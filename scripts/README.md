@@ -29,7 +29,8 @@
 
 | 脚本 | 作用 |
 |---|---|
-| `build_tree_view.py` | 把树渲染为 `output/taxonomy_tree.html` 交互式查看器（解析器见 `scripts/build_tree_view.py:18`） |
+| `build_tree.py` | 解析 `V2融合世界标签体系_清洗版.txt` + 合并 `data/ip_instances.json` 实例，输出中间 JSON 到 `build/tag_tree.json` |
+| `gen_html_v2.py` | 读 `build/tag_tree.json`，生成仓库根目录的懒加载树形浏览器 `tag_tree_explorer.html`（当前可用查看器） |
 | `analyze_residuals.py` | 残留命名分析（形容词/量词误作节点等） |
 | `fix_residual_names.py` | 残留命名修复 |
 | `regenerate_residual_csvs.py` | 重新生成审查 CSV（`标签审查_*.csv`） |
