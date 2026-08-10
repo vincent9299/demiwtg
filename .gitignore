@@ -1,0 +1,6 @@
+# 大体积数据文件（非必要不入库）
+data/raw/CustomPinyinDictionary_IBus.txt
+
+# Python
+__pycache__/
+*.pyc
