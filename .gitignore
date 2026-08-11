@@ -1,6 +1,9 @@
 # 大体积数据文件（非必要不入库）
 data/raw/CustomPinyinDictionary_IBus.txt
 
+# 多模态图片采集产物（内容寻址二进制，不入库）
+images/
+
 # Python
 __pycache__/
 *.pyc
