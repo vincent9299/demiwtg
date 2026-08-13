@@ -16,7 +16,7 @@ from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 MODULES = ['exp_landmarks', 'exp_geo', 'exp_culture', 'exp_people_brands', 'exp_events_tech',
-           'exp_landmarks_city', 'exp_landmarks_city_deep', 'exp_deepen_brands', 'exp_deepen_brands2', 'exp_deepen_people', 'exp_deepen_misc']
+           'exp_landmarks_city', 'exp_landmarks_city_deep', 'exp_landmarks_city_deep2', 'exp_deepen_brands', 'exp_deepen_brands2', 'exp_deepen_brands3', 'exp_deepen_brands4', 'exp_deepen_people', 'exp_deepen_people2', 'exp_deepen_people3', 'exp_deepen_misc']
 mods = []
 for name in MODULES:
     try:
