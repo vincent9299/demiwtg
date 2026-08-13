@@ -1,6 +1,6 @@
 # scripts/ · 清洗与工具脚本
 
-本目录下所有脚本都面向同一份数据：`V2融合世界标签体系_清洗版.txt`（UTF-8 纯文本树，用 `├──`/`└──` 与 4 空格缩进表达层级）。
+本目录下所有脚本都面向同一份数据：`data/V2融合世界标签体系_清洗版.txt`（UTF-8 纯文本树，用 `├──`/`└──` 与 4 空格缩进表达层级）。
 
 ## 统一约定
 
@@ -29,7 +29,7 @@
 
 | 脚本 | 作用 |
 |---|---|
-| `build_tree.py` | 解析 `V2融合世界标签体系_清洗版.txt` + 合并 `data/ip_instances.json` 实例，输出中间 JSON 到 `build/tag_tree.json` |
+| `build_tree.py` | 解析 `data/V2融合世界标签体系_清洗版.txt` + 合并 `data/ip_instances.json` 实例，输出中间 JSON 到 `build/tag_tree.json` |
 | `gen_html_v2.py` | 读 `build/tag_tree.json`，生成仓库根目录的懒加载树形浏览器 `tag_tree_explorer.html`（当前可用查看器） |
 | `analyze_residuals.py` | 残留命名分析（形容词/量词误作节点等） |
 | `fix_residual_names.py` | 残留命名修复 |

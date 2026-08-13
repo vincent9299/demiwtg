@@ -10,8 +10,8 @@
 """
 import re
 
-SRC = "V2融合世界标签体系_清洗版.txt"
-BAK = "V2融合世界标签体系_清洗版.txt.bak3"
+SRC = "data/V2融合世界标签体系_清洗版.txt"
+BAK = "data/V2融合世界标签体系_清洗版.txt.bak3"
 
 # (名称, 父节点) → 新名称；父节点用于消歧（可爱的/防水的 出现多次）
 RENAME_SPEC = [

@@ -11,7 +11,7 @@ Default: preview only. Pass --write to apply.
 """
 import re, json, sys
 
-PATH = "V2融合世界标签体系_清洗版.txt"
+PATH = "data/V2融合世界标签体系_清洗版.txt"
 INST = "data/ip_instances.json"
 
 SUFFIXES = ()  # populated at runtime by collect_suffixes()

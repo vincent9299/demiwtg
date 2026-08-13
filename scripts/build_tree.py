@@ -43,7 +43,7 @@ def max_depth(n, d=0):
     return max(max_depth(c, d + 1) for c in n["children"])
 
 # Repo-relative paths (run from repo root, consistent with other scripts/).
-TREE_PATH = "V2融合世界标签体系_清洗版.txt"
+TREE_PATH = "data/V2融合世界标签体系_清洗版.txt"
 INST_PATH = "data/ip_instances.json"
 # Intermediate JSON; regenerable, kept under build/ (not committed).
 JSON_OUT = "build/tag_tree.json"

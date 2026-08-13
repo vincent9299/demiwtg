@@ -16,8 +16,8 @@ Usage: python3 scripts/clean_ip_phase7.py
 """
 import re
 
-SRC = "V2融合世界标签体系_清洗版.txt"
-BAK = "V2融合世界标签体系_清洗版.txt.bak5"
+SRC = "data/V2融合世界标签体系_清洗版.txt"
+BAK = "data/V2融合世界标签体系_清洗版.txt.bak5"
 NODE_RE = re.compile(r'^((?:[│  ]{4})*)([├└]── (.*))$')
 
 RENAME = [

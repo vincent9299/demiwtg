@@ -26,12 +26,6 @@ class OpenImagesAdapter(_StubMixin, SourceAdapter):
     allowed_suffixes = ("storage.googleapis.com", "googleapis.com")
 
 
-class INaturalistAdapter(_StubMixin, SourceAdapter):
-    name = "inaturalist"
-    source_kind = "领域社区"
-    allowed_suffixes = ("inaturalist.org",)
-
-
 class SearchEngineAdapter(_StubMixin, SourceAdapter):
     name = "searchengine"
     source_kind = "搜索引擎"
@@ -39,5 +33,4 @@ class SearchEngineAdapter(_StubMixin, SourceAdapter):
 
 
 register(OpenImagesAdapter())
-register(INaturalistAdapter())
 register(SearchEngineAdapter())

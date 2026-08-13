@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import html
+import http.cookiejar
 import json
 import re
 import threading
@@ -39,10 +40,16 @@ _OPENER = urllib.request.build_opener(_NoRedirect())
 
 
 def validate_url(url: str, allowed_suffixes) -> urllib.parse.ParseResult:
-    """校验 scheme 为 https，且 host 在 allowed_suffixes 内（精确或子域）。"""
+    """校验 scheme 为 https，且 host 在 allowed_suffixes 内（精确或子域）。
+
+    allowed_suffixes 为 None 时仅做 scheme 校验（https-only），用于未授权爬虫源：
+    其图片 host 不可枚举，但下载仍要求 https，且后续由 Pillow 解码把关只存真实图片。
+    """
     p = urllib.parse.urlparse(url)
     if p.scheme != "https":
         raise ValueError(f"拒绝非 https 链接: {url}")
+    if allowed_suffixes is None:
+        return p
     host = p.netloc.lower()
     if not any(host == s or host.endswith("." + s) for s in allowed_suffixes):
         raise ValueError(f"拒绝未授权 host: {host} (来自 {url})")
@@ -62,15 +69,25 @@ def _retry_after_sec(headers, attempt: int) -> float:
 
 
 def _open_with_redirects(url: str, headers: dict, timeout: int,
-                          max_retries: int, allowed_suffixes) -> urllib.request.addinfourl:
+                          max_retries: int, allowed_suffixes,
+                          opener=_OPENER) -> urllib.request.addinfourl:
     last_url = url
     attempt = 0
+    redirects = 0
     while True:
         validate_url(last_url, allowed_suffixes)
         req = urllib.request.Request(last_url, headers=headers)
         try:
-            resp = _OPENER.open(req, timeout=timeout)
+            resp = opener.open(req, timeout=timeout)
         except urllib.error.HTTPError as e:
+            if e.code in (301, 302, 303, 307, 308):
+                # 手动跟随重定向：逐跳校验目标 host（SSRF 防护）。
+                loc = e.headers.get("Location")
+                if loc and redirects < MAX_HOPS:
+                    last_url = urllib.parse.urljoin(last_url, loc)
+                    redirects += 1
+                    continue
+                raise
             if e.code in RETRYABLE and attempt < max_retries:
                 attempt += 1
                 time.sleep(_retry_after_sec(getattr(e, "headers", None), attempt))
@@ -84,6 +101,84 @@ def _open_with_redirects(url: str, headers: dict, timeout: int,
                 last_url, resp.status, "redirect without Location", resp.headers, None
             )
         last_url = urllib.parse.urljoin(last_url, loc)  # 下一跳继续校验
+        redirects += 1
+        if redirects >= MAX_HOPS:
+            raise urllib.error.HTTPError(
+                last_url, resp.status, "too many redirects", resp.headers, None
+            )
+
+
+def _open_retry(url: str, headers: dict, timeout: int, max_retries: int,
+                allowed_suffixes, opener=_OPENER) -> urllib.request.addinfourl:
+    """在 _open_with_redirects 之上再包一层：对连接层瞬断（SSL EOF / URLError）
+    做有界重试，避免单条检索/下载因网络抖动整体失败。HTTP 错误交给内部重试。"""
+    last = None
+    for attempt in range(max_retries + 1):
+        try:
+            return _open_with_redirects(url, headers, timeout, max_retries,
+                                        allowed_suffixes, opener=opener)
+        except urllib.error.HTTPError:
+            raise  # HTTP 状态错误由内部按 Retry-After 处理，不再外层重试
+        except urllib.error.URLError as e:  # 含 SSL SSLEOFError
+            last = e
+            if attempt < max_retries:
+                time.sleep(min(2 ** (attempt + 1), 30))
+                continue
+            raise last
+    if last is not None:
+        raise last
+    raise urllib.error.URLError("未知连接错误")
+
+
+def _build_cookie_opener():
+    """构造一个带 cookie jar 的 opener（独立于全局 _OPENER，避免跨源 cookie 串味）。"""
+    cj = http.cookiejar.CookieJar()
+    return urllib.request.build_opener(_NoRedirect(), urllib.request.HTTPCookieProcessor(cj)), cj
+
+
+def fetch_json_cookie(url: str, *, warmup_url: str = None, warmup_headers: dict = None,
+                      allowed_suffixes, params: dict = None, headers: dict = None,
+                      timeout: int = 30, max_retries: int = 3) -> dict:
+    """同 fetch_json，但先访问 warmup_url 预热 cookie（如百度首页 BAIDUID），再带 cookie
+    请求目标——用于破解反爬（百度图片 acjson 的 antiFlag:1 Forbid spider access）。"""
+    if params:
+        sep = "&" if "?" in url else "?"
+        url = url + sep + urllib.parse.urlencode(params)
+    opener, _ = _build_cookie_opener()
+    if warmup_url:
+        try:
+            _open_with_redirects(warmup_url, dict(DEFAULT_HEADERS) | (warmup_headers or {}),
+                                 timeout, 0, None, opener=opener)
+        except Exception:  # noqa: BLE001  # 预热失败不致命，仍尝试主请求
+            pass
+    h = dict(DEFAULT_HEADERS)
+    h.update(headers or {})
+    resp = _open_retry(url, h, timeout, max_retries, allowed_suffixes, opener=opener)
+    body = resp.read().decode("utf-8", "replace")
+    return json.loads(body)
+
+
+def fetch_text_cookie(url: str, *, warmup_url: str = None, warmup_headers: dict = None,
+                      allowed_suffixes, params: dict = None, headers: dict = None,
+                      timeout: int = 30, max_retries: int = 3,
+                      max_bytes: int = 8 * 1024 * 1024) -> str:
+    """同 fetch_text，但先预热 cookie 再请求（破解反爬）。"""
+    if params:
+        sep = "&" if "?" in url else "?"
+        url = url + sep + urllib.parse.urlencode(params)
+    opener, _ = _build_cookie_opener()
+    if warmup_url:
+        try:
+            _open_with_redirects(warmup_url, dict(DEFAULT_HEADERS) | (warmup_headers or {}),
+                                 timeout, 0, None, opener=opener)
+        except Exception:  # noqa: BLE001
+            pass
+    h = dict(DEFAULT_HEADERS)
+    h.update(headers or {})
+    resp = _open_retry(url, h, timeout, max_retries, allowed_suffixes, opener=opener)
+    raw = resp.read(max_bytes)
+    enc = resp.headers.get_content_charset() or "utf-8"
+    return raw.decode(enc, "replace")
 
 
 def fetch_json(url: str, *, allowed_suffixes, params: dict = None,
@@ -94,7 +189,7 @@ def fetch_json(url: str, *, allowed_suffixes, params: dict = None,
         url = url + sep + urllib.parse.urlencode(params)
     h = dict(DEFAULT_HEADERS)
     h.update(headers or {})
-    resp = _open_with_redirects(url, h, timeout, max_retries, allowed_suffixes)
+    resp = _open_retry(url, h, timeout, max_retries, allowed_suffixes)
     body = resp.read().decode("utf-8", "replace")
     return json.loads(body)
 
@@ -104,7 +199,7 @@ def fetch_bytes_capped(url: str, max_bytes: int, *, allowed_suffixes,
                        max_retries: int = 3) -> bytes:
     h = dict(DEFAULT_HEADERS)
     h.update(headers or {})
-    resp = _open_with_redirects(url, h, timeout, max_retries, allowed_suffixes)
+    resp = _open_retry(url, h, timeout, max_retries, allowed_suffixes)
     buf = bytearray()
     remaining = max_bytes
     while True:
@@ -119,6 +214,21 @@ def fetch_bytes_capped(url: str, max_bytes: int, *, allowed_suffixes,
                 raise ValueError(f"内容超过字节上限 {max_bytes}")
             break
     return bytes(buf)
+
+
+def fetch_text(url: str, *, allowed_suffixes, params: dict = None,
+               headers: dict = None, timeout: int = 30,
+               max_retries: int = 3, max_bytes: int = 8 * 1024 * 1024) -> str:
+    """抓取文本页面（HTML/JSON），用于搜索引擎/社区站爬虫（未授权源）。"""
+    if params:
+        sep = "&" if "?" in url else "?"
+        url = url + sep + urllib.parse.urlencode(params)
+    h = dict(DEFAULT_HEADERS)
+    h.update(headers or {})
+    resp = _open_retry(url, h, timeout, max_retries, allowed_suffixes)
+    raw = resp.read(max_bytes)
+    enc = resp.headers.get_content_charset() or "utf-8"
+    return raw.decode(enc, "replace")
 
 
 def host_of(url: str) -> str:

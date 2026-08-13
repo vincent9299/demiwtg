@@ -12,7 +12,7 @@ from collections import Counter, defaultdict
 
 NODE_RE = re.compile(r'^((?:[│  ]{4})*)([├└]── (.*))$')
 
-SRC = "V2融合世界标签体系_清洗版.txt"
+SRC = "data/V2融合世界标签体系_清洗版.txt"
 lines = open(SRC, encoding="utf-8").read().splitlines()
 
 rec = {}

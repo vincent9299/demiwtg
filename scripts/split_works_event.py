@@ -5,7 +5,7 @@
 """
 import re
 
-PATH = "V2融合世界标签体系_清洗版.txt"
+PATH = "data/V2融合世界标签体系_清洗版.txt"
 NODE_RE = re.compile(r'^((?:[│  ]{4})*)([├└]── (.*))$')
 
 WORKS = ["动漫作品 IP", "影视作品 IP", "戏曲舞台作品 IP", "文学作品 IP",

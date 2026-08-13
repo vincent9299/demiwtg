@@ -18,6 +18,8 @@ class SourceAdapter(ABC):
     name: str = "base"
     source_kind: str = ""
     allowed_suffixes: tuple = ()
+    lang: str = "en"            # 检索语言：en / zh / both（both 时中英各搜一次合并）
+    is_authorized: bool = True  # 是否授权（CC）；False = 未授权来源，产物需隔离
 
     @abstractmethod
     def search(self, job) -> List[dict]:

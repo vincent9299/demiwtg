@@ -1,0 +1,291 @@
+{
+  "defaults": {
+    "mime_allowlist": [
+      "image/jpeg",
+      "image/png"
+    ],
+    "max_file_bytes": 10485760,
+    "total_budget_bytes": 1073741824,
+    "license_allowlist": [
+      "CC BY",
+      "CC BY-SA",
+      "CC0",
+      "Public domain",
+      "CC BY 4.0",
+      "CC BY-SA 4.0",
+      "CC BY-NC",
+      "CC BY-NC-SA",
+      "CC BY-ND",
+      "CC BY-NC-ND"
+    ],
+    "target_count": 4,
+    "per_host_min_interval_sec": 1.0,
+    "timeout_sec": 30,
+    "max_retries": 3,
+    "sources": [
+      "wikimedia",
+      "wikimedia_zh",
+      "inaturalist"
+    ],
+    "unauthorized_sources": [
+      "baidu",
+      "bing",
+      "so360",
+      "sogou",
+      "baidu_baike",
+      "douban"
+    ]
+  },
+  "jobs": [
+    {
+      "tag": "内容作品 IP / 动漫作品 / 儿童动画 / 《小猪佩奇》",
+      "query": "Peppa Pig",
+      "zh_query": "小猪佩奇"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 儿童动画 / 《哆啦A梦》",
+      "query": "doraemon",
+      "zh_query": "哆啦A梦"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 儿童动画 / 《熊出没》",
+      "query": "Boonie Bears",
+      "zh_query": "熊出没"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 儿童动画 / 《喜羊羊与灰太狼》",
+      "query": "Pleasant Goat and Big Big Wolf",
+      "zh_query": "喜羊羊与灰太狼"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 动画电影 / 《千与千寻》",
+      "query": "Spirited Away",
+      "zh_query": "千与千寻"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 动画电影 / 《冰雪奇缘》",
+      "query": "Frozen",
+      "zh_query": "冰雪奇缘"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 动画电影 / 《你的名字。》",
+      "query": "your name.",
+      "zh_query": "你的名字。"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 动画电影 / 《大圣归来》",
+      "query": "Monkey King Hero is Back",
+      "zh_query": "大圣归来"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 漫画 / 《名侦探柯南》",
+      "query": "Detective Conan",
+      "zh_query": "名侦探柯南"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 漫画 / 《龙珠》",
+      "query": "dragon ball",
+      "zh_query": "龙珠"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 漫画 / 《灌篮高手》",
+      "query": "slam dunk",
+      "zh_query": "灌篮高手"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 漫画 / 《火影忍者》",
+      "query": "naruto",
+      "zh_query": "火影忍者"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 漫画 / 《蝙蝠侠》",
+      "query": "batman",
+      "zh_query": "蝙蝠侠"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 特摄作品 / 《奥特曼》",
+      "query": "ultraman",
+      "zh_query": "奥特曼"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 特摄作品 / 《假面骑士》",
+      "query": "kamen rider",
+      "zh_query": "假面骑士"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 特摄作品 / 《超级战队》",
+      "query": "Super Sentai",
+      "zh_query": "超级战队"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 特摄作品 / 《铠甲勇士》",
+      "query": "Armored Warrior",
+      "zh_query": "铠甲勇士"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 电视动画 / 《进击的巨人》",
+      "query": "attack on titan",
+      "zh_query": "进击的巨人"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 电视动画 / 《鬼灭之刃》",
+      "query": "Demon Slayer: Kimetsu no Yaiba",
+      "zh_query": "鬼灭之刃"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 电视动画 / 《海绵宝宝》",
+      "query": "spongebob",
+      "zh_query": "海绵宝宝"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 电视动画 / 《数码宝贝》",
+      "query": "digimon",
+      "zh_query": "数码宝贝"
+    },
+    {
+      "tag": "内容作品 IP / 动漫作品 / 电视动画 / 《美少女战士》",
+      "query": "Sailor Moon",
+      "zh_query": "美少女战士"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电影 / 《肖申克的救赎》",
+      "query": "The Shawshank Redemption",
+      "zh_query": "肖申克的救赎"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电影 / 《霸王别姬》",
+      "query": "Farewell My Concubine",
+      "zh_query": "霸王别姬"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电影 / 《阿凡达》",
+      "query": "Avatar",
+      "zh_query": "阿凡达"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电影 / 《教父》",
+      "query": "godfather",
+      "zh_query": "教父"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电影 / 《流浪地球》",
+      "query": "Wandering Earth",
+      "zh_query": "流浪地球"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电视剧 / 《权力的游戏》",
+      "query": "game of thrones",
+      "zh_query": "权力的游戏"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电视剧 / 《甄嬛传》",
+      "query": "The Legend of Zhen Huan",
+      "zh_query": "甄嬛传"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电视剧 / 《老友记》",
+      "query": "friends",
+      "zh_query": "老友记"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 电视剧 / 《山海情》",
+      "query": "Love of mountains and seas",
+      "zh_query": "山海情"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 纪录片 / 《地球脉动》",
+      "query": "Earth pulses",
+      "zh_query": "地球脉动"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 纪录片 / 《舌尖上的中国》",
+      "query": "A Bite of China",
+      "zh_query": "舌尖上的中国"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 纪录片 / 《海豚湾》",
+      "query": "dolphin bay",
+      "zh_query": "海豚湾"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 纪录片 / 《行星》",
+      "query": "planet",
+      "zh_query": "行星"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 综艺 / 《奔跑吧》",
+      "query": "run",
+      "zh_query": "奔跑吧"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 综艺 / 《歌手》",
+      "query": "singer",
+      "zh_query": "歌手"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 综艺 / 《康熙来了》",
+      "query": "Kangxi is coming",
+      "zh_query": "康熙来了"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 综艺 / 《快乐大本营》",
+      "query": "Happy Camp",
+      "zh_query": "快乐大本营"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 网络剧 / 《隐秘的角落》",
+      "query": "hidden corner",
+      "zh_query": "隐秘的角落"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 网络剧 / 《庆余年》",
+      "query": "Celebrating more than one year",
+      "zh_query": "庆余年"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 网络剧 / 《长安十二时辰》",
+      "query": "Chang'an twelve o'clock",
+      "zh_query": "长安十二时辰"
+    },
+    {
+      "tag": "内容作品 IP / 影视作品 / 网络剧 / 《开端》",
+      "query": "Beginning",
+      "zh_query": "开端"
+    },
+    {
+      "tag": "内容作品 IP / 戏曲舞台作品 / 戏曲剧目 / 《牡丹亭》",
+      "query": "Peony Pavilion",
+      "zh_query": "牡丹亭"
+    },
+    {
+      "tag": "内容作品 IP / 戏曲舞台作品 / 戏曲剧目 / 《霸王别姬》",
+      "query": "Farewell My Concubine",
+      "zh_query": "霸王别姬"
+    },
+    {
+      "tag": "内容作品 IP / 戏曲舞台作品 / 戏曲剧目 / 《长生殿》",
+      "query": "Palace of Eternal Life",
+      "zh_query": "长生殿"
+    },
+    {
+      "tag": "内容作品 IP / 戏曲舞台作品 / 戏曲剧目 / 《窦娥冤》",
+      "query": "Dou E's injustice",
+      "zh_query": "窦娥冤"
+    },
+    {
+      "tag": "内容作品 IP / 戏曲舞台作品 / 歌剧 / 《图兰朵》",
+      "query": "Turandot",
+      "zh_query": "图兰朵"
+    },
+    {
+      "tag": "内容作品 IP / 戏曲舞台作品 / 歌剧 / 《卡门》",
+      "query": "carmen",
+      "zh_query": "卡门"
+    },
+    {
+      "tag": "内容作品 IP / 戏曲舞台作品 / 歌剧 / 《茶花女》",
+      "query": "La Traviata",
+      "zh_query": "茶花女"
+    }
+  ]
+}

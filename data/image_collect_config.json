@@ -1,13 +1,22 @@
 {
   "defaults": {
-    "mime_allowlist": ["image/jpeg", "image/png"],
-    "min_width": 200,
-    "min_height": 200,
+    "mime_allowlist": [
+      "image/jpeg",
+      "image/png"
+    ],
     "max_file_bytes": 10485760,
     "total_budget_bytes": 1073741824,
     "license_allowlist": [
-      "CC BY", "CC BY-SA", "CC0", "Public domain",
-      "CC BY 4.0", "CC BY-SA 4.0"
+      "CC BY",
+      "CC BY-SA",
+      "CC0",
+      "Public domain",
+      "CC BY 4.0",
+      "CC BY-SA 4.0",
+      "CC BY-NC",
+      "CC BY-NC-SA",
+      "CC BY-ND",
+      "CC BY-NC-ND"
     ],
     "target_count": 10,
     "per_host_min_interval_sec": 1.0,
@@ -29,7 +38,10 @@
       "tag": "影视明星",
       "query": "movie star portrait",
       "target_count": 2,
-      "license_allowlist": ["CC0", "Public domain"]
+      "license_allowlist": [
+        "CC0",
+        "Public domain"
+      ]
     }
   ]
 }

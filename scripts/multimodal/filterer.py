@@ -23,6 +23,8 @@ def _url_safe(url: str, allowed_suffixes) -> Tuple[bool, str]:
     p = urllib.parse.urlparse(url)
     if p.scheme != "https":
         return False, f"非 https 链接: {url}"
+    if allowed_suffixes is None:
+        return True, ""  # 仅校验 scheme（未授权爬虫源图片 host 不可枚举）
     host = p.netloc.lower()
     if not any(host == s or host.endswith("." + s) for s in allowed_suffixes):
         return False, f"host 未授权: {host}"
@@ -47,15 +49,6 @@ def filter_candidate(c: Candidate, cfg: EffectiveConfig,
     if c.declared_mime not in cfg.mime_allowlist:
         return False, f"MIME 不在白名单: {c.declared_mime}"
 
-    # 宽高
-    if c.declared_width is None or c.declared_height is None:
-        return False, "缺少宽高声明"
-    if c.declared_width < cfg.min_width or c.declared_height < cfg.min_height:
-        return False, (
-            f"宽高不足: {c.declared_width}x{c.declared_height} "
-            f"< {cfg.min_width}x{cfg.min_height}"
-        )
-
     # 单文件大小（声明缺失时放行，交由下载器流式封顶）
     if c.declared_size is not None and c.declared_size > cfg.max_file_bytes:
         return False, f"单文件超上限: {c.declared_size} > {cfg.max_file_bytes}"
@@ -67,5 +60,27 @@ def filter_candidate(c: Candidate, cfg: EffectiveConfig,
     hit = any(_norm(a) in nlic for a in cfg.license_allowlist)
     if not hit:
         return False, f"许可证不在白名单: {c.license_raw}"
+
+    return True, ""
+
+
+def filter_candidate_unauthorized(c: Candidate, cfg: EffectiveConfig,
+                                  allowed_suffixes) -> Tuple[bool, str]:
+    """未授权来源（如百度）的筛选：跳过许可证校验，仅做 URL/MIME/宽高/大小检查。
+
+    未授权源无 CC 许可，许可证白名单不适用；单流模式下其产物与授权源统一落盘、
+    统一清单，但每张图保留 source_authorized=False 以便下游按授权状态切分。
+    """
+    ok, reason = _url_safe(c.content_url, allowed_suffixes)
+    if not ok:
+        return False, reason
+
+    # MIME：百度不返回 MIME，下载后由 Pillow 复验；声明缺失时放行。
+    if c.declared_mime and c.declared_mime not in cfg.mime_allowlist:
+        return False, f"MIME 不在白名单: {c.declared_mime}"
+
+    # 单文件大小（声明缺失时放行）
+    if c.declared_size is not None and c.declared_size > cfg.max_file_bytes:
+        return False, f"单文件超上限: {c.declared_size} > {cfg.max_file_bytes}"
 
     return True, ""

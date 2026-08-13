@@ -9,7 +9,7 @@ import sys
 
 NODE_RE = re.compile(r'^((?:[│  ]{4})*)([├└]── (.*))$')
 
-path = "V2融合世界标签体系_清洗版.txt"
+path = "data/V2融合世界标签体系_清洗版.txt"
 lines = open(path, encoding="utf-8").read().splitlines()
 
 nodes = []  # (depth, name, lineno)
