@@ -74,6 +74,8 @@ def main(argv=None):
     ap.add_argument("--unauthorized-sources", default=None,
                     help="覆盖未授权源列表（逗号分隔，整体替换）；传 none 表示全部关闭。"
                          "缺省使用内置 18 个中文源列表")
+    ap.add_argument("--max-per-source", default=None, type=int,
+                    help="每源每标签最多下载张数（覆盖默认；1=各活源各采 1 张最相关图）")
     ap.add_argument("--consume-mode", default="replay",
                     choices=["delta", "replay", "replay-rules"],
                     help="增量消费模式：delta=只采新标签；replay=全量重放（达标跳过，默认）；"
@@ -101,7 +103,8 @@ def main(argv=None):
             ap.error("未知来源 %s；已注册来源：%s" % (bad, sorted(_SOURCE_REGISTRY)))
         return names
 
-    if args.sources is not None or args.unauthorized_sources is not None:
+    if (args.sources is not None or args.unauthorized_sources is not None
+            or args.max_per_source is not None):
         src = _parse_sources(args.sources) if args.sources is not None else None
         unauth = (_parse_sources(args.unauthorized_sources)
                   if args.unauthorized_sources is not None else None)
@@ -110,6 +113,8 @@ def main(argv=None):
                 j.defaults["sources"] = src
             if unauth is not None:
                 j.defaults["unauthorized_sources"] = unauth
+            if args.max_per_source is not None:
+                j.defaults["max_per_source"] = args.max_per_source
             j.effective = EffectiveConfig.resolve(j.defaults, j.overrides)
 
     if args.source:
