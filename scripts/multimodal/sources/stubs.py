@@ -21,9 +21,18 @@ class _StubMixin:
 
 
 class OpenImagesAdapter(_StubMixin, SourceAdapter):
+    """OpenImages 官方路线已不可行（2026-08 实测）：images.csv/标注 CSV 匿名访问 403；
+    HF 镜像（dalle-mini/open-images 等）仅 URL 列表、无类别/文本列，无法按标签检索。
+    通用物体类标签改走 coco / hf_coco。保留占位使旧配置引用不报 KeyError。"""
     name = "openimages"
     source_kind = "数据集"
     allowed_suffixes = ("storage.googleapis.com", "googleapis.com")
+
+    def search(self, job: Job):
+        raise NotImplementedError(
+            "来源 openimages 不可用：官方 CSV 索引匿名访问已被拒（403），"
+            "HF 镜像无标签列；请改用 coco / hf_coco"
+        )
 
 
 class SearchEngineAdapter(_StubMixin, SourceAdapter):

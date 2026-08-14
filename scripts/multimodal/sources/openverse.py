@@ -11,6 +11,7 @@ Openverse 聚合 Flickr / Wikimedia / 各大博物馆等 CC 授权图片，支�
 
 from __future__ import annotations
 
+import urllib.error
 from typing import Any, Dict, List
 
 from ..models import (
@@ -52,6 +53,11 @@ def _first(v) -> str:
     return v or ""
 
 
+# 连接级熔断：api.openverse.org 不可达（超时/拒连）时，本进程后续调用直接短路，
+# 避免在全量标签上重复吃超时。HTTP 错误（429/5xx）不触发熔断。
+_CONN_DEAD = {"flag": False}
+
+
 class OpenverseAdapter(SourceAdapter):
     name = "openverse"
     source_kind = SOURCE_KIND_CATALOG
@@ -60,7 +66,7 @@ class OpenverseAdapter(SourceAdapter):
     is_authorized = True
 
     def _search_one(self, q: str, cfg) -> List[dict]:
-        if not q:
+        if not q or _CONN_DEAD["flag"]:
             return []
         try:
             data = fetch_json(
@@ -75,8 +81,13 @@ class OpenverseAdapter(SourceAdapter):
                 timeout=cfg.timeout_sec,
                 max_retries=cfg.max_retries,
             )
-        except Exception as e:  # noqa: BLE001
+        except urllib.error.HTTPError as e:  # HTTP 层错误：本次失败，不熔断
             print(f"[warn] openverse 检索失败（{q}）: {e}")
+            return []
+        except Exception as e:  # noqa: BLE001  连接层错误（超时/拒连/DNS）：熔断
+            if not _CONN_DEAD["flag"]:
+                _CONN_DEAD["flag"] = True
+                print(f"[warn] openverse 连接失败，本次运行已熔断（重启进程后恢复）: {e}")
             return []
         results = (data or {}).get("results") or []
         out = []

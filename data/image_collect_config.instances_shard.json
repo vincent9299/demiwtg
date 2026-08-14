@@ -40,7 +40,16 @@
    "duitang",
    "zhihu",
    "sina",
-   "sohu"
+   "sohu",
+   "hf_coco",
+   "hf_laion"
+  ],
+  "sources": [
+   "wikimedia",
+   "wikimedia_zh",
+   "inaturalist",
+   "coco",
+   "openverse"
   ]
  },
  "jobs": [

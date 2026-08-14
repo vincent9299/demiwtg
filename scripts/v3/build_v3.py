@@ -19,7 +19,8 @@ MODULES = ['exp_landmarks', 'exp_geo', 'exp_culture', 'exp_people_brands', 'exp_
            'exp_landmarks_city', 'exp_landmarks_city_deep', 'exp_landmarks_city_deep2', 'exp_deepen_brands', 'exp_deepen_brands2', 'exp_deepen_brands3', 'exp_deepen_brands4', 'exp_deepen_people', 'exp_deepen_people2', 'exp_deepen_people3', 'exp_deepen_misc', 'exp_round4_branches', 'exp_round4_fill_a', 'exp_round4_fill_b',
            'exp_round5_branches', 'exp_round5_weak_a', 'exp_round5_weak_b', 'exp_round5_landmarks',
            'exp_round6_branches', 'exp_round6_inst_branches', 'exp_round6_digital', 'exp_round6_cities_cn', 'exp_round6_cities_world', 'exp_round6_weakfill',
-           'exp_round7_anime', 'exp_round7_film_chars', 'exp_round7_lit_chars', 'exp_round7_game_chars', 'exp_round7_art', 'exp_round7_film_stars', 'exp_round7_athletes', 'exp_round7_politics', 'exp_round7_historical']
+           'exp_round7_anime', 'exp_round7_film_chars', 'exp_round7_lit_chars', 'exp_round7_game_chars', 'exp_round7_art', 'exp_round7_film_stars', 'exp_round7_athletes', 'exp_round7_politics', 'exp_round7_historical',
+           'exp_round8_auto', 'exp_newtags']
 mods = []
 for name in MODULES:
     try:

@@ -14,3 +14,7 @@ dataset_newtags/
 dataset_shard*/
 dataset_verify/
 archive/images_by_tag/
+
+# 本地工具配置
+.qoder/
+archive/images_*/

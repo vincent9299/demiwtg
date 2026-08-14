@@ -55,6 +55,10 @@ def main(argv=None):
                     help="只处理指定标签（逗号分隔）；缺省处理全部")
     ap.add_argument("--source", default=None,
                     help="只处理指定来源（如 wikimedia）；缺省全部")
+    ap.add_argument("--consume-mode", default="replay",
+                    choices=["delta", "replay", "replay-rules"],
+                    help="增量消费模式：delta=只采新标签；replay=全量重放（达标跳过，默认）；"
+                         "replay-rules=重放+两级身份匹配跳过（分支改名不误重下）+topup 补采缺口")
     args = ap.parse_args(argv)
 
     run_id = args.run_id or datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -68,7 +72,9 @@ def main(argv=None):
 
     run(jobs, out_dir=out_dir, images_dir=args.images_dir,
         meta_dir=meta_dir, run_id=run_id,
-        metadata_only=args.metadata_only, only_tags=only_tags)
+        metadata_only=args.metadata_only, only_tags=only_tags,
+        consume_mode=args.consume_mode,
+        taxonomy_name=os.path.basename(args.config))
 
 
 if __name__ == "__main__":

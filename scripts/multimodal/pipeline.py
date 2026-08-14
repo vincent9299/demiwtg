@@ -9,6 +9,9 @@
         并在 downloader 解码后用【实际分辨率门】(min_resolution) 拦截低分辨率原图（不落盘）。
 
 本版增强（2026-08-13）：
+- 增量消费模式（consume_mode）：delta 只采新标签；replay 全量重放（达标跳过）；
+  replay-rules 两级身份匹配（全路径 + 父分支/叶子组合）跳过已消费标签、未达标 topup
+  补采缺口（改大 min_images_per_tag 即触发补采）。审计写 meta_dir/taxonomy_consumed.jsonl。
 - 断点续传：启动加载本湖 images.jsonl → 构建 url_index(content_url→rec)；下载前若
   content_url 已在索引且 blob 仍在，直接复用、跳过网络抓取。
 - labels 增量落盘：每下载成功 1 张即追写 images.jsonl（含 content_url），并按需刷新
@@ -36,6 +39,7 @@ from . import models
 from .config import Job, load_config
 from . import filterer
 from . import downloader
+from .incremental import classify, record_taxonomy, split_tag, summarize
 from .sources import get_adapter
 from .util import RateLimiter
 
@@ -136,7 +140,9 @@ def _refresh_tags_and_by_tag(meta_dir: str, tags_map: dict, images_dir: str) -> 
 def run(jobs: List[Job], out_dir: str, images_dir: str,
         meta_dir: Optional[str] = None, run_id: Optional[str] = None,
         metadata_only: bool = False,
-        only_tags: Optional[set] = None) -> dict:
+        only_tags: Optional[set] = None,
+        consume_mode: str = "replay",
+        taxonomy_name: Optional[str] = None) -> dict:
 
     os.makedirs(out_dir, exist_ok=True)
     os.makedirs(images_dir, exist_ok=True)
@@ -152,7 +158,6 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
 
     # --jobs 支持子串匹配，便于按实例名试点
     jobs = [j for j in jobs if (not only_tags or any(t in j.tag for t in only_tags))]
-    job_by_tag = _job_index(jobs)
 
     # 运行期配置（带默认值，兼容旧配置无新键）
     eff0 = jobs[0].effective if jobs else None
@@ -193,6 +198,15 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
     print(f"[state] 载入本湖已下载 {len(url_index)} 条（续传索引），标签 {len(tags_map)} 个",
           flush=True)
 
+    # ---------- 增量消费分类（delta / replay / replay-rules，见 incremental.py） ----------
+    # 标签身份两级匹配：全路径精确命中；（父分支,叶子）组合兜底（分支改名不误重下）。
+    total_jobs = len(jobs)
+    jobs, existing_counts, classify_report = classify(
+        jobs, tags_map, consume_mode, min_images)
+    print(f"[consume] 模式={consume_mode} 输入 {total_jobs} 标签 -> 执行 {len(jobs)} "
+          f"({summarize(classify_report)})", flush=True)
+    job_by_tag = _job_index(jobs)
+
     # 运行期统计
     src_stats = defaultdict(lambda: {"tags": 0, "ok": 0})
     dead = set(known_dead)
@@ -205,6 +219,21 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         "cc": 0, "unauth": 0, "bytes": 0, "capped": 0,
         "tag_success": defaultdict(int),
     }
+    # topup 基数：已有图数计入 tag_success，使 扩源触发/stop_at 的目标是
+    # 「总数达到 min_images」而不是「本轮再下 min_images 张」（补采只补缺口）。
+    for _tag, _n in existing_counts.items():
+        C["tag_success"][_tag] = _n
+    # 基数图的 sha 集合：续传分支若再命中这些图不得重复计数（否则 n→2n 误判达标）。
+    # fuzzy topup（路径改名）的基数图挂在旧路径下，按 (父,叶) 组合归集。
+    baseline_shas: Dict[str, set] = {}
+    if existing_counts:
+        _fuzzy_shas: Dict[tuple, set] = defaultdict(set)
+        for _t, _lst in tags_map.items():
+            _fuzzy_shas[split_tag(_t)].update(e["sha256"] for e in _lst)
+        baseline_shas = {
+            _tag: {e["sha256"] for e in tags_map.get(_tag, [])} | _fuzzy_shas[split_tag(_tag)]
+            for _tag in existing_counts
+        }
     searched_per_source = defaultdict(int)
 
     REFRESH_EVERY = 5  # 每 N 个标签刷新一次 tags.json + by_tag
@@ -252,6 +281,12 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
             src_stats[s]["tags"] += 1
             try:
                 raws = get_adapter(s).search(job)
+            except NotImplementedError as e:
+                # 来源本身不可用（如 stub）：立即剔除，避免每标签重复告警
+                if s not in dead:
+                    dead.add(s)
+                    print(f"[dead] 来源 {s} 不可用，本次运行剔除: {e}", flush=True)
+                continue
             except Exception as e:  # noqa: BLE001
                 print(f"[warn] 标签 {job.tag}: 来源 {s} 检索失败: {e}")
                 continue
@@ -282,6 +317,10 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                 if c.content_url and c.content_url in url_index:
                     rec = url_index[c.content_url]
                     cand = _rec_to_candidate(rec, tag, images_dir)
+                    if cand.sha256 in baseline_shas.get(tag, ()):
+                        # 已计入 topup 基数：只补标签关联，不重复计数
+                        _persist(cand)
+                        continue
                     C["success"].append(cand)
                     C["tag_success"][tag] += 1
                     src_stats[src]["ok"] += 1
@@ -303,6 +342,10 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                 )
                 if ok_dl and downloaded:
                     d = downloaded[0]
+                    if d.sha256 in baseline_shas.get(tag, ()):
+                        # 与基数图同内容（不同 URL 重复命中）：不重复计数
+                        _persist(d)
+                        continue
                     C["success"].append(d)
                     C["tag_success"][tag] += 1
                     src_stats[src]["ok"] += 1
@@ -387,7 +430,9 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
             if c.source in dead:
                 continue
             groups[(tag, c.source)].append(c)
-        _process_groups(groups, job.effective.max_per_source, job)
+        # topup 标签基础轮也限到 min_images（补采只补缺口）；新标签不限
+        _process_groups(groups, job.effective.max_per_source, job,
+                        stop_at=min_images if tag in existing_counts else None)
 
         # —— 太少动态扩源（优化：优先复用已检索候选、放宽每源上限，避免重新联网检索）——
         if C["tag_success"][tag] < min_images:
@@ -451,6 +496,8 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
     _refresh_tags_and_by_tag(meta_dir, tags_map, images_dir)
     if meta_dir:
         _update_master_manifest(meta_dir, C["success"], run_id or "")
+        record_taxonomy(meta_dir, taxonomy_name or "(未指定)", consume_mode,
+                        run_id or "", total_jobs, len(jobs), classify_report)
     # 块末调试产出
     models.write_jsonl(os.path.join(out_dir, "candidates_rejected.jsonl"),
                        rejected_stage2 + C["rejected"])
