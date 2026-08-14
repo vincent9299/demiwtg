@@ -29,7 +29,7 @@
 
 | 脚本 | 作用 |
 |---|---|
-| `build_tree.py` | 解析 `data/V2融合世界标签体系_清洗版.txt` + 合并 `data/ip_instances.json` 实例，输出中间 JSON 到 `build/tag_tree.json` |
+| `build_tree.py` | 历史：解析 `data/V2融合世界标签体系_清洗版.txt` + 合并 V2 实例输出 `build/tag_tree.json`（输入 `data/ip_instances.json` 已于 2026-08-14 清理，git 历史可恢复；现行链路见 `scripts/taxonomy/build.py`） |
 | `gen_html_v2.py` | 读 `build/tag_tree.json`，生成仓库根目录的懒加载树形浏览器 `tag_tree_explorer.html`（当前可用查看器） |
 | `analyze_residuals.py` | 残留命名分析（形容词/量词误作节点等） |
 | `fix_residual_names.py` | 残留命名修复 |

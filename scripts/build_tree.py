@@ -43,7 +43,7 @@ def max_depth(n, d=0):
     return max(max_depth(c, d + 1) for c in n["children"])
 
 # Repo-relative paths (run from repo root, consistent with other scripts/).
-TREE_PATH = "data/V2融合世界标签体系_清洗版.txt"
+TREE_PATH = "data/融合世界标签体系.txt"
 INST_PATH = "data/ip_instances.json"
 # Intermediate JSON; regenerable, kept under build/ (not committed).
 JSON_OUT = "build/tag_tree.json"
@@ -68,7 +68,8 @@ if os.path.exists(INST_PATH):
             for ch in n["children"]:
                 walk(ch)
     walk(tree)
-    prefixes = ["V2融合世界标签体系 / IP 分类标签 / ", "V2融合世界标签体系 / ", ""]
+    root = tree["name"]
+    prefixes = [root + " / IP 分类标签 / ", root + " / ", ""]
     matched = 0
     for key, vals in instances.items():
         for pfx in prefixes:

@@ -18,7 +18,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
-from multimodal.config import load_config
+from multimodal.config import load_taxonomy
 from multimodal.models import read_jsonl
 from multimodal.downloader import download_and_store
 from multimodal.sources import get_adapter
@@ -27,13 +27,15 @@ from multimodal.util import RateLimiter
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--config", default=os.path.join(ROOT, "data", "image_collect_config.instances.json"))
+    ap.add_argument("--taxonomy", default=os.path.join(ROOT, "data", "ip_instances.json"))
+    ap.add_argument("--aliases", default=None,
+                    help="英文别名表；缺省 data/ip_query_aliases.json")
     ap.add_argument("--failed", default=os.path.join(ROOT, "dataset", "meta", "runs", "_latest", "downloads_failed.jsonl"))
     ap.add_argument("--images-dir", default=os.path.join(ROOT, "dataset", "blobs"))
     ap.add_argument("--out", default=os.path.join(ROOT, "dataset", "meta", "runs", "_retry"))
     args = ap.parse_args()
 
-    jobs = load_config(args.config)
+    jobs, _label = load_taxonomy(args.taxonomy, args.aliases)
     eff = {j.tag: j.effective for j in jobs}
     allowed = get_adapter("wikimedia").allowed_suffixes
     cands = read_jsonl(args.failed)

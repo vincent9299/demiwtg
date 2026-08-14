@@ -11,6 +11,8 @@ Job 未提供的键回退到 defaults；query 缺省取 tag 的叶子名（路�
 from __future__ import annotations
 
 import json
+import os
+import re
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -190,3 +192,56 @@ def load_config(path: str) -> list[Job]:
             )
         )
     return jobs
+
+
+def _norm_instance(name: str) -> str:
+    """归一化实例名：去《》、去（...）/(...)注释、去首尾空白。"""
+    s = name.strip().replace("《", "").replace("》", "")
+    s = re.sub(r"[（(].*?[)）]", "", s)
+    return s.strip()
+
+
+def load_taxonomy(path: str, aliases_path: Optional[str] = None) -> tuple[list[Job], str]:
+    """直接以标签体系实例文件为采集输入，实时派生 jobs（无需单独的采集配置）。
+
+    path 指向 ip_instances.json 结构：{"meta": {...}, "instances": {叶路径: [实例...]}}。
+    每个实例生成一个 job：
+      tag      = "<叶路径> / <实例名>"
+      query    = 英文别名（aliases 命中时），否则回退 tag 叶子名
+      zh_query = 归一化实例名（中文源用）
+    aliases_path 缺省取仓库 data/ip_query_aliases.json（{实例名: 英文查询词}）。
+
+    返回 (jobs, taxonomy_label)；label 形如 "ip_instances.json#r12"（revision 取自
+    meta.revision，缺省则仅文件名），供消费审计记录。
+    """
+    with open(path, encoding="utf-8") as f:
+        doc = json.load(f)
+    instances = doc.get("instances") or {}
+
+    if aliases_path is None:
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        aliases_path = os.path.join(root, "data", "ip_query_aliases.json")
+    aliases = {}
+    if aliases_path and os.path.exists(aliases_path):
+        with open(aliases_path, encoding="utf-8") as f:
+            aliases = {_norm_instance(k): v for k, v in json.load(f).items()}
+
+    defaults = dict(DEFAULTS)
+    jobs: list[Job] = []
+    seen: set[str] = set()
+    for leaf_path, items in instances.items():
+        for it in items:
+            tag = f"{leaf_path} / {it}"
+            if tag in seen:
+                continue
+            seen.add(tag)
+            jobs.append(Job(
+                tag=tag,
+                query=aliases.get(_norm_instance(it), ""),
+                zh_query=_norm_instance(it),
+                defaults=defaults,
+            ))
+
+    rev = (doc.get("meta") or {}).get("revision")
+    label = os.path.basename(path) + (f"#r{rev}" if rev is not None else "")
+    return jobs, label

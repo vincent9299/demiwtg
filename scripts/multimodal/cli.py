@@ -1,9 +1,12 @@
 """命令行入口。
 
 用法：
-  python3 scripts/multimodal/cli.py --config data/image_collect_config.json
-  python3 scripts/multimodal/cli.py --config data/image_collect_config.json --metadata-only
-  python3 scripts/multimodal/cli.py --config data/image_collect_config.json --jobs 城市吉祥物
+  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json
+  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json --consume-mode replay-rules
+  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json \
+      --sources wikimedia,wikimedia_zh,inaturalist,coco,hf_coco   # 启用可选数据集源
+  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json --metadata-only
+  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json --jobs 城市吉祥物
 
 存储布局（数据湖风格，见 docs/IP图片数据集_存储重设计方案.md）：
   dataset/
@@ -28,16 +31,26 @@ import sys
 #   python3 -m scripts.multimodal.cli ...
 if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    from scripts.multimodal.config import load_config
+    from scripts.multimodal.config import EffectiveConfig, load_config, load_taxonomy
     from scripts.multimodal.pipeline import run
+    import scripts.multimodal.sources  # noqa: F401  触发适配器注册
+    from scripts.multimodal.sources.base import _REGISTRY as _SOURCE_REGISTRY
 else:
-    from .config import load_config
+    from .config import EffectiveConfig, load_config, load_taxonomy
     from .pipeline import run
+    from . import sources as _sources_pkg  # noqa: F401  触发适配器注册
+    from .sources.base import _REGISTRY as _SOURCE_REGISTRY
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="多模态图片采集系统（M1: Wikimedia Commons）")
-    ap.add_argument("--config", required=True, help="采集任务配置 JSON 路径")
+    ap.add_argument("--config", help="采集任务配置 JSON 路径（覆盖/临时任务用；"
+                                      "常规采集建议用 --taxonomy 直读标签体系）")
+    ap.add_argument("--taxonomy", help="标签体系实例文件（如 data/ip_instances.json）："
+                                       "直接以标签体系为采集输入，实时派生全量 jobs")
+    ap.add_argument("--aliases", default=None,
+                    help="英文查询词别名表 JSON（仅 --taxonomy 生效；"
+                         "缺省 data/ip_query_aliases.json）")
 
     # 数据湖风格布局：--meta 为 dataset/meta 根；--run-id 命名本批次 runs/<run_id>；
     # --out 默认由 --meta + --run-id 推导，可显式覆盖。
@@ -55,6 +68,12 @@ def main(argv=None):
                     help="只处理指定标签（逗号分隔）；缺省处理全部")
     ap.add_argument("--source", default=None,
                     help="只处理指定来源（如 wikimedia）；缺省全部")
+    ap.add_argument("--sources", default=None,
+                    help="覆盖授权源列表（逗号分隔，整体替换）。默认 wikimedia,"
+                         "wikimedia_zh,inaturalist；可选源如 coco/hf_coco/hf_laion/openverse")
+    ap.add_argument("--unauthorized-sources", default=None,
+                    help="覆盖未授权源列表（逗号分隔，整体替换）；传 none 表示全部关闭。"
+                         "缺省使用内置 18 个中文源列表")
     ap.add_argument("--consume-mode", default="replay",
                     choices=["delta", "replay", "replay-rules"],
                     help="增量消费模式：delta=只采新标签；replay=全量重放（达标跳过，默认）；"
@@ -65,7 +84,34 @@ def main(argv=None):
     meta_dir = args.meta
     out_dir = args.out or os.path.join(meta_dir, "runs", run_id)
 
-    jobs = load_config(args.config)
+    if bool(args.config) == bool(args.taxonomy):
+        ap.error("--config 与 --taxonomy 必须且只能提供一个")
+    if args.taxonomy:
+        jobs, taxonomy_name = load_taxonomy(args.taxonomy, args.aliases)
+    else:
+        jobs = load_config(args.config)
+        taxonomy_name = os.path.basename(args.config)
+
+    def _parse_sources(val: str) -> list:
+        if val.strip().lower() == "none":
+            return []
+        names = [s.strip() for s in val.split(",") if s.strip()]
+        bad = [n for n in names if n not in _SOURCE_REGISTRY]
+        if bad:
+            ap.error("未知来源 %s；已注册来源：%s" % (bad, sorted(_SOURCE_REGISTRY)))
+        return names
+
+    if args.sources is not None or args.unauthorized_sources is not None:
+        src = _parse_sources(args.sources) if args.sources is not None else None
+        unauth = (_parse_sources(args.unauthorized_sources)
+                  if args.unauthorized_sources is not None else None)
+        for j in jobs:
+            if src is not None:
+                j.defaults["sources"] = src
+            if unauth is not None:
+                j.defaults["unauthorized_sources"] = unauth
+            j.effective = EffectiveConfig.resolve(j.defaults, j.overrides)
+
     if args.source:
         jobs = [j for j in jobs if j.source == args.source]
     only_tags = set(t.strip() for t in args.jobs.split(",")) if args.jobs else None
@@ -74,7 +120,7 @@ def main(argv=None):
         meta_dir=meta_dir, run_id=run_id,
         metadata_only=args.metadata_only, only_tags=only_tags,
         consume_mode=args.consume_mode,
-        taxonomy_name=os.path.basename(args.config))
+        taxonomy_name=taxonomy_name)
 
 
 if __name__ == "__main__":

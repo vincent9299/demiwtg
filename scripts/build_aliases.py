@@ -3,7 +3,7 @@
 """为 IP 实例自动生成英文查询别名，提升 Commons 召回率。
 
 策略：
-  - 读取 data/ip_instances.json 的全部叶子实例（归一化去重）。
+  - 读取 data/ip_instances.json（统一标签体系）的全部叶子实例（归一化去重）。
   - 已有手工别名（data/ip_query_aliases.json）优先保留，不覆盖。
   - 其余实例批量调用 Google Translate(gtx) 端点翻译为英文，作为 Commons 查询词。
   - 已为纯 ASCII（英文/拉丁）名的实例不再翻译，原样保留。
