@@ -1,0 +1,195 @@
+"""命令行入口。
+
+用法：
+  python3 scripts/collect/cli.py --taxonomy taxonomy-instances/data/instances.json
+  python3 scripts/collect/cli.py --taxonomy taxonomy-instances/data/instances.json --consume-mode replay-rules
+  python3 scripts/collect/cli.py --taxonomy taxonomy-instances/data/instances.json \
+      --sources wikimedia,wikimedia_zh,inaturalist,coco,hf_coco   # 启用可选数据集源
+  python3 scripts/collect/cli.py --taxonomy taxonomy-instances/data/instances.json --metadata-only
+  python3 scripts/collect/cli.py --taxonomy taxonomy-instances/data/instances.json --jobs 城市吉祥物
+
+存储布局（数据湖风格，约束见 AGENTS.md 第 2 节）：
+  dataset/
+    blobs/              # 原始图片字节，内容寻址 <aa>/<sha256>.<ext>
+    meta/
+      images.jsonl      # 主清单（每张图一行，按 sha256 去重）
+      tags.json         # tag↔图 关系索引
+      runs/<run_id>/    # 本批次过程产物（candidates/success/failed/rejected/stats）
+      runs/_latest      # -> 最新 <run_id>
+    by_taxonomy/       # 按标签的软链树（由 tags.json 派生）
+    untaxonomy/        # 未归类（体系外）标签软链树（由 untaxonomy.json 派生）
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime
+import os
+import re
+import sys
+
+# 支持两种运行方式：
+#   python3 scripts/collect/cli.py ...
+#   python3 -m scripts.collect.cli ...
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    from scripts.collect.config import EffectiveConfig, load_config, load_taxonomy
+    from scripts.collect.pipeline import run
+    import scripts.collect.sources  # noqa: F401  触发适配器注册
+    from scripts.collect.sources.base import _REGISTRY as _SOURCE_REGISTRY
+else:
+    from .config import EffectiveConfig, load_config, load_taxonomy
+    from .pipeline import run
+    from . import sources as _sources_pkg  # noqa: F401  触发适配器注册
+    from .sources.base import _REGISTRY as _SOURCE_REGISTRY
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="IP 标签图片采集系统")
+    ap.add_argument("--config", help="采集任务配置 JSON 路径（覆盖/临时任务用；"
+                                      "常规采集建议用 --taxonomy 直读标签体系）")
+    ap.add_argument("--taxonomy", help="统一标签体系实例元文件（如 taxonomy-instances/data/instances.json）："
+                                       "直接以标签体系为采集输入，实时派生全量 jobs")
+    ap.add_argument("--aliases", default=None,
+                    help="（已废弃）别名已并入 instances.json 的 instance.aliases；保留仅为兼容")
+
+    # 数据湖风格布局：--meta 为 dataset/meta 根；--run-id 命名本批次 runs/<run_id>；
+    # --out 默认由 --meta + --run-id 推导，可显式覆盖。运行时状态（死信队列/健康账本
+    # /LanceDB/COCO 缓存）由 --meta 推导到顶层 state/，不落数据湖。
+    ap.add_argument("--meta", default="dataset/meta",
+                    help="元数据根目录（默认 dataset/meta），主清单 images.jsonl/tags.json 写于此")
+    ap.add_argument("--run-id", default=None,
+                    help="本批次 ID（默认时间戳）；runs/<run-id> 存放本批过程产物")
+    ap.add_argument("--out", default=None,
+                    help="本批次 JSONL 产物目录（默认 <meta>/runs/<run-id>）")
+    ap.add_argument("--images-dir", default="dataset/blobs",
+                    help="图片内容寻址存储根目录（默认 dataset/blobs），授权/未授权源统一落盘于此")
+    ap.add_argument("--metadata-only", action="store_true",
+                    help="仅跑阶段一（检索+候选 JSONL），不下载")
+    ap.add_argument("--jobs", default=None,
+                    help="只处理指定标签（逗号分隔）；缺省处理全部")
+    ap.add_argument("--source", default=None,
+                    help="只处理指定来源（如 wikimedia）；缺省全部")
+    ap.add_argument("--sources", default=None,
+                    help="覆盖授权源列表（逗号分隔，整体替换）。默认 wikimedia,"
+                         "wikimedia_zh,inaturalist；可选源如 coco/hf_coco/hf_laion/openverse")
+    ap.add_argument("--unauthorized-sources", default=None,
+                    help="覆盖未授权源列表（逗号分隔，整体替换）；传 none 表示全部关闭。"
+                         "缺省使用内置 18 个中文源列表")
+    ap.add_argument("--max-per-source", default=None, type=int,
+                    help="每源每标签最多下载张数（覆盖默认；1=各活源各采 1 张最相关图）")
+    ap.add_argument("--shard", default=None,
+                    help="分片并发：形如 i/N（第 i 片/共 N 片，从 1 计）。多进程各跑一片，"
+                         "共享同一 dataset（主清单写入有跨进程锁）；自动开启队列模式，"
+                         "per-host 限速按 --rate-mult 放大")
+    ap.add_argument("--queue", action="store_true",
+                    help="队列模式：阶段二改为共享下载队列（多进程 worker 取件下载，"
+                         "同一 URL 不并发重复下载，每候选最多 3 次重试后跳过）；"
+                         "配合 --shard 时自动开启")
+    ap.add_argument("--no-queue", action="store_true",
+                    help="关闭 --shard 自动开启的队列模式（回退各片独立逐标签下载）")
+    ap.add_argument("--queue-id", default=None,
+                    help="共享队列标识（多分片必须一致；缺省由 run-id 去掉 _sN 后缀推导）")
+    ap.add_argument("--rate-mult", type=float, default=None,
+                    help="分片时 per-host 限速放大系数（默认 4.0；16 片聚合≈每 host 4 req/s，"
+                         "调小更快但更易 429；1.0=完全不放大的单流间隔）")
+    ap.add_argument("--threads", type=int, default=1,
+                    help="队列模式下每进程下载线程数（默认 1；慢件/坏件不再阻塞其它下载）")
+    ap.add_argument("--timeout", type=int, default=None,
+                    help="检索/下载超时秒数（覆盖默认 30；网络黑洞主机多时调小可大幅提速）")
+    ap.add_argument("--alias-stop", type=float, default=None,
+                    help="多别名检索早停系数（覆盖默认 4；候选 >= target_count*K 即不再追加别名）")
+    ap.add_argument("--ignore-dead-seed", action="store_true",
+                    help="不跳过配置里 known_dead_sources 种子源（失败由候选 3 次重试兜底）")
+    ap.add_argument("--reuse-phase1", action="store_true",
+                    help="跳过阶段一检索，直接复用本 run 目录已有的 candidates.jsonl"
+                         "（调参重启时避免重搜）")
+    ap.add_argument("--consume-mode", default="replay",
+                    choices=["delta", "replay", "replay-rules"],
+                    help="增量消费模式：delta=只采新标签；replay=全量重放（达标跳过，默认）；"
+                         "replay-rules=重放+两级身份匹配跳过（分支改名不误重下）+topup 补采缺口")
+    args = ap.parse_args(argv)
+
+    run_id = args.run_id or datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    meta_dir = args.meta
+    out_dir = args.out or os.path.join(meta_dir, "runs", run_id)
+
+    if bool(args.config) == bool(args.taxonomy):
+        ap.error("--config 与 --taxonomy 必须且只能提供一个")
+    if args.taxonomy:
+        jobs, taxonomy_name = load_taxonomy(args.taxonomy, args.aliases)
+    else:
+        jobs = load_config(args.config)
+        taxonomy_name = os.path.basename(args.config)
+
+    def _parse_sources(val: str) -> list:
+        if val.strip().lower() == "none":
+            return []
+        names = [s.strip() for s in val.split(",") if s.strip()]
+        bad = [n for n in names if n not in _SOURCE_REGISTRY]
+        if bad:
+            ap.error("未知来源 %s；已注册来源：%s" % (bad, sorted(_SOURCE_REGISTRY)))
+        return names
+
+    if (args.sources is not None or args.unauthorized_sources is not None
+            or args.max_per_source is not None or args.timeout is not None
+            or args.alias_stop is not None):
+        src = _parse_sources(args.sources) if args.sources is not None else None
+        unauth = (_parse_sources(args.unauthorized_sources)
+                  if args.unauthorized_sources is not None else None)
+        for j in jobs:
+            if src is not None:
+                j.defaults["sources"] = src
+            if unauth is not None:
+                j.defaults["unauthorized_sources"] = unauth
+            if args.max_per_source is not None:
+                j.defaults["max_per_source"] = args.max_per_source
+            if args.timeout is not None:
+                j.defaults["timeout_sec"] = args.timeout
+            if args.alias_stop is not None:
+                j.defaults["alias_stop_factor"] = args.alias_stop
+            j.effective = EffectiveConfig.resolve(j.defaults, j.overrides)
+
+    _i = _n = 0
+    if args.shard:
+        try:
+            _i, _n = (int(x) for x in args.shard.split("/"))
+        except ValueError:
+            _i, _n = 0, 0
+        if _n < 1 or not (1 <= _i <= _n):
+            ap.error("--shard 需要形如 i/N（1<=i<=N），如 --shard 2/4")
+        jobs = [j for k, j in enumerate(jobs) if k % _n == (_i - 1)]
+        mult = args.rate_mult if args.rate_mult is not None else 4.0
+        if _n > 1 and jobs and mult > 0:
+            jobs[0].defaults["per_host_min_interval_sec"] = (
+                jobs[0].defaults.get("per_host_min_interval_sec", 1.0) * mult)
+            for j in jobs:
+                j.effective = EffectiveConfig.resolve(j.defaults, j.overrides)
+        print(f"[shard] 本片 {_i}/{_n}：{len(jobs)} 个标签（per-host 限速放大 x{mult}）",
+              flush=True)
+
+    queue_mode = args.queue or (args.shard is not None and not args.no_queue)
+    queue_id = None
+    if queue_mode:
+        queue_id = args.queue_id
+        if not queue_id:
+            m = re.match(r"^(.*)_s(\d+)$", run_id or "")
+            queue_id = m.group(1) if m else (run_id or "run")
+
+    if args.source:
+        jobs = [j for j in jobs if j.source == args.source]
+    only_tags = set(t.strip() for t in args.jobs.split(",")) if args.jobs else None
+
+    run(jobs, out_dir=out_dir, images_dir=args.images_dir,
+        meta_dir=meta_dir, run_id=run_id,
+        metadata_only=args.metadata_only, only_tags=only_tags,
+        consume_mode=args.consume_mode,
+        taxonomy_name=taxonomy_name,
+        queue_mode=queue_mode, n_shards=_n or 1, shard_index=_i or 1,
+        queue_id=queue_id, ignore_dead_seed=args.ignore_dead_seed,
+        reuse_phase1=args.reuse_phase1,
+        queue_threads=max(1, args.threads))
+
+
+if __name__ == "__main__":
+    main()

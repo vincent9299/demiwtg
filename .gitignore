@@ -1,7 +1,5 @@
-# 生成的 viewer 产物（由 taxonomy-instances/scripts/build_viewer.py 重建，勿提交）
-taxonomy-instances/data/taxonomy.js
-taxonomy-instances/data/instances_meta.js
-taxonomy-instances/tag_tree_explorer.standalone.html
+# 生成的 viewer 产物（由 scripts/taxonomy/build_viewer.py 重建，勿提交）
+taxonomy-instances/build/
 
 # 系统 / 编译产物
 .DS_Store
@@ -11,5 +9,12 @@ __pycache__/
 # WorkBuddy 运行时目录（系统内部，勿提交）
 .workbuddy/
 
-# gen_instance_llm.py 的运行缓存（断点续跑用，勿提交）
+# gen_* 的 LLM 断点续跑缓存（勿提交）
 taxonomy-instances/data/.llm_kb_cache.jsonl
+taxonomy-instances/data/.llm_taxonomy_kb_cache.jsonl
+
+# 本地数据与运行时产物（见 AGENTS.md 第 3 节，勿提交）
+dataset/
+state/
+logs/
+.qoder/

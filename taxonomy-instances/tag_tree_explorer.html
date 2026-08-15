@@ -68,11 +68,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 <div id="tree-container"></div>
 <div id="detail-panel"><div class="dp-empty">点击左侧节点<br>查看知识库详情</div></div>
 
-<!-- 无服务模式：双击(file://)打开时，由 data/taxonomy.js / data/instances_meta.js 把数据注入为全局变量
+<!-- 无服务模式：双击(file://)打开时，由 build/taxonomy.js / build/instances.js 把数据注入为全局变量
      （file:// 协议下浏览器禁止 fetch 本地文件）。若 sidecar 不存在，则回退到 fetch（需经 http 服务打开）。
-     运行 `python3 scripts/build_viewer.py` 生成这两个 sidecar。 -->
-<script src="data/taxonomy.js"></script>
-<script src="data/instances_meta.js"></script>
+     运行 `python3 scripts/taxonomy/build_viewer.py` 生成这两个 sidecar。 -->
+<script src="build/taxonomy.js"></script>
+<script src="build/instances.js"></script>
 <script>
 let treeData = null;
 window.ROLE_INTROS = {};
@@ -84,7 +84,7 @@ function ipCatSlice(path) {
 }
 
 // 把标签树（taxonomy.json）的节点适配为查看器运行时模型。
-// 节点 instances 仅含实例名称（结构指针），富描述由 instances_meta.json 提供。
+// 节点 instances 仅含实例名称（结构指针），富描述由 instances.json 提供。
 function adaptUnified(node) {
     const v = { name: node.name, _path: node.path, depth: node.depth };
     for (const k of KB_FIELDS) if (node[k] != null) v[k] = node[k];
@@ -96,7 +96,7 @@ function adaptUnified(node) {
     return v;
 }
 
-// 由 instances_meta.json 的实例列表构建 ROLE_INTROS / ROLE_NAME_IDX 查表。
+// 由 instances.json 的实例列表构建 ROLE_INTROS / ROLE_NAME_IDX 查表。
 // 关键概念：节点 = 分类标签（subclass of 上级分类）；实例 = 实例标签（instance of 所属分类）。
 // 两者是不同知识对象，因此实例查表独立于节点 KB，且实例面板绝不回退显示分类标签的
 // 代表案例/关联标签。这里把「全部 source」的实例都纳入（不再只取 curated/templated），
@@ -124,17 +124,17 @@ async function loadTaxonomy() {
     const dp = document.getElementById("detail-panel");
     try {
         let taxDoc, metaDoc;
-        if (window.__TAXONOMY__ && window.__INSTANCES_META__) {
+        if (window.__TAXONOMY__ && window.__INSTANCES__) {
             // 无服务模式：数据已由 data/*.js 注入为全局变量
             taxDoc = window.__TAXONOMY__;
-            metaDoc = window.__INSTANCES_META__;
+            metaDoc = window.__INSTANCES__;
         } else {
             const [taxResp, metaResp] = await Promise.all([
                 fetch("data/taxonomy.json", { cache: "no-store" }),
-                fetch("data/instances_meta.json", { cache: "no-store" })
+                fetch("data/instances.json", { cache: "no-store" })
             ]);
             if (!taxResp.ok) throw new Error("taxonomy.json HTTP " + taxResp.status);
-            if (!metaResp.ok) throw new Error("instances_meta.json HTTP " + metaResp.status);
+            if (!metaResp.ok) throw new Error("instances.json HTTP " + metaResp.status);
             taxDoc = await taxResp.json();
             metaDoc = await metaResp.json();
         }
@@ -150,8 +150,8 @@ async function loadTaxonomy() {
         const msg = "无法加载数据：" + e.message +
             "\n\n若直接双击打开（file://），浏览器禁止 fetch 本地文件。两种解决方式：\n" +
             "  1) 一次性生成 sidecar（无需服务器，双击即用）：\n" +
-            "       python3 scripts/build_viewer.py\n" +
-            "     它会写出 data/taxonomy.js 与 data/instances_meta.js，之后双击本页即可。\n" +
+            "       python3 scripts/taxonomy/build_viewer.py\n" +
+            "     它会写出 data/taxonomy.js 与 data/instances.js，之后双击本页即可。\n" +
             "  2) 或启动本地服务：\n" +
             "       python3 -m http.server 8000\n" +
             "     然后访问 http://localhost:8000/tag_tree_explorer.html";

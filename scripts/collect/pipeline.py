@@ -1,0 +1,1144 @@
+"""采集管线（docs 第 6 节两阶段 + 第 7 节产物）。
+
+阶段一：逐 job 遍历所有启用来源（授权源 sources + 未授权源 unauthorized_sources，
+        排除运行期动态剔除的死源），各源按自身语言（en/zh）取对应 query 检索 →
+        统一 Candidate（带上游原生次序 source_rank / 原生分数 source_score）→
+        写 candidates.jsonl。
+阶段二：按 source 类型做【基础校验】（CC 源走许可证白名单；未授权源跳过许可证校验，
+        仅做 URL/MIME/体积检查）→ 通过基础校验的候选下载原图（内容寻址去重，不改分辨率），
+        并在 downloader 解码后用【实际分辨率门】(min_resolution) 拦截低分辨率原图（不落盘）。
+
+本版增强（2026-08-13）：
+- 增量消费模式（consume_mode）：delta 只采新标签；replay 全量重放（达标跳过）；
+  replay-rules 两级身份匹配（全路径 + 父分支/叶子组合）跳过已消费标签、未达标 topup
+  补采缺口（改大 min_images_per_tag 即触发补采）。
+- 断点续传：启动加载本湖 images.jsonl → 构建 url_index(content_url→rec)；下载前若
+  content_url 已在索引且 blob 仍在，直接复用、跳过网络抓取。
+- labels 增量落盘：每下载成功 1 张即追写 images.jsonl（含 content_url），并按需刷新
+  tags.json + by_taxonomy/，任意时刻可看按标签组织的结果。
+- 太少动态扩源：某标签成功图 < min_images_per_tag 时，用 expansion_sources 补搜并用
+  starved_max_per_source 放宽每源上限，直到达标或候选耗尽。
+- 队列模式（--queue）：阶段二改为共享下载队列（SQLite 于 meta_dir），各分片进程投递
+  候选后全体转 worker 取件下载：同一 URL 不并发重复下载、每候选最多 3 次重试后跳过、
+  取件时按 (tag,source)/tag 封顶实时判定；死链/防盗链（401/403/404/410）确定性失败直接
+  跳过不重试。下载与获取新候选【并行】：worker 下载的同时，各片每 10s 从健康源池
+  （弱源除外）为未达标标签补搜一轮新候选投递队列，直到扩源耗尽。动态剔除死源机制
+  已移除，改用来源健康账本（state/source_health.json，跨 run 累积）记录可用下载源。
+
+每张候选的上游原生信号都会落库：source_rank / source_score。
+单流存储：授权与未授权候选都下载到【同一个】images_dir，写入【同一个】downloads_success.jsonl。
+数据湖布局：本批次过程产物写 <meta_dir>/runs/<run_id>/；主清单 <meta_dir>/images.jsonl
+（按 sha256 去重，跨批次累积）与 <meta_dir>/tags.json（tag↔图 关系索引）作为全局元数据源；
+<meta_dir>/runs/_latest 软链指向本批次。
+"""
+
+from __future__ import annotations
+
+import copy
+import json
+import os
+import threading
+import time
+from collections import defaultdict
+from typing import Dict, List, Optional
+
+from . import models
+from .config import DEFAULTS, EffectiveConfig, Job, load_config
+from . import filterer
+from . import downloader
+from .incremental import classify, split_tag, summarize
+from .sources import get_adapter
+from .util import RateLimiter, meta_lock
+
+
+def _is_cjk(s: str) -> bool:
+    return any("\u4e00" <= c <= "\u9fff" for c in (s or ""))
+
+# 确定性失败（防盗链/死链）：重试无意义，队列模式直接跳过、不再 3 次重试。
+DETERMINISTIC_FAIL = {"hotlink_forbidden", "dead_link"}
+# 扩源补搜轮起始波次：90=复用存量候选，100+ = 动态补搜新候选（晚于基础轮 1 与历史波次）。
+WAVE_LEFTOVERS = 90
+WAVE_REFILL_BASE = 100
+REFILL_SEC = 10          # 每轮补搜间隔（与下载并行）
+REFILL_BATCH = 30        # 每轮补搜最多处理标签数（摊薄搜索负载）
+REFILL_IDLE_LIMIT = 6    # 连续 N 轮零产出 → 扩源耗尽
+
+
+def _state_dir(meta_dir: str) -> str:
+    """运行时状态根目录：与 dataset/ 平级的顶层 state/（不进数据湖）。"""
+    state_dir = os.path.join(os.path.dirname(os.path.dirname(meta_dir)), "state")
+    os.makedirs(state_dir, exist_ok=True)
+    return state_dir
+
+
+def _health_path(meta_dir: str) -> str:
+    return os.path.join(_state_dir(meta_dir), "source_health.json")
+
+
+def _load_health(meta_dir: Optional[str]) -> dict:
+    """加载来源健康账本（跨 run 累积的可用下载源记录）。"""
+    if not meta_dir:
+        return {}
+    p = _health_path(meta_dir)
+    if not os.path.exists(p):
+        return {}
+    try:
+        with open(p, encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def _merge_health(meta_dir: str, counters: dict) -> None:
+    """把本 run 的来源健康计数增量合并进账本（meta_lock 串行，多分片安全）。"""
+    if not meta_dir or not counters:
+        return
+    with meta_lock(meta_dir):
+        p = _health_path(meta_dir)
+        h = {}
+        if os.path.exists(p):
+            try:
+                with open(p, encoding="utf-8") as f:
+                    h = json.load(f)
+            except (json.JSONDecodeError, OSError):
+                h = {}
+        for s, c in counters.items():
+            e = h.setdefault(s, {})
+            for k, v in c.items():
+                e[k] = e.get(k, 0) + v
+            e["runs"] = e.get("runs", 0) + 1
+            e["updated_at"] = time.time()
+        tmp = p + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(h, f, ensure_ascii=False, indent=1)
+        os.replace(tmp, p)
+
+
+def _weak_sources_from_health(health: dict) -> set:
+    """历史账本判定弱源：下载尝试 >=30 次、0 成功、确定性失败（死链/防盗链/超时）占比 >=60%。"""
+    weak = set()
+    for s, e in health.items():
+        tried = e.get("dl_ok", 0) + e.get("dl_fail", 0) + e.get("dl_dead", 0)
+        if tried >= 30 and e.get("dl_ok", 0) == 0:
+            deterministic = e.get("dl_dead", 0) + e.get("dl_timeout", 0)
+            if deterministic >= 0.6 * max(e.get("dl_fail", 1), 1):
+                weak.add(s)
+    return weak
+
+
+def _job_index(jobs: List[Job]) -> Dict[str, Job]:
+    return {j.tag: j for j in jobs}
+
+
+# ---------------------------------------------------------------------------
+# 小工具
+# ---------------------------------------------------------------------------
+def _blob_path(rec: dict, images_dir: str) -> str:
+    sha = rec.get("sha256", "")
+    ext = rec.get("ext", "") or "jpg"
+    return os.path.join(images_dir, sha[:2], f"{sha}.{ext}") if sha else ""
+
+
+def _blob_exists(rec: dict, images_dir: str) -> bool:
+    p = _blob_path(rec, images_dir)
+    return bool(p) and os.path.exists(p)
+
+
+def _candidate_to_rec(c: "models.Candidate", images_dir: str) -> dict:
+    """把成功 Candidate 投影成 images.jsonl 记录（含 content_url 以便续传）。"""
+    sha = c.sha256 or ""
+    ext = os.path.splitext(c.local_path or "")[1].lstrip(".") if c.local_path else ""
+    tier = c.selected_tier if c.selected_tier is not None else 0
+    return {
+        "sha256": sha,
+        "ext": ext,
+        "source": c.source,
+        "source_kind": c.source_kind,
+        "source_authorized": c.source_authorized,
+        "license": c.license_raw or "",
+        "author": c.author,
+        "credit": c.credit,
+        "width": c.actual_width,
+        "height": c.actual_height,
+        "orig_width": c.orig_width,
+        "orig_height": c.orig_height,
+        "size_bytes": c.actual_size,
+        "mime": c.actual_mime,
+        "tags": [c.tag] if c.tag else [],
+        "tiers": [tier],
+        "source_rank": c.source_rank,
+        "source_score": c.source_score,
+        "landing_url": c.landing_url,
+        "content_url": c.content_url,
+        "fetched_at": c.fetched_at,
+        "path": _rel_path(c.local_path),
+    }
+
+
+def _rec_to_candidate(rec: dict, tag: str, images_dir: str) -> "models.Candidate":
+    """从 images.jsonl 记录重建一个 success Candidate（用于续传复用，避免重抓）。"""
+    sha = rec.get("sha256", "")
+    local = _blob_path(rec, images_dir)
+    return models.Candidate(
+        source=rec.get("source", ""),
+        source_kind=rec.get("source_kind", ""),
+        asset_id=sha,
+        tag=tag or (rec.get("tags") or [""])[0],
+        query=tag or "",
+        landing_url=rec.get("landing_url", ""),
+        content_url=rec.get("content_url", ""),
+        source_authorized=rec.get("source_authorized", True),
+        license_raw=rec.get("license", ""),
+        source_rank=rec.get("source_rank"),
+        source_score=rec.get("source_score"),
+        status=models.STATUS_DOWNLOADED,
+        sha256=sha,
+        local_path=local,
+        actual_width=rec.get("width"),
+        actual_height=rec.get("height"),
+        actual_size=rec.get("size_bytes"),
+        actual_mime=rec.get("mime"),
+    )
+
+
+def _refresh_tags_and_by_tag(meta_dir: str, tags_map: dict, images_dir: str) -> None:
+    """把内存中的 tags_map 写出 tags.json 并重建 by_taxonomy/ 软链（幂等）。"""
+    if not meta_dir:
+        return
+    with meta_lock(meta_dir):
+        with open(os.path.join(meta_dir, "tags.json"), "w", encoding="utf-8") as f:
+            json.dump(tags_map, f, ensure_ascii=False, indent=1)
+        try:
+            from scripts.lake.link_by_tag import link_from_tags as _lt  # type: ignore
+            lake_root = os.path.dirname(os.path.normpath(images_dir))
+            _lt(os.path.join(meta_dir, "tags.json"),
+                os.path.join(lake_root, "by_taxonomy"), images_dir)
+        except Exception as e:  # noqa: BLE001
+            print(f"[warn] 重建 by_taxonomy/ 失败（忽略，可手动 scripts/lake/link_by_tag.py）: {e}")
+
+
+def _link_by_tag(meta_dir: str, images_dir: str) -> None:
+    """用 meta_dir/tags.json（须先由主清单重建）重建 by_taxonomy/ 软链树（队列模式用）。"""
+    if not meta_dir:
+        return
+    with meta_lock(meta_dir):
+        try:
+            from scripts.lake.link_by_tag import link_from_tags as _lt  # type: ignore
+            lake_root = os.path.dirname(os.path.normpath(images_dir))
+            _lt(os.path.join(meta_dir, "tags.json"),
+                os.path.join(lake_root, "by_taxonomy"), images_dir)
+        except Exception as e:  # noqa: BLE001
+            print(f"[warn] 重建 by_taxonomy/ 失败（忽略，可手动 scripts/lake/link_by_tag.py）: {e}")
+
+
+# ---------------------------------------------------------------------------
+# 主流程
+# ---------------------------------------------------------------------------
+def run(jobs: List[Job], out_dir: str, images_dir: str,
+        meta_dir: Optional[str] = None, run_id: Optional[str] = None,
+        metadata_only: bool = False,
+        only_tags: Optional[set] = None,
+        consume_mode: str = "replay",
+        taxonomy_name: Optional[str] = None,
+        queue_mode: bool = False,
+        n_shards: int = 1,
+        shard_index: int = 1,
+        queue_id: Optional[str] = None,
+        ignore_dead_seed: bool = False,
+        reuse_phase1: bool = False,
+        queue_threads: int = 1) -> dict:
+
+    os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(images_dir, exist_ok=True)
+    if meta_dir:
+        os.makedirs(meta_dir, exist_ok=True)
+
+    # 限速器间隔取配置（默认 1.0s）。分片并发时各片把 per_host_min_interval_sec 调大，
+    # 使对同一 host 的【聚合】请求速率不超过单流，避免触发 429/封禁。
+    _rate_interval = 1.0
+    if jobs:
+        _rate_interval = getattr(jobs[0].effective, "per_host_min_interval_sec", 1.0) or 1.0
+    rate_limiter = RateLimiter(_rate_interval)
+
+    # --jobs 支持子串匹配，便于按实例名试点
+    jobs = [j for j in jobs if (not only_tags or any(t in j.tag for t in only_tags))]
+
+    # 运行期配置（带默认值，兼容旧配置无新键）；无 jobs 的分片（纯队列 worker）用内置默认。
+    eff0 = (jobs[0].effective if jobs else
+            EffectiveConfig.resolve(dict(DEFAULTS), None))
+    min_images = getattr(eff0, "min_images_per_tag", None) or 4
+    expansion_sources = list(getattr(eff0, "expansion_sources", None) or [])
+    starved_cap = getattr(eff0, "starved_max_per_source", None)
+    # 死源「种子」跳过（配置静态列表，非运行期剔除；--ignore-dead-seed 关闭）。
+    # 动态剔除机制已移除：来源失败由候选级 3 次重试规则兜底，不再整源摘除。
+    known_dead = list(getattr(eff0, "known_dead_sources", None) or [])
+    dead = set() if ignore_dead_seed else set(known_dead)
+    if dead:
+        print(f"[config] 种子跳过来源 {sorted(dead)}（--ignore-dead-seed 可关闭）", flush=True)
+
+    # 来源健康账本：跨 run 累积的可用下载源记录（state/source_health.json）。
+    health = _load_health(meta_dir) if meta_dir else {}
+    weak_from_health = _weak_sources_from_health(health)
+    if weak_from_health:
+        print(f"[health] 历史弱源（扩源将跳过）: {sorted(weak_from_health)}", flush=True)
+
+    # ---------- 加载本湖已有状态：断点续传 + 增量标签 ----------
+    url_index: Dict[str, dict] = {}     # content_url -> rec（blob 仍存在）
+    tags_map: Dict[str, list] = {}      # tag -> [{sha256, ext, source, tiers, ...}]
+    mpath = os.path.join(meta_dir, "images.jsonl") if meta_dir else None
+    if mpath and os.path.exists(mpath):
+        with open(mpath, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue  # 进程被杀时残留的半行，跳过
+                sha = rec.get("sha256")
+                if not sha:
+                    continue
+                # 续传索引：仅保留 blob 仍在磁盘的记录
+                if _blob_exists(rec, images_dir):
+                    cu = rec.get("content_url")
+                    if cu:
+                        url_index[cu] = rec
+                for t in rec.get("tags", []):
+                    tags_map.setdefault(t, []).append({
+                        "sha256": sha,
+                        "ext": rec.get("ext", ""),
+                        "source": rec.get("source", ""),
+                        "tiers": rec.get("tiers", [0]),
+                        "source_rank": rec.get("source_rank"),
+                        "source_score": rec.get("source_score"),
+                    })
+    print(f"[state] 载入本湖已下载 {len(url_index)} 条（续传索引），标签 {len(tags_map)} 个",
+          flush=True)
+
+    # ---------- 增量消费分类（delta / replay / replay-rules，见 incremental.py） ----------
+    # 标签即实体名（不含路径）；精确命中即跳过/补采，历史路径格式标签仍有 (父,叶) 兜底。
+    total_jobs = len(jobs)
+    jobs, existing_counts, classify_report = classify(
+        jobs, tags_map, consume_mode, min_images)
+    print(f"[consume] 模式={consume_mode} 输入 {total_jobs} 标签 -> 执行 {len(jobs)} "
+          f"({summarize(classify_report)})", flush=True)
+    job_by_tag = _job_index(jobs)
+
+    # 计数器（跨整个 run）
+    C = {
+        "success": [], "failed": [], "rejected": [], "candidates": [],
+        "cc": 0, "unauth": 0, "bytes": 0, "capped": 0,
+        "tag_success": defaultdict(int),
+        "q_done": 0,
+        "src_health": defaultdict(lambda: {
+            "search_ok": 0, "search_fail": 0, "candidates": 0,
+            "dl_ok": 0, "dl_fail": 0, "dl_dead": 0, "dl_timeout": 0,
+        }),
+    }
+    # topup 基数：已有图数计入 tag_success，使 扩源触发/stop_at 的目标是
+    # 「总数达到 min_images」而不是「本轮再下 min_images 张」（补采只补缺口）。
+    for _tag, _n in existing_counts.items():
+        C["tag_success"][_tag] = _n
+    # 基数图的 sha 集合：续传分支若再命中这些图不得重复计数（否则 n→2n 误判达标）。
+    # （实体名标签无路径，split_tag 兜底自然退化为名字匹配；保留以兼容旧格式标签。）
+    baseline_shas: Dict[str, set] = {}
+    if existing_counts:
+        _fuzzy_shas: Dict[tuple, set] = defaultdict(set)
+        for _t, _lst in tags_map.items():
+            _fuzzy_shas[split_tag(_t)].update(e["sha256"] for e in _lst)
+        baseline_shas = {
+            _tag: {e["sha256"] for e in tags_map.get(_tag, [])} | _fuzzy_shas[split_tag(_tag)]
+            for _tag in existing_counts
+        }
+    searched_per_source = defaultdict(int)
+
+    REFRESH_EVERY = 5  # 每 N 个标签刷新一次 tags.json + by_taxonomy
+
+    def _persist(c: "models.Candidate") -> None:
+        """追写 images.jsonl（增量、崩溃安全）+ 更新内存 url_index / tags_map。"""
+        rec = _candidate_to_rec(c, images_dir)
+        rec["content_url"] = c.content_url
+        # 幂等：同一 content_url 的图已落盘（断点续传命中 / 扩源重复命中）则不再重复写文件，
+        # 仅确保 url_index / tags_map 已含该 sha，避免重复记录与计数膨胀。
+        if c.content_url and c.content_url in url_index and _blob_exists(rec, images_dir):
+            lst = tags_map.setdefault(c.tag, [])
+            if not any(e["sha256"] == c.sha256 for e in lst):
+                lst.append({
+                    "sha256": c.sha256,
+                    "ext": rec.get("ext", ""),
+                    "source": c.source,
+                    "tiers": [c.selected_tier or 0],
+                    "source_rank": c.source_rank,
+                    "source_score": c.source_score,
+                })
+            return
+        if mpath:
+            with meta_lock(meta_dir):
+                with open(mpath, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        url_index[c.content_url] = rec
+        lst = tags_map.setdefault(c.tag, [])
+        if not any(e["sha256"] == c.sha256 for e in lst):
+            lst.append({
+                "sha256": c.sha256,
+                "ext": rec.get("ext", ""),
+                "source": c.source,
+                "tiers": [c.selected_tier or 0],
+                "source_rank": c.source_rank,
+                "source_score": c.source_score,
+            })
+
+    def _active_sources(job: Job) -> List[str]:
+        return [s for s in (list(job.sources) + list(job.unauthorized_sources))
+                if s not in dead]
+
+    def _search_source(s: str, job: Job, alias_scope: str = "all") -> List["models.Candidate"]:
+        """对单个来源做【多别名早停检索】：
+
+        - 按来源语言选别名池（en 源用 en_aliases、zh 源用 zh_aliases、both 源两者交替）；
+        - best-first：先搜最优别名，累计候选 >= target_count*alias_stop_factor 即停；
+        - 跨别名按 content_url 去重；source_rank 按追加顺序重排（先搜的别名整体靠前）。
+        """
+        adapter = get_adapter(s)
+        threshold = max(1, int((job.effective.target_count or 4)
+                               * (getattr(job.effective, "alias_stop_factor", None) or 4)))
+        if adapter.lang == "zh":
+            pools = [list(job.zh_aliases or [job.zh_query])]
+        elif adapter.lang == "both":
+            pools = [list(job.en_aliases or [job.query]),
+                     list(job.zh_aliases or [job.zh_query])]
+        else:
+            pools = [list(job.en_aliases or [job.query])]
+        out: List["models.Candidate"] = []
+        seen_urls: set = set()
+        for pool in pools:
+            for alias in pool:
+                sub = copy.copy(job)
+                sub.query = alias
+                sub.zh_query = alias if _is_cjk(alias) else job.zh_query
+                try:
+                    raws = adapter.search(sub)
+                    C["src_health"][s]["search_ok"] += 1
+                except Exception as e:  # noqa: BLE001
+                    C["src_health"][s]["search_fail"] += 1
+                    print(f"[warn] 标签 {job.tag}: 来源 {s} 别名 {alias!r} 检索失败: {e}")
+                    continue
+                added = 0
+                for raw in raws:
+                    try:
+                        c = adapter.to_candidate(raw, sub)
+                    except Exception:  # noqa: BLE001
+                        continue
+                    if c.content_url and c.content_url in seen_urls:
+                        continue
+                    if c.content_url:
+                        seen_urls.add(c.content_url)
+                    out.append(c)
+                    added += 1
+                if added == 0 or len(out) >= threshold:
+                    break
+            if len(out) >= threshold:
+                break
+        for idx, c in enumerate(out):
+            if c.source_rank is None:
+                c.source_rank = idx
+        return out
+
+    def _search_job(job: Job) -> List["models.Candidate"]:
+        new = []
+        for s in _active_sources(job):
+            out = _search_source(s, job)
+            searched_per_source[s] += len(out)
+            C["src_health"][s]["candidates"] += len(out)
+            new.extend(out)
+        return new
+
+    def _process_groups(groups, cap, job, stop_at=None):
+        """下载 groups（(tag,source)->[cands]），带 url_index 续传跳过 + max_per_source 封顶。
+        返回新增 success 数。"""
+        local_new = 0
+        for (tag, src), cs in groups.items():
+            if tag not in job_by_tag:
+                continue
+            cs.sort(key=lambda c: (c.source_rank if c.source_rank is not None else 0))
+            succ = 0
+            for c in cs:
+                if cap and cap > 0 and succ >= cap:
+                    C["capped"] += 1
+                    continue
+                # —— 断点续传：URL 已下载过则直接复用，跳过网络抓取 ——
+                if c.content_url and c.content_url in url_index:
+                    rec = url_index[c.content_url]
+                    cand = _rec_to_candidate(rec, tag, images_dir)
+                    if cand.sha256 in baseline_shas.get(tag, ()):
+                        # 已计入 topup 基数：只补标签关联，不重复计数
+                        _persist(cand)
+                        continue
+                    C["success"].append(cand)
+                    C["tag_success"][tag] += 1
+                    if cand.sha256 and cand.source_authorized:
+                        C["cc"] += 1
+                    elif cand.sha256:
+                        C["unauth"] += 1
+                    _persist(cand)
+                    succ += 1
+                    local_new += 1
+                    continue
+                # —— 正常下载 ——
+                cfg = job.effective
+                adapter = get_adapter(c.source)
+                allowed = None if not c.source_authorized else adapter.allowed_suffixes
+                ok_dl, downloaded = downloader.download_and_store(
+                    c, cfg, allowed, images_dir, rate_limiter,
+                    headers=getattr(adapter, "download_headers", None),
+                )
+                if ok_dl and downloaded:
+                    d = downloaded[0]
+                    if d.sha256 in baseline_shas.get(tag, ()):
+                        # 与基数图同内容（不同 URL 重复命中）：不重复计数
+                        _persist(d)
+                        continue
+                    C["success"].append(d)
+                    C["tag_success"][tag] += 1
+                    C["bytes"] += d.actual_size or 0
+                    if d.source_authorized:
+                        C["cc"] += 1
+                    else:
+                        C["unauth"] += 1
+                    C["src_health"][src]["dl_ok"] += 1
+                    _persist(d)
+                    succ += 1
+                    local_new += 1
+                else:
+                    if c.status == models.STATUS_GATE_REJECTED:
+                        C["rejected"].append(c)
+                    else:
+                        C["failed"].append(c)
+                        fk = getattr(c, "fail_kind", None)
+                        if fk in DETERMINISTIC_FAIL:
+                            C["src_health"][src]["dl_dead"] += 1
+                        elif fk == "timeout":
+                            C["src_health"][src]["dl_timeout"] += 1
+                        else:
+                            C["src_health"][src]["dl_fail"] += 1
+                if stop_at and C["tag_success"][tag] >= stop_at:
+                    break
+            if stop_at and C["tag_success"][tag] >= stop_at:
+                break
+        return local_new
+
+    # ---------- 阶段一：多源检索 + 候选（增量落盘 candidates.jsonl） ----------
+    cand_path = os.path.join(out_dir, "candidates.jsonl")
+    total = len(jobs)
+    if reuse_phase1 and os.path.exists(cand_path):
+        # 调参重启：跳过检索，直接复用本 run 目录候选（省去重搜时间）
+        loaded = []
+        with open(cand_path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    loaded.append(models.Candidate.from_dict(json.loads(line)))
+                except (json.JSONDecodeError, TypeError):
+                    continue
+        for c in loaded:
+            searched_per_source[c.source] += 1
+        C["candidates"] = loaded
+        print(f"[阶段一] 复用既有候选 {len(C['candidates'])} 条（--reuse-phase1，跳过检索）",
+              flush=True)
+    else:
+        with open(cand_path, "w", encoding="utf-8") as cf:
+            for i, job in enumerate(jobs, 1):
+                new_for_job = _search_job(job)
+                C["candidates"].extend(new_for_job)
+                for c in new_for_job:
+                    cf.write(json.dumps(c.to_dict(), ensure_ascii=False) + "\n")
+                if i % 50 == 0 or i == total:
+                    cf.flush()
+                    print(f"[阶段一] 进度 {i}/{total} 任务，已累积候选 {len(C['candidates'])} 条")
+
+    print(f"[阶段一] 检索完成：候选 {len(C['candidates'])} 条（{total} 个任务）")
+    print(f"[阶段一] 各来源候选数: {dict(searched_per_source)}")
+
+    if metadata_only:
+        _write_stats(out_dir, jobs, C["candidates"], searched_per_source,
+                     rejected=0, downloaded=0, failed=0, bytes_=0)
+        print("[阶段一] 已完成（--metadata-only，未下载）")
+        return {"candidates": len(C["candidates"])}
+
+    # ---------- 阶段二：筛选 + 分组 + 下载（含续传/扩源；--queue 走共享队列） ----------
+    rejected_stage2 = []
+    cands_by_tag: Dict[str, list] = defaultdict(list)
+    for c in C["candidates"]:
+        job = job_by_tag.get(c.tag)
+        if job is None:
+            c.status = models.STATUS_REJECTED
+            c.reject_reason = "找不到对应任务配置"
+            rejected_stage2.append(c)
+            continue
+        if c.source_authorized:
+            ok, reason = filterer.filter_candidate(
+                c, job.effective, get_adapter(c.source).allowed_suffixes)
+        else:
+            ok, reason = filterer.filter_candidate_unauthorized(
+                c, job.effective, None)
+        if not ok:
+            c.status = models.STATUS_REJECTED
+            c.reject_reason = reason
+            rejected_stage2.append(c)
+            continue
+        cands_by_tag[c.tag].append(c)
+
+    if queue_mode and meta_dir:
+        # —— 队列模式：共享下载队列（见 queue.py）——
+        from .queue import DownloadQueue
+
+        qid = queue_id or run_id or "run"
+        state_dir = _state_dir(meta_dir)
+        qdb = os.path.join(state_dir, f".dlq_{qid}.sqlite3")
+        flags_dir = os.path.join(state_dir, f".dlq_flags_{qid}")
+        os.makedirs(flags_dir, exist_ok=True)
+        my_flag = os.path.join(flags_dir, f"done.{shard_index}")
+        q = DownloadQueue(qdb)
+        q_since = time.time() - 300.0  # done 计数只算本轮（同 run-id 重启防误判）
+        reused_tag = defaultdict(int)
+
+        def _reuse_lake_candidate(rec: dict, tag: str) -> None:
+            """湖内已有该 URL：复用记录并补标签关联（不再联网）。"""
+            cand = _rec_to_candidate(rec, tag, images_dir)
+            if cand.sha256 in baseline_shas.get(tag, ()):
+                _persist(cand)
+                return
+            C["success"].append(cand)
+            C["tag_success"][tag] += 1
+            reused_tag[tag] += 1
+            if cand.sha256 and cand.source_authorized:
+                C["cc"] += 1
+            elif cand.sha256:
+                C["unauth"] += 1
+            _persist(cand)
+
+        def _enqueue_wave1() -> None:
+            """基础轮：每 (tag,source) 最多 max_per_source 张（rank 最小者优先）。"""
+            n_q = n_reuse = 0
+            for tag, cs in cands_by_tag.items():
+                job = job_by_tag[tag]
+                cap = job.effective.max_per_source
+                tag_min = ((min_images - existing_counts[tag])
+                           if tag in existing_counts else None)
+                by_src = defaultdict(list)
+                for c in cs:
+                    if c.content_url and c.content_url in url_index:
+                        _reuse_lake_candidate(url_index[c.content_url], tag)
+                        n_reuse += 1
+                        continue
+                    by_src[c.source].append(c)
+                for src, lst in by_src.items():
+                    lst.sort(key=lambda c: (c.source_rank if c.source_rank is not None else 0))
+                    take = lst if (not cap or cap <= 0) else lst[:cap]
+                    for c in take:
+                        q.enqueue(1, tag, src, c.content_url or "",
+                                  c.source_rank or 0, cap, tag_min, c.to_dict())
+                        n_q += 1
+            print(f"[queue] wave1 投递 {n_q} 条候选 / 复用湖内 {n_reuse} 条", flush=True)
+
+        # —— 弱源识别：本 run 队列证据 + 历史账本 ——
+        weak_sources = set(weak_from_health)
+        for s, st in q.wave_source_stats(1).items():
+            if st["total"] >= 30 and st["done"] == 0 and st["exhausted"] >= 30:
+                weak_sources.add(s)
+        if weak_sources:
+            print(f"[queue] 扩源跳过弱源: {sorted(weak_sources)}", flush=True)
+
+        def _enqueue_leftovers() -> int:
+            """扩源第 1 层（一次）：复用已检索候选、放宽每源上限（wave1 未投递/封顶跳过的）。"""
+            n_q = 0
+            for tag, cs in cands_by_tag.items():
+                job = job_by_tag[tag]
+                existing = existing_counts.get(tag, 0)
+                total_now = existing + q.tag_done_count(tag, q_since) + reused_tag[tag]
+                if total_now >= min_images:
+                    continue
+                w1 = q.tag_wave_rows(tag, 1)
+                remaining = []
+                for c in cs:
+                    if not c.content_url or c.content_url in url_index:
+                        continue
+                    if c.source in weak_sources:
+                        continue
+                    row = w1.get(c.content_url)
+                    if row is None:
+                        remaining.append(c)          # wave1 未投递（超出基础轮封顶）
+                        continue
+                    if row["attempts"] >= 3:
+                        continue                    # 3 次无果，跳过
+                    if row["status"] in ("pending", "claimed", "done"):
+                        continue
+                    remaining.append(c)              # 封顶跳过 → 放宽上限后重试
+                cap2 = starved_cap or job.effective.max_per_source
+                tag_min2 = min_images - existing
+                if remaining:
+                    by_src = defaultdict(list)
+                    for c in remaining:
+                        by_src[c.source].append(c)
+                    for src, lst in by_src.items():
+                        lst.sort(key=lambda c: (c.source_rank if c.source_rank is not None else 0))
+                        take = lst if (not cap2 or cap2 <= 0) else lst[:cap2]
+                        for c in take:
+                            q.enqueue(WAVE_LEFTOVERS, tag, src, c.content_url,
+                                      c.source_rank or 0, cap2, tag_min2, c.to_dict())
+                            n_q += 1
+            return n_q
+
+        # —— 动态补搜（与下载并行）：轮转自家未达标标签，从健康源池补搜新候选 ——
+        refill_wave = WAVE_REFILL_BASE
+        refill_tried = defaultdict(set)   # tag -> 已补搜过的来源
+        refill_cursor = 0
+        refill_idle = 0
+        refill_done = False
+
+        def _refill_once(limit: int = REFILL_BATCH) -> int:
+            """每轮补搜：最多 limit 个未达标标签，每个补搜 1 个健康源。返回新投递数。"""
+            nonlocal refill_wave, refill_cursor, refill_idle
+            tags = list(cands_by_tag)
+            if not tags:
+                return 0
+            n_q = 0
+            for _ in range(limit):
+                if refill_cursor >= len(tags):
+                    refill_cursor = 0
+                tag = tags[refill_cursor]
+                refill_cursor += 1
+                job = job_by_tag[tag]
+                existing = existing_counts.get(tag, 0)
+                total_now = existing + q.tag_done_count(tag, q_since) + reused_tag[tag]
+                if total_now >= min_images:
+                    continue
+                if expansion_sources:
+                    pool = [s for s in expansion_sources
+                            if s not in weak_sources and s not in refill_tried[tag]]
+                else:
+                    pool = [s for s in _active_sources(job)
+                            if s not in weak_sources and s not in refill_tried[tag]]
+                if not pool:
+                    continue
+                s = pool[0]
+                refill_tried[tag].add(s)
+                cands = _search_source(s, job)
+                C["src_health"][s]["candidates"] += len(cands)
+                cap2 = starved_cap or job.effective.max_per_source
+                tag_min2 = min_images - existing
+                kept = []
+                for c in cands:
+                    if c.content_url and c.content_url in url_index:
+                        continue
+                    if c.source_authorized:
+                        ok, _ = filterer.filter_candidate(
+                            c, job.effective, get_adapter(c.source).allowed_suffixes)
+                    else:
+                        ok, _ = filterer.filter_candidate_unauthorized(
+                            c, job.effective, None)
+                    if ok:
+                        kept.append(c)
+                for c in kept[: (cap2 if cap2 and cap2 > 0 else len(kept))]:
+                    q.enqueue(refill_wave, tag, s, c.content_url or "",
+                              c.source_rank or 0, cap2, tag_min2, c.to_dict())
+                    n_q += 1
+                refill_wave += 1
+            return n_q
+
+        def _process_queue_item(item: dict) -> None:
+            tag = item["tag"]
+            job = job_by_tag.get(tag)
+            rec = q.reuse_rec(item["content_url"])
+            if rec:
+                # 同 URL 已被其它 worker 下载成功：复用记录、补本标签关联
+                cand = _rec_to_candidate(rec, tag, images_dir)
+                if cand.sha256 in baseline_shas.get(tag, ()):
+                    _persist(cand)
+                else:
+                    C["success"].append(cand)
+                    _count_tag(tag)
+                    if cand.sha256 and cand.source_authorized:
+                        _count("cc")
+                    elif cand.sha256:
+                        _count("unauth")
+                    _persist(cand)
+                q.mark_done(item["id"], rec)
+                return
+            c = models.Candidate.from_dict(item["payload"])
+            c.tag = tag
+            cfg = job.effective if job else eff0
+            adapter = get_adapter(c.source)
+            allowed = None if not c.source_authorized else adapter.allowed_suffixes
+            ok_dl, downloaded = downloader.download_and_store(
+                c, cfg, allowed, images_dir, rate_limiter,
+                headers=getattr(adapter, "download_headers", None))
+            if ok_dl and downloaded:
+                d = downloaded[0]
+                if d.sha256 in baseline_shas.get(tag, ()):
+                    _persist(d)
+                    q.mark_done(item["id"], _candidate_to_rec(d, images_dir))
+                    return
+                C["success"].append(d)
+                _count_tag(tag)
+                _count("bytes", d.actual_size or 0)
+                if d.source_authorized:
+                    _count("cc")
+                else:
+                    _count("unauth")
+                _count_src(c.source, "dl_ok")
+                _persist(d)
+                q.mark_done(item["id"], _candidate_to_rec(d, images_dir))
+            else:
+                if c.status == models.STATUS_GATE_REJECTED:
+                    C["rejected"].append(c)
+                    q.mark_skipped(item["id"])   # 分辨率门拒绝：重试无意义
+                elif getattr(c, "fail_kind", None) in DETERMINISTIC_FAIL:
+                    # 死链/防盗链：确定性失败，重试无意义，直接跳过
+                    C["failed"].append(c)
+                    _count_src(c.source, "dl_dead")
+                    q.mark_skipped(item["id"])
+                else:
+                    C["failed"].append(c)
+                    if getattr(c, "fail_kind", None) == "timeout":
+                        _count_src(c.source, "dl_timeout")
+                    else:
+                        _count_src(c.source, "dl_fail")
+                    q.release(item["id"])        # <3 次回 pending 退避重试；>=3 跳过
+
+        _enqueue_wave1()
+        n_left = _enqueue_leftovers()
+        print(f"[queue] 存量候选放宽投递 {n_left} 条（与下载并行）", flush=True)
+        stop = threading.Event()
+        stats_lock = threading.Lock()
+
+        def _count(key: str, n: int = 1) -> None:
+            with stats_lock:
+                C[key] += n
+
+        def _count_tag(tag: str, n: int = 1) -> None:
+            with stats_lock:
+                C["tag_success"][tag] += n
+
+        def _count_src(source: str, key: str, n: int = 1) -> None:
+            with stats_lock:
+                C["src_health"][source][key] += n
+
+        def _worker_loop() -> None:
+            while not stop.is_set():
+                item = q.claim(q_since)
+                if item is None:
+                    if stop.wait(1.0):
+                        return
+                    continue
+                _process_queue_item(item)
+                with stats_lock:
+                    C["q_done"] += 1
+                    if C["q_done"] % 50 == 0:
+                        print(f"[queue] worker 处理 {C['q_done']} 件 / 本进程成功 "
+                              f"{len(C['success'])} 张，队列 {q.counts()}", flush=True)
+
+        threads = [threading.Thread(target=_worker_loop, daemon=True)
+                   for _ in range(max(1, queue_threads))]
+        for t in threads:
+            t.start()
+
+        # —— 并行扩源：worker 下载的同时，主线程每 REFILL_SEC 秒从健康源池补搜一轮 ——
+        # （不再串行等 wave 排空；下载与获取新候选同时进行，见 _refill_once）
+        flagged = False
+        last_refill = time.time() - REFILL_SEC  # 启动即来一轮
+        while True:
+            if not refill_done and time.time() - last_refill >= REFILL_SEC:
+                n_q = _refill_once()
+                if n_q == 0:
+                    refill_idle += 1
+                    if refill_idle >= REFILL_IDLE_LIMIT:
+                        refill_done = True
+                        print("[queue] 扩源耗尽（连续无新候选），停止补搜", flush=True)
+                else:
+                    refill_idle = 0
+                    print(f"[queue] 补搜轮投递 {n_q} 条新候选（下载并行中）", flush=True)
+                last_refill = time.time()
+            if refill_done and not flagged:
+                with open(my_flag, "w", encoding="utf-8") as f:
+                    f.write(str(time.time()))
+                print("[queue] 本片扩源耗尽，收尾完成，等待其它分片", flush=True)
+                flagged = True
+            flags = len([f for f in os.listdir(flags_dir) if f.startswith("done.")])
+            if flagged and flags >= n_shards and q.drained():
+                break
+            time.sleep(2.0)
+        stop.set()
+        for t in threads:
+            t.join(timeout=10)
+        q.close()
+    else:
+        # —— 逐标签串行下载（非队列模式，原逻辑）——
+        processed = 0
+        for job in jobs:
+            tag = job.tag
+            # 基础分组（跳过种子死源）
+            groups = defaultdict(list)
+            for c in cands_by_tag.get(tag, []):
+                if c.source in dead:
+                    continue
+                groups[(tag, c.source)].append(c)
+            # topup 标签基础轮也限到 min_images（补采只补缺口）；新标签不限
+            _process_groups(groups, job.effective.max_per_source, job,
+                            stop_at=min_images if tag in existing_counts else None)
+
+            # —— 太少动态扩源（优化：优先复用已检索候选、放宽每源上限，避免重新联网检索）——
+            if C["tag_success"][tag] < min_images:
+                before = C["tag_success"][tag]
+                # 第 1 层：复用本标签已检索到的候选（base 轮只下了每源 1 张，余下候选仍在内存），
+                # 放宽每源上限到 starved_max_per_source，直到达标或候选耗尽。不再重新检索。
+                # 关键：剔除本运行已下载的候选（content_url 已入 url_index），否则 base 轮已下的图
+                # 会在扩源轮被「续传分支」再次计入 / 再次落盘，造成重复记录与计数膨胀。
+                remaining = defaultdict(list)
+                for (tg, src), cs in groups.items():
+                    if tg != tag:
+                        continue
+                    for c in cs:
+                        if c.content_url and c.content_url in url_index:
+                            continue
+                        remaining[(tg, src)].append(c)
+                _process_groups(remaining, starved_cap or job.effective.max_per_source,
+                                job, stop_at=min_images)
+                # 第 2 层：仍不足且配置了「额外扩源池」（非基础源的其它源）才补搜。
+                if C["tag_success"][tag] < min_images and expansion_sources:
+                    extra = [s for s in expansion_sources
+                             if s not in dead and s not in _active_sources(job)]
+                    if extra:
+                        exp_cands = []
+                        for s in extra:
+                            exp_cands.extend(_search_source(s, job))
+                        exp_cands = [c for c in exp_cands if c.content_url not in url_index]
+                        kept = []
+                        for c in exp_cands:
+                            if c.source_authorized:
+                                ok, _ = filterer.filter_candidate(
+                                    c, job.effective, get_adapter(c.source).allowed_suffixes)
+                            else:
+                                ok, _ = filterer.filter_candidate_unauthorized(
+                                    c, job.effective, None)
+                            if ok:
+                                kept.append(c)
+                        if kept:
+                            eg2 = defaultdict(list)
+                            for c in kept:
+                                eg2[(tag, c.source)].append(c)
+                            _process_groups(eg2, starved_cap or job.effective.max_per_source,
+                                            job, stop_at=min_images)
+                after = C["tag_success"][tag]
+                if after > before:
+                    print(f"[扩源] {tag}: {before} -> {after} 张", flush=True)
+
+            processed += 1
+            if processed % REFRESH_EVERY == 0:
+                _refresh_tags_and_by_tag(meta_dir, tags_map, images_dir)
+                print(f"[阶段二] 进度 {processed}/{total} 标签，已下载 {len(C['success'])} 张",
+                      flush=True)
+
+    # 末尾刷新标签视图 + 干净去重重写主清单（传入本块 success 以正确按标签并集）
+    if queue_mode and meta_dir:
+        # 队列模式：主清单由各进程 upsert（meta_lock 串行），tags.json 由全量清单重建，
+        # 再据此重建 by_taxonomy/（不能沿用本进程不完整的 tags_map）。
+        _update_master_manifest(meta_dir, C["success"], run_id or "")
+        _link_by_tag(meta_dir, images_dir)
+        _merge_health(meta_dir, C["src_health"])
+    else:
+        _refresh_tags_and_by_tag(meta_dir, tags_map, images_dir)
+        if meta_dir:
+            _update_master_manifest(meta_dir, C["success"], run_id or "")
+            _merge_health(meta_dir, C["src_health"])
+    # 块末调试产出
+    models.write_jsonl(os.path.join(out_dir, "candidates_rejected.jsonl"),
+                       rejected_stage2 + C["rejected"])
+    models.write_jsonl(os.path.join(out_dir, "downloads_success.jsonl"), C["success"])
+    models.write_jsonl(os.path.join(out_dir, "downloads_failed.jsonl"), C["failed"])
+
+    _write_stats(out_dir, jobs, C["candidates"], searched_per_source,
+                 rejected=len(rejected_stage2) + len(C["rejected"]),
+                 downloaded=len(C["success"]),
+                 failed=len(C["failed"]),
+                 bytes_=C["bytes"],
+                 cc_downloaded=C["cc"],
+                 unauth_downloaded=C["unauth"],
+                 capped_per_source=C["capped"])
+
+    print(f"[阶段二] 拒绝 {len(rejected_stage2) + len(C['rejected'])} / "
+          f"下载成功 {len(C['success'])} (授权 {C['cc']} + 未授权 {C['unauth']}) / "
+          f"失败 {len(C['failed'])} / 封顶跳过 {C['capped']}")
+    return {
+        "candidates": len(C["candidates"]),
+        "rejected": len(rejected_stage2) + len(C["rejected"]),
+        "downloaded": len(C["success"]),
+        "cc_downloaded": C["cc"],
+        "unauthorized_downloaded": C["unauth"],
+        "failed": len(C["failed"]),
+        "bytes": C["bytes"],
+    }
+
+
+def _rel_path(local_path: Optional[str]) -> str:
+    """把 local_path 规整为相对 dataset/ 的路径（blobs/<aa>/<sha>.<ext>）。"""
+    if not local_path:
+        return ""
+    p = local_path
+    if p.startswith("dataset/"):
+        p = p[len("dataset/"):]
+    return p
+
+
+def _cand_attr(c: "models.Candidate", field: str):
+    return getattr(c, field, None)
+
+
+def _update_master_manifest(meta_dir: str, success: list, run_id: str) -> None:
+    """upsert 主清单 images.jsonl（按 sha256 去重，跨批次累积），
+    并派生 tags.json 与 runs/_latest 软链。全程持 meta_lock（分片并发安全）。"""
+    with meta_lock(meta_dir):
+        _update_master_manifest_locked(meta_dir, success, run_id)
+
+
+def _update_master_manifest_locked(meta_dir: str, success: list, run_id: str) -> None:
+    os.makedirs(meta_dir, exist_ok=True)
+    mpath = os.path.join(meta_dir, "images.jsonl")
+    existing: Dict[str, dict] = {}
+    if os.path.exists(mpath):
+        with open(mpath, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                existing[rec["sha256"]] = rec
+
+    for c in success:
+        sha = c.sha256
+        if not sha:
+            continue
+        ext = os.path.splitext(c.local_path or "")[1].lstrip(".") if c.local_path else ""
+        tier = c.selected_tier if c.selected_tier is not None else 0
+        rec = existing.get(sha)
+        if rec is None:
+            rec = {
+                "sha256": sha,
+                "ext": ext,
+                "source": c.source,
+                "source_kind": c.source_kind,
+                "source_authorized": c.source_authorized,
+                "license": c.license_raw or "",
+                "author": c.author,
+                "credit": c.credit,
+                "width": c.actual_width,
+                "height": c.actual_height,
+                "orig_width": c.orig_width,
+                "orig_height": c.orig_height,
+                "size_bytes": c.actual_size,
+                "mime": c.actual_mime,
+                "tags": [c.tag] if c.tag else [],
+                "tiers": [tier],
+                "source_rank": c.source_rank,
+                "source_score": c.source_score,
+                "landing_url": c.landing_url,
+                "fetched_at": c.fetched_at,
+                "path": _rel_path(c.local_path),
+            }
+        else:
+            if c.tag and c.tag not in rec["tags"]:
+                rec["tags"].append(c.tag)
+            if tier not in rec["tiers"]:
+                rec["tiers"].append(tier)
+            for fld, cf in (
+                ("source", "source"), ("source_kind", "source_kind"),
+                ("license", "license_raw"), ("author", "author"),
+                ("credit", "credit"), ("mime", "actual_mime"),
+                ("landing_url", "landing_url"), ("path", "local_path"),
+                ("source_rank", "source_rank"), ("source_score", "source_score"),
+            ):
+                if rec.get(fld) is None and _cand_attr(c, cf) is not None:
+                    rec[fld] = _cand_attr(c, cf)
+            for fld, cf in (
+                ("width", "actual_width"), ("height", "actual_height"),
+                ("size_bytes", "actual_size"),
+            ):
+                if rec.get(fld) is None:
+                    rec[fld] = _cand_attr(c, cf)
+            if not rec.get("ext") and ext:
+                rec["ext"] = ext
+        existing[sha] = rec
+
+    tmp_path = mpath + ".tmp"
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        for sha in sorted(existing):
+            f.write(json.dumps(existing[sha], ensure_ascii=False) + "\n")
+    os.replace(tmp_path, mpath)
+
+    # 派生 tag↔图 关系索引：tag -> [ {sha256, ext, source, tiers} ]
+    tags: Dict[str, list] = {}
+    for rec in existing.values():
+        for t in rec.get("tags", []):
+            tags.setdefault(t, []).append({
+                "sha256": rec["sha256"],
+                "ext": rec.get("ext", ""),
+                "source": rec.get("source", ""),
+                "tiers": rec.get("tiers", [0]),
+                "source_rank": rec.get("source_rank"),
+                "source_score": rec.get("source_score"),
+            })
+    with open(os.path.join(meta_dir, "tags.json"), "w", encoding="utf-8") as f:
+        json.dump(tags, f, ensure_ascii=False, indent=1)
+
+    # runs/_latest -> 本批次 run_id
+    runs_dir = os.path.join(meta_dir, "runs")
+    os.makedirs(runs_dir, exist_ok=True)
+    latest = os.path.join(runs_dir, "_latest")
+    if os.path.lexists(latest):
+        os.remove(latest)
+    os.symlink(run_id, latest)
+
+
+def _write_stats(out_dir, jobs, candidates, searched_per_source,
+                 rejected, downloaded, failed, bytes_,
+                 cc_downloaded=0, unauth_downloaded=0, capped_per_source=0):
+    lines = []
+    by_tag = defaultdict(lambda: {"candidates": 0, "cc": 0, "zh": 0})
+    by_source = defaultdict(int)
+    for c in candidates:
+        by_tag[c.tag]["candidates"] += 1
+        by_source[c.source] += 1
+        if c.query_lang == "zh":
+            by_tag[c.tag]["zh"] += 1
+    for j in jobs:
+        t = by_tag[j.tag]
+        zh_ratio = (t["zh"] / t["candidates"]) if t["candidates"] else 0
+        lines.append(json.dumps({
+            "tag": j.tag,
+            "source": ",".join(j.sources),
+            "candidates": t["candidates"],
+            "zh_candidates": t["zh"],
+            "zh_ratio": round(zh_ratio, 3),
+            "target_count": j.effective.target_count,
+        }, ensure_ascii=False))
+    lines.append(json.dumps({
+        "tag": "TOTAL",
+        "source": "*",
+        "candidates": len(candidates),
+        "by_source": dict(by_source),
+        "rejected": rejected,
+        "downloaded": downloaded,
+        "cc_downloaded": cc_downloaded,
+        "unauthorized_downloaded": unauth_downloaded,
+        "failed": failed,
+        "capped_per_source": capped_per_source,
+        "bytes": bytes_,
+    }, ensure_ascii=False))
+    with open(os.path.join(out_dir, "stats.jsonl"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
