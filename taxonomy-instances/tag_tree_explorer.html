@@ -97,16 +97,24 @@ function adaptUnified(node) {
 }
 
 // 由 instances_meta.json 的实例列表构建 ROLE_INTROS / ROLE_NAME_IDX 查表。
+// 关键概念：节点 = 分类标签（subclass of 上级分类）；实例 = 实例标签（instance of 所属分类）。
+// 两者是不同知识对象，因此实例查表独立于节点 KB，且实例面板绝不回退显示分类标签的
+// 代表案例/关联标签。这里把「全部 source」的实例都纳入（不再只取 curated/templated），
+// 以便实例面板能展示别名与 query 词，并对无富文本的实例给出明确提示而非套用分类内容。
 function buildRoleIntros(insts) {
     window.ROLE_INTROS = {};
     window.ROLE_NAME_IDX = {};
     for (const it of insts) {
-        if (it.source === "curated" || it.source === "templated") {
-            const rec = { d: it.definition || "", i: it.intro || "", c: it.desc || "", s: it.source };
-            const key = it.name + "\u0001" + ipCatSlice(it.category || "");
-            window.ROLE_INTROS[key] = rec;
-            (window.ROLE_NAME_IDX[it.name] = window.ROLE_NAME_IDX[it.name] || []).push(key);
-        }
+        const rec = {
+            d: it.definition || "",   // 实例自身定义
+            i: it.intro || "",        // 实例自身简介
+            c: it.desc || "",         // 实例自身详细描述
+            s: it.source || "derived",
+            al: it.aliases || []       // 实例别称 / 别名
+        };
+        const key = it.name + "\u0001" + ipCatSlice(it.category || "");
+        window.ROLE_INTROS[key] = rec;
+        (window.ROLE_NAME_IDX[it.name] = window.ROLE_NAME_IDX[it.name] || []).push(key);
     }
 }
 
@@ -285,32 +293,38 @@ function showDetail(node) {
     const dp = document.getElementById("detail-panel");
     if (!node) { dp.innerHTML = '<div class="dp-empty">点击左侧节点<br>查看知识库详情</div>'; return; }
 
-    // 实例：优先展示「虚构角色 IP 实例简介」富描述（由 ROLE_INTROS 注入）
+    // 实例标签（instance of 所属分类）：只展示实例自身的知识库，
+    // 绝对不回退到所属「分类标签」的 KB（那是 subclass of 体系，会错误地显示代表案例等）。
     if (node._instance === true) {
         const intro = (typeof findIntro === "function") ? findIntro(node.name, node._parent ? node._parent._path : "") : null;
+        const parentName = node._parent ? (node._parent.name || "") : "";
+        let html = '<h2 style="font-size:14px">' + escapeHtml(node.name) + '</h2>';
+        html += '<div class="dp-path">' + escapeHtml(node._path || "") + '</div>';
+        const srcTag = intro ? (intro.s === "curated" ? "精确" : (intro.s === "templated" ? "归类" : "派生")) : "";
+        html += '<div class="dp-note">实例标签 · instance of「' + escapeHtml(parentName || "?") + '」' + (srcTag ? " · " + srcTag : "") + '</div>';
+
         if (intro) {
-            const tag = intro.s === "curated" ? "精确" : "归类";
-            let html = '<h2 style="font-size:14px">' + escapeHtml(node.name) + '</h2>';
-            html += '<div class="dp-path">' + escapeHtml(node._path || "") + '</div>';
-            html += '<div class="dp-note">虚构角色 IP 实例简介 · ' + tag + '</div>';
-            if (intro.i) html += '<div class="dp-section"><div class="dp-label">简介</div><div class="dp-body" style="color:#2b6cb0">' + escapeHtml(intro.i) + '</div></div>';
+            const hasDetail = intro.d || intro.i || intro.c;
             if (intro.d) html += '<div class="dp-section"><div class="dp-label">定义</div><div class="dp-body">' + escapeHtml(intro.d) + '</div></div>';
-            if (intro.c) html += '<div class="dp-section"><div class="dp-label">详细描述</div><div class="dp-body">' + escapeHtml(intro.c) + '</div></div>';
-            dp.innerHTML = html;
-            dp.scrollTop = 0;
-            return;
+            const ki = intro.i || intro.c;
+            if (ki) html += '<div class="dp-section"><div class="dp-label">知识介绍</div><div class="dp-body">' + escapeHtml(ki) + '</div></div>';
+            // 别称 / 别名（保留）
+            if (intro.al && intro.al.length) {
+                html += '<div class="dp-section"><div class="dp-label">别称 / 别名</div><div class="dp-chips">' +
+                    intro.al.map(t => '<span class="dp-chip static">' + escapeHtml(t) + '</span>').join("") + '</div></div>';
+            }
+            // query 词（检索扩展词，与 multimodal 约定一致：取别名首项，无别名则取实例名）
+            const q = (intro.al && intro.al.length) ? intro.al[0] : node.name;
+            html += '<div class="dp-section"><div class="dp-label">query 词</div><div class="dp-body" style="font-family:ui-monospace,Menlo,Consolas,monospace">' + escapeHtml(q) + '</div></div>';
+            if (!hasDetail && (!intro.al || !intro.al.length)) {
+                html += '<div class="dp-note" style="color:#bbb;margin-top:8px">本实例暂无独立知识库内容，仅作为「' + escapeHtml(parentName || "") + '」分类下的实例标签。</div>';
+            }
+        } else {
+            html += '<div class="dp-empty" style="margin-top:20px">本实例暂无独立知识库<br><small>归属分类标签：' + escapeHtml(parentName || "") + '</small></div>';
         }
-        // 没有富描述时回退到所属分类 KB
-        if (node._parent && hasKB(node._parent)) {
-            const src = node._parent;
-            let html = '<h2 style="font-size:14px">' + escapeHtml(node.name) + '</h2>';
-            html += '<div class="dp-path">' + escapeHtml(node._path || "") + '</div>';
-            html += '<div class="dp-note">实例 · 所属分类「' + escapeHtml(src.name) + '」的知识库内容</div>';
-            html += renderKB(src);
-            dp.innerHTML = html;
-            dp.scrollTop = 0;
-            return;
-        }
+        dp.innerHTML = html;
+        dp.scrollTop = 0;
+        return;
     }
 
     if (!hasKB(node)) {
