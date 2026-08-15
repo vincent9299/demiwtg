@@ -1,12 +1,12 @@
 """命令行入口。
 
 用法：
-  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json
-  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json --consume-mode replay-rules
-  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json \
+  python3 scripts/multimodal/cli.py --taxonomy data/instances_meta.json
+  python3 scripts/multimodal/cli.py --taxonomy data/instances_meta.json --consume-mode replay-rules
+  python3 scripts/multimodal/cli.py --taxonomy data/instances_meta.json \
       --sources wikimedia,wikimedia_zh,inaturalist,coco,hf_coco   # 启用可选数据集源
-  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json --metadata-only
-  python3 scripts/multimodal/cli.py --taxonomy data/ip_instances.json --jobs 城市吉祥物
+  python3 scripts/multimodal/cli.py --taxonomy data/instances_meta.json --metadata-only
+  python3 scripts/multimodal/cli.py --taxonomy data/instances_meta.json --jobs 城市吉祥物
 
 存储布局（数据湖风格，见 docs/IP图片数据集_存储重设计方案.md）：
   dataset/
@@ -46,11 +46,10 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="多模态图片采集系统（M1: Wikimedia Commons）")
     ap.add_argument("--config", help="采集任务配置 JSON 路径（覆盖/临时任务用；"
                                       "常规采集建议用 --taxonomy 直读标签体系）")
-    ap.add_argument("--taxonomy", help="标签体系实例文件（如 data/ip_instances.json）："
+    ap.add_argument("--taxonomy", help="统一标签体系实例元文件（如 data/instances_meta.json）："
                                        "直接以标签体系为采集输入，实时派生全量 jobs")
     ap.add_argument("--aliases", default=None,
-                    help="英文查询词别名表 JSON（仅 --taxonomy 生效；"
-                         "缺省 data/ip_query_aliases.json）")
+                    help="（已废弃）别名已并入 instances_meta.json 的 instance.aliases；保留仅为兼容")
 
     # 数据湖风格布局：--meta 为 dataset/meta 根；--run-id 命名本批次 runs/<run_id>；
     # --out 默认由 --meta + --run-id 推导，可显式覆盖。

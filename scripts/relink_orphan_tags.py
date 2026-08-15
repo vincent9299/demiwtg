@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """孤儿 tag 双向同步：隔离 + 重挂（幂等）。
 
-背景：采集图库的 tag 以标签体系（data/ip_instances.json）为准。体系演化
+背景：采集图库的 tag 以标签体系（data/instances_meta.json）为准。体系演化
 （删分支/改路径）后，部分旧 tag 失去归属；但后续版本可能新增适合挂载的
 节点，因此孤儿不删除、单独隔离存放，待可匹配时重挂回主索引。
 
@@ -16,8 +16,8 @@
   3. 每次操作追加审计到 dataset/meta/tag_relocations.jsonl。
 
 用法：
-  python3 scripts/relink_orphan_tags.py            # 对 data/ip_instances.json
-  python3 scripts/relink_orphan_tags.py --taxonomy data/ip_instances_v4.json
+  python3 scripts/relink_orphan_tags.py            # 对 data/instances_meta.json
+  python3 scripts/relink_orphan_tags.py --taxonomy data/instances_meta.json
 
 完成后重建软链：
   python3 scripts/link_by_tag.py
@@ -30,6 +30,7 @@ import re
 import shutil
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT_NAME = "融合世界标签体系 / "
 TAGS = os.path.join(ROOT, "dataset/meta/tags.json")
 ORPHAN = os.path.join(ROOT, "dataset/meta/tags_orphan.json")
 AUDIT = os.path.join(ROOT, "dataset/meta/tag_relocations.jsonl")
@@ -68,16 +69,25 @@ def merge_into(dst: dict, key: str, imgs: list):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--taxonomy", default=os.path.join(ROOT, "data", "ip_instances.json"))
+    ap.add_argument("--taxonomy", default=os.path.join(ROOT, "data", "instances_meta.json"))
     args = ap.parse_args()
 
-    tags = json.load(open(TAGS, encoding="utf-8"))
-    v3 = json.load(open(args.taxonomy, encoding="utf-8"))["instances"]
-    v3tags = {f"{leaf} / {it}" for leaf, items in v3.items() for it in items}
+    tags = json.load(open(TAGS, encoding="utf-8")) if os.path.exists(TAGS) else {}
+
+    def tag_of(category: str, name: str) -> str:
+        cat = category or ""
+        if cat.startswith(ROOT_NAME):
+            cat = cat[len(ROOT_NAME):]
+        return f"{cat} / {name}" if cat else name
+
+    v3 = json.load(open(args.taxonomy, encoding="utf-8")).get("instances") or []
+    v3tags = {tag_of(it.get("category", ""), it["name"]) for it in v3 if it.get("name")}
     by_norm = {}
-    for leaf, items in v3.items():
-        for it in items:
-            by_norm.setdefault(norm(it), []).append(f"{leaf} / {it}")
+    for it in v3:
+        nm = it.get("name")
+        if not nm:
+            continue
+        by_norm.setdefault(norm(nm), []).append(tag_of(it.get("category", ""), nm))
 
     store = json.load(open(ORPHAN, encoding="utf-8")) if os.path.exists(ORPHAN) else {}
 

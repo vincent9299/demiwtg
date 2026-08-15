@@ -81,7 +81,12 @@
         },
         "intro": { "type": "string", "description": "一句话简介" },
         "definition": { "type": "string", "description": "定义" },
-        "desc": { "type": "string", "description": "详细描述" }
+        "desc": { "type": "string", "description": "详细描述" },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "[查询] 别名/英文名等，用于检索扩展；来自 ip_query_aliases.json 的实例级条目"
+        }
       }
     }
   }

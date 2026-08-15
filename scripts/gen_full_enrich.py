@@ -156,7 +156,7 @@ print("to be enriched       :", len(todo))
 if "--write" in sys.argv:
     for n, p in todo:
         n.update(build_fields(n))
-    doc["meta"]["source"] = "build/tag_tree.json + 现有 taxonomy.json(KB 复用) + 本脚本补充分类 KB"
+    doc["meta"]["source"] = "data/taxonomy.json（结构+实例名+节点KB 复用） + 本脚本补充分类 KB（IP 分支节点）"
     doc["meta"]["generated_at"] = datetime.datetime.now().isoformat(timespec="seconds")
     nodes_c = insts_c = enriched_c = kb_c = 0
     st = [doc["tree"]]

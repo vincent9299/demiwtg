@@ -415,7 +415,7 @@ print(f"虚构角色 IP 实例更新: 精确(curated)={n_curated}  归类(templa
 if "--write" not in sys.argv:
     print("（未加 --write，仅预览。加 --write 写回 data/instances_meta.json）")
 else:
-    doc["meta"]["source"] = "build/tag_tree.json（实例名） + data/虚构角色IP_实例简介.json（富描述） + 本脚本生成实例富描述"
+    doc["meta"]["source"] = "data/taxonomy.json（实例名，经 name+category 关联） + 本脚本生成实例富描述（curated/templated）；别名已并入 instance.aliases"
     doc["meta"]["generated_at"] = datetime.datetime.now().isoformat(timespec="seconds")
     insts = enriched = 0
     for it in doc.get("instances", []):

@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""build_unified.py — 将现有标签体系数据融合为「统一 schema」的两个交付文件。
+"""build_unified.py — 由「统一标签体系」的两个交付文件互相印证、重新生成。
 
-设计目标（对应需求）：
-  1. 标签体系：以 build/tag_tree.json 的全树（通用分类标签 + IP 分类标签）为结构来源。
-  2. 实例级富描述：虚构角色 IP 的富描述（data/虚构角色IP_实例简介.json）并入对应实例；
-     其余分支实例无富描述时 source=derived。
-  3. 覆盖整个标签体系，不保留虚构角色 IP 个性化存储：所有实例统一挂在所属叶子节点下。
+全量收敛后（见讨论结论）：
+  - data/taxonomy.json   是结构权威源（标签树：节点结构 + KB 字段 + 实例名称列表 + 节点别名）。
+  - data/instances_meta.json 是实例权威源（实例级富描述扁平列表，含实例别名）。
 
-数据来源：
-  build/tag_tree.json                  全树结构 + 实例（纯字符串名）
-  data/虚构角色IP_实例简介.json        虚构角色 IP 实例级富描述
-  data/taxonomy.json（若存在）         已有节点的 KB 字段（合并保留，避免重建丢失）
+本脚本的作用：在 taxonomy.json 作为结构源的前提下，重新产出这两份文件，
+保证二者一致且符合 schema。实例的富描述（intro/definition/desc）与实例别名
+（aliases）从「现有 instances_meta.json」按 (name, category) 携带回写，避免重建丢失。
+节点 KB 字段与节点别名直接来自 taxonomy.json 本身（它即为源）。
+
+已不再依赖：build/tag_tree.json、data/虚构角色IP_实例简介.json、data/ip_instances.json、
+data/ip_query_aliases.json（这些为遗留文件，收敛后删除）。
 
 产物（两个文件，共用 schema/tag_taxonomy.schema.json）：
-  data/taxonomy.json          标签树：节点结构 + KB 字段 + instances 名称列表
-  data/instances_meta.json    实例级富描述：扁平 instance 列表
+  data/taxonomy.json          标签树
+  data/instances_meta.json    实例级富描述
 
 用法：
   python3 scripts/build_unified.py            # 仅预览统计
@@ -23,74 +24,45 @@
 """
 import json
 import os
-import re
 import sys
 import datetime
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BUILD = os.path.join(REPO, "build", "tag_tree.json")
-FIC = os.path.join(REPO, "data", "虚构角色IP_实例简介.json")
 TAXONOMY = os.path.join(REPO, "data", "taxonomy.json")
 META = os.path.join(REPO, "data", "instances_meta.json")
 SCHEMA = os.path.join(REPO, "schema", "tag_taxonomy.schema.json")
 
-KB_FIELDS = ["definition", "knowledge_intro", "aliases", "representative_cases", "related_tags"]
+NODE_KB = ["definition", "knowledge_intro", "aliases", "representative_cases", "related_tags"]
+INST_CARRY = ["intro", "definition", "desc", "aliases", "source"]
 
 
-def norm_cat(c: str) -> str:
-    """统一分隔符为 ' / '，并去掉首尾空白。"""
-    return " / ".join(p.strip() for p in c.replace("/", " / ").split(" / ") if p.strip())
-
-
-def load_kb_from_taxonomy():
-    """从已有的 data/taxonomy.json 抽取 _path -> KB 字典（重建时保留已富化字段）。缺失则返回 {}。"""
+def load_carryover():
+    """从现有 instances_meta.json 抽取 (name, category) -> 富描述/别名，用于回写。"""
     try:
-        doc = json.load(open(TAXONOMY, encoding="utf-8"))
+        doc = json.load(open(META, encoding="utf-8"))
     except Exception:
         return {}
-    kb = {}
-    st = [doc.get("tree", {})]
-    while st:
-        n = st.pop()
-        p = n.get("path")
-        if p and any(n.get(f) for f in KB_FIELDS):
-            kb[p] = {f: n[f] for f in KB_FIELDS if n.get(f)}
-        for ch in (n.get("children") or []):
-            if isinstance(ch, dict):
-                st.append(ch)
-    print(f"  从现有 taxonomy.json 复用 KB 节点: {len(kb)}")
-    return kb
-
-
-def load_fic():
-    """虚构角色 IP 富描述 -> 键 (name, path从'IP 分类标签'起)。"""
-    fic = json.load(open(FIC, encoding="utf-8"))
-    d = {}
-    for x in fic:
-        cat = norm_cat(x["category"])
-        d[(x["name"], cat)] = x
-    print(f"  虚构角色IP 富描述条目: {len(d)}")
-    return d
-
-
-def node_cat_key(path: str) -> str:
-    """将节点 path 归一到与虚构角色IP JSON 一致的键：从 'IP 分类标签' 起。"""
-    idx = path.find("IP 分类标签")
-    return path[idx:] if idx >= 0 else path
+    co = {}
+    for it in doc.get("instances", []):
+        key = (it.get("name"), it.get("category"))
+        co[key] = {k: it[k] for k in INST_CARRY if it.get(k) not in (None, "", [], {})}
+    print(f"  从现有 instances_meta.json 复用实例富描述/别名: {len(co)}")
+    return co
 
 
 INSTANCES = []  # 扁平实例收集器
 
 
-def build(node, kb, fic, root=False):
-    path = node.get("_path", "")
+def build(node, carry, root=False):
+    path = node.get("path", "")
     out = {
         "name": node["name"],
         "path": path,
         "depth": node.get("depth", path.count(" / ")),
     }
-    if path in kb:
-        out.update(kb[path])
+    for f in NODE_KB:
+        if node.get(f) not in (None, "", [], {}):
+            out[f] = node[f]
     children = node.get("children") or []
     if root:
         out["type"] = "root"
@@ -102,23 +74,21 @@ def build(node, kb, fic, root=False):
     insts = node.get("instances") or []
     if insts:
         names = []
-        cat_key = node_cat_key(path)
         for nm in insts:
             if not isinstance(nm, str):
                 nm = str(nm)
             names.append(nm)
             rec = {"name": nm, "category": path, "source": "derived"}
-            f = fic.get((nm, cat_key))
-            if f:
-                rec["source"] = f.get("source", "templated")
-                rec["intro"] = f.get("intro", "")
-                rec["definition"] = f.get("definition", "")
-                rec["desc"] = f.get("desc", "")
+            c = carry.get((nm, path))
+            if c:
+                for k in INST_CARRY:
+                    if c.get(k) not in (None, "", [], {}):
+                        rec[k] = c[k]
             INSTANCES.append(rec)
         out["instances"] = names
 
     if children:
-        out["children"] = [build(ch, kb, fic) for ch in children if isinstance(ch, dict)]
+        out["children"] = [build(ch, carry) for ch in children if isinstance(ch, dict)]
     return out
 
 
@@ -126,22 +96,21 @@ def main():
     global INSTANCES
     INSTANCES = []
     print("== 读取源 ==")
-    tree = json.load(open(BUILD, encoding="utf-8"))
-    print(f"  build/tag_tree.json: 根={tree['name']!r}")
-    kb = load_kb_from_taxonomy()
-    fic = load_fic()
+    doc = json.load(open(TAXONOMY, encoding="utf-8"))
+    tree = doc["tree"]
+    print(f"  data/taxonomy.json: 根={tree['name']!r}")
+    carry = load_carryover()
 
     print("== 构建统一树 ==")
-    unified_tree = build(tree, kb, fic, root=True)
+    unified_tree = build(tree, carry, root=True)
 
-    # 统计
-    nodes = insts = enriched = kb_nodes = 0
+    nodes = insts = enriched = kb_nodes = aliased_inst = 0
     branches = set()
     st = [unified_tree]
     while st:
         n = st.pop()
         nodes += 1
-        if any(k in n for k in KB_FIELDS):
+        if any(k in n for k in NODE_KB):
             kb_nodes += 1
         if n["depth"] == 1:
             branches.add(n["name"])
@@ -150,13 +119,14 @@ def main():
         for ch in (n.get("children") or []):
             st.append(ch)
     enriched = sum(1 for i in INSTANCES if i.get("source") in ("curated", "templated"))
+    aliased_inst = sum(1 for i in INSTANCES if i.get("aliases"))
 
     now = datetime.datetime.now().isoformat(timespec="seconds")
     tax_doc = {
-        "schema_version": "1.0.0",
+        "schema_version": doc.get("schema_version", "1.0.0"),
         "meta": {
             "generated_at": now,
-            "source": "build/tag_tree.json（结构+实例） + data/虚构角色IP_实例简介.json（实例富描述） + 现有 taxonomy.json（KB 复用）",
+            "source": "data/taxonomy.json（结构+实例名+节点KB/别名，作为权威源）",
             "description": "标签树（taxonomy）：覆盖整棵树（通用分类标签 + IP 分类标签），节点含 KB 字段与实例名称列表；实例富描述见 instances_meta.json。",
         },
         "tree": unified_tree,
@@ -165,11 +135,12 @@ def main():
         "schema_version": "1.0.0",
         "meta": {
             "generated_at": now,
-            "source": "build/tag_tree.json（实例名） + data/虚构角色IP_实例简介.json（富描述）",
+            "source": "data/taxonomy.json（实例名） + 现有 data/instances_meta.json（富描述/别名携带）",
             "description": "实例级富描述（扁平列表），与 taxonomy.json 通过 name + category 关联。",
             "stats": {
                 "instances": len(INSTANCES),
                 "instances_enriched": enriched,
+                "instances_aliased": aliased_inst,
             },
         },
         "instances": INSTANCES,
@@ -184,7 +155,7 @@ def main():
         print(f"已写出: {META} ({os.path.getsize(META)/1024/1024:.2f} MB)")
     print(
         f"统计: 节点={nodes}  一级分支={len(branches)}  实例={len(INSTANCES)}  "
-        f"富描述实例={enriched}  KB节点={kb_nodes}"
+        f"富描述实例={enriched}  含别名实例={aliased_inst}  KB节点={kb_nodes}"
     )
 
 

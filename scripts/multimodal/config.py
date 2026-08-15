@@ -201,47 +201,51 @@ def _norm_instance(name: str) -> str:
     return s.strip()
 
 
+# 统一标签体系常量根（全树顶层名）；由实例 meta 拼 job.tag 时去掉该前缀，
+# 使 tag 从二级分支起算（"IP 分类标签 / ... / 实例"），与 relink_orphan_tags 保持一致。
+ROOT = "融合世界标签体系 / "
+
+
+def _tag_of(category: str, name: str) -> str:
+    cat = category or ""
+    if cat.startswith(ROOT):
+        cat = cat[len(ROOT):]
+    return f"{cat} / {name}" if cat else name
+
+
 def load_taxonomy(path: str, aliases_path: Optional[str] = None) -> tuple[list[Job], str]:
-    """直接以标签体系实例文件为采集输入，实时派生 jobs（无需单独的采集配置）。
+    """直接以「统一标签体系」的实例元文件为采集输入，实时派生 jobs（无需单独的采集配置）。
 
-    path 指向 ip_instances.json 结构：{"meta": {...}, "instances": {叶路径: [实例...]}}。
-    每个实例生成一个 job：
-      tag      = "<叶路径> / <实例名>"
-      query    = 英文别名（aliases 命中时），否则回退 tag 叶子名
+    全量收敛后：path 指向 data/instances_meta.json（扁平 instance 列表）。每个实例生成一个 job：
+      tag      = "<分类路径(去根前缀)> / <实例名>"
+      query    = 实例别名（instance.aliases 命中时，取首个），否则回退空串
       zh_query = 归一化实例名（中文源用）
-    aliases_path 缺省取仓库 data/ip_query_aliases.json（{实例名: 英文查询词}）。
+    aliases_path 已废弃（别名并入 instances_meta 的 instance.aliases 字段）；保留参数仅为兼容调用方。
 
-    返回 (jobs, taxonomy_label)；label 形如 "ip_instances.json#r12"（revision 取自
-    meta.revision，缺省则仅文件名），供消费审计记录。
+    返回 (jobs, taxonomy_label)；label 取文件名，供消费审计记录。
     """
     with open(path, encoding="utf-8") as f:
         doc = json.load(f)
-    instances = doc.get("instances") or {}
-
-    if aliases_path is None:
-        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        aliases_path = os.path.join(root, "data", "ip_query_aliases.json")
-    aliases = {}
-    if aliases_path and os.path.exists(aliases_path):
-        with open(aliases_path, encoding="utf-8") as f:
-            aliases = {_norm_instance(k): v for k, v in json.load(f).items()}
+    instances = doc.get("instances") or []
 
     defaults = dict(DEFAULTS)
     jobs: list[Job] = []
     seen: set[str] = set()
-    for leaf_path, items in instances.items():
-        for it in items:
-            tag = f"{leaf_path} / {it}"
-            if tag in seen:
-                continue
-            seen.add(tag)
-            jobs.append(Job(
-                tag=tag,
-                query=aliases.get(_norm_instance(it), ""),
-                zh_query=_norm_instance(it),
-                defaults=defaults,
-            ))
+    for it in instances:
+        name = it.get("name")
+        if not name:
+            continue
+        tag = _tag_of(it.get("category") or "", name)
+        if tag in seen:
+            continue
+        seen.add(tag)
+        aliases = it.get("aliases") or []
+        jobs.append(Job(
+            tag=tag,
+            query=aliases[0] if aliases else "",
+            zh_query=_norm_instance(name),
+            defaults=defaults,
+        ))
 
-    rev = (doc.get("meta") or {}).get("revision")
-    label = os.path.basename(path) + (f"#r{rev}" if rev is not None else "")
+    label = os.path.basename(path)
     return jobs, label

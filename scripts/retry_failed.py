@@ -27,9 +27,9 @@ from multimodal.util import RateLimiter
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--taxonomy", default=os.path.join(ROOT, "data", "ip_instances.json"))
+    ap.add_argument("--taxonomy", default=os.path.join(ROOT, "data", "instances_meta.json"))
     ap.add_argument("--aliases", default=None,
-                    help="英文别名表；缺省 data/ip_query_aliases.json")
+                    help="（已废弃）别名已并入 instances_meta.json 的 instance.aliases")
     ap.add_argument("--failed", default=os.path.join(ROOT, "dataset", "meta", "runs", "_latest", "downloads_failed.jsonl"))
     ap.add_argument("--images-dir", default=os.path.join(ROOT, "dataset", "blobs"))
     ap.add_argument("--out", default=os.path.join(ROOT, "dataset", "meta", "runs", "_retry"))
