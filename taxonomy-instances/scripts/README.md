@@ -18,8 +18,9 @@
 | `build_unified.py` | 以 `data/taxonomy.json` 为结构权威源，重新产出两份文件；实例富描述/别名从现有 `instances_meta.json` 按 `(name, category)` 携带回写。`--write` 落盘 |
 | `gen_full_enrich.py` | 补 `IP 分类标签` 分支节点的分类 KB（definition 等）。读/写 `taxonomy.json`。`--write` 落盘 |
 | `gen_role_intros.py` | 生成虚构角色 IP 等实例的富描述（curated 精确 + templated 模板）；别名已并入 `instance.aliases`。读/写 `instances_meta.json`。`--write` 落盘 |
+| `gen_instance_kb.py` | 为「缺少实例级富文本」的 IP 实例生成知识（模型手写知名实体 `curated` + 长尾接地模板 `templated`，不编造事实）。与 `gen_role_intros` 互补，覆盖其余 20 个子分支。读/写 `instances_meta.json`。`--branch "内容作品 IP"` 可只跑某分支。`--write` 落盘 |
 
-重生成顺序：`build_unified.py --write` → `gen_full_enrich.py --write` → `gen_role_intros.py --write`。
+重生成顺序：`build_unified.py --write` → `gen_full_enrich.py --write` → `gen_instance_kb.py --write`（非虚构角色 IP 分支）→ `gen_role_intros.py --write`（虚构角色 IP 分支）。
 校验：`jsonschema` 对两份文件分别按 `node` / `instance` 校验（见 `schema` 内 `$defs`）。
 
 ## 消费脚本
