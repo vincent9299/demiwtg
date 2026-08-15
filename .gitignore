@@ -7,3 +7,6 @@ taxonomy-instances/tag_tree_explorer.standalone.html
 .DS_Store
 __pycache__/
 *.pyc
+
+# gen_instance_llm.py 的运行缓存（断点续跑用，勿提交）
+taxonomy-instances/data/.llm_kb_cache.jsonl

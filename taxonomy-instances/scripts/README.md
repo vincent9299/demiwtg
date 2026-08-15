@@ -5,7 +5,7 @@
 | 文件 | 作用 |
 |---|---|
 | `data/taxonomy.json` | 标签树：节点结构 + KB 字段（`definition`/`knowledge_intro`/`aliases`/`representative_cases`/`related_tags`）+ `instances` 实例名称列表（结构指针） |
-| `data/instances_meta.json` | 实例元：扁平 `instances[]`，每条 `{name, category, source, intro?, definition?, desc?, aliases?}`；与 taxonomy 经 `name + category` 关联 |
+| `data/instances_meta.json` | 实例元：扁平 `instances[]`，每条 `{name, category, source, intro?, definition?, desc?, aliases?, query?}`；`query` 为 LLM 生成的检索扩展词（含英文/简称），与 taxonomy 经 `name + category` 关联 |
 | `schema/tag_taxonomy.schema.json` | JSON Schema Draft 2020-12（`node` 定义树，`instance` 定义实例元；`additionalProperties:false`） |
 
 查看器 `tag_tree_explorer.html` 运行时 `Promise.all` 懒加载这两份文件，打开方式：
@@ -19,6 +19,7 @@
 | `gen_full_enrich.py` | 补 `IP 分类标签` 分支节点的分类 KB（definition 等）。读/写 `taxonomy.json`。`--write` 落盘 |
 | `gen_role_intros.py` | 生成虚构角色 IP 等实例的富描述（curated 精确 + templated 模板）；别名已并入 `instance.aliases`。读/写 `instances_meta.json`。`--write` 落盘 |
 | `gen_instance_kb.py` | 为「缺少实例级富文本」的 IP 实例生成知识（模型手写知名实体 `curated` + 长尾接地模板 `templated`，不编造事实）。与 `gen_role_intros` 互补，覆盖其余 20 个子分支。读/写 `instances_meta.json`。`--branch "内容作品 IP"` 可只跑某分支。`--write` 落盘 |
+| `gen_instance_llm.py` | **调 LLM 为每个实例生成 `detail`(详细介绍) / `query`(检索扩展词) / `aliases`(含英文)**。OpenAI 兼容接口（任一千问/Qwen、DeepSeek、Ollama 等兼容端点均可），`LLM_API_KEY`/`LLM_BASE_URL`/`LLM_MODEL` 环境变量配置；`LLM_WEB_SEARCH=1` 在 OpenAI 端点启用联网检索（Responses API `web_search_preview`）。断点续跑（缓存 `data/.llm_kb_cache.jsonl`）、`--dry-run` 预览、`--branch/--limit/--only-empty/--workers/--write` 控制。依赖 `openai` 包（`pip install openai`）。**注意：本机沙箱无外网，需在你的机器上运行** |
 
 重生成顺序：`build_unified.py --write` → `gen_full_enrich.py --write` → `gen_instance_kb.py --write`（非虚构角色 IP 分支）→ `gen_role_intros.py --write`（虚构角色 IP 分支）。
 校验：`jsonschema` 对两份文件分别按 `node` / `instance` 校验（见 `schema` 内 `$defs`）。

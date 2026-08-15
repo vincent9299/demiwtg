@@ -86,6 +86,11 @@
           "type": "array",
           "items": { "type": "string" },
           "description": "[查询] 别名/英文名等，用于检索扩展；来自 ip_query_aliases.json 的实例级条目"
+        },
+        "query": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "[查询] 检索扩展词（query 词），由大模型生成，含英文/简称/别名，逗号分隔前的数组形态，用于检索扩展；优先英文与常用简称"
         }
       }
     }
