@@ -101,7 +101,7 @@ UNCERTAIN               未解决，不写硬关系，也不能当作 NONE
 | `标签审查_可疑命名.csv` | 机翻残留 / 可疑节点 | 219 |
 | `标签审查_多名节点.csv` | 出现 ≥2 次的标签名及位置 | 2,926 |
 | `data/raw/CustomPinyinDictionary_IBus.txt` | 完整中文词条拼音表（`词条 拼音`，2～29 字词，零重复、零格式异常，详见 `data/README.md`） | 1,498,781 |
-| `scripts/README.md` | 清洗与工具脚本索引（IP 段清洗链路 + 通用工具，含 `--write` 预览约定） | 14 |
+| `taxonomy-instances/scripts/README.md` | 标签体系数据工具索引（构建 / 富化 / 查看器 / 消费脚本，含 `--write` 约定） | — |
 
 注意：审查清单以**行号**定位节点，而任何修复都会使行号漂移。进入修复前必须先建立稳定节点 ID（见 §8 开放问题）。审查输入 `pasted-text.txt`（33,339 行树本身）尚未入库，**修复工作的前置条件是把原始树文本入库并冻结版本**。
 
@@ -180,7 +180,7 @@ PhysicalCandidatePruningRate   = INFERRED_BEFORE_MODEL / (INFERRED_BEFORE_MODEL 
 | `src/wlo_pipeline/aepgs_active_training.py` | `src/demiwtg/aepgs_active_training.py` | 数据注册、component 分组、发布门禁 |
 | `src/wlo_pipeline/aepgs_runtime_monitoring.py` | `src/demiwtg/aepgs_runtime_monitoring.py` | prequential 质量指标与剪枝率 |
 | `tests/test_safe_gated_*.py`、`tests/test_aepgs_*.py` | `tests/` | 与代码同迁，先跑绿再改 |
-| `scripts/*` | `scripts/` | 适配 V2 候选源后迁移 |
+| `scripts/*` | `taxonomy-instances/scripts/` | 适配 V2 候选源后迁移（已归入子项目） |
 
 迁移顺序遵循历史设计 §21：契约 → 引擎+测试 → Catalog/evidence 适配 → replay → ledger/Frozen Wave → 概率模型 → canary。运行数据（live run 输出、旧模型 registry）默认不迁。
 

@@ -68,6 +68,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 <div id="tree-container"></div>
 <div id="detail-panel"><div class="dp-empty">点击左侧节点<br>查看知识库详情</div></div>
 
+<!-- 无服务模式：双击(file://)打开时，由 data/taxonomy.js / data/instances_meta.js 把数据注入为全局变量
+     （file:// 协议下浏览器禁止 fetch 本地文件）。若 sidecar 不存在，则回退到 fetch（需经 http 服务打开）。
+     运行 `python3 scripts/build_viewer.py` 生成这两个 sidecar。 -->
+<script src="data/taxonomy.js"></script>
+<script src="data/instances_meta.js"></script>
 <script>
 let treeData = null;
 window.ROLE_INTROS = {};
@@ -105,18 +110,26 @@ function buildRoleIntros(insts) {
     }
 }
 
-// 运行时分别懒加载两个 JSON：标签树 + 实例元
+// 运行时加载数据：优先使用 sidecar 注入的全局变量（双击 file:// 无服务模式），
+// 否则回退到 fetch（需经 http 服务打开）。
 async function loadTaxonomy() {
     const dp = document.getElementById("detail-panel");
     try {
-        const [taxResp, metaResp] = await Promise.all([
-            fetch("data/taxonomy.json", { cache: "no-store" }),
-            fetch("data/instances_meta.json", { cache: "no-store" })
-        ]);
-        if (!taxResp.ok) throw new Error("taxonomy.json HTTP " + taxResp.status);
-        if (!metaResp.ok) throw new Error("instances_meta.json HTTP " + metaResp.status);
-        const taxDoc = await taxResp.json();
-        const metaDoc = await metaResp.json();
+        let taxDoc, metaDoc;
+        if (window.__TAXONOMY__ && window.__INSTANCES_META__) {
+            // 无服务模式：数据已由 data/*.js 注入为全局变量
+            taxDoc = window.__TAXONOMY__;
+            metaDoc = window.__INSTANCES_META__;
+        } else {
+            const [taxResp, metaResp] = await Promise.all([
+                fetch("data/taxonomy.json", { cache: "no-store" }),
+                fetch("data/instances_meta.json", { cache: "no-store" })
+            ]);
+            if (!taxResp.ok) throw new Error("taxonomy.json HTTP " + taxResp.status);
+            if (!metaResp.ok) throw new Error("instances_meta.json HTTP " + metaResp.status);
+            taxDoc = await taxResp.json();
+            metaDoc = await metaResp.json();
+        }
         treeData = adaptUnified(taxDoc.tree);
         buildRoleIntros(metaDoc.instances || []);
         renderTree();
@@ -127,7 +140,13 @@ async function loadTaxonomy() {
         }
     } catch (e) {
         const msg = "无法加载数据：" + e.message +
-            "\n\n请通过本地服务器打开本页（浏览器禁止 file:// 直接 fetch 本地文件），例如：\n  python3 -m http.server 8000\n然后访问 http://localhost:8000/tag_tree_explorer.html";
+            "\n\n若直接双击打开（file://），浏览器禁止 fetch 本地文件。两种解决方式：\n" +
+            "  1) 一次性生成 sidecar（无需服务器，双击即用）：\n" +
+            "       python3 scripts/build_viewer.py\n" +
+            "     它会写出 data/taxonomy.js 与 data/instances_meta.js，之后双击本页即可。\n" +
+            "  2) 或启动本地服务：\n" +
+            "       python3 -m http.server 8000\n" +
+            "     然后访问 http://localhost:8000/tag_tree_explorer.html";
         if (dp) dp.innerHTML = '<div class="dp-empty" style="white-space:pre-wrap">' + escapeHtml(msg) + '</div>';
         const st = document.getElementById("stats"); if (st) st.textContent = "数据加载失败";
         console.error(e);

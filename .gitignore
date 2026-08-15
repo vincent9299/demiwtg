@@ -1,20 +1,9 @@
-# 大体积数据文件（非必要不入库）
-data/raw/CustomPinyinDictionary_IBus.txt
+# 生成的 viewer 产物（由 taxonomy-instances/scripts/build_viewer.py 重建，勿提交）
+taxonomy-instances/data/taxonomy.js
+taxonomy-instances/data/instances_meta.js
+taxonomy-instances/tag_tree_explorer.standalone.html
 
-# 多模态图片采集产物（内容寻址二进制，不入库）
-images/
-
-# Python
+# 系统 / 编译产物
+.DS_Store
 __pycache__/
 *.pyc
-
-# 数据集图片分片（数 GB，不入库）
-dataset/
-dataset_newtags/
-dataset_shard*/
-dataset_verify/
-archive/images_by_tag/
-
-# 本地工具配置
-.qoder/
-archive/images_*/
