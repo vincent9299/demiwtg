@@ -1,4 +1,0 @@
-/root/miniconda3/lib/python3.10/site-packages/PIL/TiffImagePlugin.py:935: UserWarning: Truncated File Read
-  warnings.warn(str(msg))
-[阶段一] 检索候选 35994 条（2122 个任务）
-[阶段二] 拒绝 34280 / 下载成功 6594 / 下载失败 51 / 累计 7698027708 字节
