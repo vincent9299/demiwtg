@@ -304,10 +304,9 @@ function showDetail(node) {
         html += '<div class="dp-note">实例标签 · instance of「' + escapeHtml(parentName || "?") + '」' + (srcTag ? " · " + srcTag : "") + '</div>';
 
         if (intro) {
-            const hasDetail = intro.d || intro.i || intro.c;
-            if (intro.d) html += '<div class="dp-section"><div class="dp-label">定义</div><div class="dp-body">' + escapeHtml(intro.d) + '</div></div>';
-            const ki = intro.i || intro.c;
-            if (ki) html += '<div class="dp-section"><div class="dp-label">知识介绍</div><div class="dp-body">' + escapeHtml(ki) + '</div></div>';
+            // 实例标签不需要「定义」；知识内容统一展示为「详细介绍」
+            const detail = intro.i || intro.c;
+            if (detail) html += '<div class="dp-section"><div class="dp-label">详细介绍</div><div class="dp-body">' + escapeHtml(detail) + '</div></div>';
             // 别称 / 别名（保留）
             if (intro.al && intro.al.length) {
                 html += '<div class="dp-section"><div class="dp-label">别称 / 别名</div><div class="dp-chips">' +
@@ -316,7 +315,7 @@ function showDetail(node) {
             // query 词（检索扩展词，与 multimodal 约定一致：取别名首项，无别名则取实例名）
             const q = (intro.al && intro.al.length) ? intro.al[0] : node.name;
             html += '<div class="dp-section"><div class="dp-label">query 词</div><div class="dp-body" style="font-family:ui-monospace,Menlo,Consolas,monospace">' + escapeHtml(q) + '</div></div>';
-            if (!hasDetail && (!intro.al || !intro.al.length)) {
+            if (!detail && (!intro.al || !intro.al.length)) {
                 html += '<div class="dp-note" style="color:#bbb;margin-top:8px">本实例暂无独立知识库内容，仅作为「' + escapeHtml(parentName || "") + '」分类下的实例标签。</div>';
             }
         } else {
