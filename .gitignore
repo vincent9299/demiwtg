@@ -1,5 +1,5 @@
-# 生成的 viewer 产物（由 scripts/taxonomy/build_viewer.py 重建，勿提交）
-taxonomy-instances/build/
+# 生成的 viewer 产物（由 viewer/build_viewer.py 重建，勿提交）
+viewer/build/
 
 # 系统 / 编译产物
 .DS_Store
@@ -10,11 +10,13 @@ __pycache__/
 .workbuddy/
 
 # gen_* 的 LLM 断点续跑缓存（勿提交）
-taxonomy-instances/data/.llm_kb_cache.jsonl
-taxonomy-instances/data/.llm_taxonomy_kb_cache.jsonl
+data/taxonomy/.llm_kb_cache.jsonl
+data/taxonomy/.llm_taxonomy_kb_cache.jsonl
+data/taxonomy/.llm_rename_cache.jsonl
+data/taxonomy/.rename_map.json
 
-# 本地数据与运行时产物（见 AGENTS.md 第 3 节，勿提交）
-dataset/
+# 本地数据与运行时产物（见 AGENTS.md 第 2/4 节，勿提交）
+data/dataset/
 state/
 logs/
 .qoder/
