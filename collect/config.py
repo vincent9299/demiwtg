@@ -80,14 +80,17 @@ DEFAULTS = {
     # 但每张图保留 source / license_raw / source_authorized 字段以便下游按授权状态切分。
     # 扩种中文源：百度/必应/360/搜狗/百度百科/豆瓣（通用）+ 央视/搜狗图库/站酷/中新/
     # 人民/花瓣(HTML+API)/堆糖/知乎/新浪/搜狐（通用网页抽取）+ B站相簿（wbi 签名检索，
-    # 虚拟偶像/潮玩/ACG）。另加国际图板 safebooru（英文检索词，补西方文学/影视/游戏
-    # 角色长尾）。部分源在此沙箱被反爬/JS渲染拦截（403/空），但均已实现 best-effort，
+    # 虚拟偶像/潮玩/ACG）。另加国际图板 safebooru/danbooru/gelbooru/yandere/konachan
+    # （英文 tag 检索，补 ACG 角色长尾；均强制 rating:safe/general 只采全年龄向）与
+    # fandom（分站 MediaWiki 检索，西方影视/游戏 IP wiki 农场）。
+    # 部分源在此沙箱被反爬/JS渲染拦截（403/空），但均已实现 best-effort，
     # 换环境或放宽反爬后可能出图。
     "unauthorized_sources": [
         "baidu", "bing", "so360", "sogou", "baidu_baike", "douban",
         "cctv", "sogou_tuku", "zcool", "chinanews", "people",
         "huaban", "huaban_api", "duitang", "zhihu", "sina", "sohu",
-        "toutiao", "bilibili", "safebooru",
+        "toutiao", "bilibili", "safebooru", "danbooru", "gelbooru",
+        "yandere", "konachan", "fandom",
     ],
     # —— 运行期优化（2026-08-13）——
     # 太少动态扩源触发线：某标签成功图 < 此数时，自动用 expansion_sources 补搜。
@@ -95,9 +98,14 @@ DEFAULTS = {
     # 死源动态剔除：某源在 >= dead_min_instances 个标签上 0 成功即剔除（不再搜/下）。
     "dead_min_instances": 8,
     # 死源种子（沙箱已知必失败源，直接跳过其超时等待）。
+    # huaban(HTML)：JS 渲染拦截，30 run 共 628 次检索 0 候选（有效的是 huaban_api）。
+    # duitang：防盗链，候选全部下载死链（健康账本已判弱源，种子化省去首轮试探）。
+    # gelbooru：网络已通但 dapi 自 2024 起强制 api_key（401）；注册拿到
+    # api_key/user_id 后改适配器再从此名单摘除。
     "known_dead_sources": [
         "sogou", "baidu_baike", "douban", "cctv", "sogou_tuku",
-        "zcool", "chinanews", "people", "zhihu", "sina", "sohu",
+        "zcool", "chinanews", "people", "zhihu", "sina", "sohu", "huaban",
+        "duitang", "gelbooru",
     ],
     # 扩源池：标签图少时补搜的来源。空 = 用全部源作兜底（除已剔除外的所有源）。
     "expansion_sources": [],
@@ -216,8 +224,8 @@ def _norm_instance(name: str) -> str:
     return s.strip()
 
 
-# 图片打标只存实例名（不含路径，见 AGENTS.md 1.5）；看图端直接按实例名查 instance_images.json。
-def _instance_of(taxonomy_path: str, name: str) -> str:
+# 图片打标只存实例名（不含路径，见 AGENTS.md 1.5）；看图端由 images.jsonl 的 instances 字段聚合。
+def _instance_of(name: str) -> str:
     return name
 
 
@@ -263,8 +271,8 @@ def _build_alias_pools(name: str, query_list, aliases_list) -> tuple[list, list]
 def load_taxonomy(path: str, aliases_path: Optional[str] = None) -> tuple[list[Job], str]:
     """直接以「统一标签体系」的实例元文件为采集输入，实时派生 jobs（无需单独的采集配置）。
 
-    全量收敛后：path 指向 data/instances.json（扁平 instance 列表）。每个【实体名】生成一个
-    job（同名实体挂多个路径时只采集一次，采集按实例名进行，见 AGENTS.md 1.5）：
+    全量收敛后：path 指向 data/instances.json（扁平 instance 列表，name 全局唯一，
+    一条记录挂多个路径，见 AGENTS.md 1.5）。每个【实体名】生成一个 job：
       instance = 实例名（不含路径）
       query    = instance.query（英文检索词，全量实例已补齐）；缺省回退 instance.aliases[0]，
                  再回退实例名（Job 构造器兜底）
@@ -284,7 +292,7 @@ def load_taxonomy(path: str, aliases_path: Optional[str] = None) -> tuple[list[J
         name = it.get("name")
         if not name:
             continue
-        instance = _instance_of(it.get("taxonomy_path") or "", name)
+        instance = _instance_of(name)
         if instance in seen:
             continue
         seen.add(instance)

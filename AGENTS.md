@@ -55,8 +55,8 @@ node = {
 { "schema_version": "...", "meta": {...}, "instances": [instance] }
 
 instance = {
-  name: str                    # 实例名
-  taxonomy_path: str           # 所挂节点的 path（与 node.path 一致）
+  name: str                    # 实例名（全局唯一主键：一个实体只允许一条记录）
+  taxonomy_paths: [str]        # 所挂节点的 path 列表（每项与 node.path 一致；一个实体可挂多个路径）
   source: "curated" | "llm" | "derived"   # curated=人工精写；llm=LLM 生成；derived=未富化占位（templated 为历史值，不再新写）
   desc?: str                   # 详细介绍（唯一富描述字段；150-350 字，维基百科词条风格：具体知识点，拒绝空话套话）
   aliases?: [str]              # 别名/英文名
@@ -64,9 +64,10 @@ instance = {
 }
 ```
 
-- 两份文件经 `name + taxonomy_path` 关联；`taxonomy/build_unified.py` 是唯一重建入口。
+- 两份文件经**实例名**关联；`taxonomy/build_unified.py` 是唯一重建入口。
+- **`name` 全局唯一是硬约束**：同一实体的知识字段（desc/query/aliases）只维护一份，多路径挂载一律收进 `taxonomy_paths` 列表；禁止同名多条记录（历史上曾出现同名多行导致 KB 字段漂移，已通过结构合并废除）。
 - 没有 `type` 字段：有没有子树看 `children`，挂不挂实例看 `instances`。
-- 图片打标只存**实例名**（实体标签，不含路径）——体系演化（改路径）不再需要迁移图数据。看图入口（viewer 的 build/imgs.js）直接按实例名从 meta/instance_images.json 查图、相对路径指到 blobs 原图（相对 viewer/ 的 ../data/dataset/blobs/...），不再建软链树；一个实体可挂多个路径是允许的（采集按实体去重）。
+- 图片打标只存**实例名**（实体标签，不含路径）——体系演化（改路径）不再需要迁移图数据。看图入口（viewer 的 build/imgs.js）由 meta/images.jsonl 的 instances 字段现场聚合、相对路径指到 blobs 原图（相对 viewer/ 的 ../data/dataset/blobs/...），不再建软链树。
 - 数据字段定义即契约，改字段 = 改本节 + 同步 build_unified.py。
 
 ## 2. data/dataset/ 硬约束（定死，逐条执行）
@@ -88,15 +89,14 @@ data/dataset/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 文�
 
 | 文件 | 角色 |
 |---|---|
-| `images.jsonl` | 唯一权威主清单：一张图一行（sha256 + 全部字段），按 sha256 增量 upsert；instances 字段只存实例名 |
-| `instance_images.json` | 实例名→图 反向索引（键=实例名，不含路径），由 images.jsonl 聚合 |
+| `images.jsonl` | 唯一权威主清单：一张图一行（sha256 + 全部字段），按 sha256 增量 upsert；instances 字段只存实例名，实例名↔图关系由它单点承载 |
 | `.meta.lock` | 跨进程写锁（运行时瞬态） |
 
 **禁止出现在 meta/ 下的东西：**
 
 - ❌ 审计日志（只写不读的账本一律不建；先有读取代码才允许写入）
 - ❌ 备份文件（*.bak-*、*.bak-sync 之类）
-- ❌ 派生索引（LanceDB 等）
+- ❌ 派生索引（LanceDB、实例名→图反向索引等；需要时由消费者从 images.jsonl 现场聚合）
 - ❌ 运行时状态（死信队列 sqlite、健康账本、done flags、COCO 缓存）
 
 **判据（新增任何文件前先回答）：**
@@ -107,13 +107,13 @@ data/dataset/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 文�
 
 ### 2.3 运行时状态在顶层 state/（不属于数据湖，按模块归属分子目录）
 
-`state/collect/`：死信队列（`.dlq_*.sqlite3` + flags）、`source_health.json`、采集批次产物（`runs/<run_id>/`，含 `_latest` 软链）；`state/dataset_index/`：COCO 缓存；`state/.lancedb/`：Lance 查询索引；`state/filter_vlm/`：VLM 过滤结果。代码约定：仓库根由 `--meta`（默认 `data/dataset/meta`）向上三级推导。永远不进 meta/、不进 data/dataset/、不进 git。
+`state/collect/`：死信队列（`.dlq_*.sqlite3` + flags）、`source_health.json`、采集批次产物（`runs/<run_id>/`，含 `_latest` 软链）、`source_registry.jsonl`（源生命周期覆盖层，append-only）、`auto/`（缺口报告/源提案/探测账本）；LLM 生成的源 spec 落 `collect/specs/`（不入 git）；`state/dataset_index/`：COCO 缓存；`state/.lancedb/`：Lance 查询索引；`state/filter_vlm/`：VLM 过滤结果；`state/annotate_vlm/`：VLM 打标结果（results.jsonl）与打标队列（queue.sqlite3，collect/stream.py 生产、curation/annotate_vlm.py 消费）。代码约定：仓库根由 `--meta`（默认 `data/dataset/meta`）向上三级推导。永远不进 meta/、不进 data/dataset/、不进 git。
 
 ### 2.4 一致性规则
 
-- `images.jsonl` 是唯一真相；`instance_images.json` 由它聚合。改一处结构必须三处同步。
-- `instance_images.json` 的键只应是当前体系的实例名；体系演化后残留的死名打标从 images.jsonl 剥离（无隔离区）。
-- 一张图的 instances 变更（改名/隔离）改的是索引文件，**图字节不动**。
+- `images.jsonl` 是唯一真相；**不建任何派生索引文件**（原 instance_images.json 已废除：双份存储存在一致性漂移风险，需要实例名→图关系时由消费者从 images.jsonl 现场聚合，如 viewer/build_viewer.py）。
+- `images.jsonl` 的 instances 字段只应是当前体系的实例名；体系演化后残留的死名打标从 images.jsonl 剥离（无隔离区）。
+- 一张图的 instances 变更（改名/隔离）改的是 images.jsonl，**图字节不动**。
 - 新元数据字段设计时必须先问"哪个消费者读它"；答案为空就不加。
 
 ## 3. 代码模块职责
@@ -121,9 +121,11 @@ data/dataset/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 文�
 | 模块 | 职责 | 入口 |
 |---|---|---|
 | `taxonomy/` | 标签体系构建（build_unified）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 实例知识，各一次 LLM 调用） | 各脚本 `--write` |
-| `collect/` | 图片采集：任务配置、来源适配器（wikimedia/inaturalist/baidu/openverse/scrapers/cn_web/coco/hf_dataset）、下载、队列、增量消费、主清单 upsert、LanceDB 查询索引 | `collect/cli.py` |
-| `curation/` | 数据策展：失败重试（retry_failed）、VLM 图片质量过滤（filter_vlm） | 各脚本直接运行 |
+| `collect/` | 图片采集：任务配置、来源适配器（wikimedia/inaturalist/baidu/openverse/scrapers/cn_web/coco/hf_dataset）、下载、队列、增量消费、主清单 upsert、LanceDB 查询索引；常驻流式采集（stream：缺口驱动检索→DownloadQueue→流式下载，与批处理 run 并存） | `collect/cli.py`（含 `stream` 子命令） |
+| `curation/` | 数据策展：失败重试（retry_failed）、VLM 图片质量过滤（filter_vlm）、VLM 知识打标（annotate_vlm：run 批量 / stream 常驻消费打标队列 / apply 合并） | 各脚本直接运行 |
 | `viewer/` | 查看器闭环：页面 tag_tree_explorer.html + 构建脚本 build_viewer.py + 产物 build/（sidecar taxonomy.js/instances.js/imgs.js 与 standalone 单文件，gitignore）；HTML 与 build/ 同址是 file:// 双击可用的硬要求 | `viewer/build_viewer.py` |
+
+> **架构决策（2026-08-17）**：broader/ 模块（Open-BROADER 上下位关系模型）迁出本仓库，回归独立项目 `/root/data/projects/open_broader/`（代码、55G 训练语料、训练产物、历史日志整体搬移，脚本内绝对路径已批量改写至新家）。理由：上下位判断本质依赖世界知识，通用大模型（Qwen3.8-27B 批审计 + 现成 embedding 检索）已可覆盖 taxonomy 树审计场景，且训练语料正确性存疑、课题短期难推进，故冻结训练、语料与 checkpoint 原地归档。本决策推翻 2026-08-16 的并入决策；未来如复活，先做大模型 vs BROADER 的 head-to-head 评测再立项。
 
 - 跨模块 import 一律 `from <模块>.<文件> import ...`（四模块直接位于仓库根，仓库根在 sys.path 上）。
 - 路径常量一律从脚本自身向上推导到仓库根，不依赖 cwd 之外的魔法。
@@ -133,7 +135,7 @@ data/dataset/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 文�
 
 - `data/dataset/`、`state/`、`logs/`、`.qoder/` 是本地数据/运行时产物，**不入 git**（.gitignore 强制）。
 - 入库的只有：代码（taxonomy/、collect/、curation/、viewer/，含 viewer 页面 HTML）、约束文档（AGENTS.md、README.md）、以及 `data/taxonomy/` 下的权威 JSON。
-- 大 JSON（images.jsonl、instance_images.json、blobs）永远不进 git；需要备份走独立通道。
+- 大 JSON（images.jsonl、blobs）永远不进 git；需要备份走独立通道。
 - 生成产物（`viewer/build/`）不入 git，数据改动后重跑 build_viewer.py。
 
 ## 5. 关键命令
@@ -155,6 +157,10 @@ python3 curation/filter_vlm.py run        # VLM 质量过滤（断点续跑）
 
 # 采集（消费 data/taxonomy/instances.json，按 sha256 增量 upsert 进 images.jsonl）
 python3 collect/cli.py --taxonomy data/taxonomy/instances.json ...
+
+# 流式三级流水线（两个常驻进程；批处理 run 仍可用）
+python3 collect/cli.py stream --taxonomy data/taxonomy/instances.json   # 检索→下载流式
+python3 curation/annotate_vlm.py stream          # 消费打标队列，成功逐批合并进 images.jsonl
 ```
 
 ## 6. 禁止事项速查
@@ -167,5 +173,6 @@ python3 collect/cli.py --taxonomy data/taxonomy/instances.json ...
 - ❌ 往 data/ 里放代码、页面或生成产物（viewer 页面与产物在 viewer/ 内闭环）
 - ❌ 恢复历史过程文档（docs/、子目录 README）
 - ❌ 在数据/代码里使用 category、leaf、root 作为分类概念
+- ❌ 在 instances.json 里为同一 name 写多条记录（一个实体一条，多路径进 taxonomy_paths 列表）
 - ❌ 把 data/dataset/、state/ 或 logs/ 提交进 git
 - ❌ 把运行时状态塞进 data/dataset/（放顶层 state/ 对应模块子目录）

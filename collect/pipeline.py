@@ -14,8 +14,10 @@
   补采缺口（改大 min_images_per_instance 即触发补采）。
 - 断点续传：启动加载本湖 images.jsonl → 构建 url_index(content_url→rec)；下载前若
   content_url 已在索引且 blob 仍在，直接复用、跳过网络抓取。
-- labels 增量落盘：每下载成功 1 张即追写 images.jsonl（含 content_url），并按需刷新
-  instance_images.json（实例名 → 图 反向索引）。
+- labels 增量落盘：每下载成功 1 张即追写 images.jsonl（含 content_url）；
+  实例名↔图 关系直接由 images.jsonl 的 instances 字段承载（不另建派生索引）。
+- 采集溯源字段（2026-08-16）：queries/query_langs 按实例对齐、asset_ids 按来源对齐，
+  记录实际检索词与来源内资产 ID；同 sha 合并时取映射并集。
 - 太少动态扩源：某实例成功图 < min_images_per_instance 时，用 expansion_sources 补搜并用
   starved_max_per_source 放宽每源上限，直到达标或候选耗尽。
 - 队列模式（--queue）：阶段二改为共享下载队列（SQLite 于 meta_dir），各分片进程投递
@@ -28,7 +30,7 @@
 每张候选的上游原生信号都会落库：source_rank / source_score。
 单流存储：授权与未授权候选都下载到【同一个】images_dir，写入【同一个】downloads_success.jsonl。
 数据湖布局：本批次过程产物写 state/collect/runs/<run_id>/（由 meta_dir 推导）；主清单 <meta_dir>/images.jsonl
-（按 sha256 去重，跨批次累积）与 <meta_dir>/instance_images.json（实例名↔图 关系索引）作为全局元数据源；
+（按 sha256 去重，跨批次累积，含 instances 字段）作为全局元数据唯一真相源；
 state/collect/runs/_latest 软链指向本批次。
 """
 
@@ -37,17 +39,19 @@ from __future__ import annotations
 import copy
 import json
 import os
+import sqlite3
 import threading
 import time
 from collections import defaultdict
 from typing import Dict, List, Optional
 
 from . import models
+from .http_scope import BudgetExceeded
 from .config import DEFAULTS, EffectiveConfig, Job, load_config
 from . import filterer
 from . import downloader
 from .incremental import classify, split_instance, summarize
-from .sources import get_adapter
+from .registry import load_registry
 from .util import RateLimiter, meta_lock
 
 
@@ -128,6 +132,91 @@ def _weak_sources_from_health(health: dict) -> set:
     return weak
 
 
+# ---------------------------------------------------------------------------
+# 检索层（模块级：批处理 run 与流式 stream 模式共用同一实现）
+# ---------------------------------------------------------------------------
+def active_sources(reg, job: Job, dead: set) -> List[str]:
+    """本 job 可用来源：配置源表 ∩ 生命周期可用（active/probation）∩ 除死源种子。"""
+    usable = reg.usable_names()
+    return [s for s in (list(job.sources) + list(job.unauthorized_sources))
+            if s not in dead and s in usable]
+
+
+def search_source(get_adapter, s: str, job: Job,
+                  src_health: dict) -> List["models.Candidate"]:
+    """对单个来源做【多别名早停检索】：
+
+    - 按来源语言选别名池（en 源用 en_aliases、zh 源用 zh_aliases、both 源两者交替）；
+    - best-first：先搜最优别名，累计候选 >= target_count*alias_stop_factor 即停；
+    - 跨别名按 content_url 去重；source_rank 按追加顺序重排（先搜的别名整体靠前）。
+    """
+    adapter = get_adapter(s)
+    threshold = max(1, int((job.effective.target_count or 4)
+                           * (getattr(job.effective, "alias_stop_factor", None) or 4)))
+    if adapter.lang == "zh":
+        pools = [list(job.zh_aliases or [job.zh_query])]
+    elif adapter.lang == "both":
+        pools = [list(job.en_aliases or [job.query]),
+                 list(job.zh_aliases or [job.zh_query])]
+    else:
+        pools = [list(job.en_aliases or [job.query])]
+    out: List["models.Candidate"] = []
+    seen_urls: set = set()
+    budget_hit = False
+    for pool in pools:
+        for alias in pool:
+            sub = copy.copy(job)
+            sub.query = alias
+            sub.zh_query = alias if _is_cjk(alias) else job.zh_query
+            try:
+                raws = adapter.search(sub)
+                src_health[s]["search_ok"] += 1
+            except BudgetExceeded as e:
+                # 预算早停：不计 search_fail（不污染健康账本失败率），
+                # 本源本 run 不再继续检索（预算是源级硬约束）
+                print(f"[warn] 标签 {job.instance}: 来源 {s} 预算耗尽，提前停止: {e}",
+                      flush=True)
+                budget_hit = True
+                break
+            except Exception as e:  # noqa: BLE001
+                src_health[s]["search_fail"] += 1
+                print(f"[warn] 标签 {job.instance}: 来源 {s} 别名 {alias!r} 检索失败: {e}")
+                continue
+            added = 0
+            for raw in raws:
+                try:
+                    c = adapter.to_candidate(raw, sub)
+                except Exception:  # noqa: BLE001
+                    continue
+                if c.content_url and c.content_url in seen_urls:
+                    continue
+                if c.content_url:
+                    seen_urls.add(c.content_url)
+                out.append(c)
+                added += 1
+            if added == 0 or len(out) >= threshold:
+                break
+        if budget_hit or len(out) >= threshold:
+            break
+    for idx, c in enumerate(out):
+        if c.source_rank is None:
+            c.source_rank = idx
+    return out
+
+
+def search_job(get_adapter, reg, job: Job, dead: set, src_health: dict,
+               searched_per_source: dict = None) -> List["models.Candidate"]:
+    """一个实例任务的全源检索（active_sources 逐源 search_source 汇总）。"""
+    new = []
+    for s in active_sources(reg, job, dead):
+        out = search_source(get_adapter, s, job, src_health)
+        if searched_per_source is not None:
+            searched_per_source[s] += len(out)
+        src_health[s]["candidates"] += len(out)
+        new.extend(out)
+    return new
+
+
 def _job_index(jobs: List[Job]) -> Dict[str, Job]:
     return {j.instance: j for j in jobs}
 
@@ -151,6 +240,9 @@ def _candidate_to_rec(c: "models.Candidate", images_dir: str) -> dict:
     sha = c.sha256 or ""
     ext = os.path.splitext(c.local_path or "")[1].lstrip(".") if c.local_path else ""
     tier = c.selected_tier if c.selected_tier is not None else 0
+    queries = ({c.instance: c.query} if c.instance and c.query else {})
+    query_langs = ({c.instance: c.query_lang} if c.instance and c.query_lang else {})
+    asset_ids = ({c.source: c.asset_id} if c.source and c.asset_id else {})
     return {
         "sha256": sha,
         "ext": ext,
@@ -170,6 +262,9 @@ def _candidate_to_rec(c: "models.Candidate", images_dir: str) -> dict:
         "tiers": [tier],
         "source_rank": c.source_rank,
         "source_score": c.source_score,
+        "queries": queries,
+        "query_langs": query_langs,
+        "asset_ids": asset_ids,
         "landing_url": c.landing_url,
         "content_url": c.content_url,
         "fetched_at": c.fetched_at,
@@ -186,7 +281,7 @@ def _rec_to_candidate(rec: dict, instance: str, images_dir: str) -> "models.Cand
         source_kind=rec.get("source_kind", ""),
         asset_id=sha,
         instance=instance or (rec.get("instances") or [""])[0],
-        query=instance or "",
+        query=(rec.get("queries") or {}).get(instance or "") or instance or "",
         landing_url=rec.get("landing_url", ""),
         content_url=rec.get("content_url", ""),
         source_authorized=rec.get("source_authorized", True),
@@ -201,15 +296,6 @@ def _rec_to_candidate(rec: dict, instance: str, images_dir: str) -> "models.Cand
         actual_size=rec.get("size_bytes"),
         actual_mime=rec.get("mime"),
     )
-
-
-def _refresh_instances(meta_dir: str, instance_map: dict) -> None:
-    """把内存中的 instance_map 写出 instance_images.json（幂等）。"""
-    if not meta_dir:
-        return
-    with meta_lock(meta_dir):
-        with open(os.path.join(meta_dir, "instance_images.json"), "w", encoding="utf-8") as f:
-            json.dump(instance_map, f, ensure_ascii=False, indent=1)
 
 
 # ---------------------------------------------------------------------------
@@ -241,6 +327,14 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
     if jobs:
         _rate_interval = getattr(jobs[0].effective, "per_host_min_interval_sec", 1.0) or 1.0
     rate_limiter = RateLimiter(_rate_interval)
+
+    # ---------- 源注册表（L2）：统一适配器加载 + 生命周期过滤 ----------
+    # 手写模块 ∪ 手写 spec（collect/specs/）∪ 生成源（state/collect/）；
+    # 仅 active/probation 可参与采集（retired/degraded 由覆盖层证据驱动）。
+    reg = load_registry(meta_dir)
+
+    def get_adapter(name: str):
+        return reg.get_adapter(name)
 
     # --jobs 支持子串匹配，便于按实例名试点；--jobs-file 为精确匹配
     jobs = [j for j in jobs if (not only_instances or any(t in j.instance for t in only_instances))
@@ -336,7 +430,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         }
     searched_per_source = defaultdict(int)
 
-    REFRESH_EVERY = 5  # 每 N 个实例刷新一次 instance_images.json
+    REFRESH_EVERY = 5  # 每 N 个实例打一次进度
 
     def _persist(c: "models.Candidate") -> None:
         """追写 images.jsonl（增量、崩溃安全）+ 更新内存 url_index / instance_map。"""
@@ -373,69 +467,14 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
             })
 
     def _active_sources(job: Job) -> List[str]:
-        return [s for s in (list(job.sources) + list(job.unauthorized_sources))
-                if s not in dead]
+        return active_sources(reg, job, dead)
 
     def _search_source(s: str, job: Job, alias_scope: str = "all") -> List["models.Candidate"]:
-        """对单个来源做【多别名早停检索】：
-
-        - 按来源语言选别名池（en 源用 en_aliases、zh 源用 zh_aliases、both 源两者交替）；
-        - best-first：先搜最优别名，累计候选 >= target_count*alias_stop_factor 即停；
-        - 跨别名按 content_url 去重；source_rank 按追加顺序重排（先搜的别名整体靠前）。
-        """
-        adapter = get_adapter(s)
-        threshold = max(1, int((job.effective.target_count or 4)
-                               * (getattr(job.effective, "alias_stop_factor", None) or 4)))
-        if adapter.lang == "zh":
-            pools = [list(job.zh_aliases or [job.zh_query])]
-        elif adapter.lang == "both":
-            pools = [list(job.en_aliases or [job.query]),
-                     list(job.zh_aliases or [job.zh_query])]
-        else:
-            pools = [list(job.en_aliases or [job.query])]
-        out: List["models.Candidate"] = []
-        seen_urls: set = set()
-        for pool in pools:
-            for alias in pool:
-                sub = copy.copy(job)
-                sub.query = alias
-                sub.zh_query = alias if _is_cjk(alias) else job.zh_query
-                try:
-                    raws = adapter.search(sub)
-                    C["src_health"][s]["search_ok"] += 1
-                except Exception as e:  # noqa: BLE001
-                    C["src_health"][s]["search_fail"] += 1
-                    print(f"[warn] 标签 {job.instance}: 来源 {s} 别名 {alias!r} 检索失败: {e}")
-                    continue
-                added = 0
-                for raw in raws:
-                    try:
-                        c = adapter.to_candidate(raw, sub)
-                    except Exception:  # noqa: BLE001
-                        continue
-                    if c.content_url and c.content_url in seen_urls:
-                        continue
-                    if c.content_url:
-                        seen_urls.add(c.content_url)
-                    out.append(c)
-                    added += 1
-                if added == 0 or len(out) >= threshold:
-                    break
-            if len(out) >= threshold:
-                break
-        for idx, c in enumerate(out):
-            if c.source_rank is None:
-                c.source_rank = idx
-        return out
+        return search_source(get_adapter, s, job, C["src_health"])
 
     def _search_job(job: Job) -> List["models.Candidate"]:
-        new = []
-        for s in _active_sources(job):
-            out = _search_source(s, job)
-            searched_per_source[s] += len(out)
-            C["src_health"][s]["candidates"] += len(out)
-            new.extend(out)
-        return new
+        return search_job(get_adapter, reg, job, dead, C["src_health"],
+                          searched_per_source)
 
     def _process_groups(groups, cap, job, stop_at=None):
         """下载 groups（(instance,source)->[cands]），带 url_index 续传跳过 + max_per_source 封顶。
@@ -606,6 +645,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         def _enqueue_wave1() -> None:
             """基础轮：每 (instance,source) 最多 max_per_source 张（rank 最小者优先）。"""
             n_q = n_reuse = 0
+            batch = []  # 批量投递缓冲：凑够一批一个写事务，避免逐条抢锁
             for instance, cs in cands_by_instance.items():
                 job = job_by_instance[instance]
                 cap = job.effective.max_per_source
@@ -622,9 +662,13 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                     lst.sort(key=lambda c: (c.source_rank if c.source_rank is not None else 0))
                     take = lst if (not cap or cap <= 0) else lst[:cap]
                     for c in take:
-                        q.enqueue(1, instance, src, c.content_url or "",
-                                  c.source_rank or 0, cap, instance_min, c.to_dict())
+                        batch.append((1, instance, src, c.content_url or "",
+                                      c.source_rank or 0, cap, instance_min, c.to_dict()))
                         n_q += 1
+                        if len(batch) >= 2000:
+                            q.enqueue_many(batch)
+                            batch = []
+            q.enqueue_many(batch)
             print(f"[queue] wave1 投递 {n_q} 条候选 / 复用湖内 {n_reuse} 条", flush=True)
 
         # —— 弱源识别：本 run 队列证据 + 历史账本 ——
@@ -638,6 +682,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         def _enqueue_leftovers() -> int:
             """扩源第 1 层（一次）：复用已检索候选、放宽每源上限（wave1 未投递/封顶跳过的）。"""
             n_q = 0
+            batch = []  # 同 wave1：批量投递避免逐条抢写锁
             for instance, cs in cands_by_instance.items():
                 job = job_by_instance[instance]
                 existing = existing_counts.get(instance, 0)
@@ -670,9 +715,13 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                         lst.sort(key=lambda c: (c.source_rank if c.source_rank is not None else 0))
                         take = lst if (not cap2 or cap2 <= 0) else lst[:cap2]
                         for c in take:
-                            q.enqueue(WAVE_LEFTOVERS, instance, src, c.content_url,
-                                      c.source_rank or 0, cap2, instance_min2, c.to_dict())
+                            batch.append((WAVE_LEFTOVERS, instance, src, c.content_url,
+                                          c.source_rank or 0, cap2, instance_min2, c.to_dict()))
                             n_q += 1
+                            if len(batch) >= 2000:
+                                q.enqueue_many(batch)
+                                batch = []
+            q.enqueue_many(batch)
             return n_q
 
         # —— 动态补搜（与下载并行）：轮转自家未达标标签，从健康源池补搜新候选 ——
@@ -815,13 +864,23 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                 C["src_health"][source][key] += n
 
         def _worker_loop() -> None:
+            buf = []  # 批量领取的本地缓冲：减少 claim 频次（Q1 选源扫描很贵）
             while not stop.is_set():
-                item = q.claim(q_since)
-                if item is None:
-                    if stop.wait(1.0):
+                try:
+                    if not buf:
+                        buf = q.claim_many(q_since, limit=8)
+                        if not buf:
+                            if stop.wait(1.0):
+                                return
+                            continue
+                    item = buf.pop()
+                    _process_queue_item(item)
+                except sqlite3.OperationalError:
+                    # 队列库瞬时锁争用/磁盘压力：退避后重试，不拖死整个进程。
+                    # buf 里未处理的件仍是 claimed，掉线兜底 600s 后自动回池，不丢。
+                    if stop.wait(5.0):
                         return
                     continue
-                _process_queue_item(item)
                 with stats_lock:
                     C["q_done"] += 1
                     if C["q_done"] % 50 == 0:
@@ -925,21 +984,13 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
 
             processed += 1
             if processed % REFRESH_EVERY == 0:
-                _refresh_instances(meta_dir, instance_map)
                 print(f"[阶段二] 进度 {processed}/{total} 标签，已下载 {len(C['success'])} 张",
                       flush=True)
 
-    # 末尾刷新标签索引 + 干净去重重写主清单（传入本块 success 以正确按标签并集）
-    if queue_mode and meta_dir:
-        # 队列模式：主清单由各进程 upsert（meta_lock 串行），instance_images.json 由全量清单重建
-        # （不能沿用本进程不完整的 instance_map）。
+    # 末尾干净去重重写主清单（传入本块 success 以正确按标签并集）
+    if meta_dir:
         _update_master_manifest(meta_dir, C["success"], run_id or "")
         _merge_health(meta_dir, C["src_health"])
-    else:
-        _refresh_instances(meta_dir, instance_map)
-        if meta_dir:
-            _update_master_manifest(meta_dir, C["success"], run_id or "")
-            _merge_health(meta_dir, C["src_health"])
     # 块末调试产出
     models.write_jsonl(os.path.join(out_dir, "candidates_rejected.jsonl"),
                        rejected_stage2 + C["rejected"])
@@ -987,7 +1038,7 @@ def _cand_attr(c: "models.Candidate", field: str):
 
 def _update_master_manifest(meta_dir: str, success: list, run_id: str) -> None:
     """upsert 主清单 images.jsonl（按 sha256 去重，跨批次累积），
-    并派生 instance_images.json 与 state/collect/runs/_latest 软链。全程持 meta_lock（分片并发安全）。"""
+    并维护 state/collect/runs/_latest 软链。全程持 meta_lock（分片并发安全）。"""
     with meta_lock(meta_dir):
         _update_master_manifest_locked(meta_dir, success, run_id)
 
@@ -1006,7 +1057,34 @@ def _update_master_manifest_locked(meta_dir: str, success: list, run_id: str) ->
                     rec = json.loads(line)
                 except json.JSONDecodeError:
                     continue
-                existing[rec["sha256"]] = rec
+                sha = rec.get("sha256")
+                if not sha:
+                    continue
+                prev = existing.get(sha)
+                if prev is None:
+                    existing[sha] = rec
+                    continue
+                # 重复 sha 行（同图异 URL/跨批命中）：合并 instances/tiers 并集，
+                # 其余字段保留首条；直接覆盖会丢实例关联（已验证存在数千条差异行）
+                prev.setdefault("instances", [])
+                for t in rec.get("instances") or []:
+                    if t not in prev["instances"]:
+                        prev["instances"].append(t)
+                prev.setdefault("tiers", [0])
+                for tier in rec.get("tiers") or []:
+                    if tier not in prev["tiers"]:
+                        prev["tiers"].append(tier)
+                # 溯源映射取并集（按实例/来源对齐，冲突时保留先落盘值）
+                for fld in ("queries", "query_langs", "asset_ids"):
+                    add = rec.get(fld) or {}
+                    if not add:
+                        continue
+                    base = prev.get(fld)
+                    if not isinstance(base, dict):
+                        base = {}
+                    base.update({k: v for k, v in add.items() if k not in base})
+                    if base:
+                        prev[fld] = base
 
     for c in success:
         sha = c.sha256
@@ -1035,6 +1113,9 @@ def _update_master_manifest_locked(meta_dir: str, success: list, run_id: str) ->
                 "tiers": [tier],
                 "source_rank": c.source_rank,
                 "source_score": c.source_score,
+                "queries": ({c.instance: c.query} if c.instance and c.query else {}),
+                "query_langs": ({c.instance: c.query_lang} if c.instance and c.query_lang else {}),
+                "asset_ids": ({c.source: c.asset_id} if c.source and c.asset_id else {}),
                 "landing_url": c.landing_url,
                 "fetched_at": c.fetched_at,
                 "path": _rel_path(c.local_path),
@@ -1044,6 +1125,19 @@ def _update_master_manifest_locked(meta_dir: str, success: list, run_id: str) ->
                 rec["instances"].append(c.instance)
             if tier not in rec["tiers"]:
                 rec["tiers"].append(tier)
+            # 溯源映射并集合并（与重复 sha 行合并同规则）
+            for fld, add in (
+                ("queries", {c.instance: c.query} if c.instance and c.query else {}),
+                ("query_langs", {c.instance: c.query_lang} if c.instance and c.query_lang else {}),
+                ("asset_ids", {c.source: c.asset_id} if c.source and c.asset_id else {}),
+            ):
+                if not add:
+                    continue
+                base = rec.get(fld)
+                if not isinstance(base, dict):
+                    base = {}
+                base.update({k: v for k, v in add.items() if k not in base})
+                rec[fld] = base
             for fld, cf in (
                 ("source", "source"), ("source_kind", "source_kind"),
                 ("license", "license_raw"), ("author", "author"),
@@ -1069,23 +1163,8 @@ def _update_master_manifest_locked(meta_dir: str, success: list, run_id: str) ->
             f.write(json.dumps(existing[sha], ensure_ascii=False) + "\n")
     os.replace(tmp_path, mpath)
 
-    # 派生 实例名↔图 关系索引：instance -> [ {sha256, ext, source, tiers} ]
-    idx: Dict[str, list] = {}
-    for rec in existing.values():
-        for t in rec.get("instances", []):
-            idx.setdefault(t, []).append({
-                "sha256": rec["sha256"],
-                "ext": rec.get("ext", ""),
-                "source": rec.get("source", ""),
-                "tiers": rec.get("tiers", [0]),
-                "source_rank": rec.get("source_rank"),
-                "source_score": rec.get("source_score"),
-            })
-    with open(os.path.join(meta_dir, "instance_images.json"), "w", encoding="utf-8") as f:
-        json.dump(idx, f, ensure_ascii=False, indent=1)
-
-    # state/collect/runs/_latest -> 本批次 run_id
-    runs_dir = os.path.join(_state_dir(meta_dir), "collect", "runs")
+    # state/collect/runs/_latest -> 本批次 run_id（_state_dir 已含 state/collect，勿重复拼接）
+    runs_dir = os.path.join(_state_dir(meta_dir), "runs")
     os.makedirs(runs_dir, exist_ok=True)
     latest = os.path.join(runs_dir, "_latest")
     if os.path.lexists(latest):

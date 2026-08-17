@@ -12,8 +12,7 @@
   data/dataset/
     blobs/              # 原始图片字节，内容寻址 <aa>/<sha256>.<ext>
     meta/
-      images.jsonl      # 主清单（每张图一行，按 sha256 去重）
-      instance_images.json         # 实体名↔图 关系索引（由 images.jsonl 聚合）
+      images.jsonl      # 主清单（每张图一行，按 sha256 去重；instances 字段承载实体名↔图关系）
   state/collect/runs/<run_id>/    # 本批次过程产物（candidates/success/failed/rejected/stats）
   state/collect/runs/_latest      # -> 最新 <run_id>
 """
@@ -33,16 +32,44 @@ if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from collect.config import EffectiveConfig, load_config, load_taxonomy
     from collect.pipeline import run
-    import collect.sources  # noqa: F401  触发适配器注册
-    from collect.sources.base import _REGISTRY as _SOURCE_REGISTRY
+    from collect.registry import load_registry  # 触发手写适配器注册 + spec 源发现
+    from collect.auto import gap as _auto_gap, discover as _auto_discover, probe as _auto_probe
+    from collect.auto import synth as _auto_synth, verify as _auto_verify
+    from collect.auto import govern as _auto_govern, repair as _auto_repair
+    from collect.auto import orchestrate as _auto_orchestrate
+    from collect import stream as _stream
+    from collect import bulk as _bulk
+    from collect import bench as _bench
 else:
     from .config import EffectiveConfig, load_config, load_taxonomy
     from .pipeline import run
-    from . import sources as _sources_pkg  # noqa: F401  触发适配器注册
-    from .sources.base import _REGISTRY as _SOURCE_REGISTRY
+    from .registry import load_registry  # 触发手写适配器注册 + spec 源发现
+    from .auto import gap as _auto_gap, discover as _auto_discover, probe as _auto_probe
+    from .auto import synth as _auto_synth, verify as _auto_verify
+    from .auto import govern as _auto_govern, repair as _auto_repair
+    from .auto import orchestrate as _auto_orchestrate
+    from . import stream as _stream
+    from . import bulk as _bulk
+    from . import bench as _bench
+
+# L3 智能平面子命令（gap→discover→probe→synth→verify→govern/repair；产物人工过目，
+# 晋升由闸门裁决）；orchestrate 为 L4 编排层（一轮缺口驱动闭环的确定性调度）；
+# stream 为常驻流式采集入口（与批处理 run 并存）；
+# bulk 为整包数据集摄入（数据集驱动反向打标，与搜索驱动 run/stream 并存的进水口）；
+# bench 为带宽/下载速度压测（目标注册表 + 并发阶梯/Range 分片/镜像对比/小图画像）
+_AUTO_SUBCOMMANDS = {"gap": _auto_gap, "discover": _auto_discover,
+                     "probe": _auto_probe, "synth": _auto_synth,
+                     "verify": _auto_verify, "govern": _auto_govern,
+                     "repair": _auto_repair, "orchestrate": _auto_orchestrate,
+                     "stream": _stream, "bulk": _bulk, "bench": _bench}
 
 
 def main(argv=None):
+    argv = sys.argv[1:] if argv is None else list(argv)
+    # 子命令分发；非子命令首参维持原 run 参数面（向后兼容）
+    if argv and argv[0] in _AUTO_SUBCOMMANDS:
+        _AUTO_SUBCOMMANDS[argv[0]].main(argv[1:])
+        return
     ap = argparse.ArgumentParser(description="IP 标签图片采集系统")
     ap.add_argument("--config", help="采集任务配置 JSON 路径（覆盖/临时任务用；"
                                       "常规采集建议用 --taxonomy 直读标签体系）")
@@ -55,7 +82,7 @@ def main(argv=None):
     # state/collect/runs/<run_id>（不落数据湖）；--out 默认由 --meta + --run-id 推导，
     # 可显式覆盖。运行时状态（死信队列/健康账本/LanceDB/COCO 缓存）同样在顶层 state/。
     ap.add_argument("--meta", default="data/dataset/meta",
-                    help="元数据根目录（默认 data/dataset/meta），主清单 images.jsonl/instance_images.json 写于此")
+                    help="元数据根目录（默认 data/dataset/meta），主清单 images.jsonl 写于此")
     ap.add_argument("--run-id", default=None,
                     help="本批次 ID（默认时间戳）；state/collect/runs/<run-id> 存放本批过程产物")
     ap.add_argument("--out", default=None,
@@ -109,6 +136,8 @@ def main(argv=None):
                     choices=["delta", "replay", "replay-rules"],
                     help="增量消费模式：delta=只采新实例；replay=全量重放（达标跳过，默认）；"
                          "replay-rules=重放+两级身份匹配跳过（分支改名不误重下）+topup 补采缺口")
+    ap.add_argument("--list-sources", action="store_true",
+                    help="打印源注册表（手写模块 ∪ spec 源，含生命周期）后退出，不采集")
     args = ap.parse_args(argv)
 
     run_id = args.run_id or datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -116,6 +145,17 @@ def main(argv=None):
     # 仓库根由 --meta 向上三级推导（与 pipeline._state_dir 一致）
     _repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.path.normpath(meta_dir)))))
     out_dir = args.out or os.path.join(_repo_root, "state", "collect", "runs", run_id)
+
+    reg = load_registry(meta_dir)
+    if args.list_sources:
+        print(f"{'名称':<16}{'mode':<6}{'provenance':<11}{'生命周期':<10}"
+              f"{'语言':<6}{'授权':<5}{'类型':<10}来源定义")
+        for n in reg.names():
+            c = reg.card(n)
+            print(f"{c.name:<16}{c.mode:<6}{c.provenance:<11}{c.lifecycle:<10}"
+                  f"{c.lang:<6}{('是' if c.authorized else '否'):<5}"
+                  f"{c.kind:<10}{c.spec_path or '(手写模块)'}")
+        return
 
     if bool(args.config) == bool(args.taxonomy):
         ap.error("--config 与 --taxonomy 必须且只能提供一个")
@@ -129,9 +169,15 @@ def main(argv=None):
         if val.strip().lower() == "none":
             return []
         names = [s.strip() for s in val.split(",") if s.strip()]
-        bad = [n for n in names if n not in _SOURCE_REGISTRY]
+        bad = [n for n in names if n not in reg.names()]
         if bad:
-            ap.error("未知来源 %s；已注册来源：%s" % (bad, sorted(_SOURCE_REGISTRY)))
+            ap.error("未知来源 %s；已注册来源：%s" % (bad, reg.names()))
+        # 非 usable（retired/degraded/candidate）源通过校验但不会参与采集，显式提示
+        unusable = [(n, reg.card(n).lifecycle) for n in names
+                    if n not in reg.usable_names()]
+        if unusable:
+            print("[warn] 以下来源不在可用生命周期（active/probation），将被跳过: %s"
+                  % ["%s(%s)" % u for u in unusable], flush=True)
         return names
 
     if (args.sources is not None or args.unauthorized_sources is not None

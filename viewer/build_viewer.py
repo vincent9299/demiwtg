@@ -8,8 +8,10 @@ so the viewer works on double-click with NO running server.
 
 Generated artifacts (gitignored, NOT data) go to viewer/build/:
     build/taxonomy.js / build/instances.js          sidecars (default)
-    build/imgs.js                                    实例 → 原图相对路径索引
-                                                      （由 data/dataset/meta/instance_images.json 派生，
+    build/imgs.js                                    实例 → 图片索引（路径 + VLM 打分）
+                                                      （由 data/dataset/meta/images.jsonl 现场聚合，
+                                                      每项 {p, km, ri, cap}：相对路径/kb_match/richness/caption，
+                                                      按 kb_match 降序（同分按 richness 降序）；
                                                       路径为 ../data/dataset/blobs/... 原图，不生成缩略图；
                                                       需经 HTTP 服务打开查看器才能显示图片，
                                                       双击 file:// 时浏览器禁止读取父目录资源）
@@ -21,7 +23,7 @@ Usage:
     python3 viewer/build_viewer.py --standalone     # write build/tag_tree_explorer.standalone.html (single self-contained file)
     python3 viewer/build_viewer.py --standalone --out my_viewer.html
 
-Regenerate after ANY change to data/taxonomy.json, data/instances.json or instance_images.json.
+Regenerate after ANY change to data/taxonomy.json, data/instances.json or images.jsonl.
 """
 import argparse
 import json
@@ -35,7 +37,7 @@ META = ROOT / "data" / "taxonomy" / "instances.json"
 OUT_TAX = BUILD / "taxonomy.js"
 OUT_META = BUILD / "instances.js"
 VIEWER = ROOT / "viewer" / "tag_tree_explorer.html"
-INSTANCE_IMAGES = ROOT / "data" / "dataset" / "meta" / "instance_images.json"
+IMAGES_JSONL = ROOT / "data" / "dataset" / "meta" / "images.jsonl"
 BLOBS = ROOT / "data" / "dataset" / "blobs"
 IMGS_JS = BUILD / "imgs.js"
 
@@ -74,7 +76,8 @@ def build_sidecar():
 
 
 # ---------------------------------------------------------------------------
-# 实例原图索引：由 dataset/meta/instance_images.json（实例名 → 图记录）派生。
+# 实例原图索引：由 dataset/meta/images.jsonl（唯一真相主清单）现场聚合，
+# 不再依赖派生索引文件（避免双份存储的一致性问题）。
 # 不复制/不缩图：imgs.js 只存相对路径 ../data/dataset/blobs/<aa>/<sha256>.<ext>
 # （相对 viewer/tag_tree_explorer.html 所在目录），需以仓库根为站点根起 HTTP 服务
 # （如 python3 -m http.server），浏览器才能加载。
@@ -90,23 +93,54 @@ def _sorted_recs(recs):
     return sorted(recs, key=key)
 
 
+def _by_score(entries):
+    # VLM 打分降序：kb_match 优先，同分按 richness，未打分的排最后
+    def key(e):
+        km = e.get("km")
+        ri = e.get("ri")
+        return (-(km if km is not None else -1),
+                -(ri if ri is not None else -1))
+    return sorted(entries, key=key)
+
+
 def build_imgs_js():
-    if not INSTANCE_IMAGES.exists():
-        print("[warn] instance_images.json 不存在，imgs.js 未生成。")
+    if not IMAGES_JSONL.exists():
+        print("[warn] images.jsonl 不存在，imgs.js 未生成。")
         return
-    idx = json.loads(INSTANCE_IMAGES.read_text(encoding="utf-8"))
+    idx: dict[str, list] = {}
+    with open(IMAGES_JSONL, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not rec.get("sha256"):
+                continue
+            for name in rec.get("instances") or []:
+                idx.setdefault(name, []).append(rec)
     out = {}
     for name, recs in idx.items():
-        paths = []
+        entries = []
         for r in _sorted_recs(recs):
             sha = r.get("sha256", "")
             if not sha:
                 continue
             rel = f"../data/dataset/blobs/{sha[:2]}/{sha}.{r.get('ext', 'jpg')}"
-            if (BLOBS / sha[:2] / f"{sha}.{r.get('ext', 'jpg')}").exists():
-                paths.append(rel)
-        if paths:
-            out[name] = paths
+            if not (BLOBS / sha[:2] / f"{sha}.{r.get('ext', 'jpg')}").exists():
+                continue
+            e = {"p": rel}
+            if r.get("kb_match") is not None:
+                e["km"] = r["kb_match"]
+            if r.get("richness") is not None:
+                e["ri"] = r["richness"]
+            if r.get("caption"):
+                e["cap"] = r["caption"]
+            entries.append(e)
+        if entries:
+            out[name] = _by_score(entries)
     IMGS_JS.write_text(
         "window.__IMGS__ = " + json.dumps(out, ensure_ascii=False) + ";\n",
         encoding="utf-8",

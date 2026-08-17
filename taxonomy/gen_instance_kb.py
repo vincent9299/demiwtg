@@ -10,7 +10,7 @@
 
 机制（共用 llm_common.py）：
   - OpenAI 兼容端点（LLM_BASE_URL），LLM_WEB_SEARCH=1 可联网核实（仅官方端点）
-  - 按实体名去重：同名实体多路径挂载（契约允许）只生成一次，结果应用到该实体所有行
+  - name 全局唯一（一条记录挂多个路径，见 AGENTS.md 1.5），一个实体只生成一次
   - 断点续跑：缓存 data/taxonomy/.llm_kb_cache.jsonl，--overwrite 重生成
   - 默认跳过 source=curated 与已富化实例；--only-empty 只补缺口、--refresh 全量重生成
 
@@ -51,7 +51,7 @@ SYSTEM_PROMPT = (
 )
 
 
-def build_user_prompt(name, taxonomy_path, it):
+def build_user_prompt(name, taxonomy_paths, it):
     ctx = []
     for label, key in (("已有描述", "desc"), ("已有别名", "aliases")):
         v = it.get(key)
@@ -62,31 +62,27 @@ def build_user_prompt(name, taxonomy_path, it):
     ctx_block = ("\n".join(ctx) + "\n") if ctx else ""
     return (
         f"实例名称：{name}\n"
-        f"所属分类(instance of)：{taxonomy_path}\n"
+        f"所属分类(instance of)：{taxonomy_paths}\n"
         f"{ctx_block}"
         "请生成该实例的 desc / query / aliases。"
     )
 
 
 def load_targets(args):
-    """按实体名去重：一个实体可挂多个路径（契约允许），知识只生成一次、应用到所有行。"""
+    """实例列表：契约保证 name 全局唯一（一条记录挂多个路径，见 AGENTS.md 1.5）。"""
     doc = json.load(open(META_PATH, encoding="utf-8"))
-    insts = doc.get("instances", [])
-    by_name = {}
-    for it in insts:
+    out = []
+    for it in doc.get("instances", []):
         name = it.get("name", "")
         if not name:
             continue
-        by_name.setdefault(name, []).append(it)
-    out = []
-    for name, rows in by_name.items():
-        if args.branch and not any(args.branch in r.get("taxonomy_path", "")
-                                   for r in rows):
+        paths = it.get("taxonomy_paths") or []
+        if args.branch and not any(args.branch in p for p in paths):
             continue
-        if (not args.refresh) and any(r.get("source") == "curated" for r in rows):
+        if (not args.refresh) and it.get("source") == "curated":
             continue
-        if args.only_empty and any(r.get("desc") or r.get("query") or
-                                   r.get("aliases") for r in rows):
+        if args.only_empty and (it.get("desc") or it.get("query") or
+                                it.get("aliases")):
             continue
         out.append(name)
     return out
@@ -148,14 +144,12 @@ def main():
 
     if args.dry_run:
         doc = json.load(open(META_PATH, encoding="utf-8"))
-        by_name = {}
-        for it in doc.get("instances", []):
-            by_name.setdefault(it["name"], []).append(it)
+        by_name = {it["name"]: it for it in doc.get("instances", [])}
         for name in targets[: max(args.limit, 3)]:
-            rows = by_name.get(name, [{}])
-            paths = "、".join(r.get("taxonomy_path", "") for r in rows)
+            it = by_name.get(name, {})
+            paths = "、".join(it.get("taxonomy_paths") or [])
             print("=" * 60)
-            print(build_user_prompt(name, paths, rows[0]))
+            print(build_user_prompt(name, paths, it))
         print("=" * 60)
         print("[dry-run] 未调用 API，结束。")
         return
@@ -168,7 +162,7 @@ def main():
         doc = json.load(open(META_PATH, encoding="utf-8"))
         rows = [x for x in doc.get("instances", []) if x["name"] == name]
         it = rows[0] if rows else {}
-        paths = "、".join(r.get("taxonomy_path", "") for r in rows)
+        paths = "、".join(it.get("taxonomy_paths") or [])
         user = build_user_prompt(name, paths, it)
         rec = llm.generate(client, SYSTEM_PROMPT, user, use_responses)
         ok = bool(rec and rec.get("desc"))

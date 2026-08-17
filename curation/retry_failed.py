@@ -21,7 +21,7 @@ sys.path.insert(0, ROOT)
 from collect.config import load_taxonomy
 from collect.models import read_jsonl
 from collect.downloader import download_and_store
-from collect.sources import get_adapter
+from collect.registry import load_registry
 from collect.util import RateLimiter
 
 
@@ -37,7 +37,8 @@ def main():
 
     jobs, _label = load_taxonomy(args.taxonomy, args.aliases)
     eff = {j.instance: j.effective for j in jobs}
-    allowed = get_adapter("wikimedia").allowed_suffixes
+    reg = load_registry(os.path.join(ROOT, "data", "dataset", "meta"))
+    allowed = reg.get_adapter("wikimedia").allowed_suffixes
     cands = read_jsonl(args.failed)
     print(f"待重试候选: {len(cands)}")
 

@@ -8,6 +8,7 @@ __pycache__/
 
 # WorkBuddy 运行时目录（系统内部，勿提交）
 .workbuddy/
+.vscode/
 
 # gen_* 的 LLM 断点续跑缓存（勿提交）
 data/taxonomy/.llm_kb_cache.jsonl
@@ -15,8 +16,14 @@ data/taxonomy/.llm_taxonomy_kb_cache.jsonl
 data/taxonomy/.llm_rename_cache.jsonl
 data/taxonomy/.rename_map.json
 
+# 大体积分析 notebook（内嵌输出，勿提交）
+curation/annotate_analysis.ipynb
+
 # 本地数据与运行时产物（见 AGENTS.md 第 2/4 节，勿提交）
 data/dataset/
 state/
 logs/
 .qoder/
+
+# LLM 生成的源 spec（运行时产物，见 AGENTS.md 2.3）
+collect/specs/

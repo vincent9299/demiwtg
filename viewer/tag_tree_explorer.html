@@ -61,6 +61,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .gal-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; }
 .gal-thumb.on { border-color: #4e79a7; }
 .gal-none { font-size: 12px; color: #bbb; }
+.gal-meta { display: flex; gap: 8px; justify-content: center; margin: 4px 0 2px; }
+.gal-score { font-size: 11px; padding: 1px 9px; border-radius: 9px; }
+.gal-score.km-hi { background: #e6f4ea; color: #1e7e34; }
+.gal-score.km-mid { background: #fff4e0; color: #b07d1a; }
+.gal-score.km-lo { background: #fdeaea; color: #c0392b; }
+.gal-score.ri { background: #e6f4f1; color: #2a9d8f; }
+.gal-score.none { background: #f3f3f5; color: #999; }
+.gal-cap { font-size: 12px; color: #777; line-height: 1.6; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -71,6 +79,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
     <option value="all">全部</option>
     <option value="ip" selected>IP 分类标签</option>
     <option value="general">通用分类标签</option>
+  </select>
+  <select id="score-field" onchange="onScoreFilter()" title="打分筛选：选择分数维度（匹配 kb_match / 丰富 richness）" style="padding:5px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;">
+    <option value="all">打分：全部</option>
+    <option value="km">打分：匹配</option>
+    <option value="ri">打分：丰富</option>
+  </select>
+  <select id="score-dir" onchange="onScoreFilter()" disabled style="padding:5px 4px;border:1px solid #ddd;border-radius:6px;font-size:12px;">
+    <option value="ge">≥</option>
+    <option value="le">≤</option>
+  </select>
+  <select id="score-thr" onchange="onScoreFilter()" disabled style="padding:5px 4px;border:1px solid #ddd;border-radius:6px;font-size:12px;">
+    <option value="10">10</option><option value="9">9</option><option value="8">8</option>
+    <option value="7" selected>7</option><option value="6">6</option><option value="5">5</option>
+    <option value="4">4</option><option value="3">3</option><option value="2">2</option>
+    <option value="1">1</option><option value="0">0</option>
   </select>
   <input type="text" id="search" placeholder="搜索标签名或实例..." />
   <span id="result-count"></span>
@@ -85,7 +108,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 <!-- 无服务模式：双击(file://)打开时，由 build/taxonomy.js / build/instances.js / build/imgs.js
      把数据注入为全局变量（file:// 协议下浏览器禁止 fetch 本地文件）。若 sidecar 不存在，则回退到
      fetch（需经 http 服务打开）。运行 `python3 viewer/build_viewer.py` 生成这些 sidecar，
-     其中 imgs.js 为实例 → 原图相对路径索引（../data/dataset/blobs/...，由 dataset/meta/instance_images.json 派生）。
+     其中 imgs.js 为实例 → 原图相对路径索引（../data/dataset/blobs/...，由 dataset/meta/images.jsonl 现场聚合）。
      注意：原图位于 data/dataset/，file:// 双击打开时浏览器禁止读取，图片需经 HTTP 服务查看：
        python3 -m http.server 8000（在仓库根运行） → http://localhost:8000/viewer/tag_tree_explorer.html -->
 <script src="build/taxonomy.js"></script>
@@ -94,11 +117,41 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 <script>
 let treeData = null;
 window.ROLE_INTROS = {};
-window.ROLE_NAME_IDX = {};
+let curDetailNode = null;   // 当前详情面板展示的节点（打分筛选变化时重绘用）
 
-function ipCatSlice(path) {
-    const i = (path || "").indexOf("IP 分类标签");
-    return i >= 0 ? path.slice(i) : (path || "");
+// 打分控件联动：维度选「全部」时置灰方向/阈值框；无论是否有选中节点，
+// onchange 时都立即同步可用性（不能依赖详情面板渲染才启用）。
+function syncScoreControls() {
+    const fieldEl = document.getElementById("score-field");
+    const dirEl = document.getElementById("score-dir");
+    const thrEl = document.getElementById("score-thr");
+    const off = !fieldEl || fieldEl.value === "all";
+    if (dirEl) dirEl.disabled = off;
+    if (thrEl) thrEl.disabled = off;
+}
+
+// 按顶部打分过滤器筛选图片条目：维度（km/ri）× 方向（≥/≤）× 阈值（0-10），
+// 未打分的图在阈值档位下一律滤掉；按丰富度筛选时重排为丰富度降序（便于扫 case）。
+function applyScoreFilter(imgs) {
+    const fieldEl = document.getElementById("score-field");
+    const dirEl = document.getElementById("score-dir");
+    const thrEl = document.getElementById("score-thr");
+    const field = fieldEl ? fieldEl.value : "all";
+    if (field === "all") return imgs;
+    const dir = dirEl.value;
+    const thr = parseInt(thrEl.value, 10);
+    const out = imgs.filter(e => {
+        const v = e[field];
+        if (v == null) return false;
+        return dir === "ge" ? v >= thr : v <= thr;
+    });
+    if (field === "ri") out.sort((a, b) => b.ri - a.ri);
+    return out;
+}
+function onScoreFilter() {
+    syncScoreControls();
+    refreshImgBadges();
+    if (curDetailNode) showDetail(curDetailNode);
 }
 
 // 把标签树（taxonomy.json）的节点适配为查看器运行时模型。
@@ -114,23 +167,20 @@ function adaptUnified(node) {
     return v;
 }
 
-// 由 instances.json 的实例列表构建 ROLE_INTROS / ROLE_NAME_IDX 查表。
+// 由 instances.json 的实例列表构建 ROLE_INTROS 查表（key=实例名，name 全局唯一）。
 // 关键概念：节点 = 分类标签（subclass of 上级分类）；实例 = 实例标签（instance of 所属分类）。
 // 两者是不同知识对象，因此实例查表独立于节点 KB，且实例面板绝不回退显示分类标签的
 // 代表案例/关联标签。这里把「全部 source」的实例都纳入（不再只取 curated/templated），
 // 以便实例面板能展示别名与 query 词，并对无富文本的实例给出明确提示而非套用分类内容。
 function buildRoleIntros(insts) {
     window.ROLE_INTROS = {};
-    window.ROLE_NAME_IDX = {};
     for (const it of insts) {
-        const rec = {
+        // 契约（AGENTS.md 1.5）：instances.json 中 name 全局唯一，直接按名查表
+        window.ROLE_INTROS[it.name] = {
             c: it.desc || "",         // 实例自身详细描述
             s: it.source || "derived",
-            al: it.aliases || []       // 实例别称 / 别名
+            al: it.aliases || []      // 实例别称 / 别名
         };
-        const key = it.name + "\u0001" + ipCatSlice(it.category || "");
-        window.ROLE_INTROS[key] = rec;
-        (window.ROLE_NAME_IDX[it.name] = window.ROLE_NAME_IDX[it.name] || []).push(key);
     }
 }
 
@@ -187,6 +237,7 @@ function countNodes(n) {
 // 子树图片统计：_instImg = 本节点直挂实例中有图的去重个数；_imgN = 对应图片张数；
 // _subInstImg/_subImgN = 含全部子孙节点的子树聚合。数据源为 imgs.js 注入的 __IMGS__
 //（standalone/file:// 无图模式下为 null，统计自然全 0，徽标不渲染）。
+// 计数经顶部打分过滤器筛一道，阈值变化时由 refreshImgBadges 重算。
 function computeImgStats(node) {
     let instImg = 0, imgN = 0;
     if (node.instances && window.__IMGS__) {
@@ -195,7 +246,10 @@ function computeImgStats(node) {
             if (seen.has(nm)) continue;
             seen.add(nm);
             const arr = window.__IMGS__[nm];
-            if (arr && arr.length) { instImg++; imgN += arr.length; }
+            if (arr && arr.length) {
+                const f = applyScoreFilter(arr);
+                if (f.length) { instImg++; imgN += f.length; }
+            }
         }
     }
     let subInstImg = instImg, subImgN = imgN;
@@ -208,6 +262,44 @@ function computeImgStats(node) {
     }
     node._instImg = instImg; node._imgN = imgN;
     node._subInstImg = subInstImg; node._subImgN = subImgN;
+}
+
+// 图片徽标统一创建入口：节点显示子树聚合（有图实例数 / 图片张数），
+// 实例行显示自身筛选后图片数；createNode 与 refreshImgBadges 共用。
+function imgBadgeEl(node) {
+    const fEl = document.getElementById("score-field");
+    const fOn = fEl && fEl.value !== "all";
+    if (node._instance === true) {
+        const raw = window.__IMGS__ ? (window.__IMGS__[node.name] || []) : [];
+        const n = applyScoreFilter(raw).length;
+        if (!n) return null;
+        const badge = document.createElement("span");
+        badge.className = "node-count imgs";
+        badge.textContent = "\uD83D\uDDBC " + n + " \u56FE";
+        if (n !== raw.length) badge.title = "\u7B5B\u9009 " + n + " / \u5171 " + raw.length + " \u5F20";
+        return badge;
+    }
+    const subInstImg = node._subInstImg || 0, subImgN = node._subImgN || 0;
+    if (!subInstImg) return null;
+    const badge = document.createElement("span");
+    badge.className = "node-count imgs";
+    badge.textContent = "\uD83D\uDDBC " + subInstImg + " \u5B9E\u4F8B / " + subImgN + " \u56FE";
+    badge.title = (fOn ? "\u6253\u5206\u7B5B\u9009\u540E\uFF1A" : "") + "\u5B50\u6811\u5171 " + subInstImg + " \u4E2A\u6709\u56FE\u5B9E\u4F8B\uFF0C\u5408\u8BA1 " + subImgN + " \u5F20\u56FE\u7247";
+    return badge;
+}
+
+// 打分筛选变化时原位刷新已渲染树行的图片徽标（不清空重渲，保留展开状态）
+function refreshImgBadges() {
+    if (!treeData) return;
+    computeImgStats(treeData);
+    container.querySelectorAll(".node-row").forEach(row => {
+        const node = row._nodeRef;
+        if (!node) return;
+        const old = row.querySelector(".node-count.imgs");
+        if (old) old.remove();
+        const badge = imgBadgeEl(node);
+        if (badge) row.appendChild(badge);
+    });
 }
 
 if (treeData) document.getElementById("stats").textContent = countNodes(treeData) + " 节点";
@@ -238,6 +330,7 @@ function createNode(node, depth) {
 
     const row = document.createElement("div");
     row.className = "node-row" + (isInstance ? " instance-row" : "");
+    row._nodeRef = node;   // refreshImgBadges 原位刷新徽标时反查节点用
 
     const toggle = document.createElement("span");
     if (isInstance) {
@@ -266,23 +359,9 @@ function createNode(node, depth) {
         row.appendChild(cnt);
     }
 
-    // 图片统计徽标：节点显示子树聚合（有图实例数 / 图片张数），实例行显示自身图片数
-    const subInstImg = node._subInstImg || 0, subImgN = node._subImgN || 0;
-    if (isInstance) {
-        const n = window.__IMGS__ ? ((window.__IMGS__[node.name] || []).length) : 0;
-        if (n) {
-            const badge = document.createElement("span");
-            badge.className = "node-count imgs";
-            badge.textContent = "\uD83D\uDDBC " + n + " \u56FE";
-            row.appendChild(badge);
-        }
-    } else if (subInstImg) {
-        const badge = document.createElement("span");
-        badge.className = "node-count imgs";
-        badge.textContent = "\uD83D\uDDBC " + subInstImg + " \u5B9E\u4F8B / " + subImgN + " \u56FE";
-        badge.title = "\u5B50\u6811\u5171 " + subInstImg + " \u4E2A\u6709\u56FE\u5B9E\u4F8B\uFF0C\u5408\u8BA1 " + subImgN + " \u5F20\u56FE\u7247";
-        row.appendChild(badge);
-    }
+    // 图片统计徽标（imgBadgeEl 统一创建，打分筛选变化时由 refreshImgBadges 原位刷新）
+    const badge = imgBadgeEl(node);
+    if (badge) row.appendChild(badge);
 
     row.onclick = function(e) {
         e.stopPropagation();
@@ -340,18 +419,13 @@ function escapeHtml(s) {
 }
 function hasKB(n) { return KB_FIELDS.some(k => n && n[k] && (Array.isArray(n[k]) ? n[k].length : true)); }
 function findIntro(name, parentPath) {
-    if (!window.ROLE_INTROS) return null;
-    let cat = parentPath || "";
-    const idx = cat.indexOf("IP 分类标签");
-    if (idx >= 0) cat = cat.slice(idx);
-    const k = name + "\u0001" + cat;
-    if (window.ROLE_INTROS[k]) return window.ROLE_INTROS[k];
-    const arr = window.ROLE_NAME_IDX ? window.ROLE_NAME_IDX[name] : null;
-    return (arr && arr.length) ? window.ROLE_INTROS[arr[0]] : null;
+    // name 全局唯一（AGENTS.md 1.5），直接按名查表；parentPath 仅为兼容旧调用保留
+    return window.ROLE_INTROS ? (window.ROLE_INTROS[name] || null) : null;
 }
 
 function showDetail(node) {
     const dp = document.getElementById("detail-panel");
+    curDetailNode = node || null;
     if (!node) { dp.innerHTML = '<div class="dp-empty">点击左侧节点<br>查看知识库详情</div>'; return; }
 
     // 实例标签（instance of 所属分类）：只展示实例自身的知识库，
@@ -364,18 +438,32 @@ function showDetail(node) {
         const srcTag = intro ? (intro.s === "curated" ? "精确" : (intro.s === "llm" ? "生成" : (intro.s === "templated" ? "归类" : "派生"))) : "";
         html += '<div class="dp-note">实例标签 · instance of「' + escapeHtml(parentName || "?") + '」' + (srcTag ? " · " + srcTag : "") + '</div>';
 
-        // 实例图片（由 build/imgs.js 注入原图相对路径；standalone 或 file:// 双击时不可用）
-        const imgs = (window.__IMGS__ && window.__IMGS__[node.name]) || [];
+        // 实例图片（由 build/imgs.js 注入 {p, km, ri, cap} 条目，按 kb_match 降序；
+        // standalone 或 file:// 双击时不可用）；经顶部打分过滤器再筛一道
+        const rawImgs = (window.__IMGS__ && window.__IMGS__[node.name]) || [];
+        const imgs = applyScoreFilter(rawImgs);
         gal.imgs = imgs; gal.i = 0;
         if (imgs.length) {
-            html += '<div class="dp-section"><div class="dp-label">图片（' + imgs.length + ' 张）</div>';
-            html += '<div class="gal-main"><img id="gal-img" src="' + imgs[0] + '" alt="' + escapeHtml(node.name) + '" onclick="galMove(1)" title="点击切换下一张"></div>';
+            const kms = imgs.filter(e => e.km != null).map(e => e.km);
+            const avgKm = kms.length ? (kms.reduce((a, b) => a + b, 0) / kms.length).toFixed(1) : null;
+            const countTxt = (imgs.length !== rawImgs.length)
+                ? '筛选 ' + imgs.length + ' / 共 ' + rawImgs.length
+                : imgs.length + '';
+            const fEl = document.getElementById("score-field");
+            const sortTxt = (fEl && fEl.value === "ri") ? "按丰富度降序" : "按匹配度降序";
+            html += '<div class="dp-section"><div class="dp-label">图片（' + countTxt + ' 张' +
+                    (avgKm ? ' · 平均匹配 ' + avgKm : '') + '，' + sortTxt + '）</div>';
+            html += '<div class="gal-main"><img id="gal-img" src="' + imgs[0].p + '" alt="' + escapeHtml(node.name) + '" onclick="galMove(1)" title="点击切换下一张"></div>';
+            html += '<div class="gal-meta" id="gal-meta">' + galScoreHtml(0) + '</div>';
             html += '<div class="gal-bar"><button class="gal-btn" onclick="galMove(-1)">&#9664;</button>' +
                     '<span id="gal-pos">1 / ' + imgs.length + '</span>' +
                     '<button class="gal-btn" onclick="galMove(1)">&#9654;</button></div>';
+            html += '<div class="gal-cap" id="gal-cap">' + escapeHtml(imgs[0].cap || "") + '</div>';
             html += '<div class="gal-strip">' +
-                    imgs.map((s, i) => '<img class="gal-thumb' + (i === 0 ? ' on' : '') + '" src="' + s + '" onclick="galJump(' + i + ')" title="第 ' + (i + 1) + ' 张">').join("") +
+                    imgs.map((e, i) => '<img class="gal-thumb' + (i === 0 ? ' on' : '') + '" src="' + e.p + '" onclick="galJump(' + i + ')" title="第 ' + (i + 1) + ' 张 · 匹配 ' + (e.km != null ? e.km : "-") + ' / 丰富 ' + (e.ri != null ? e.ri : "-") + '">').join("") +
                     '</div></div>';
+        } else if (rawImgs.length) {
+            html += '<div class="dp-section"><div class="dp-label">图片</div><div class="gal-none">共 ' + rawImgs.length + ' 张，当前打分筛选下无匹配图片（调整顶部「打分」过滤器）</div></div>';
         } else {
             html += '<div class="dp-section"><div class="dp-label">图片</div><div class="gal-none">暂无已采集图片，或当前以 file:// 双击打开（浏览器禁止加载父目录图片，请用 HTTP 服务打开）</div></div>';
         }
@@ -490,17 +578,37 @@ document.getElementById("search").addEventListener("input", function() {
     searchTimer = setTimeout(doSearch, 300);
 });
 
-// 实例图片画廊：gal.imgs 为当前实例的缩略图路径列表，galJump 切换主图并高亮胶片条。
+// 实例图片画廊：gal.imgs 为当前实例的图片条目列表（{p, km, ri, cap}），
+// galJump 切换主图、分数徽标与 caption 并高亮胶片条。
 let gal = { imgs: [], i: 0 };
+function galScoreHtml(i) {
+    const e = gal.imgs[i];
+    if (!e) return "";
+    let s = "";
+    if (e.km != null) {
+        const cls = e.km >= 7 ? "km-hi" : (e.km >= 4 ? "km-mid" : "km-lo");
+        s += '<span class="gal-score ' + cls + '" title="kb_match：图片内容与实体知识的匹配度（0-10）">匹配 ' + e.km + '</span>';
+    }
+    if (e.ri != null) {
+        s += '<span class="gal-score ri" title="richness：图片信息丰富度（0-10）">丰富 ' + e.ri + '</span>';
+    }
+    if (!s) s = '<span class="gal-score none">未打分</span>';
+    return s;
+}
 function galMove(d) { galJump(gal.i + d); }
 function galJump(i) {
     const n = gal.imgs.length;
     if (!n) return;
     gal.i = ((i % n) + n) % n;
+    const e = gal.imgs[gal.i];
     const img = document.getElementById("gal-img");
-    if (img) img.src = gal.imgs[gal.i];
+    if (img) img.src = e.p;
     const pos = document.getElementById("gal-pos");
     if (pos) pos.textContent = (gal.i + 1) + " / " + n;
+    const meta = document.getElementById("gal-meta");
+    if (meta) meta.innerHTML = galScoreHtml(gal.i);
+    const cap = document.getElementById("gal-cap");
+    if (cap) cap.textContent = e.cap || "";
     document.querySelectorAll(".gal-thumb").forEach((t, idx) => t.classList.toggle("on", idx === gal.i));
 }
 

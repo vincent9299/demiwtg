@@ -8,7 +8,8 @@
 
 本脚本的作用：在 taxonomy.json 作为结构源的前提下，重新产出这两份文件，
 保证二者一致且符合 schema。实例的富描述（desc）与实例别名
-（aliases）从「现有 instances.json」按 (name, taxonomy_path) 携带回写，避免重建丢失。
+（aliases）从「现有 instances.json」按 name（全局唯一主键）携带回写，避免重建丢失。
+instances.json 每个 name 只有一条记录，taxonomy_paths 汇总该实体挂载的所有节点路径。
 节点 KB 字段与节点别名直接来自 taxonomy.json 本身（它即为源）。
 
 已不再依赖：build/tag_tree.json、taxonomy-instances/data/虚构角色IP_实例简介.json、taxonomy-instances/data/ip_instances.json、
@@ -35,16 +36,35 @@ NODE_KB = ["knowledge_intro", "aliases", "representative_cases", "related_tags"]
 INST_CARRY = ["desc", "aliases", "query", "source"]
 
 
+SRC_RANK = {"curated": 0, "llm": 1, "derived": 2, "templated": 3}
+
+
 def load_carryover():
-    """从现有 instances.json 抽取 (name, taxonomy_path) -> 富描述/别名，用于回写。"""
+    """从现有 instances.json 抽取 name -> 富描述/别名，用于回写（name 为全局唯一主键）。
+
+    兼容迁移前的旧格式（同名多行）：按 source 优先级取 desc/query，aliases 取并集。
+    """
     try:
         doc = json.load(open(META, encoding="utf-8"))
     except Exception:
         return {}
     co = {}
-    for it in doc.get("instances", []):
-        key = (it.get("name"), it.get("taxonomy_path"))
-        co[key] = {k: it[k] for k in INST_CARRY if it.get(k) not in (None, "", [], {})}
+    for it in sorted(doc.get("instances", []),
+                     key=lambda x: SRC_RANK.get(x.get("source"), 9)):
+        key = it.get("name")
+        rec = co.setdefault(key, {})
+        for k in INST_CARRY:
+            v = it.get(k)
+            if v in (None, "", [], {}):
+                continue
+            if k == "aliases":
+                merged = list(rec.get("aliases") or [])
+                for a in v:
+                    if a not in merged:
+                        merged.append(a)
+                rec["aliases"] = merged
+            else:
+                rec.setdefault(k, v)  # 首个非空即最优（已按 source 优先级排序）
     print(f"  从现有 instances.json 复用实例富描述/别名: {len(co)}")
     return co
 
@@ -70,14 +90,22 @@ def build(node, carry):
         for nm in insts:
             if not isinstance(nm, str):
                 nm = str(nm)
+            if nm in names:  # 同节点重复挂载视为无效数据，去重
+                continue
             names.append(nm)
-            rec = {"name": nm, "taxonomy_path": path, "source": "derived"}
-            c = carry.get((nm, path))
-            if c:
-                for k in INST_CARRY:
-                    if c.get(k) not in (None, "", [], {}):
-                        rec[k] = c[k]
-            INSTANCES.append(rec)
+            rec = BY_NAME.get(nm)
+            if rec is None:
+                # 契约：name 全局唯一，一条记录汇总所有挂载路径
+                rec = {"name": nm, "taxonomy_paths": [], "source": "derived"}
+                c = carry.get(nm)
+                if c:
+                    for k in INST_CARRY:
+                        if c.get(k) not in (None, "", [], {}):
+                            rec[k] = c[k]
+                BY_NAME[nm] = rec
+                INSTANCES.append(rec)
+            if path not in rec["taxonomy_paths"]:
+                rec["taxonomy_paths"].append(path)
         out["instances"] = names
 
     if children:
@@ -86,8 +114,9 @@ def build(node, carry):
 
 
 def main():
-    global INSTANCES
+    global INSTANCES, BY_NAME
     INSTANCES = []
+    BY_NAME = {}
     print("== 读取源 ==")
     doc = json.load(open(TAXONOMY, encoding="utf-8"))
     tree = doc["tree"]
@@ -125,11 +154,11 @@ def main():
         "tree": unified_tree,
     }
     meta_doc = {
-        "schema_version": "1.0.0",
+        "schema_version": "1.1.0",  # 1.1.0：name 全局唯一，taxonomy_path -> taxonomy_paths 列表
         "meta": {
             "generated_at": now,
             "source": "data/taxonomy.json（实例名） + 现有 data/instances.json（富描述/别名携带）",
-            "description": "实例级富描述（扁平列表），与 taxonomy.json 通过 name + taxonomy_path 关联。",
+            "description": "实例级富描述（扁平列表，name 全局唯一），与 taxonomy.json 通过实例名关联。",
             "stats": {
                 "instances": len(INSTANCES),
                 "instances_enriched": enriched,
