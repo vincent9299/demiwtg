@@ -235,6 +235,35 @@ def _blob_exists(rec: dict, images_dir: str) -> bool:
     return bool(p) and os.path.exists(p)
 
 
+# 续传索引紧凑条目：(sha256, ext, source, source_authorized)。
+# 不驻留完整 rec 字典（278k 条完整记录曾实测 ~1.5GB/进程，32 分片直接顶爆容器限额）；
+# 续传补关联行的其余字段留空，由块末去重合并从同 sha 完整行回填（None 不覆盖已有值）。
+_LakeEntry = tuple
+
+
+def _lake_candidate(entry: _LakeEntry, instance: str, content_url: str,
+                    images_dir: str) -> "models.Candidate":
+    """从紧凑续传索引条目重建复用 Candidate（仅携带合并/落盘所需最小字段）。
+
+    local_path 按 (sha, ext) 直接重建 blob 路径（加载索引时已验 blob 存在），
+    使 _candidate_to_rec 的 ext/path 字段投影正确。
+    """
+    sha, ext, source, auth = entry
+    return models.Candidate(
+        source=source,
+        source_kind="",
+        asset_id=sha,
+        instance=instance,
+        query=instance,
+        landing_url="",
+        content_url=content_url,
+        source_authorized=auth,
+        status=models.STATUS_DOWNLOADED,
+        sha256=sha,
+        local_path=os.path.join(images_dir, sha[:2], f"{sha}.{ext}") if sha else "",
+    )
+
+
 def _candidate_to_rec(c: "models.Candidate", images_dir: str) -> dict:
     """把成功 Candidate 投影成 images.jsonl 记录（含 content_url 以便续传）。"""
     sha = c.sha256 or ""
@@ -360,8 +389,10 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         print(f"[health] 历史弱源（扩源将跳过）: {sorted(weak_from_health)}", flush=True)
 
     # ---------- 加载本湖已有状态：断点续传 + 增量实例 ----------
-    url_index: Dict[str, dict] = {}     # content_url -> rec（blob 仍存在）
-    instance_map: Dict[str, list] = {}      # instance -> [{sha256, ext, source, tiers, ...}]
+    # 紧凑索引（不驻留完整 rec 字典，避免大批次分片内存膨胀）：
+    url_index: Dict[str, _LakeEntry] = {}   # content_url -> (sha, ext, source, authorized)，仅 blob 仍存在
+    instance_map: Dict[str, set] = {}       # instance -> sha256 集合（达标计数/基数去重只需 sha）
+    _persisted_keys: set = set()        # 本 run 已追写过的 (content_url, instance)，_persist 防重复行
     mpath = os.path.join(meta_dir, "images.jsonl") if meta_dir else None
     if mpath and os.path.exists(mpath):
         with open(mpath, encoding="utf-8") as f:
@@ -376,20 +407,15 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                 sha = rec.get("sha256")
                 if not sha:
                     continue
-                # 续传索引：仅保留 blob 仍在磁盘的记录
+                # 续传索引：仅保留 blob 仍在磁盘的记录（只存 4 元组，不存完整 rec）
                 if _blob_exists(rec, images_dir):
                     cu = rec.get("content_url")
                     if cu:
-                        url_index[cu] = rec
+                        url_index[cu] = (sha, rec.get("ext", "") or "",
+                                         rec.get("source", "") or "",
+                                         rec.get("source_authorized", True))
                 for t in rec.get("instances", []):
-                    instance_map.setdefault(t, []).append({
-                        "sha256": sha,
-                        "ext": rec.get("ext", ""),
-                        "source": rec.get("source", ""),
-                        "tiers": rec.get("tiers", [0]),
-                        "source_rank": rec.get("source_rank"),
-                        "source_score": rec.get("source_score"),
-                    })
+                    instance_map.setdefault(t, set()).add(sha)
     print(f"[state] 载入本湖已下载 {len(url_index)} 条（续传索引），实例 {len(instance_map)} 个",
           flush=True)
 
@@ -402,9 +428,14 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
           f"({summarize(classify_report)})", flush=True)
     job_by_instance = _job_index(jobs)
 
-    # 计数器（跨整个 run）
+    # 计数器（跨整个 run）。success/failed/rejected/candidates 不再驻留内存列表：
+    # 运行产物即时流式落盘（见下方 _emit_*），候选统计增量计入 cand_stat，
+    # 长时大批次 RSS 不再随下载量增长（32 分片 reuse-phase1 曾实测 ~2GB/进程）。
     C = {
-        "success": [], "failed": [], "rejected": [], "candidates": [],
+        # candidates 是阶段一/二的工作列表：投递入队（队列模式）或串行消费完即释放，
+        # 不再长期驻留；success/failed/rejected 则完全不建列表（流式落盘）。
+        "candidates": [],
+        "n_success": 0, "n_failed": 0, "n_rejected": 0, "n_candidates": 0,
         "cc": 0, "unauth": 0, "bytes": 0, "capped": 0,
         "instance_success": defaultdict(int),
         "q_done": 0,
@@ -413,6 +444,15 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
             "dl_ok": 0, "dl_fail": 0, "dl_dead": 0, "dl_timeout": 0,
         }),
     }
+    # 每实例候选统计（候选数/中文检索词数）：增量构建，替代块末对驻留候选列表的遍历
+    cand_stat: Dict[str, dict] = defaultdict(lambda: {"candidates": 0, "zh": 0})
+
+    def _note_cand(c: "models.Candidate") -> None:
+        st = cand_stat[c.instance]
+        st["candidates"] += 1
+        if c.query_lang == "zh":
+            st["zh"] += 1
+        C["n_candidates"] += 1
     # topup 基数：已有图数计入 instance_success，使 扩源触发/stop_at 的目标是
     # 「总数达到 min_images」而不是「本轮再下 min_images 张」（补采只补缺口）。
     for _instance, _n in existing_counts.items():
@@ -422,10 +462,10 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
     baseline_shas: Dict[str, set] = {}
     if existing_counts:
         _fuzzy_shas: Dict[tuple, set] = defaultdict(set)
-        for _t, _lst in instance_map.items():
-            _fuzzy_shas[split_instance(_t)].update(e["sha256"] for e in _lst)
+        for _t, _shas in instance_map.items():
+            _fuzzy_shas[split_instance(_t)].update(_shas)
         baseline_shas = {
-            _instance: {e["sha256"] for e in instance_map.get(_instance, [])} | _fuzzy_shas[split_instance(_instance)]
+            _instance: set(instance_map.get(_instance, ())) | _fuzzy_shas[split_instance(_instance)]
             for _instance in existing_counts
         }
     searched_per_source = defaultdict(int)
@@ -433,38 +473,25 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
     REFRESH_EVERY = 5  # 每 N 个实例打一次进度
 
     def _persist(c: "models.Candidate") -> None:
-        """追写 images.jsonl（增量、崩溃安全）+ 更新内存 url_index / instance_map。"""
+        """追写 images.jsonl（增量、崩溃安全）+ 更新内存 url_index / instance_map。
+
+        续传命中/扩源重复命中同样追写一行：新实例关联必须崩溃安全地即时落地
+        （重复 sha 行由块末 _update_master_manifest 统一折叠，与同图异 URL 的跨批命中
+        同规则）；仅同 (content_url, instance) 在本 run 内重复命中时去重，避免重复行。
+        """
         rec = _candidate_to_rec(c, images_dir)
         rec["content_url"] = c.content_url
-        # 幂等：同一 content_url 的图已落盘（断点续传命中 / 扩源重复命中）则不再重复写文件，
-        # 仅确保 url_index / instance_map 已含该 sha，避免重复记录与计数膨胀。
-        if c.content_url and c.content_url in url_index and _blob_exists(rec, images_dir):
-            lst = instance_map.setdefault(c.instance, [])
-            if not any(e["sha256"] == c.sha256 for e in lst):
-                lst.append({
-                    "sha256": c.sha256,
-                    "ext": rec.get("ext", ""),
-                    "source": c.source,
-                    "tiers": [c.selected_tier or 0],
-                    "source_rank": c.source_rank,
-                    "source_score": c.source_score,
-                })
-            return
-        if mpath:
+        pkey = (c.content_url, c.instance)
+        if mpath and pkey not in _persisted_keys:
             with meta_lock(meta_dir):
                 with open(mpath, "a", encoding="utf-8") as f:
                     f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-        url_index[c.content_url] = rec
-        lst = instance_map.setdefault(c.instance, [])
-        if not any(e["sha256"] == c.sha256 for e in lst):
-            lst.append({
-                "sha256": c.sha256,
-                "ext": rec.get("ext", ""),
-                "source": c.source,
-                "tiers": [c.selected_tier or 0],
-                "source_rank": c.source_rank,
-                "source_score": c.source_score,
-            })
+            _persisted_keys.add(pkey)
+        url_index[c.content_url] = (c.sha256 or "",
+                                    os.path.splitext(c.local_path or "")[1].lstrip(".")
+                                    if c.local_path else "",
+                                    c.source or "", c.source_authorized)
+        instance_map.setdefault(c.instance, set()).add(c.sha256 or "")
 
     def _active_sources(job: Job) -> List[str]:
         return active_sources(reg, job, dead)
@@ -491,13 +518,13 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                     continue
                 # —— 断点续传：URL 已下载过则直接复用，跳过网络抓取 ——
                 if c.content_url and c.content_url in url_index:
-                    rec = url_index[c.content_url]
-                    cand = _rec_to_candidate(rec, instance, images_dir)
+                    cand = _lake_candidate(url_index[c.content_url], instance,
+                                           c.content_url, images_dir)
                     if cand.sha256 in baseline_shas.get(instance, ()):
                         # 已计入 topup 基数：只补标签关联，不重复计数
                         _persist(cand)
                         continue
-                    C["success"].append(cand)
+                    _emit_success(cand)
                     C["instance_success"][instance] += 1
                     if cand.sha256 and cand.source_authorized:
                         C["cc"] += 1
@@ -521,7 +548,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                         # 与基数图同内容（不同 URL 重复命中）：不重复计数
                         _persist(d)
                         continue
-                    C["success"].append(d)
+                    _emit_success(d)
                     C["instance_success"][instance] += 1
                     C["bytes"] += d.actual_size or 0
                     if d.source_authorized:
@@ -534,9 +561,9 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                     local_new += 1
                 else:
                     if c.status == models.STATUS_GATE_REJECTED:
-                        C["rejected"].append(c)
+                        _emit_rejected(c)
                     else:
-                        C["failed"].append(c)
+                        _emit_failed(c)
                         fk = getattr(c, "fail_kind", None)
                         if fk in DETERMINISTIC_FAIL:
                             C["src_health"][src]["dl_dead"] += 1
@@ -567,6 +594,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                     continue
         for c in loaded:
             searched_per_source[c.source] += 1
+            _note_cand(c)
         C["candidates"] = loaded
         print(f"[阶段一] 复用既有候选 {len(C['candidates'])} 条（--reuse-phase1，跳过检索）",
               flush=True)
@@ -576,6 +604,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                 new_for_job = _search_job(job)
                 C["candidates"].extend(new_for_job)
                 for c in new_for_job:
+                    _note_cand(c)
                     cf.write(json.dumps(c.to_dict(), ensure_ascii=False) + "\n")
                 if i % 50 == 0 or i == total:
                     cf.flush()
@@ -585,20 +614,40 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
     print(f"[阶段一] 各来源候选数: {dict(searched_per_source)}")
 
     if metadata_only:
-        _write_stats(out_dir, jobs, C["candidates"], searched_per_source,
+        _write_stats(out_dir, jobs, cand_stat, C["n_candidates"], searched_per_source,
                      rejected=0, downloaded=0, failed=0, bytes_=0)
         print("[阶段一] 已完成（--metadata-only，未下载）")
-        return {"candidates": len(C["candidates"])}
+        return {"candidates": C["n_candidates"]}
+
+    # ---------- 运行产物流式落盘：success/failed/rejected 即写即弃，不驻留内存 ----------
+    f_success = open(os.path.join(out_dir, "downloads_success.jsonl"), "w", encoding="utf-8")
+    f_failed = open(os.path.join(out_dir, "downloads_failed.jsonl"), "w", encoding="utf-8")
+    f_rejected = open(os.path.join(out_dir, "candidates_rejected.jsonl"), "w", encoding="utf-8")
+    emit_lock = threading.Lock()  # 队列模式下多 worker 并发追写
+
+    def _emit(fh, c: "models.Candidate", key: str) -> None:
+        with emit_lock:
+            fh.write(json.dumps(c.to_dict(), ensure_ascii=False) + "\n")
+            fh.flush()
+            C[key] += 1
+
+    def _emit_success(c: "models.Candidate") -> None:
+        _emit(f_success, c, "n_success")
+
+    def _emit_failed(c: "models.Candidate") -> None:
+        _emit(f_failed, c, "n_failed")
+
+    def _emit_rejected(c: "models.Candidate") -> None:
+        _emit(f_rejected, c, "n_rejected")
 
     # ---------- 阶段二：筛选 + 分组 + 下载（含续传/扩源；--queue 走共享队列） ----------
-    rejected_stage2 = []
     cands_by_instance: Dict[str, list] = defaultdict(list)
     for c in C["candidates"]:
         job = job_by_instance.get(c.instance)
         if job is None:
             c.status = models.STATUS_REJECTED
             c.reject_reason = "找不到对应任务配置"
-            rejected_stage2.append(c)
+            _emit_rejected(c)
             continue
         if c.source_authorized:
             ok, reason = filterer.filter_candidate(
@@ -609,7 +658,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         if not ok:
             c.status = models.STATUS_REJECTED
             c.reject_reason = reason
-            rejected_stage2.append(c)
+            _emit_rejected(c)
             continue
         cands_by_instance[c.instance].append(c)
 
@@ -627,13 +676,13 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         q_since = time.time() - 300.0  # done 计数只算本轮（同 run-id 重启防误判）
         reused_instance = defaultdict(int)
 
-        def _reuse_lake_candidate(rec: dict, instance: str) -> None:
+        def _reuse_lake_candidate(entry: _LakeEntry, instance: str, content_url: str) -> None:
             """湖内已有该 URL：复用记录并补标签关联（不再联网）。"""
-            cand = _rec_to_candidate(rec, instance, images_dir)
+            cand = _lake_candidate(entry, instance, content_url, images_dir)
             if cand.sha256 in baseline_shas.get(instance, ()):
                 _persist(cand)
                 return
-            C["success"].append(cand)
+            _emit_success(cand)
             C["instance_success"][instance] += 1
             reused_instance[instance] += 1
             if cand.sha256 and cand.source_authorized:
@@ -654,7 +703,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                 by_src = defaultdict(list)
                 for c in cs:
                     if c.content_url and c.content_url in url_index:
-                        _reuse_lake_candidate(url_index[c.content_url], instance)
+                        _reuse_lake_candidate(url_index[c.content_url], instance, c.content_url)
                         n_reuse += 1
                         continue
                     by_src[c.source].append(c)
@@ -734,7 +783,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         def _refill_once(limit: int = REFILL_BATCH) -> int:
             """每轮补搜：最多 limit 个未达标标签，每个补搜 1 个健康源。返回新投递数。"""
             nonlocal refill_wave, refill_cursor, refill_idle
-            insts = list(cands_by_instance)
+            insts = refill_instances
             if not insts:
                 return 0
             n_q = 0
@@ -791,7 +840,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                 if cand.sha256 in baseline_shas.get(instance, ()):
                     _persist(cand)
                 else:
-                    C["success"].append(cand)
+                    _emit_success(cand)
                     _count_instance(instance)
                     if cand.sha256 and cand.source_authorized:
                         _count("cc")
@@ -814,7 +863,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                     _persist(d)
                     q.mark_done(item["id"], _candidate_to_rec(d, images_dir))
                     return
-                C["success"].append(d)
+                _emit_success(d)
                 _count_instance(instance)
                 _count("bytes", d.actual_size or 0)
                 if d.source_authorized:
@@ -827,15 +876,15 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                 q.bump_cap(c.source, up=True)      # AIMD：成功 +1 试探加并发
             else:
                 if c.status == models.STATUS_GATE_REJECTED:
-                    C["rejected"].append(c)
+                    _emit_rejected(c)
                     q.mark_skipped(item["id"])   # 分辨率门拒绝：重试无意义
                 elif getattr(c, "fail_kind", None) in DETERMINISTIC_FAIL:
                     # 死链/防盗链：确定性失败，重试无意义，直接跳过
-                    C["failed"].append(c)
+                    _emit_failed(c)
                     _count_src(c.source, "dl_dead")
                     q.mark_skipped(item["id"])
                 else:
-                    C["failed"].append(c)
+                    _emit_failed(c)
                     fk = getattr(c, "fail_kind", None)
                     if fk == "timeout":
                         _count_src(c.source, "dl_timeout")
@@ -848,6 +897,11 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
         _enqueue_wave1()
         n_left = _enqueue_leftovers()
         print(f"[queue] 存量候选放宽投递 {n_left} 条（与下载并行）", flush=True)
+        # 内存释放：候选已全部序列化进 sqlite 队列（payload 字段），驻留池即刻释放，
+        # 避免大批次 reuse-phase1 下 RSS 随候选规模膨胀；补搜只需要实例名清单。
+        refill_instances = list(cands_by_instance)
+        C["candidates"].clear()
+        cands_by_instance.clear()
         stop = threading.Event()
         stats_lock = threading.Lock()
 
@@ -885,7 +939,7 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
                     C["q_done"] += 1
                     if C["q_done"] % 50 == 0:
                         print(f"[queue] worker 处理 {C['q_done']} 件 / 本进程成功 "
-                              f"{len(C['success'])} 张，队列 {q.counts()}", flush=True)
+                              f"{C['n_success']} 张，队列 {q.counts()}", flush=True)
 
         threads = [threading.Thread(target=_worker_loop, daemon=True)
                    for _ in range(max(1, queue_threads))]
@@ -984,38 +1038,37 @@ def run(jobs: List[Job], out_dir: str, images_dir: str,
 
             processed += 1
             if processed % REFRESH_EVERY == 0:
-                print(f"[阶段二] 进度 {processed}/{total} 标签，已下载 {len(C['success'])} 张",
+                print(f"[阶段二] 进度 {processed}/{total} 标签，已下载 {C['n_success']} 张",
                       flush=True)
 
-    # 末尾干净去重重写主清单（传入本块 success 以正确按标签并集）
+    # 末尾干净去重重写主清单：success 记录已在下载时逐条追写 images.jsonl
+    # （_persist，含续传命中的实例关联），此处只做全文件 sha 去重合并，故传空列表。
     if meta_dir:
-        _update_master_manifest(meta_dir, C["success"], run_id or "")
+        _update_master_manifest(meta_dir, [], run_id or "")
         _merge_health(meta_dir, C["src_health"])
-    # 块末调试产出
-    models.write_jsonl(os.path.join(out_dir, "candidates_rejected.jsonl"),
-                       rejected_stage2 + C["rejected"])
-    models.write_jsonl(os.path.join(out_dir, "downloads_success.jsonl"), C["success"])
-    models.write_jsonl(os.path.join(out_dir, "downloads_failed.jsonl"), C["failed"])
+    # 运行产物（success/failed/rejected）已流式落盘，收尾关闭句柄
+    for _fh in (f_success, f_failed, f_rejected):
+        _fh.close()
 
-    _write_stats(out_dir, jobs, C["candidates"], searched_per_source,
-                 rejected=len(rejected_stage2) + len(C["rejected"]),
-                 downloaded=len(C["success"]),
-                 failed=len(C["failed"]),
+    _write_stats(out_dir, jobs, cand_stat, C["n_candidates"], searched_per_source,
+                 rejected=C["n_rejected"],
+                 downloaded=C["n_success"],
+                 failed=C["n_failed"],
                  bytes_=C["bytes"],
                  cc_downloaded=C["cc"],
                  unauth_downloaded=C["unauth"],
                  capped_per_source=C["capped"])
 
-    print(f"[阶段二] 拒绝 {len(rejected_stage2) + len(C['rejected'])} / "
-          f"下载成功 {len(C['success'])} (授权 {C['cc']} + 未授权 {C['unauth']}) / "
-          f"失败 {len(C['failed'])} / 封顶跳过 {C['capped']}")
+    print(f"[阶段二] 拒绝 {C['n_rejected']} / "
+          f"下载成功 {C['n_success']} (授权 {C['cc']} + 未授权 {C['unauth']}) / "
+          f"失败 {C['n_failed']} / 封顶跳过 {C['capped']}")
     return {
-        "candidates": len(C["candidates"]),
-        "rejected": len(rejected_stage2) + len(C["rejected"]),
-        "downloaded": len(C["success"]),
+        "candidates": C["n_candidates"],
+        "rejected": C["n_rejected"],
+        "downloaded": C["n_success"],
         "cc_downloaded": C["cc"],
         "unauthorized_downloaded": C["unauth"],
-        "failed": len(C["failed"]),
+        "failed": C["n_failed"],
         "bytes": C["bytes"],
     }
 
@@ -1172,19 +1225,12 @@ def _update_master_manifest_locked(meta_dir: str, success: list, run_id: str) ->
     os.symlink(run_id, latest)
 
 
-def _write_stats(out_dir, jobs, candidates, searched_per_source,
+def _write_stats(out_dir, jobs, cand_stat, n_candidates, searched_per_source,
                  rejected, downloaded, failed, bytes_,
                  cc_downloaded=0, unauth_downloaded=0, capped_per_source=0):
     lines = []
-    by_instance = defaultdict(lambda: {"candidates": 0, "cc": 0, "zh": 0})
-    by_source = defaultdict(int)
-    for c in candidates:
-        by_instance[c.instance]["candidates"] += 1
-        by_source[c.source] += 1
-        if c.query_lang == "zh":
-            by_instance[c.instance]["zh"] += 1
     for j in jobs:
-        t = by_instance[j.instance]
+        t = cand_stat.get(j.instance) or {"candidates": 0, "zh": 0}
         zh_ratio = (t["zh"] / t["candidates"]) if t["candidates"] else 0
         lines.append(json.dumps({
             "instance": j.instance,
@@ -1197,8 +1243,8 @@ def _write_stats(out_dir, jobs, candidates, searched_per_source,
     lines.append(json.dumps({
         "instance": "TOTAL",
         "source": "*",
-        "candidates": len(candidates),
-        "by_source": dict(by_source),
+        "candidates": n_candidates,
+        "by_source": dict(searched_per_source),
         "rejected": rejected,
         "downloaded": downloaded,
         "cc_downloaded": cc_downloaded,

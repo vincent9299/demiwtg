@@ -27,3 +27,6 @@ logs/
 
 # LLM 生成的源 spec（运行时产物，见 AGENTS.md 2.3）
 collect/specs/
+
+# 本地临时验证目录（stream 冒烟等一次性产物，勿提交）
+_st_tmp/

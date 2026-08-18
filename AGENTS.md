@@ -107,7 +107,7 @@ data/dataset/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 文�
 
 ### 2.3 运行时状态在顶层 state/（不属于数据湖，按模块归属分子目录）
 
-`state/collect/`：死信队列（`.dlq_*.sqlite3` + flags）、`source_health.json`、采集批次产物（`runs/<run_id>/`，含 `_latest` 软链）、`source_registry.jsonl`（源生命周期覆盖层，append-only）、`auto/`（缺口报告/源提案/探测账本）；LLM 生成的源 spec 落 `collect/specs/`（不入 git）；`state/dataset_index/`：COCO 缓存；`state/.lancedb/`：Lance 查询索引；`state/filter_vlm/`：VLM 过滤结果；`state/annotate_vlm/`：VLM 打标结果（results.jsonl）与打标队列（queue.sqlite3，collect/stream.py 生产、curation/annotate_vlm.py 消费）。代码约定：仓库根由 `--meta`（默认 `data/dataset/meta`）向上三级推导。永远不进 meta/、不进 data/dataset/、不进 git。
+`state/collect/`：死信队列（`.dlq_*.sqlite3` + flags）、`source_health.json`、采集批次产物（`runs/<run_id>/`，含 `_latest` 软链）、`source_registry.jsonl`（源生命周期覆盖层，append-only）、`auto/`（缺口报告/源提案/探测账本）；LLM 生成的源 spec 落 `collect/specs/`（不入 git）；`state/dataset_index/`：COCO 缓存；`state/.lancedb/`：Lance 查询索引；`state/filter_vlm/`：VLM 过滤结果；`state/annotate_vlm/`：VLM 打标结果（results.jsonl）与打标队列（queue.sqlite3，collect/stream.py 生产、curation/annotate_vlm.py 消费）；`state/emerge/`：taxonomy 涌现缺口分析产物（caption embedding/聚类/LLM 命名对齐缓存/差异报告，curation/emerge.py 生产，人审消费，全部可从 images.jsonl 重算）。代码约定：仓库根由 `--meta`（默认 `data/dataset/meta`）向上三级推导。永远不进 meta/、不进 data/dataset/、不进 git。
 
 ### 2.4 一致性规则
 
@@ -122,7 +122,7 @@ data/dataset/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 文�
 |---|---|---|
 | `taxonomy/` | 标签体系构建（build_unified）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 实例知识，各一次 LLM 调用） | 各脚本 `--write` |
 | `collect/` | 图片采集：任务配置、来源适配器（wikimedia/inaturalist/baidu/openverse/scrapers/cn_web/coco/hf_dataset）、下载、队列、增量消费、主清单 upsert、LanceDB 查询索引；常驻流式采集（stream：缺口驱动检索→DownloadQueue→流式下载，与批处理 run 并存） | `collect/cli.py`（含 `stream` 子命令） |
-| `curation/` | 数据策展：失败重试（retry_failed）、VLM 图片质量过滤（filter_vlm）、VLM 知识打标（annotate_vlm：run 批量 / stream 常驻消费打标队列 / apply 合并） | 各脚本直接运行 |
+| `curation/` | 数据策展：失败重试（retry_failed）、VLM 图片质量过滤（filter_vlm）、VLM 知识打标（annotate_vlm：run 批量 / stream 常驻消费打标队列 / apply 合并）、taxonomy 涌现缺口分析（emerge：embed/cluster/name/align/report，数据有树无的新概念提议，人审入树） | 各脚本直接运行 |
 | `viewer/` | 查看器闭环：页面 tag_tree_explorer.html + 构建脚本 build_viewer.py + 产物 build/（sidecar taxonomy.js/instances.js/imgs.js 与 standalone 单文件，gitignore）；HTML 与 build/ 同址是 file:// 双击可用的硬要求 | `viewer/build_viewer.py` |
 
 > **架构决策（2026-08-17）**：broader/ 模块（Open-BROADER 上下位关系模型）迁出本仓库，回归独立项目 `/root/data/projects/open_broader/`（代码、55G 训练语料、训练产物、历史日志整体搬移，脚本内绝对路径已批量改写至新家）。理由：上下位判断本质依赖世界知识，通用大模型（Qwen3.8-27B 批审计 + 现成 embedding 检索）已可覆盖 taxonomy 树审计场景，且训练语料正确性存疑、课题短期难推进，故冻结训练、语料与 checkpoint 原地归档。本决策推翻 2026-08-16 的并入决策；未来如复活，先做大模型 vs BROADER 的 head-to-head 评测再立项。

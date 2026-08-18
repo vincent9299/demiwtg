@@ -351,7 +351,9 @@ async def call_vlm(client: httpx.AsyncClient, endpoint: str, model: str,
     last_err = ""
     for attempt in range(1, retries + 1):
         try:
-            r = await client.post(endpoint, json=payload, timeout=120)
+            # 超时给足：单请求含图片 prefill + 长 caption 生成，
+            # 并发下正常耗时 100-300s，120s 会把正常请求误杀成超时重试
+            r = await client.post(endpoint, json=payload, timeout=600)
             r.raise_for_status()
             content = r.json()["choices"][0]["message"]["content"]
             return parse_annotation(content), attempt
@@ -421,7 +423,10 @@ async def worker(name: str, queue: asyncio.Queue, client: httpx.AsyncClient,
             t0 = time.time()
             rec = {"sha256": row["sha256"], "path": row["path"],
                    "instances": row.get("instances", [])}
-            encoded = encode_image(args.dataset, row, args.max_edge)
+            # PIL 解码/缩放是同步阻塞的，直接调用会卡死事件循环，
+            # 把并发请求串行化（表现为 GPU 饥饿 + 客户端大面积超时）
+            encoded = await asyncio.to_thread(
+                encode_image, args.dataset, row, args.max_edge)
             if encoded is None:
                 rec.update({"ok": False, "error": "image_unreadable"})
             else:
@@ -605,7 +610,8 @@ async def stream_worker(queue: asyncio.Queue, client: httpx.AsyncClient,
             row = {"sha256": item["sha256"], "path": item["path"],
                    "instances": item["instances"]}
             rec = dict(row)
-            encoded = encode_image(args.dataset, row, args.max_edge)
+            encoded = await asyncio.to_thread(
+                encode_image, args.dataset, row, args.max_edge)
             if encoded is None:
                 rec.update({"ok": False, "error": "image_unreadable"})
             else:
