@@ -10,7 +10,8 @@
 
 机制（共用 llm_common.py）：
   - OpenAI 兼容端点（LLM_BASE_URL），LLM_WEB_SEARCH=1 可联网核实（仅官方端点）
-  - name 全局唯一（一条记录挂多个路径，见 AGENTS.md 1.5），一个实体只生成一次
+  - name 全局唯一（一个实体一条记录，见 AGENTS.md 1.5），一个实体只生成一次
+  - 挂载路径不落实例表：--branch 过滤与 prompt 上下文从 taxonomy.json 现算（mount_map）
   - 断点续跑：缓存 data/taxonomy/.llm_kb_cache.jsonl，--overwrite 重生成
   - 默认跳过 source=curated 与已富化实例；--only-empty 只补缺口、--refresh 全量重生成
 
@@ -32,9 +33,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from taxonomy import llm_common as llm
+from taxonomy.mount_map import load_mount_map
 
 ROOT = Path(__file__).resolve().parent.parent    # 仓库根
 META_PATH = ROOT / "data" / "taxonomy" / "instances.json"
+TAXONOMY_PATH = ROOT / "data" / "taxonomy" / "taxonomy.json"
 CACHE_PATH = ROOT / "data" / "taxonomy" / ".llm_kb_cache.jsonl"
 
 SYSTEM_PROMPT = (
@@ -68,15 +71,15 @@ def build_user_prompt(name, taxonomy_paths, it):
     )
 
 
-def load_targets(args):
-    """实例列表：契约保证 name 全局唯一（一条记录挂多个路径，见 AGENTS.md 1.5）。"""
+def load_targets(args, mounts):
+    """实例列表：契约保证 name 全局唯一；挂载路径由 mounts（树现算）提供。"""
     doc = json.load(open(META_PATH, encoding="utf-8"))
     out = []
     for it in doc.get("instances", []):
         name = it.get("name", "")
         if not name:
             continue
-        paths = it.get("taxonomy_paths") or []
+        paths = mounts.get(name, [])
         if args.branch and not any(args.branch in p for p in paths):
             continue
         if (not args.refresh) and it.get("source") == "curated":
@@ -130,7 +133,8 @@ def main():
     llm.add_common_args(ap)
     args = ap.parse_args()
 
-    targets = load_targets(args)
+    mounts = load_mount_map(TAXONOMY_PATH)
+    targets = load_targets(args, mounts)
     cache = llm.JsonlCache(CACHE_PATH)
     done = set() if args.overwrite else cache.done_keys()
     targets = [n for n in targets if n not in done]
@@ -147,7 +151,7 @@ def main():
         by_name = {it["name"]: it for it in doc.get("instances", [])}
         for name in targets[: max(args.limit, 3)]:
             it = by_name.get(name, {})
-            paths = "、".join(it.get("taxonomy_paths") or [])
+            paths = "、".join(mounts.get(name, []))
             print("=" * 60)
             print(build_user_prompt(name, paths, it))
         print("=" * 60)
@@ -162,7 +166,7 @@ def main():
         doc = json.load(open(META_PATH, encoding="utf-8"))
         rows = [x for x in doc.get("instances", []) if x["name"] == name]
         it = rows[0] if rows else {}
-        paths = "、".join(it.get("taxonomy_paths") or [])
+        paths = "、".join(mounts.get(name, []))
         user = build_user_prompt(name, paths, it)
         rec = llm.generate(client, SYSTEM_PROMPT, user, use_responses)
         ok = bool(rec and rec.get("desc"))

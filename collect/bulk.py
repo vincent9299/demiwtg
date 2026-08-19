@@ -32,6 +32,7 @@
         --max-posts 200000 --per-instance 2 --dry-run     # 小规模试算
     python3 collect/cli.py bulk --taxonomy ... --jobs 初音未来 --reuse
     python3 collect/cli.py bulk --by-character --min-score 10  # 代表作模式
+    python3 collect/cli.py bulk --recover-meta    # 回捞已入湖 post 的原始元数据
 """
 
 from __future__ import annotations
@@ -610,6 +611,29 @@ def _existing_asset_ids(meta_dir: str) -> set:
     return out
 
 
+def _danbooru_pids(meta_dir: str) -> set:
+    """images.jsonl 中 bulk_danbooru2023 图的 post id 集合（asset_ids 解析）。"""
+    pids = set()
+    mpath = os.path.join(meta_dir, "images.jsonl")
+    if not os.path.exists(mpath):
+        return pids
+    with open(mpath, encoding="utf-8") as f:
+        for line in f:
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if rec.get("source") != DATASETS["danbooru2023"]["source"]:
+                continue
+            aid = str((rec.get("asset_ids") or {}).get("bulk_danbooru2023") or "")
+            if aid.startswith("danbooru2023-"):
+                try:
+                    pids.add(int(aid.split("-", 1)[1]))
+                except ValueError:
+                    continue
+    return pids
+
+
 def _candidate_of(profile: dict, row: dict) -> "models.Candidate":
     pid = row["post_id"]
     ext = (row.get("file_ext") or "").lower()
@@ -754,6 +778,86 @@ def download_selected(profile: dict, rows: list,
 
 
 # ---------------------------------------------------------------------------
+# 原始元数据回捞：已入湖 post 的完整 tag_string 等字段持久落盘
+# ---------------------------------------------------------------------------
+def recover_meta(meta_dir: str, dataset: str = "danbooru2023",
+                 dl_threads: int = 8) -> int:
+    """把已入湖图的原始 post 记录从 posts 缓存捞出，持久落 posts_meta.jsonl。
+
+    背景：scan_posts* 流式扫描后 tag_string 即弃，打标/审计再要用只能重扫。
+    本函数按 images.jsonl 的 asset_ids 圈定 pid，整记录（含 tag_string/
+    tag_string_character/tag_string_copyright/tag_string_artist/score 等）
+    逐行 append 进 state/collect/bulk/<dataset>/posts_meta.jsonl；已落 pid
+    跳过（中断重跑幂等）。posts.tar.gz 缓存本身亦保留，即原始元数据双保险。
+    返回本次新增记录数。"""
+    profile = DATASETS[dataset]
+    state_dir = _state_dir(meta_dir, dataset)
+    out_path = os.path.join(state_dir, "posts_meta.jsonl")
+    want = _danbooru_pids(meta_dir)
+    if not want:
+        print("[bulk] images.jsonl 无 %s 图，无需回捞" % profile["source"],
+              flush=True)
+        return 0
+    got = set()
+    if os.path.exists(out_path):
+        with open(out_path, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    got.add(int(json.loads(line)["id"]))
+                except (json.JSONDecodeError, KeyError, ValueError):
+                    continue
+    todo = want - got
+    print(f"[bulk] 回捞目标 {len(want):,} pid / 已落 {len(got):,} / "
+          f"待捞 {len(todo):,}", flush=True)
+    if not todo:
+        return 0
+    posts_path = _ensure_posts_cache(profile, state_dir, dl_threads)
+    n = n_scan = 0
+    t0 = time.time()
+    with open(posts_path, "rb") as raw, \
+            open(out_path, "a", encoding="utf-8") as out:
+        tf = tarfile.open(fileobj=raw, mode="r|gz")
+        try:
+            for m in tf:
+                if not m.isfile() or \
+                        os.path.basename(m.name) != profile["posts_member"]:
+                    continue
+                f = tf.extractfile(m)
+                try:
+                    for line in f:
+                        n_scan += 1
+                        # pid 先串前缀快筛，命中才全量解析（千万级行省解析开销；
+                        # dump 行形如 {"id":1,...}，id 恒为首字段）
+                        if b'"id":' not in line[:16]:
+                            continue
+                        try:
+                            rec = json.loads(line)
+                        except (json.JSONDecodeError, UnicodeDecodeError):
+                            continue
+                        pid = rec.get("id")
+                        if pid in todo:
+                            out.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                            todo.discard(pid)
+                            n += 1
+                            if not todo:
+                                break
+                        if n_scan % 1000000 == 0:
+                            print(f"[bulk] 已扫 {n_scan:,} / 捞回 {n:,} / "
+                                  f"剩 {len(todo):,} / {time.time()-t0:.0f}s",
+                                  flush=True)
+                except (OSError, EOFError, tarfile.TarError) as e:
+                    print(f"[warn] posts 流提前中断: {e}", flush=True)
+                    break
+                if not todo:
+                    break
+        finally:
+            tf.close()
+    print(f"[bulk] 回捞完成：新增 {n:,} 条 → {out_path}（剩 {len(todo):,} 未命中："
+          f"dump 后删档或 pid 异常）/ {time.time()-t0:.0f}s", flush=True)
+    return n
+
+
+# ---------------------------------------------------------------------------
 # 入口
 # ---------------------------------------------------------------------------
 def bulk(meta_dir: str, taxonomy: str, dataset: str, images_dir: str,
@@ -844,7 +948,14 @@ def main(argv=None):
     ap.add_argument("--by-character", action="store_true",
                     help="代表作模式：不做 instances 匹配，按角色 tag 分组每角色取 "
                          "top1（选单 selected_bychar.jsonl；配合 --min-score/--min-side）")
+    ap.add_argument("--recover-meta", action="store_true",
+                    help="只回捞已入湖 post 的原始元数据（tag_string 等）持久落 "
+                         "posts_meta.jsonl，不扫描选单不下载")
     args = ap.parse_args(argv)
+
+    if args.recover_meta:
+        recover_meta(args.meta, args.dataset, args.dl_threads)
+        return
 
     run_id = time.strftime("bulk_%Y%m%d_%H%M%S")
     bulk(args.meta, args.taxonomy, args.dataset, args.images_dir, run_id,

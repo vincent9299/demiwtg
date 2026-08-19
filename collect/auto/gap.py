@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """缺口分析（六步闭环第 1 步，纯确定性代码，无 LLM、无网络）。
 
-本质：instances 全集 − images.jsonl 达标集（taxonomy 仅作聚簇元数据）。
+本质：instances 全集 − images.jsonl 达标集（树仅作聚簇元数据）。
 - 达标判据：该实例在 images.jsonl 中的图数 >= min_images_per_instance（config.DEFAULTS）。
-- 聚簇：按实例首个 taxonomy_path 的根下一级节点分组（缺口以簇为单位喂给 discover，
+- 聚簇：按实例在树上首个挂载路径的根下一级节点分组（挂载关系从同目录
+  taxonomy.json 现算，见 taxonomy/mount_map.py；缺口以簇为单位喂给 discover，
   而非单实例——同一簇的缺口通常能被同一批源覆盖）。
 产物：state/collect/auto/gap_report.json（人工过目 + discover 输入）。
 
@@ -21,6 +22,7 @@ from typing import Dict, List
 
 from . import auto_dir
 from ..config import DEFAULTS
+from taxonomy.mount_map import load_mount_map, tree_sibling_of
 
 
 def _count_images(meta_dir: str) -> Dict[str, int]:
@@ -43,9 +45,8 @@ def _count_images(meta_dir: str) -> Dict[str, int]:
     return counts
 
 
-def _cluster_of(instance: dict) -> str:
-    """首个 taxonomy_path 的根下一级节点；无路径归入 (未挂载)。"""
-    paths = instance.get("taxonomy_paths") or []
+def _cluster_of(paths: list) -> str:
+    """首个挂载路径的根下一级节点；未挂载归入 (未挂载)。"""
     if not paths:
         return "(未挂载)"
     parts = [p.strip() for p in paths[0].split(" / ")]
@@ -56,6 +57,7 @@ def build_report(taxonomy_path: str, meta_dir: str,
                  threshold: int, top: int) -> dict:
     with open(taxonomy_path, encoding="utf-8") as f:
         data = json.load(f)
+    mounts = load_mount_map(tree_sibling_of(taxonomy_path))
     counts = _count_images(meta_dir)
 
     clusters: Dict[str, List[dict]] = defaultdict(list)
@@ -68,7 +70,7 @@ def build_report(taxonomy_path: str, meta_dir: str,
         if have >= threshold:
             achieved += 1
             continue
-        clusters[_cluster_of(it)].append({
+        clusters[_cluster_of(mounts.get(name, []))].append({
             "name": name,
             "have": have,
             "need": threshold - have,

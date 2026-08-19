@@ -327,7 +327,22 @@ def parse_annotation(text: str) -> dict:
     return {"ok": True, "kb_match": km, "richness": ri, "caption": cap}
 
 
-async def call_vlm(client: httpx.AsyncClient, endpoint: str, model: str,
+class EndpointPool:
+    """多端点轮询：DP 多实例时每请求轮流打一个端点（单事件循环内计数即可）。
+    重试时取下一端点，天然避开故障实例。"""
+
+    def __init__(self, endpoints: list[str]):
+        assert endpoints, "端点列表不能为空"
+        self.endpoints = endpoints
+        self.i = 0
+
+    def next(self) -> str:
+        ep = self.endpoints[self.i % len(self.endpoints)]
+        self.i += 1
+        return ep
+
+
+async def call_vlm(client: httpx.AsyncClient, pool: EndpointPool, model: str,
                    b64: str, blocks: str, max_tokens: int,
                    retries: int) -> tuple[dict, int]:
     """调 vLLM，返回 (解析后的标注, 尝试次数)。"""
@@ -353,7 +368,7 @@ async def call_vlm(client: httpx.AsyncClient, endpoint: str, model: str,
         try:
             # 超时给足：单请求含图片 prefill + 长 caption 生成，
             # 并发下正常耗时 100-300s，120s 会把正常请求误杀成超时重试
-            r = await client.post(endpoint, json=payload, timeout=600)
+            r = await client.post(pool.next(), json=payload, timeout=600)
             r.raise_for_status()
             content = r.json()["choices"][0]["message"]["content"]
             return parse_annotation(content), attempt
@@ -434,7 +449,7 @@ async def worker(name: str, queue: asyncio.Queue, client: httpx.AsyncClient,
                 await gate.acquire()
                 try:
                     ann, attempts = await call_vlm(
-                        client, args.endpoint, args.model, encoded,
+                        client, args.pool, args.model, encoded,
                         blocks, args.max_tokens, args.retries)
                 finally:
                     await gate.release()
@@ -489,8 +504,9 @@ async def run(args, kb: dict):
         gate = AdaptiveGate(min(args.concurrency, args.max_concurrency))
         queue: asyncio.Queue = asyncio.Queue(maxsize=args.max_concurrency * 4)
 
-        limits = httpx.Limits(max_connections=args.max_concurrency + 4,
-                              max_keepalive_connections=args.max_concurrency)
+        limits = httpx.Limits(
+            max_connections=(args.max_concurrency + 4) * len(args.pool.endpoints),
+            max_keepalive_connections=args.max_concurrency * len(args.pool.endpoints))
         async with httpx.AsyncClient(limits=limits) as client:
             workers = [asyncio.create_task(
                 worker(f"w{i}", queue, client, args, kb, gate, out_f,
@@ -550,6 +566,19 @@ def merge_results(meta_dir: Path, ann: dict) -> int:
     return n_merged
 
 
+def sync_emerge_embeddings(meta: Path):
+    """best effort：新标注的 caption 增量补进 emerge 两池 embedding 索引。
+
+    taxonomy 涌现分析（curation/emerge.py）的 embed 产物直接长在打标
+    下游，避免每轮新数据全量重 embed；失败只告警，不阻断打标主流程。"""
+    try:
+        from curation import emerge
+        emerge.sync(meta)
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] emerge embedding 同步失败（不影响打标）: {e}",
+              flush=True)
+
+
 def apply(args):
     if not args.out.exists():
         sys.exit(f"结果文件不存在：{args.out}（先 run）")
@@ -561,12 +590,15 @@ def apply(args):
     n_merged = merge_results(args.meta, ann)
     print(f"已合并 {n_merged} 条进 {args.meta / 'images.jsonl'}"
           "（meta_lock 下原子替换，其余字段未动）")
+    if not args.no_embed_sync and n_merged:
+        sync_emerge_embeddings(args.meta)
 
 
 # ---------------------------------------------------------------------------
 # stream 子命令：常驻消费打标队列（与 collect stream 构成流水线第三级）
 # ---------------------------------------------------------------------------
-STREAM_FLUSH_SEC = 60        # 合并缓冲最长滞留时间
+STREAM_FLUSH_SEC = 240       # 合并缓冲最长滞留时间（主清单 400MB+ 后全量重写一次
+                             # ~15-20s CPU，频率过高会 GIL 争抢饿死 GPU，放宽到 4 分钟）
 
 
 def backfill(aq: AnnotateQueue, args) -> int:
@@ -619,7 +651,7 @@ async def stream_worker(queue: asyncio.Queue, client: httpx.AsyncClient,
                 await gate.acquire()
                 try:
                     ann, attempts = await call_vlm(
-                        client, args.endpoint, args.model, encoded,
+                        client, args.pool, args.model, encoded,
                         blocks, args.max_tokens, args.retries)
                 finally:
                     await gate.release()
@@ -649,7 +681,11 @@ async def stream_worker(queue: asyncio.Queue, client: httpx.AsyncClient,
 
 async def stream_flusher(args, merge_buf: dict, lock: asyncio.Lock,
                          counter: dict, stop_evt: threading.Event):
-    """每 flush_every 条或 STREAM_FLUSH_SEC 秒把合并缓冲写进 images.jsonl。"""
+    """每 flush_every 条或 STREAM_FLUSH_SEC 秒把合并缓冲写进 images.jsonl。
+
+    merge_results 要全量重写 images.jsonl（秒~十秒级），同步调用会冻结
+    事件循环，期间 worker 无法收发请求，vLLM 引擎周期性饥饿；丢进线程池，
+    合并与推理并行。flusher 是单 task 串行 await，不会并发重入合并。"""
     last = time.time()
     while True:
         await asyncio.sleep(5.0)
@@ -663,11 +699,15 @@ async def stream_flusher(args, merge_buf: dict, lock: asyncio.Lock,
             buf = dict(merge_buf)      # 原地清空调用方缓冲（不能重绑定）
             merge_buf.clear()
         if buf:
-            n = merge_results(args.meta, buf)
+            n = await asyncio.to_thread(merge_results, args.meta, buf)
             counter["merged"] += n
             last = time.time()
             print(f"[stream] 合并 {n} 条标注进 images.jsonl（累计 "
                   f"{counter['merged']}）", flush=True)
+            if not args.no_embed_sync and n:
+                # 线程池内跑：embedding 与推理并行，不冻结事件循环
+                await asyncio.to_thread(
+                    sync_emerge_embeddings, args.meta)
 
 
 async def stream_main(args, kb: dict):
@@ -698,8 +738,9 @@ async def stream_main(args, kb: dict):
     merge_buf: dict = {}
     lock = asyncio.Lock()
 
-    limits = httpx.Limits(max_connections=args.max_concurrency + 4,
-                          max_keepalive_connections=args.max_concurrency)
+    limits = httpx.Limits(
+        max_connections=(args.max_concurrency + 4) * len(args.pool.endpoints),
+        max_keepalive_connections=args.max_concurrency * len(args.pool.endpoints))
     with open(args.out, "a", encoding="utf-8") as out_f:
         async with httpx.AsyncClient(limits=limits) as client:
             workers = [asyncio.create_task(stream_worker(
@@ -772,13 +813,14 @@ def main():
     add_common(pr)
     pr.add_argument("--dataset", type=Path, default=Path("data/dataset"),
                     help="数据湖根目录（默认 data/dataset）")
-    pr.add_argument("--endpoint", default=DEFAULT_ENDPOINT, help="vLLM chat completions 地址")
+    pr.add_argument("--endpoint", default=DEFAULT_ENDPOINT,
+                    help="vLLM chat completions 地址（逗号分隔可填多个，DP 多实例轮询）")
     pr.add_argument("--model", default=DEFAULT_MODEL)
     pr.add_argument("--concurrency", type=int, default=16, help="初始并发（自适应起点）")
     pr.add_argument("--min-concurrency", type=int, default=8, help="自适应下限")
     pr.add_argument("--max-concurrency", type=int, default=48, help="自适应上限（worker 池大小）")
     pr.add_argument("--adapt-step", type=int, default=4, help="每次调整的并发步长")
-    pr.add_argument("--max-edge", type=int, default=1280, help="送模型前最长边缩放阈值")
+    pr.add_argument("--max-edge", type=int, default=1024, help="送模型前最长边缩放阈值")
     pr.add_argument("--max-tokens", type=int, default=600)
     pr.add_argument("--retries", type=int, default=3)
     pr.add_argument("--instance", default=None, help="只处理含该实例名的图")
@@ -788,24 +830,29 @@ def main():
 
     pa = sub.add_parser("apply", help="把三字段合并进 images.jsonl")
     add_common(pa)
+    pa.add_argument("--no-embed-sync", action="store_true",
+                    help="合并后不增量同步 emerge embedding 索引")
 
     ps = sub.add_parser("stream", help="常驻消费打标队列（collect stream 的下游）")
     add_common(ps)
     ps.add_argument("--dataset", type=Path, default=Path("data/dataset"),
                     help="数据湖根目录（默认 data/dataset）")
-    ps.add_argument("--endpoint", default=DEFAULT_ENDPOINT, help="vLLM chat completions 地址")
+    ps.add_argument("--endpoint", default=DEFAULT_ENDPOINT,
+                    help="vLLM chat completions 地址（逗号分隔可填多个，DP 多实例轮询）")
     ps.add_argument("--model", default=DEFAULT_MODEL)
     ps.add_argument("--concurrency", type=int, default=16, help="初始并发（自适应起点）")
     ps.add_argument("--min-concurrency", type=int, default=8, help="自适应下限")
     ps.add_argument("--max-concurrency", type=int, default=48, help="自适应上限（worker 池大小）")
     ps.add_argument("--adapt-step", type=int, default=4, help="每次调整的并发步长")
-    ps.add_argument("--max-edge", type=int, default=1280, help="送模型前最长边缩放阈值")
+    ps.add_argument("--max-edge", type=int, default=1024, help="送模型前最长边缩放阈值")
     ps.add_argument("--max-tokens", type=int, default=600)
     ps.add_argument("--retries", type=int, default=3)
     ps.add_argument("--flush-every", type=int, default=50,
                     help="成功标注满 N 条即合并进 images.jsonl（默认 50，或 60s 先到者）")
     ps.add_argument("--no-backfill", action="store_true",
                     help="不回填存量无标注图（只消费新投递）")
+    ps.add_argument("--no-embed-sync", action="store_true",
+                    help="合并后不增量同步 emerge embedding 索引")
     ps.add_argument("--log-every", type=int, default=50)
 
     pp = sub.add_parser("report", help="分布统计与样例抽查")
@@ -813,6 +860,11 @@ def main():
 
     args = p.parse_args()
     args.meta = args.meta.resolve()
+    if args.cmd in ("run", "stream"):
+        eps = [e.strip() for e in args.endpoint.split(",") if e.strip()]
+        args.pool = EndpointPool(eps)
+        if len(eps) > 1:
+            print(f"多端点轮询：{eps}")
     if args.cmd == "run":
         args.dataset = args.dataset.resolve()
         kb = load_instance_kb(repo_root_from_meta(args.meta))

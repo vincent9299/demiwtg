@@ -42,12 +42,14 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # 仓库根入 sys.path
 from taxonomy import llm_common  # noqa: E402
+from taxonomy.mount_map import load_mount_map, tree_sibling_of  # noqa: E402
 
 POOLS = ("anom", "ctrl")
 LOW_KM = 3          # 异常池阈值：kb_match <= 3
@@ -166,21 +168,19 @@ def _load_embeddings(edir: Path, pool: str) -> "np.ndarray | None":
     return np.concatenate([np.load(p)["emb"] for p in parts])
 
 
-def embed(args):
-    meta = Path(args.meta)
-    edir = emerge_dir(meta)
-    fn, backend = make_embedder(args)
-    print("embedding 后端: %s" % backend)
+def select_pool_rows(meta: Path, pools, limit: int = 0) -> dict:
+    """扫一遍 images.jsonl 定各池待 embed 候选（增量：已入 index 的 sha 剔除）。
 
-    pools = POOLS if args.pool == "both" else (args.pool,)
+    对照组确定性抽样：kb_match>=HIGH_KM 候选排序取前 CTRL_SAMPLE；
+    异常池全量 kb_match<=LOW_KM。返回 {pool: [row,...]}。
+    """
+    edir = emerge_dir(meta)
     done = {p: {r["sha256"] for r in _load_index(edir, p)} for p in pools}
     counts = {p: len(done[p]) for p in pools}
     todo = {p: [] for p in pools}
 
-    # 对照组候选：一次扫描收集高匹配 sha256；确定性抽样 = 排序取前 CTRL_SAMPLE
     ctrl_sel = None
-    need_ctrl = "ctrl" in pools
-    if need_ctrl:
+    if "ctrl" in pools:
         hi = []
         with open(meta / "images.jsonl", encoding="utf-8") as f:
             for line in f:
@@ -214,7 +214,7 @@ def embed(args):
                     pass
                 else:
                     continue
-                if sha in done[p] or args.limit and counts[p] + len(todo[p]) >= args.limit:
+                if sha in done[p] or limit and counts[p] + len(todo[p]) >= limit:
                     continue
                 todo[p].append({"sha256": sha, "caption": cap, "kb_match": km,
                                 "instances": rec.get("instances") or []})
@@ -222,54 +222,101 @@ def embed(args):
     print("主清单 %d 行；本轮待 embed：%s（已存量 %s）" % (
         n_rows, {p: len(todo[p]) for p in pools},
         {p: counts[p] for p in pools}))
-    total = {p: counts[p] + len(todo[p]) for p in pools}
+    return todo
 
-    from concurrent.futures import ThreadPoolExecutor
+
+def _expected_dim(edir: Path, pool: str) -> "int | None":
+    """已有分块向量维度（embedding 空间一致性基准）；无分块返 None。"""
+    first = sorted(edir.glob("emb_%s_*.npz" % pool))
+    if not first:
+        return None
+    return int(np.load(first[0])["emb"].shape[1])
+
+
+def _embed_pool(edir: Path, pool: str, todo: list, fn) -> int:
+    """并发 embed todo 并落盘（index 追加 + 新 npz 分块）；返回写入条数。
+
+    新向量维度与已有分块不一致时直接报错：换 embedding 后端会污染
+    向量空间，应保持同一后端，或清空 index/emb 全量重算。"""
+    if not todo:
+        return 0
+    dim = _expected_dim(edir, pool)
+    total = len(_load_index(edir, pool)) + len(todo)
+    done_n = 0
+    idx_f = open(edir / ("index_%s.jsonl" % pool), "a", encoding="utf-8")
+    seq = len(list(edir.glob("emb_%s_*.npz" % pool)))
+    ex = ThreadPoolExecutor(max_workers=HTTP_WORKERS)
+    buf_rows: list = []
+    buf_vecs: list = []
+
+    def flush():
+        """攒满即落盘：index 追加写 + embedding 新分块（断点续跑粒度）。"""
+        nonlocal seq, done_n
+        if not buf_rows:
+            return
+        for r in buf_rows:
+            idx_f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        idx_f.flush()
+        arr = np.asarray(buf_vecs, dtype=np.float32)
+        if dim is not None and arr.shape[1] != dim:
+            raise RuntimeError(
+                "新向量维度 %d 与已有分块 %d 不一致：embedding 后端不可混用，"
+                "请保持同一后端或清空 index/emb 全量重算" % (arr.shape[1], dim))
+        np.savez_compressed(
+            edir / ("emb_%s_%04d.npz" % (pool, seq)), emb=arr)
+        seq += 1
+        done_n += len(buf_rows)
+        print("[%s] 已 embed %d / %d" % (pool, total - len(todo) + done_n,
+                                          total), flush=True)
+        buf_rows.clear()
+        buf_vecs.clear()
+
+    try:
+        for i in range(0, len(todo), HTTP_BATCH * HTTP_WORKERS):
+            wave = todo[i:i + HTTP_BATCH * HTTP_WORKERS]
+            batches = [wave[j:j + HTTP_BATCH]
+                       for j in range(0, len(wave), HTTP_BATCH)]
+            futures = [(b, ex.submit(fn, [r["caption"] for r in b]))
+                       for b in batches]
+            for b, fut in futures:
+                buf_vecs.extend(fut.result())
+                buf_rows.extend(b)
+            if len(buf_rows) >= 2000:
+                flush()
+        flush()
+    finally:
+        ex.shutdown(wait=True)
+        idx_f.close()
+    return len(todo)
+
+
+def embed(args):
+    meta = Path(args.meta)
+    fn, backend = make_embedder(args)
+    print("embedding 后端: %s" % backend)
+    pools = POOLS if args.pool == "both" else (args.pool,)
+    todo = select_pool_rows(meta, pools, limit=args.limit)
+    edir = emerge_dir(meta)
     for p in pools:
-        if not todo[p]:
-            continue
-        idx_f = open(edir / ("index_%s.jsonl" % p), "a", encoding="utf-8")
-        seq = len(list(edir.glob("emb_%s_*.npz" % p)))
-        ex = ThreadPoolExecutor(max_workers=HTTP_WORKERS)
-        buf_rows: list = []
-        buf_vecs: list = []
-
-        def flush():
-            """攒满即落盘：index 追加写 + embedding 新分块（断点续跑粒度）。"""
-            nonlocal seq
-            if not buf_rows:
-                return
-            for r in buf_rows:
-                idx_f.write(json.dumps(r, ensure_ascii=False) + "\n")
-            idx_f.flush()
-            np.savez_compressed(
-                edir / ("emb_%s_%04d.npz" % (p, seq)),
-                emb=np.asarray(buf_vecs, dtype=np.float32))
-            seq += 1
-            print("[%s] 已 embed %d / %d" % (p, counts[p] + len(buf_rows),
-                                              total[p]),
-                  flush=True)
-            counts[p] += len(buf_rows)
-            buf_rows.clear()
-            buf_vecs.clear()
-
-        try:
-            for i in range(0, len(todo[p]), HTTP_BATCH * HTTP_WORKERS):
-                wave = todo[p][i:i + HTTP_BATCH * HTTP_WORKERS]
-                batches = [wave[j:j + HTTP_BATCH]
-                           for j in range(0, len(wave), HTTP_BATCH)]
-                futures = [(b, ex.submit(fn, [r["caption"] for r in b]))
-                           for b in batches]
-                for b, fut in futures:
-                    buf_vecs.extend(fut.result())
-                    buf_rows.extend(b)
-                if len(buf_rows) >= 2000:
-                    flush()
-            flush()
-        finally:
-            ex.shutdown(wait=True)
-            idx_f.close()
+        _embed_pool(edir, p, todo[p], fn)
     print("embed 完成。")
+
+
+def sync(meta: "str | Path", backend: str = "auto") -> int:
+    """增量同步：把新打标图片的 caption 补进两池 embedding 索引。
+
+    annotate_vlm 合并新标注后调用（best effort，失败不阻断打标主流程），
+    也可作 sync 子命令独立跑；返回本次新增条数。"""
+    meta = Path(meta)
+    ns = argparse.Namespace(backend=backend)
+    fn, bdesc = make_embedder(ns)
+    todo = select_pool_rows(meta, POOLS)
+    edir = emerge_dir(meta)
+    n = 0
+    for p in POOLS:
+        n += _embed_pool(edir, p, todo[p], fn)
+    print("embedding 增量同步：新增 %d 条（后端 %s）" % (n, bdesc))
+    return n
 
 
 # ---------------------------------------------------------------------------
@@ -347,13 +394,12 @@ def name_clusters(args):
     cache = llm_common.JsonlCache(str(edir / "name_cache.jsonl"))
     done = set() if args.overwrite else cache.done_keys()
     n_ok = n_skip = 0
+    jobs = []  # 先收齐任务再并发：vLLM 连续批处理吃满吞吐
     for p in pools:
         cpath = edir / ("clusters_%s.jsonl" % p)
         if not cpath.exists():
             print("[%s] 缺 clusters 文件，先跑 cluster；跳过" % p)
             continue
-        rows = _load_index(edir, p)
-        emb = _load_embeddings(edir, p)
         with open(cpath, encoding="utf-8") as f:
             clusters = [json.loads(l) for l in f if l.strip()]
         for c in clusters:
@@ -363,30 +409,58 @@ def name_clusters(args):
             if key in done:
                 n_skip += 1
                 continue
+            jobs.append((p, c))
+    if args.dry_run:
+        rows_cache = {}
+        for p, c in jobs:
+            if p not in rows_cache:
+                rows_cache[p] = (_load_index(edir, p),
+                                 _load_embeddings(edir, p))
+            rows, emb = rows_cache[p]
             caps = _representatives(edir, p, c["members"], rows, emb)
             user = ("池：%s（%s）\n簇规模：%d\n代表 caption：\n%s" % (
                 p, "异常池 kb_match<=3" if p == "anom" else "对照组 kb_match>=7",
                 c["size"], "\n".join("- %s" % x for x in caps)))
-            if args.dry_run:
-                print("=" * 60)
-                print("[dry-run] key=%s\n-- user --\n%s" % (key, user))
-                continue
-            try:
-                out = llm_common.generate(client, _NAME_SYSTEM, user,
-                                          use_responses=llm_common.want_responses()) or {}
-            except Exception as e:  # noqa: BLE001
-                print("[warn] %s LLM 失败: %s" % (key, e))
-                cache.append(key, {"error": str(e)}, ok=False)
-                continue
-            rec = {"name": str(out.get("name") or "").strip()[:40],
-                   "desc": str(out.get("desc") or "").strip()[:300],
-                   "coherent": bool(out.get("coherent", True)),
-                   "reason": str(out.get("reason") or "").strip()[:100],
-                   "pool": p, "cluster_id": c["cluster_id"], "size": c["size"]}
-            cache.append(key, rec, ok=True)
-            n_ok += 1
-            print("[%s] 簇#%d(size=%d) → %s" % (p, c["cluster_id"], c["size"],
-                                                 rec["name"] or "?"))
+            print("=" * 60)
+            print("[dry-run] key=%s:%d\n-- user --\n%s" % (
+                p, c["cluster_id"], user))
+        print("命名完成：新增 0，跳过（缓存）%d。" % n_skip)
+        return
+
+    rows_cache = {}
+
+    def _name_one(p, c):
+        if p not in rows_cache:
+            rows_cache[p] = (_load_index(edir, p),
+                             _load_embeddings(edir, p))
+        rows, emb = rows_cache[p]
+        key = "%s:%d" % (p, c["cluster_id"])
+        caps = _representatives(edir, p, c["members"], rows, emb)
+        user = ("池：%s（%s）\n簇规模：%d\n代表 caption：\n%s" % (
+            p, "异常池 kb_match<=3" if p == "anom" else "对照组 kb_match>=7",
+            c["size"], "\n".join("- %s" % x for x in caps)))
+        try:
+            out = llm_common.generate(client, _NAME_SYSTEM, user,
+                                      use_responses=llm_common.want_responses()) or {}
+        except Exception as e:  # noqa: BLE001
+            print("[warn] %s LLM 失败: %s" % (key, e))
+            cache.append(key, {"error": str(e)}, ok=False)
+            return False
+        rec = {"name": str(out.get("name") or "").strip()[:40],
+               "desc": str(out.get("desc") or "").strip()[:300],
+               "coherent": bool(out.get("coherent", True)),
+               "reason": str(out.get("reason") or "").strip()[:100],
+               "pool": p, "cluster_id": c["cluster_id"], "size": c["size"]}
+        cache.append(key, rec, ok=True)
+        print("[%s] 簇#%d(size=%d) → %s" % (p, c["cluster_id"], c["size"],
+                                             rec["name"] or "?"), flush=True)
+        return True
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    with ThreadPoolExecutor(max_workers=max(1, args.workers)) as ex:
+        futs = [ex.submit(_name_one, p, c) for p, c in jobs]
+        for fut in as_completed(futs):
+            n_ok += bool(fut.result())
     print("命名完成：新增 %d，跳过（缓存）%d。" % (n_ok, n_skip))
 
 
@@ -398,7 +472,7 @@ _ALIGN_SYSTEM = """你是标签体系策展专家。一个图片聚类簇已被�
 请判断它与现有标签体系的关系，严格按 JSON 输出：
 {"verdict":"new|existing|noise",
 "matched_instance":"verdict=existing 时填对应的现有实例名，否则空串",
-"anchor_path":"verdict=new 时建议锚定的体系路径（格式形如 根 / 一级 / 二级），可参考候选实例的 taxonomy_paths，拿不准就写最可能的一级分支",
+"anchor_path":"verdict=new 时建议锚定的体系路径（格式形如 根 / 一级 / 二级），可参考候选实例的挂载路径，拿不准就写最可能的一级分支",
 "confidence":0到1的小数,"reason":"40字内依据"}
 判定标准：existing=该概念就是候选中的某个现有实体（含别名/俗称）；
 new=确是有价值的新概念且候选里没有；noise=无意义杂烩或不构成概念。"""
@@ -461,11 +535,12 @@ def _align_llm(client, cluster_name: dict, caps: list, cands: list,
 
 def align(args):
     edir = emerge_dir(Path(args.meta))
-    root = repo_root_from_meta(Path(args.meta))
     pools = POOLS if args.pool == "both" else (args.pool,)
 
     with open(args.instances, encoding="utf-8") as f:
         insts = json.load(f).get("instances") or []
+    # 挂载路径不落实例表（解耦契约）：从同目录 taxonomy.json 现算，注入候选上下文
+    mounts = load_mount_map(tree_sibling_of(args.instances))
     by_norm = {}
     for it in insts:
         by_norm.setdefault(norm(it["name"]), []).append(it)
@@ -474,7 +549,7 @@ def align(args):
 
     fn, backend = make_embedder(args)
     inst_emb = _load_instance_emb(edir, insts, fn)
-    inst_norm = np.linalg.norm(inst_emb, axis=1, keepdims=True) + 1e-9
+    inst_norm = np.linalg.norm(inst_emb, axis=1) + 1e-9
 
     if not args.dry_run:
         llm_common.require_api_key()
@@ -482,13 +557,21 @@ def align(args):
     cache = llm_common.JsonlCache(str(edir / "align_cache.jsonl"))
     done = set() if args.overwrite else cache.done_keys()
     n_ok = n_skip = 0
+
+    npath = edir / "name_cache.jsonl"
+    if not npath.exists():
+        raise SystemExit("缺 name_cache.jsonl，先跑 name")
+
+    rows_cache = {}
+
+    def _pool_data(p):
+        if p not in rows_cache:
+            rows_cache[p] = (_load_index(edir, p),
+                             _load_embeddings(edir, p))
+        return rows_cache[p]
+
+    jobs = []  # 收齐待对齐任务（确定性捷径先走掉）再并发调 LLM
     for p in pools:
-        npath = edir / "name_cache.jsonl"
-        if not npath.exists():
-            print("缺 name_cache.jsonl，先跑 name；跳过")
-            return
-        rows = _load_index(edir, p)
-        emb = _load_embeddings(edir, p)
         for key, named in cache_records_of(edir, "name_cache.jsonl").items():
             if named.get("pool") != p or not named.get("coherent", True):
                 continue
@@ -498,50 +581,80 @@ def align(args):
             if key in done:
                 n_skip += 1
                 continue
+            rows, emb = _pool_data(p)
             # 1) 确定性捷径：名称/别名精确命中
             hits = by_norm.get(norm(named["name"])) or []
             # 2) embedding 最近邻候选
             q = _cluster_centroid(emb, c["members"])
-            sims = (inst_emb @ q) / (inst_norm * (np.linalg.norm(q) + 1e-9))
-            topk = [insts[i] for i in np.argsort(-sims)[:ALIGN_TOPK]]
+            sims = ((inst_emb @ q)
+                    / (inst_norm * (np.linalg.norm(q) + 1e-9)))
+            order = [int(i) for i in np.argsort(-sims)[:ALIGN_TOPK]]
+            topk = [dict(insts[i], taxonomy_paths=mounts.get(insts[i]["name"], []))
+                    for i in order]
+            topk_rec = [{"name": insts[i]["name"],
+                         "sim": round(float(sims[i]), 3)} for i in order]
             if hits:
-                verdict = {"verdict": "existing",
-                           "matched_instance": hits[0]["name"],
-                           "anchor_path": "", "confidence": 0.95,
-                           "reason": "名称/别名精确命中现有实例"}
-            else:
-                caps = _representatives(edir, p, c["members"], rows, emb)
-                if args.dry_run:
-                    print("=" * 60)
-                    print("[dry-run] key=%s 簇=%s topk=%s" % (
-                        key, named["name"], [t["name"] for t in topk]))
-                    continue
-                try:
-                    verdict = _align_llm(client, named, caps, topk,
-                                         llm_common.want_responses())
-                except Exception as e:  # noqa: BLE001
-                    print("[warn] %s 对齐 LLM 失败: %s" % (key, e))
-                    cache.append(key, {"error": str(e)}, ok=False)
-                    continue
-            rec = {"key": key, "pool": p, "cluster_id": named["cluster_id"],
-                   "size": c["size"], "concept": named["name"],
-                   "concept_desc": named["desc"],
-                   "verdict": str(verdict.get("verdict") or "").strip(),
-                   "matched_instance": str(verdict.get("matched_instance") or "").strip(),
-                   "anchor_path": str(verdict.get("anchor_path") or "").strip()[:ANCHOR_CHARS],
-                   "confidence": verdict.get("confidence"),
-                   "reason": str(verdict.get("reason") or "").strip()[:120],
-                   "topk": [{"name": t["name"], "sim": round(float(sims[i]), 3)}
-                            for i, t in zip(np.argsort(-sims)[:ALIGN_TOPK], topk)]}
-            if rec["verdict"] not in ("new", "existing", "noise"):
-                rec["verdict"] = "noise"
-                rec["reason"] = "LLM 输出非法 verdict，按噪声处理"
-            cache.append(key, rec, ok=True)
-            n_ok += 1
-            print("[%s] 簇#%d %s → %s%s" % (
-                p, named["cluster_id"], named["name"], rec["verdict"],
-                "(%s)" % rec["matched_instance"] if rec["matched_instance"] else ""))
+                rec = _align_record(key, p, named, c, topk_rec,
+                                    {"verdict": "existing",
+                                     "matched_instance": hits[0]["name"],
+                                     "anchor_path": "", "confidence": 0.95,
+                                     "reason": "名称/别名精确命中现有实例"})
+                cache.append(key, rec, ok=True)
+                n_ok += 1
+                print("[%s] 簇#%d %s → existing(%s) [精确命中]" % (
+                    p, named["cluster_id"], named["name"], hits[0]["name"]))
+                continue
+            caps = _representatives(edir, p, c["members"], rows, emb)
+            if args.dry_run:
+                print("=" * 60)
+                print("[dry-run] key=%s 簇=%s topk=%s" % (
+                    key, named["name"], [t["name"] for t in topk]))
+                continue
+            jobs.append((key, p, named, c, caps, topk, topk_rec))
+    if args.dry_run:
+        print("对齐完成：新增 %d，跳过（缓存）%d。" % (n_ok, n_skip))
+        return
+
+    def _align_one(job):
+        key, p, named, c, caps, topk, topk_rec = job
+        try:
+            verdict = _align_llm(client, named, caps, topk,
+                                 llm_common.want_responses())
+        except Exception as e:  # noqa: BLE001
+            print("[warn] %s 对齐 LLM 失败: %s" % (key, e))
+            cache.append(key, {"error": str(e)}, ok=False)
+            return False
+        rec = _align_record(key, p, named, c, topk_rec, verdict)
+        cache.append(key, rec, ok=True)
+        print("[%s] 簇#%d %s → %s%s" % (
+            p, named["cluster_id"], named["name"], rec["verdict"],
+            "(%s)" % rec["matched_instance"] if rec["matched_instance"] else ""),
+            flush=True)
+        return True
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    with ThreadPoolExecutor(max_workers=max(1, args.workers)) as ex:
+        futs = [ex.submit(_align_one, j) for j in jobs]
+        for fut in as_completed(futs):
+            n_ok += bool(fut.result())
     print("对齐完成：新增 %d，跳过（缓存）%d。" % (n_ok, n_skip))
+
+
+def _align_record(key, p, named, c, topk_rec, verdict) -> dict:
+    """对齐结果统一落库格式；非法 verdict 按噪声处理。"""
+    rec = {"key": key, "pool": p, "cluster_id": named["cluster_id"],
+           "size": c["size"], "concept": named["name"],
+           "concept_desc": named["desc"],
+           "verdict": str(verdict.get("verdict") or "").strip(),
+           "matched_instance": str(verdict.get("matched_instance") or "").strip(),
+           "anchor_path": str(verdict.get("anchor_path") or "").strip()[:ANCHOR_CHARS],
+           "confidence": verdict.get("confidence"),
+           "reason": str(verdict.get("reason") or "").strip()[:120],
+           "topk": topk_rec}
+    if rec["verdict"] not in ("new", "existing", "noise"):
+        rec["verdict"] = "noise"
+        rec["reason"] = "LLM 输出非法 verdict，按噪声处理"
+    return rec
 
 
 def cache_records_of(edir: Path, fname: str) -> dict:
@@ -611,9 +724,31 @@ def report(args):
                 c = json.loads(line)
                 memb[c["cluster_id"]] = c["members"]
     rowsl = _load_index(edir, "anom")
+    prop_members = {}
+    all_shas = set()
     for r in proposals:
-        idxs = (memb.get(r["cluster_id"]) or [])[:5]
-        r["sample_shas"] = [rowsl[i]["sha256"] for i in idxs if i < len(rowsl)]
+        idxs = memb.get(r["cluster_id"]) or []
+        shs = [rowsl[i]["sha256"] for i in idxs if i < len(rowsl)]
+        prop_members[r["cluster_id"]] = shs
+        all_shas.update(shs)
+    # 采集溯源：一次扫描同时收两份——簇成员的高频检索词（簇怎么采来的）
+    # 与 topk 候选实例名下图片的检索词（最近邻怎么采来的，对照用）
+    topk_names = {t["name"] for r in proposals for t in r.get("topk", [])}
+    qmap, inst_qmap = _collect_queries(Path(args.meta), all_shas, topk_names)
+    for r in proposals:
+        r["sample_shas"] = prop_members[r["cluster_id"]][:5]
+        cnt = {}
+        for sha in prop_members[r["cluster_id"]]:
+            for inst, q in qmap.get(sha, []):
+                cnt[(inst, q)] = cnt.get((inst, q), 0) + 1
+        r["queries"] = sorted(({"instance": inst, "query": q, "count": n}
+                               for (inst, q), n in cnt.items()),
+                              key=lambda x: -x["count"])[:8]
+        for t in r.get("topk", []):
+            icnt = inst_qmap.get(t["name"], {})
+            t["queries"] = sorted(({"query": q, "count": n}
+                                   for q, n in icnt.items()),
+                                  key=lambda x: -x["count"])[:5]
 
     out = {"generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
            "pools": {p: {"stats": by_pool[p]["stats"],
@@ -634,11 +769,40 @@ def report(args):
             100 * by_pool[p]["align_rate"]))
     print("\nTop 新概念提议（异常池，按簇规模降序）：")
     for r in proposals[:15]:
-        print("  [%4d图] %s —— %s | 锚定建议: %s | 置信 %.2f" % (
+        qs = ", ".join("%s→%s" % (q["instance"], q["query"])
+                        for q in r.get("queries", [])[:3])
+        print("  [%4d图] %s —— %s | 锚定建议: %s | 置信 %.2f | 来源词: %s" % (
             r["size"], r["concept"], (r["concept_desc"] or "")[:50],
-            r["anchor_path"] or "?", float(r.get("confidence") or 0)))
+            r["anchor_path"] or "?", float(r.get("confidence") or 0),
+            qs or "-"))
     if len(proposals) > 15:
         print("  ...（其余 %d 条见报告文件）" % (len(proposals) - 15))
+
+
+def _collect_queries(meta: Path, shas: set, inst_names: set) -> tuple:
+    """扫一遍 images.jsonl 收两份采集溯源：
+
+    - 按 sha：簇成员图的检索词（(实例名, 检索词) 对，queries 字段展开）；
+    - 按实例名：该实例名下每张图按实例取对应检索词计频（topk 候选对照用）。"""
+    out = {}
+    inst_cnt = {n: {} for n in inst_names}
+    with open(meta / "images.jsonl", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            r = json.loads(line)
+            qs = r.get("queries") or {}
+            if not qs:
+                continue
+            sha = r.get("sha256")
+            if sha in shas and sha not in out:
+                out[sha] = list(qs.items())
+            for inst in r.get("instances") or []:
+                q = qs.get(inst)
+                if inst in inst_cnt and q:
+                    inst_cnt[inst][q] = inst_cnt[inst].get(q, 0) + 1
+    return out, inst_cnt
 
 
 # ---------------------------------------------------------------------------
@@ -669,6 +833,7 @@ def main(argv=None):
     common(pn)
     pn.add_argument("--pool", choices=POOLS + ("both",), default="both")
     pn.add_argument("--min-size", type=int, default=MIN_CLUSTER_SIZE)
+    pn.add_argument("--workers", type=int, default=8, help="LLM 并发线程数")
     pn.add_argument("--overwrite", action="store_true")
     pn.add_argument("--dry-run", action="store_true")
 
@@ -677,14 +842,23 @@ def main(argv=None):
     pa.add_argument("--pool", choices=POOLS + ("both",), default="both")
     pa.add_argument("--instances", default="data/taxonomy/instances.json")
     pa.add_argument("--min-size", type=int, default=MIN_CLUSTER_SIZE)
+    pa.add_argument("--workers", type=int, default=8, help="LLM 并发线程数")
     pa.add_argument("--overwrite", action="store_true")
     pa.add_argument("--dry-run", action="store_true")
     pa.add_argument("--backend", choices=("auto", "local"), default="auto")
+
+    ps = sub.add_parser("sync",
+                        help="增量同步新打标 caption 的 embedding（annotate_vlm 合并后自动调，也可独立跑）")
+    common(ps)
+    ps.add_argument("--backend", choices=("auto", "local"), default="auto")
 
     pr = sub.add_parser("report", help="汇总差异报告")
     common(pr)
 
     args = ap.parse_args(argv)
+    if args.cmd == "sync":
+        sync(args.meta, backend=args.backend)
+        return
     {"embed": embed, "cluster": cluster, "name": name_clusters,
      "align": align, "report": report}[args.cmd](args)
 
