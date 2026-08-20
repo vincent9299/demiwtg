@@ -25,7 +25,9 @@ curation/emerge_review.ipynb
 data/dataset/
 state/
 logs/
-.qoder/
+.qoder/*
+# 交接文档进仓（V2 重写的权威工作文档）
+!.qoder/handoff_collect_v2.md
 
 # LLM 生成的源 spec（运行时产物，见 AGENTS.md 2.3）
 collect/specs/
@@ -36,3 +38,4 @@ _st_tmp/
 # 外部数据集包与一次性分析产物（勿提交）
 annotations_trainval2017.zip
 dataset_value_ranking_top500.md
+_reference/
