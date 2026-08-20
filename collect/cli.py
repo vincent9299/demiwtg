@@ -39,6 +39,7 @@ if __package__ in (None, ""):
     from collect.auto import orchestrate as _auto_orchestrate
     from collect import stream as _stream
     from collect import bulk as _bulk
+    from collect import bulk_pkg as _bulk_pkg
     from collect import bench as _bench
 else:
     from .config import EffectiveConfig, load_config, load_taxonomy
@@ -50,18 +51,21 @@ else:
     from .auto import orchestrate as _auto_orchestrate
     from . import stream as _stream
     from . import bulk as _bulk
+    from . import bulk_pkg as _bulk_pkg
     from . import bench as _bench
 
 # L3 智能平面子命令（gap→discover→probe→synth→verify→govern/repair；产物人工过目，
 # 晋升由闸门裁决）；orchestrate 为 L4 编排层（一轮缺口驱动闭环的确定性调度）；
 # stream 为常驻流式采集入口（与批处理 run 并存）；
 # bulk 为整包数据集摄入（数据集驱动反向打标，与搜索驱动 run/stream 并存的进水口）；
+# bulk-pkg 为整包数据摄入（平台整包下载内嵌图数据集，离线解包入湖，第三种进水口）；
 # bench 为带宽/下载速度压测（目标注册表 + 并发阶梯/Range 分片/镜像对比/小图画像）
 _AUTO_SUBCOMMANDS = {"gap": _auto_gap, "discover": _auto_discover,
                      "probe": _auto_probe, "synth": _auto_synth,
                      "verify": _auto_verify, "govern": _auto_govern,
                      "repair": _auto_repair, "orchestrate": _auto_orchestrate,
-                     "stream": _stream, "bulk": _bulk, "bench": _bench}
+                     "stream": _stream, "bulk": _bulk, "bulk-pkg": _bulk_pkg,
+                     "bench": _bench}
 
 
 def main(argv=None):

@@ -38,7 +38,6 @@ from __future__ import annotations
 
 import argparse
 import copy
-import hashlib
 import heapq
 import io
 import json
@@ -48,7 +47,6 @@ import sys
 import tarfile
 import threading
 import time
-import urllib.request
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -69,11 +67,11 @@ if __package__ in (None, ""):
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from collect import downloader, models, pipeline
     from collect.config import DEFAULTS, EffectiveConfig
-    from collect.util import RateLimiter
+    from collect.util import RateLimiter, RangeDownloadError, range_download_file
 else:
     from . import downloader, models, pipeline
     from .config import DEFAULTS, EffectiveConfig
-    from .util import RateLimiter
+    from .util import RateLimiter, RangeDownloadError, range_download_file
 
 # 打标队列归属消费方模块（curation）；collect 只是生产者（同 stream.py 契约）
 try:
@@ -160,140 +158,21 @@ def build_tag_index(taxonomy_path: str, jobs_substr=None) -> dict:
 # ---------------------------------------------------------------------------
 # 阶段一：扫 posts 元数据（先并行分段缓存 tar.gz 到 state 再扫，重扫不再过网）
 # ---------------------------------------------------------------------------
-def _dl_range(url: str, start: int, end: int, path: str, timeout: int = 300) -> None:
-    """分段下载 [start, end) 写到 path 的对应偏移（Range + seek 写）。"""
-    req = urllib.request.Request(
-        url, headers={"User-Agent": "multimodal-collector/1.0",
-                      "Range": f"bytes={start}-{end - 1}"})
-    for attempt in range(3):
-        try:
-            got = 0
-            with urllib.request.urlopen(req, timeout=timeout) as resp, \
-                    open(path, "r+b") as f:
-                f.seek(start)
-                while True:
-                    chunk = resp.read(1 << 20)
-                    if not chunk:
-                        break
-                    got += len(chunk)
-                    f.write(chunk)
-            if got != end - start:
-                # CDN 重试可能切到不同边缘返回短读/错段，宁重下不静默
-                raise IOError(f"分段长度不符: {got} != {end - start}")
-            return
-        except Exception as e:  # noqa: BLE001
-            if attempt == 2:
-                raise
-            print(f"[bulk] 分段 {start/1e6:.0f}-{end/1e6:.0f} MB 重试: {e}",
-                  flush=True)
-            time.sleep(2 ** attempt)
-
-
 def _ensure_posts_cache(profile: dict, cache_dir: str,
                         dl_threads: int = 8, limit_mb: int = 0) -> str:
     """posts.tar.gz 并行分段下载缓存（gzip 顺序解压只需前缀完整，limit_mb
-    截断配合 --max-posts 试点用）；返回本地路径。"""
+    截断配合 --max-posts 试点用）；返回本地路径。
+    分段续传/sha256 验收由 util.range_download_file 统一承担。"""
     cache = os.path.join(cache_dir, "posts.tar.gz")
-    done = cache + ".done"
-    want = profile.get("posts_sha256")
-    # 完成标记记录“字节数 sha256”：两者都匹配才复用，否则重下（旧格式/损坏一律重走）
-    if os.path.exists(done) and os.path.exists(cache):
-        try:
-            with open(done) as f:
-                parts = f.read().split()
-            if int(parts[0]) == os.path.getsize(cache) and \
-                    (not want or (len(parts) > 1 and parts[1] == want)):
-                return cache
-        except (ValueError, OSError, IndexError):
-            pass
-    # 探总长（HEAD）
-    hreq = urllib.request.Request(
-        profile["posts_url"], method="HEAD",
-        headers={"User-Agent": "multimodal-collector/1.0"})
-    with urllib.request.urlopen(hreq, timeout=60) as r:
-        total = int(r.headers.get("Content-Length") or 0)
-    if limit_mb:
-        total = min(total, limit_mb * 1024 * 1024)
-    if os.path.exists(cache) and os.path.getsize(cache) != total:
-        os.remove(cache)          # 上次下载目标不同，重下
-    if not os.path.exists(cache):
-        with open(cache, "wb") as f:
-            f.truncate(total)
-    chunk = max(4 * 1024 * 1024, total // (dl_threads * 16) if total else 0)
-    spans = [(s, min(s + chunk, total)) for s in range(0, total, chunk)]
-    # 分段完成账本（pid:start:end）：上次跑挂后续传只补缺段，不整文件重下；
-    # pid 不匹配（进程换命）则作废。最终以 sha256 验收兑底，账本误记不会引入脏数据
-    seg_done = cache + ".segs"
-    done_spans = set()
     try:
-        with open(seg_done) as f:
-            parts = f.read().split()
-        if parts and parts[0] == str(os.getpid()):
-            pass  # pid 巧合重叠不可信，作废
-        elif parts:
-            done_spans = {(int(a), int(b)) for a, b in
-                          (p.split(":") for p in parts[1:] if ":" in p)}
-    except (OSError, ValueError):
-        done_spans = set()
-    seg_lock = threading.Lock()
-    seg_f = open(seg_done, "a", encoding="utf-8")
-    if not done_spans:
-        seg_f.truncate(0)
-        seg_f.write(f"{os.getpid()}\n")
-        seg_f.flush()
-    n_done = [0]
-    lock = threading.Lock()
-    t0 = time.time()
-
-    def _job(span):
-        if span in done_spans:
-            with lock:
-                n_done[0] += 1
-            return
-        _dl_range(profile["posts_url"], span[0], span[1], cache)
-        with seg_lock:
-            seg_f.write(f"{span[0]}:{span[1]}\n")
-            seg_f.flush()
-        with lock:
-            n_done[0] += 1
-            if n_done[0] % 16 == 0 or n_done[0] == len(spans):
-                done_mb = n_done[0] * chunk / 1e6
-                dt = max(time.time() - t0, 1)
-                print(f"[bulk] posts 缓存 {min(done_mb, total/1e6):.0f}/{total/1e6:.0f} MB "
-                      f"({done_mb/dt:.1f} MB/s)", flush=True)
-
-    todo = [s for s in spans if s not in done_spans]
-    print(f"[bulk] posts 缓存下载：{total/1e6:.0f} MB / {len(spans)} 段 / "
-          f"{dl_threads} 线程"
-          + (f"（续传：已完成 {len(done_spans)} 段，只下 {len(todo)} 段）"
-             if todo and done_spans else ""), flush=True)
-    with ThreadPoolExecutor(max_workers=dl_threads) as ex:
-        list(ex.map(_job, todo))
-    seg_f.close()
-    # sha256 验收（防分段下载静默损坏）：不过则删缓存报错，杜绝 .done 误标；
-    # limit_mb 截断试点本就不完整，不验（done 会被上游 max_posts 逻辑删除）
-    got_sha = ""
-    if want and not limit_mb:
-        h = hashlib.sha256()
-        with open(cache, "rb") as f:
-            while True:
-                blk = f.read(8 << 20)
-                if not blk:
-                    break
-                h.update(blk)
-        got_sha = h.hexdigest()
-        if got_sha != want:
-            os.remove(cache)
-            if os.path.exists(seg_done):
-                os.remove(seg_done)   # 账本作废：重下必须从零来
-            raise SystemExit(
-                f"[bulk] posts 缓存 sha256 不符（分段下载被污染），已删除，重跑重下: {cache}")
-    if os.path.exists(seg_done):
-        os.remove(seg_done)           # 验收通过，账本使命结束
-    with open(done, "w") as f:
-        f.write(f"{total} {got_sha}\n")
-    print(f"[bulk] posts 缓存就绪 {total/1e6:.0f} MB → {cache} "
-          f"({time.time()-t0:.0f}s)", flush=True)
+        range_download_file(
+            profile["posts_url"], cache,
+            want_sha=profile.get("posts_sha256") or "",
+            threads=dl_threads,
+            limit_bytes=limit_mb * 1024 * 1024 if limit_mb else 0,
+            label="bulk")
+    except RangeDownloadError as e:
+        raise SystemExit(str(e))
     return cache
 
 

@@ -176,3 +176,18 @@ python3 curation/annotate_vlm.py stream          # 消费打标队列，成功�
 - ❌ 在 instances.json 里为同一 name 写多条记录（一个实体一条，多路径进 taxonomy_paths 列表）
 - ❌ 把 data/dataset/、state/ 或 logs/ 提交进 git
 - ❌ 把运行时状态塞进 data/dataset/（放顶层 state/ 对应模块子目录）
+
+## 7. 网络与下载约定（2026-08-20 新增：环境里残留已宕机代理 100.89.199.67:7890，pip/curl 会被拖死，故将代理策略定死）
+
+- 国内下载**不走代理**，优先找国内源（如 pypi 用 `pypi.tuna.tsinghua.edu.cn`；注意部分域名 DNS 只返回 IPv6 记录而本机无 IPv6，需确认 A 记录可达）。
+- 确需访问外网（pypi.org、download.pytorch.org、GitHub 等）时才用代理：
+
+```bash
+export http_proxy=http://192.168.10.109:10808
+export https_proxy=http://192.168.10.109:10808
+# 或
+export ALL_PROXY=socks5h://192.168.10.109:10808
+export no_proxy="localhost,127.0.0.1,192.168.10.0/24,modelscope.cn,modelscope.org.cn,.modelscope.cn"
+```
+
+- 执行任何下载前，先 `env | grep -i proxy` 检查残留：发现已宕机的旧代理（100.89.199.67:7890）必须先 unset 或按上述配置覆盖。

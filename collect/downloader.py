@@ -77,60 +77,27 @@ def _dim_close(actual: int, declared: int, tol_rel: float = 0.03,
     return abs(actual - declared) <= max(declared * tol_rel, tol_abs)
 
 
-def download_and_store(c: Candidate, cfg: EffectiveConfig,
-                        allowed_suffixes, images_dir: str,
-                        rate_limiter: RateLimiter,
-                        headers: dict = None):
-    """下载【原图】并落盘（保持原始分辨率，不做任何缩放/改分辨率）。
-    返回 (ok, [候选列表])：只包含这一张原图候选（其 sha256/路径/实际尺寸已填充）。
-    多张不同图由下载前挑选决定，这里只负责把选中的原图存好。"""
+def verify_and_store_bytes(data: bytes, c: Candidate, cfg: EffectiveConfig,
+                           images_dir: str):
+    """内存图片字节复验 + SHA-256 内容寻址落盘（共享内核）。
+
+    Pillow 完整解码 + EXIF 方向校正 + 实际分辨率门 + MIME/大小复验，
+    成功填 c.sha256/local_path/actual_* 并置 downloaded。URL 下载路径
+    （download_and_store）与整包解包路径（bulk_pkg）共用。
+    返回 (ok, [c])。"""
     try:
-        rate_limiter.acquire(host_of(c.content_url))
-        h = dict(DEFAULT_HEADERS)
-        h.update(headers or {})
-        # 失败分类（fail_kind）：确定性失败（防盗链 401/403、死链 404/410）供上层直接跳过，
-        # 不再重试；超时/网络/解码等瞬态失败仍按重试策略处理。
-        try:
-            data = fetch_bytes_capped(
-                c.content_url,
-                max_bytes=cfg.max_file_bytes,
-                allowed_suffixes=allowed_suffixes,
-                headers=h,
-                timeout=cfg.timeout_sec,
-                max_retries=cfg.max_retries,
-            )
-        except urllib.error.HTTPError as e:
-            c.status = STATUS_FAILED
-            if e.code in (401, 403):
-                c.fail_kind = "hotlink_forbidden"
-                c.fail_reason = f"HTTP {e.code} 防盗链/权限拒绝（重试无意义）"
-            elif e.code in (404, 410):
-                c.fail_kind = "dead_link"
-                c.fail_reason = f"HTTP {e.code} 死链（重试无意义）"
-            else:
-                c.fail_kind = f"http_{e.code}"
-                c.fail_reason = f"HTTP {e.code}: {e}"
-            return False, [c]
-        except TimeoutError as e:
-            c.status = STATUS_FAILED
-            c.fail_kind = "timeout"
-            c.fail_reason = f"请求硬超时: {e}"
-            return False, [c]
-        except urllib.error.URLError as e:
-            c.status = STATUS_FAILED
-            c.fail_kind = "network_error"
-            c.fail_reason = f"网络错误: {e}"
-            return False, [c]
         actual_size = len(data)
 
         # Pillow 完整解码 + 复验实际属性
         try:
             img = Image.open(BytesIO(data))
             img.load()
-            # 应用 EXIF 方向校正：Commons 报告的宽高已按 EXIF 旋转，
-            # 而裸像素是未旋转的，直接对比会因横竖颠倒而误判"尺寸偏差过大"。
-            img = ImageOps.exif_transpose(img)
+            # format 必须在 EXIF 校正【前】取：Pillow 的 exif_transpose 返回
+            # 新对象时 format 为 None，后置会让 actual_mime/扩展名判定全部失效。
             fmt = img.format or ""
+            # 应用 EXIF 方向校正：Commons 报告的宽高已按 EXIF 旋转，
+            # 而裸像素是未旋转的，直接对比会因横竖颠倒而误判“尺寸偏差过大”。
+            img = ImageOps.exif_transpose(img)
             actual_w, actual_h = img.size
         except Exception as e:  # noqa: BLE001
             c.status = STATUS_FAILED
@@ -151,7 +118,7 @@ def download_and_store(c: Candidate, cfg: EffectiveConfig,
             )
             return False, [c]
 
-        # 复验：实际 vs 声明。下载阶段只拦截"格式/字节严重不符"这类明显坏图；
+        # 复验：实际 vs 声明。只拦截“格式/字节严重不符”这类明显坏图；
         # 宽度/高度的轻微偏差不再判失败（分辨率过滤已移至后续整体选图步骤，
         # 这里仅如实记录实际尺寸供下游使用）。
         if actual_mime and c.declared_mime and actual_mime != c.declared_mime:
@@ -190,6 +157,58 @@ def download_and_store(c: Candidate, cfg: EffectiveConfig,
         c.status = STATUS_DOWNLOADED
         return True, [c]
 
+    except Exception as e:  # noqa: BLE001
+        c.status = STATUS_FAILED
+        c.fail_kind = c.fail_kind or "other"
+        c.fail_reason = f"校验/落盘失败: {e}"
+        return False, [c]
+
+
+def download_and_store(c: Candidate, cfg: EffectiveConfig,
+                        allowed_suffixes, images_dir: str,
+                        rate_limiter: RateLimiter,
+                        headers: dict = None):
+    """下载【原图】并落盘（保持原始分辨率，不做任何缩放/改分辨率）。
+    返回 (ok, [候选列表])：只包含这一张原图候选（其 sha256/路径/实际尺寸已填充）。
+    多张不同图由下载前挑选决定，这里只负责把选中的原图存好。"""
+    try:
+        rate_limiter.acquire(host_of(c.content_url))
+        h = dict(DEFAULT_HEADERS)
+        h.update(headers or {})
+        # 失败分类（fail_kind）：确定性失败（防盗链 401/403、死链 404/410）供上层直接跳过，
+        # 不再重试；超时/网络等瞬态失败仍按重试策略处理。
+        try:
+            data = fetch_bytes_capped(
+                c.content_url,
+                max_bytes=cfg.max_file_bytes,
+                allowed_suffixes=allowed_suffixes,
+                headers=h,
+                timeout=cfg.timeout_sec,
+                max_retries=cfg.max_retries,
+            )
+        except urllib.error.HTTPError as e:
+            c.status = STATUS_FAILED
+            if e.code in (401, 403):
+                c.fail_kind = "hotlink_forbidden"
+                c.fail_reason = f"HTTP {e.code} 防盗链/权限拒绝（重试无意义）"
+            elif e.code in (404, 410):
+                c.fail_kind = "dead_link"
+                c.fail_reason = f"HTTP {e.code} 死链（重试无意义）"
+            else:
+                c.fail_kind = f"http_{e.code}"
+                c.fail_reason = f"HTTP {e.code}: {e}"
+            return False, [c]
+        except TimeoutError as e:
+            c.status = STATUS_FAILED
+            c.fail_kind = "timeout"
+            c.fail_reason = f"请求硬超时: {e}"
+            return False, [c]
+        except urllib.error.URLError as e:
+            c.status = STATUS_FAILED
+            c.fail_kind = "network_error"
+            c.fail_reason = f"网络错误: {e}"
+            return False, [c]
+        return verify_and_store_bytes(data, c, cfg, images_dir)
     except Exception as e:  # noqa: BLE001
         c.status = STATUS_FAILED
         c.fail_kind = c.fail_kind or "other"
