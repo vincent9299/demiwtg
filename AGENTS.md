@@ -6,14 +6,14 @@
 
 ```
 demiwtg/
-├── taxonomy/                   # 【代码】体系构建与富化（build_unified / gen_taxonomy_kb / gen_instance_kb）
+├── taxonomy/                   # 【代码】体系维护与富化（mount_map 挂载聚合 / gen_taxonomy_kb / gen_instance_kb / audit_nodes）
 ├── collect/                    # 【代码】图片采集系统（cli/config/downloader/pipeline/queue/sources…）
 ├── curation/                   # 【代码】数据策展（retry_failed / filter_vlm）
 ├── viewer/                     # 【代码】查看器闭环：tag_tree_explorer.html + build_viewer.py + build/ 产物（gitignore）
 ├── data/                       # 【纯数据】统一数据根目录
-│   ├── taxonomy/               #   标签体系数据
-│   │   ├── taxonomy.json       #     树结构权威源
-│   │   └── instances.json      #     实例权威源
+│   ├── taxonomy/               #   标签体系数据（两个独立权威源，互不推导）
+│   │   ├── taxonomy.json       #     树（展示视角）
+│   │   └── instances.json      #     实例（实体资产库，独立于树）
 │   └── dataset/                #   图片数据湖（不入 git）
 ├── state/                      # 运行时状态，按模块归属分子目录（不入 git）
 │   ├── collect/                #   死信队列 / source_health.json / runs/<run_id>（含 _latest 软链）
@@ -30,11 +30,13 @@ demiwtg/
 - 仓库顶层禁止新增散落的脚本或数据目录（`data/`、`state/`、`logs/` 是明确登记过的例外）。
 - 文档只有两份：`AGENTS.md`（约束）与 `README.md`（指针）。历史过程文档（docs/、子目录 README）已删除，**不再恢复**——过程记录看 git 历史。
 
-## 1.5 标签体系数据契约（只有两个概念，定死）
+## 1.5 标签体系数据契约（两个独立概念，定死）
 
 整个标签体系**只存在两个概念**，代码、数据字段、文档一律使用这两个词，禁止再引入其他分类术语（category、leaf、root 已废除）。数据模型以本节为准（原 schema/tag_taxonomy.schema.json 已删除：无校验消费者、与 instances.json 顶层结构不符，勿恢复）。
 
-### taxonomy.json —— 树（结构权威源）
+**两者彻底解耦（架构决策 2026-08-19）**：实例是资产，taxonomy 是视角。实例的生灭与富知识完全不依赖树；树只是展示/导航视图，同一套实例未来可被多套树视角引用。关联关系（谁挂在哪）**不写进任何一方文件**，需要时由消费者从树的 instances 名单现场聚合（`taxonomy/mount_map.py`）。原 build_unified.py（树推导实例表的重建器）已删除：它维护的正是被废除的耦合。
+
+### taxonomy.json —— 树（展示视角）
 
 ```
 { "schema_version": "...", "meta": {...}, "tree": <node> }
@@ -44,19 +46,18 @@ node = {
   path: str                    # 完整路径，' / ' 分隔，从根『融合世界标签体系』起算
   depth: int                   # 根为 0
   children?: [node]            # 子树；末端节点省略
-  instances?: [str]            # 挂在本节点下的实例名列表（结构指针）
+  instances?: [str]            # 挂在本节点下的实例名列表（对 instances.json 的引用，挂载关系的唯一落点）
   knowledge_intro?/aliases?/representative_cases?/related_tags?: [KB 字段，可选；knowledge_intro 为 150-350 字维基百科词条风格]
 }
 ```
 
-### instances.json —— 实例（扁平权威源）
+### instances.json —— 实例（独立权威源，实体资产库）
 
 ```
 { "schema_version": "...", "meta": {...}, "instances": [instance] }
 
 instance = {
   name: str                    # 实例名（全局唯一主键：一个实体只允许一条记录）
-  taxonomy_paths: [str]        # 所挂节点的 path 列表（每项与 node.path 一致；一个实体可挂多个路径）
   source: "curated" | "llm" | "derived"   # curated=人工精写；llm=LLM 生成；derived=未富化占位（templated 为历史值，不再新写）
   desc?: str                   # 详细介绍（唯一富描述字段；150-350 字，维基百科词条风格：具体知识点，拒绝空话套话）
   aliases?: [str]              # 别名/英文名
@@ -64,11 +65,11 @@ instance = {
 }
 ```
 
-- 两份文件经**实例名**关联；`taxonomy/build_unified.py` 是唯一重建入口。
-- **`name` 全局唯一是硬约束**：同一实体的知识字段（desc/query/aliases）只维护一份，多路径挂载一律收进 `taxonomy_paths` 列表；禁止同名多条记录（历史上曾出现同名多行导致 KB 字段漂移，已通过结构合并废除）。
+- **实例独立于树**：未挂载任何树节点的实例是合法状态（待认领池）；增删树节点不造成实例的创建或删除，富知识（desc/query/aliases）只存在 instances.json。
+- **`name` 全局唯一是硬约束**：同一实体的知识字段只维护一份；多处挂载表现为多个树节点的 instances 名单同时含该名字（原 taxonomy_paths 字段已废除：它是树的影子，不进实例表）。
 - 没有 `type` 字段：有没有子树看 `children`，挂不挂实例看 `instances`。
-- 图片打标只存**实例名**（实体标签，不含路径）——体系演化（改路径）不再需要迁移图数据。看图入口（viewer 的 build/imgs.js）由 meta/images.jsonl 的 instances 字段现场聚合、相对路径指到 blobs 原图（相对 viewer/ 的 ../data/dataset/blobs/...），不再建软链树。
-- 数据字段定义即契约，改字段 = 改本节 + 同步 build_unified.py。
+- 图片打标只存**实例名**（实体标签，不含路径）——体系演化（改路径/重生成树）不需要迁移图数据。看图入口（viewer 的 build/imgs.js）由 meta/images.jsonl 的 instances 字段现场聚合、相对路径指到 blobs 原图（相对 viewer/ 的 ../data/dataset/blobs/...），不再建软链树。
+- 数据字段定义即契约，改字段 = 改本节 + 同步全部消费代码。
 
 ## 2. data/dataset/ 硬约束（定死，逐条执行）
 
@@ -120,11 +121,13 @@ data/dataset/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 文�
 
 | 模块 | 职责 | 入口 |
 |---|---|---|
-| `taxonomy/` | 标签体系构建（build_unified）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 实例知识，各一次 LLM 调用） | 各脚本 `--write` |
+| `taxonomy/` | 标签体系维护：树审计（audit_nodes 死叶子审查）、挂载聚合（mount_map，只读现算不落盘）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 实例知识，各一次 LLM 调用） | 各脚本 `--write` |
 | `collect/` | 图片采集：任务配置、来源适配器（wikimedia/inaturalist/baidu/openverse/scrapers/cn_web/coco/hf_dataset）、下载、队列、增量消费、主清单 upsert、LanceDB 查询索引；常驻流式采集（stream：缺口驱动检索→DownloadQueue→流式下载，与批处理 run 并存） | `collect/cli.py`（含 `stream` 子命令） |
 | `curation/` | 数据策展：失败重试（retry_failed）、VLM 图片质量过滤（filter_vlm）、VLM 知识打标（annotate_vlm：run 批量 / stream 常驻消费打标队列 / apply 合并）、taxonomy 涌现缺口分析（emerge：embed/cluster/name/align/report，数据有树无的新概念提议，人审入树） | 各脚本直接运行 |
 | `viewer/` | 查看器闭环：页面 tag_tree_explorer.html + 构建脚本 build_viewer.py + 产物 build/（sidecar taxonomy.js/instances.js/imgs.js 与 standalone 单文件，gitignore）；HTML 与 build/ 同址是 file:// 双击可用的硬要求 | `viewer/build_viewer.py` |
 
+> **架构决策（2026-08-19）**：标签体系解耦——instances.json 升为独立权威源（实体资产，生灭与富知识不依赖树），taxonomy.json 降为展示视角（树 + 挂载引用）；废除 instances.taxonomy_paths 字段（schema 2.0，实例表 56,789 条一次性迁移零丢失）并删除 build_unified.py。理由：树决定实例生死的反向控制是唯一残留耦合，斩断后数据处理链路（采集/打标/涌现）全部只读实例表；树可自由重生成/多视角并存而不伤资产。需要挂载关系的消费者（collect gap 聚簇、gen_instance_kb 与 emerge 的 prompt 上下文）改由 taxonomy/mount_map.py 从树现算。
+>
 > **架构决策（2026-08-17）**：broader/ 模块（Open-BROADER 上下位关系模型）迁出本仓库，回归独立项目 `/root/data/projects/open_broader/`（代码、55G 训练语料、训练产物、历史日志整体搬移，脚本内绝对路径已批量改写至新家）。理由：上下位判断本质依赖世界知识，通用大模型（Qwen3.8-27B 批审计 + 现成 embedding 检索）已可覆盖 taxonomy 树审计场景，且训练语料正确性存疑、课题短期难推进，故冻结训练、语料与 checkpoint 原地归档。本决策推翻 2026-08-16 的并入决策；未来如复活，先做大模型 vs BROADER 的 head-to-head 评测再立项。
 
 - 跨模块 import 一律 `from <模块>.<文件> import ...`（四模块直接位于仓库根，仓库根在 sys.path 上）。
@@ -141,9 +144,6 @@ data/dataset/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 文�
 ## 5. 关键命令
 
 ```bash
-# 标签体系统一重建（taxonomy.json 为结构权威源）
-python3 taxonomy/build_unified.py --write
-
 # 标签体系富化（LLM 各一次调用；需 LLM_API_KEY 等环境变量；dry-run 零成本预览）
 python3 taxonomy/gen_taxonomy_kb.py --only-empty --write       # 节点 KB（knowledge_intro 等 4 字段）
 python3 taxonomy/gen_instance_kb.py --only-empty --write   # 实例知识（desc/query/aliases）
@@ -173,7 +173,8 @@ python3 curation/annotate_vlm.py stream          # 消费打标队列，成功�
 - ❌ 往 data/ 里放代码、页面或生成产物（viewer 页面与产物在 viewer/ 内闭环）
 - ❌ 恢复历史过程文档（docs/、子目录 README）
 - ❌ 在数据/代码里使用 category、leaf、root 作为分类概念
-- ❌ 在 instances.json 里为同一 name 写多条记录（一个实体一条，多路径进 taxonomy_paths 列表）
+- ❌ 在 instances.json 里为同一 name 写多条记录（一个实体一条；多处挂载表现为多个树节点名单同名）
+- ❌ 往 instances.json 里写树派生字段（挂载路径等）——挂载关系从树现算（taxonomy/mount_map.py），不持久化
 - ❌ 把 data/dataset/、state/ 或 logs/ 提交进 git
 - ❌ 把运行时状态塞进 data/dataset/（放顶层 state/ 对应模块子目录）
 

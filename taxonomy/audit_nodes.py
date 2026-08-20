@@ -264,8 +264,7 @@ def do_apply(write):
     json.dump(doc, open(TAXONOMY_PATH, "w", encoding="utf-8"),
               ensure_ascii=False, indent=1)
     print(f"已写出 {TAXONOMY_PATH}")
-    print("后续同步：python3 taxonomy/build_unified.py --write"
-          " && python3 viewer/build_viewer.py")
+    print("后续同步：python3 viewer/build_viewer.py")
 
 
 def main():
