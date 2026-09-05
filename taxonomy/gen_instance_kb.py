@@ -32,8 +32,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))   # data/（裸包名 import 约定）
 
-from taxonomy import llm_common as llm
-from taxonomy.mount_map import load_mount_map
+from collect_v2 import llm_common as llm
+from collect_v2.mount_map import load_mount_map
 
 ROOT = Path(__file__).resolve().parent.parent.parent      # 仓库根
 META_PATH = ROOT / "datasets" / "demiwtg" / "meta" / "instances.json"
