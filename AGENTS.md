@@ -134,9 +134,8 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 | 模块 | 职责 | 入口 |
 |---|---|---|
-| `data/taxonomy/` | 标签体系维护：树审计（audit_nodes 死叶子审查）、挂载聚合（mount_map，只读现算不落盘）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 实例知识，各一次 LLM 调用） | 各脚本 `--write` |
-| `data/collect_v2/` | 图片采集 v2：infra/算子/chain 三层架构，检索→下载→落盘/打标链路编排（op_seed/op_search/op_download/op_sink/op_annotate，chain.py 串联，smoke_* 分层验证）；存量迁移链（op_backfill 补标算子 + migrate.py 记录驱动入口，images.jsonl → metadata.jsonl） | `data/collect_v2/chain.py`；迁移 `data/collect_v2/migrate.py` |
-| `data/curation/` | 数据策展：数据集分析 notebook（dataset_analysis.ipynb，参数写在 cell 内部，直接运行）：① danbooru2024 metadata.parquet 字段字典 + 单字段下钻（取值分布/TopN 覆盖/Gini/均衡化提示/抽样看 case）；② demiwtg 权威清单（metadata.jsonl）得分分布与按源对比、多实例与重复检查、每实例图数分布、按阈值过滤看 case；③ taxonomy 视角：mount_map 现算节点量级/CSV 导出/按节点抽样看图，只读（评测集分析 notebook 已挪入 benchmark/） | notebook 直接运行 |
+| `taxonomy/` | 标签体系维护：树审计（audit_nodes 死叶子审查）、挂载聚合（mount_map，只读现算不落盘）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 实例知识，各一次 LLM 调用） | 各脚本 `--write` |
+| `curation/` | 数据策展与检索接地：search_kb 实例知识检索接地管线（search_kb_sources 直供源扩充 / search_kb_supervise 全量跑监督）、annotate_backfill 补标驱动（kb_match=None 行 VLM 打标回写）、en_entity_merge EN/ZH 实体合并、focus_sample 重点补图池抽样、质量分析 notebook（download_quality / search_kb_quality）、数据集分析 notebook（dataset_analysis.ipynb，参数写在 cell 内部，直接运行：① danbooru2024 字段下钻；② demiwtg 权威清单分布与过滤；③ taxonomy 视角节点量级与抽样，只读） | 各脚本 `--help`；notebook 直接运行 |
 | `viewer/` | 查看器闭环：页面 tag_tree_explorer.html（+ tag_tree_explorer_en.html 英文平行页，由 --lang en 从主页现场替换生成，单一来源防漂移）+ 构建脚本 build_viewer.py（--lang en 读英文两件套）+ 产物 build/、build_en/（sidecar taxonomy.js/instances.js/imgs.js 与 standalone 单文件，gitignore；英文侧 imgs.js 注入 null，英文版无图）；HTML 与 build/ 同址是 file:// 双击可用的硬要求 | `viewer/build_viewer.py` |
 | `benchmark/` | 评测基准：按三大题型拆成三子模块（见架构决策 2026-08-24 三子模块拆分）。**t2i/**（生成）与 **edit/**（编辑）各带完整四件套：抽样（eval_sample.py 分层配额，--filter 一条 duckdb SQL WHERE；edit 版默认叠加编辑适配门）、出题（eval_synthesize.py，Galaxy API；t2i 版含 facet 词表审计、edit 版 9 类 edit_type 轮转 + 每第 5 题知识编辑套）、判分（eval_score.py 调本地 vLLM judge，score/dump 子命令；t2i 版 FACETS 权威源 + φ 映射聚合，edit 版 EDIT_DIMS 三维钳制）、gen_results_review.py（生成审阅 notebook）；**vlm/**（理解）暂不拆代码，只放 notebook。每子模块两个 notebook：question_dev.ipynb（抽样+分布+题库审阅，for 题目构造）、results_review.ipynb（打分/评估结果分析）。评测数据在各子模块 data/ 下（样本图/题库/判分产物，均不入 git，.gitignore 登记）；编辑评分契约 edit/edit_score_prompts.json（ImgEdit 官方原文，随代码入 git） | 各脚本 `--help`；各子模块 `question_dev.ipynb` / `results_review.ipynb` |
 
@@ -198,8 +197,8 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 ## 4. 数据与代码的边界
 
-- `datasets/`、`state/`、`logs/`、`.qoder/` 是本地数据/运行时产物，**不入 git**（.gitignore 强制；例外：datasets/demiwtg/meta 下 taxonomy 三件套）。
-- 入库的只有：代码（data/collect_v2、data/taxonomy、data/curation、viewer/、benchmark/，含 viewer 页面 HTML）、约束文档（AGENTS.md、README.md）、以及 `datasets/demiwtg/meta/` 下的权威 JSON（taxonomy.json/instances.json/alias_western.json）。
+- `datasets/`、`state/`、`logs/` 是本地数据/运行时产物，**不入 git**（.gitignore 强制；例外：datasets/demiwtg/meta 下 taxonomy 三件套）。
+- 入库的只有：代码（taxonomy、curation、viewer、benchmark，含 viewer 页面 HTML）、约束文档（AGENTS.md、README.md）、以及 `datasets/demiwtg/meta/` 下的权威 JSON（taxonomy.json/instances.json/alias_western.json）。
 - 大 JSON（images.jsonl、blobs）永远不进 git；需要备份走独立通道。
 - 生成产物（`viewer/build/`）不入 git，数据改动后重跑 build_viewer.py。
 
@@ -207,16 +206,16 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 ```bash
 # 标签体系富化（LLM 各一次调用；需 LLM_API_KEY 等环境变量；dry-run 零成本预览）
-python3 data/taxonomy/gen_taxonomy_kb.py --only-empty --write       # 节点 KB（knowledge_intro 等 4 字段）
-python3 data/taxonomy/gen_instance_kb.py --only-empty --write   # 实例知识（desc/query/aliases）
+python3 taxonomy/gen_taxonomy_kb.py --only-empty --write       # 节点 KB（knowledge_intro 等 4 字段）
+python3 taxonomy/gen_instance_kb.py --only-empty --write   # 实例知识（desc/query/aliases）
 
 # viewer 产物重建（数据改动后）
 python3 viewer/build_viewer.py
 
-# 数据策展（无脚本入口；分析 notebook 在 data/curation/ 内直接运行）
+# 数据策展与检索接地（curation/，各脚本 --help；notebook 直接运行）
 
-# 采集 v2（检索→下载→落盘链路；smoke_* 为分层验证入口；包根在 data/）
-python3 -m data.collect_v2.chain ...   # 或 PYTHONPATH=data 后 python3 -m collect_v2.chain ...
+# 图片采集链（已独立为 demiwtg-data 仓库：flow.py + operators/ + smokes/，另含 source_health/source_plan 源策略）
+# 见 https://github.com/vincent9299/demiwtg-data
 
 # modelhub LLM 网关 + 静态代理（独立子项目；详见 modelhub/README.md）
 bash modelhub/start.sh && bash modelhub/smoke.sh   # 启动+冒烟；停止: bash modelhub/stop.sh [--all]
@@ -228,7 +227,7 @@ bash modelhub/start.sh && bash modelhub/smoke.sh   # 启动+冒烟；停止: bas
 - ❌ 手改 blobs/ 下的文件（包括"顺手修一下坏图"——正确做法是重新采集）
 - ❌ 删除图片目录前不做 blobs 内容比对
 - ❌ 新增只写不读的"审计/日志"文件
-- ❌ 在 `data/`（collect_v2/taxonomy/curation）、`viewer/`、`benchmark/` 之外新增脚本（`bagel/`、`modelhub/` 子项目内部自治，不受此限）
+- ❌ 在 `taxonomy/`、`curation/`、`viewer/`、`benchmark/` 之外新增脚本（`bagel/`、`modelhub/` 子项目内部自治，不受此限）
 - ❌ 往 datasets/ 里放代码、页面或生成产物（viewer 页面与产物在 viewer/ 内闭环）
 - ❌ 恢复历史过程文档（docs/、子目录 README）
 - ❌ 在数据/代码里使用 category、leaf、root 作为分类概念
