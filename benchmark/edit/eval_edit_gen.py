@@ -6,8 +6,8 @@ caption 或实体知识。默认复用项目此前 T2I 跑通的 Gemini 强模�
 
 示例：
     .venv/bin/python benchmark/edit/eval_edit_gen.py \
-      --questions benchmark/edit/data/synth_v61_pilot/questions.jsonl \
-      --out-dir benchmark/edit/data/synth_v61_pilot/gemini
+      --questions benchmark/edit/synth_v61_pilot/questions.jsonl \
+      --out-dir benchmark/edit/synth_v61_pilot/gemini
 """
 
 from __future__ import annotations

@@ -2,15 +2,15 @@
 源图出编辑题（每实例 1 题）。
 
 输入（只读）：
-    data/focus200/manifest.jsonl              553 行图池（main 371 + 双载体补 93
+    focus200/manifest.jsonl                   553 行图池（main 371 + 双载体补 93
                                               + hard++++ 89，generator/batch 分桶）
     state/collect/focus_bench_v1.json         200 实例权威顺序
     state/collect/focus1000_instances.json    实体 desc（防幻觉锚定；103/200 有）
     datasets/demiwtg/meta/taxonomy.json       分类路径（mount_map 现算 → 主域）
-    data/complexity_audit_synth.jsonl         初审素材（371 旧图；已知偏乐观，
-                                              复核见 data/audit_doublecheck.report.json）
-    data/focus200/supplement_prompts.jsonl    双载体补图已核实素材（93）
-    data/focus200/quality_regen_v1/*          hard++++ 已核实素材（89）
+    complexity_audit_synth.jsonl              初审素材（371 旧图；已知偏乐观，
+                                              复核见 archive/audit_doublecheck.report.json）
+    focus200/supplement_prompts.jsonl         双载体补图已核实素材（93）
+    focus200/quality_regen_v1/*               hard++++ 已核实素材（89）
     benchmark/t2i/data/focus1000/gen_prompts.jsonl 等  gen_prompt（题面 caption 角色）
 
 批次设计（2026-09-03 v6.1）：
@@ -25,7 +25,7 @@
     输出契约 evidence_receipt（题面引用要素逐项凭图回执，source != image 拒收）；
     初审 count 不入题面、大 count 组不作序数定位锚；交叉核验容差按修正比放宽。
 
-产物（data/synth_v61/）：
+产物（synth_v61/）：
     questions.jsonl         题库（含 _meta 溯源字段）
     raw/<qid>.json          每题原始 API 响应（断点复用）
     cannot_construct.jsonl  不可出题分支收集（换类型/换图重试后仍卡住的）
@@ -62,11 +62,11 @@ sys.path.insert(0, str(REPO / "data"))
 from collect_v2.mount_map import load_mount_map               # noqa: E402
 
 SUB_DIR = Path(__file__).resolve().parent                     # edit/
-EVAL_DIR = SUB_DIR / "data"
+EVAL_DIR = SUB_DIR    # edit 无 data/ 层：批次目录（synth_v61_pilot 等）落子模块根
 FOCUS = EVAL_DIR / "focus200"
 QRV = FOCUS / "quality_regen_v1"
 T2I_F1000 = REPO / "benchmark" / "t2i" / "data" / "focus1000"
-PROMPT_FILE = SUB_DIR / "synthesize_prompt_edit_v6.1.md"
+PROMPT_FILE = SUB_DIR / "prompts" / "synthesize_prompt_edit_v6.1.md"
 MANIFEST = FOCUS / "manifest.jsonl"
 BENCH_INSTANCES = REPO / "state" / "collect" / "focus_bench_v1.json"
 FOCUS1000_INSTANCES = REPO / "state" / "collect" / "focus1000_instances.json"

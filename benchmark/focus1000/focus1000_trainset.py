@@ -20,8 +20,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = Path(__file__).resolve().parent / "data" / "focus1000"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = Path(__file__).resolve().parent / "data"
 PROMPTS_F = DATA_DIR / "gen_prompts.jsonl"
 RESULTS_F = DATA_DIR / "gen_results.jsonl"
 OUT_F = DATA_DIR / "train_pairs.jsonl"

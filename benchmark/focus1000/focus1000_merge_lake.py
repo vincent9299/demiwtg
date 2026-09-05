@@ -21,8 +21,8 @@ import shutil
 import time
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = Path(__file__).resolve().parent / "data" / "focus1000"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = Path(__file__).resolve().parent / "data"
 RESULTS_F = DATA_DIR / "gen_results.jsonl"
 DATASET = REPO_ROOT / "datasets" / "demiwtg"
 BLOBS = DATASET / "blobs"

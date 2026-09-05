@@ -12,11 +12,11 @@ from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
-DATA = HERE / "data"
-DEFAULT_SOURCE = DATA / "complexity_audit_synth.jsonl"
-DEFAULT_SAMPLE = DATA / "audit_doublecheck_sample.jsonl"
-DEFAULT_RESULTS = DATA / "audit_doublecheck_results.jsonl"
-DEFAULT_REPORT = DATA / "audit_doublecheck.report.json"
+ARCHIVE = HERE / "archive"    # 复核轮历史产物已归档
+DEFAULT_SOURCE = HERE / "complexity_audit_synth.jsonl"    # 活素材仍在 edit 根
+DEFAULT_SAMPLE = ARCHIVE / "audit_doublecheck_sample.jsonl"
+DEFAULT_RESULTS = ARCHIVE / "audit_doublecheck_results.jsonl"
+DEFAULT_REPORT = ARCHIVE / "audit_doublecheck.report.json"
 SEED = 20260902
 
 

@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-"""生成 edit/results_review.ipynb（edit 赛道打分/评估结果审阅，纯只读展示）。
+"""生成 edit/reviews/results_review.ipynb（edit 赛道打分/评估结果审阅，纯只读展示）。
 
-用法：python3 benchmark/edit/gen_results_review.py   # 覆写同目录 results_review.ipynb
+用法：python3 benchmark/edit/gen_results_review.py   # 覆写 reviews/results_review.ipynb
 """
 import json
 from pathlib import Path
 
-OUT_NB = Path(__file__).resolve().parent / "results_review.ipynb"
+OUT_NB = Path(__file__).resolve().parent / "reviews" / "results_review.ipynb"
 
 MD_INTRO = """# edit 赛道 · 打分/评估结果审阅
 
-- 题库：`edit/data/synth_edit/questions.jsonl`（`eval_synthesize.py` 产物；换批次/快照改下方 `QFILE`）
+- 题库：`edit/synth_v61_pilot/questions.jsonl`（`eval_synthesize.py` 产物；换批次/快照改下方 `QFILE`）
 - 模型产出：`bagel/results/wkbench_v0/`（`responses_shard*.jsonl` + `imgs/<qid>.png`；换目录改 `RESP_DIR`）
 - 只展示 task=edit 的题；**默认只展示 3 个冒烟 case**，全量跑完后把 `SHOW_ALL` 改 `True`
 - 纯只读展示，零数据处理逻辑；多分片记录按 qid 合并（后读到的文件覆盖，即最新一次重跑结果优先）
-- 逐题分数与聚合报表由 `eval_score.py` 产出（`data/scores_edit.jsonl(.report.json)`），分析见 question_dev.ipynb
+- 逐题分数与聚合报表由 `eval_score.py` 产出（`scores_edit.jsonl(.report.json)`），分析见 reviews/question_dev.ipynb
 
 > 运行：菜单 Run All，或逐 Cell 运行。"""
 
 CELL_LOAD = """import json, base64
 from pathlib import Path
 
-QFILE    = Path('data/synth_edit/questions.jsonl')  # ← 题库（出题产物或快照）
-RESP_DIR = Path('../../bagel/results/wkbench_v0')   # ← 模型产出目录
+QFILE    = Path('../synth_v61_pilot/questions.jsonl')  # ← 题库（出题产物或快照）
+RESP_DIR = Path('../../../bagel/results/wkbench_v0')   # ← 模型产出目录
 SMOKE_QIDS = ['0001-edit-1', '0002-edit-1', '0003-edit-1']
 SHOW_ALL = False     # 全量跑完后改 True 审阅全部已完成的题
 TASK = 'edit'
@@ -86,7 +86,7 @@ def _head(q, r):
     return (f'<h3 style="margin:16px 0 4px">{q["qid"]} · {q["task"]} · {q.get("difficulty", "")} '
             f'· {q.get("knowledge_dim", "")} · {q.get("edit_type", "")} · {dims}　{badge}</h3>')"""
 
-CELL_SHOW = """EVAL_ROOT = Path('data')   # 样本图相对本子模块数据区（题库 _sample_image 字段）
+CELL_SHOW = """EVAL_ROOT = Path('..')   # 样本图相对子模块根 edit/（题库 _sample_image 字段；notebook 在 reviews/ 下运行）
 
 def show_edit(q, r):
     sample = EVAL_ROOT / q['_sample_image']

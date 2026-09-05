@@ -51,7 +51,7 @@ from t2i.eval_score import FACET_KEYS                 # noqa: E402  facet 词表
 
 SUB_DIR = Path(__file__).resolve().parent             # t2i/
 EVAL_DIR = SUB_DIR / "data"
-PROMPT_FILE = SUB_DIR / "synthesize_prompt_gen.md"
+PROMPT_FILE = SUB_DIR / "synthesize_prompt_gen_v6.0.md"
 SAMPLES = EVAL_DIR / "samples.jsonl"
 
 API_URL = "https://token.ai-galaxy.com/v1/chat/completions"

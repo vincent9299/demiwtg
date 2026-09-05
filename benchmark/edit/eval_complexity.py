@@ -11,10 +11,10 @@
 2. select：每实例按（scene 维度数 -> 同类多实例 -> 载体数 -> quality）取
    top-K（默认 3），批次级分布报表（L2/L3 供给率、类型适配覆盖、低复杂实例名单）。
 
-产物（评测数据，不入 git）：
-    benchmark/edit/data/complexity_audit.jsonl     # 逐图审计（append，可续跑）
-    benchmark/edit/data/selected_samples.jsonl     # 每实例 top-K 选取
-    benchmark/edit/data/selected_report.json       # 批次校准报表
+产物（评测数据，不入 git；旧轮历史账本已归档 archive/）：
+    benchmark/edit/complexity_audit.jsonl     # 逐图审计（append，可续跑）
+    benchmark/edit/selected_samples.jsonl     # 每实例 top-K 选取
+    benchmark/edit/selected_report.json       # 批次校准报表
 
 用法：
     python3 benchmark/edit/eval_complexity.py audit [--workers 12] [--limit 20]
@@ -39,7 +39,7 @@ import requests
 SUB_DIR = Path(__file__).resolve().parent                    # edit/
 BENCH_ROOT = SUB_DIR.parent                                  # benchmark/
 REPO_ROOT = BENCH_ROOT.parent                                # 仓库根
-EVAL_DIR = SUB_DIR / "data"
+EVAL_DIR = SUB_DIR    # edit 无 data/ 层：focus200 与账本落子模块根
 META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
 DATASET_DIR = REPO_ROOT / "datasets" / "demiwtg"
 

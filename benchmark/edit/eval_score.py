@@ -7,7 +7,7 @@ responses 契约（每题一行）：{"qid": "...", "image": "产出图路径"}
 
 用法：
     python3 benchmark/edit/eval_score.py --questions Q.jsonl --responses R.jsonl
-    python3 benchmark/edit/eval_score.py dump   # 物化 judge prompt 到 data/judge_prompts（审计用）
+    python3 benchmark/edit/eval_score.py dump   # 物化 judge prompt 到 judge_prompts/（审计用）
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ import requests
 from PIL import Image
 
 SUB_DIR = Path(__file__).resolve().parent                    # edit/
-EVAL_DIR = SUB_DIR / "data"
+EVAL_DIR = SUB_DIR    # edit 无 data/ 层：批次目录与判分产物落子模块根
 JUDGE_PROMPTS_DIR = EVAL_DIR / "judge_prompts"
 EDIT_PROMPTS_FILE = SUB_DIR / "edit_score_prompts.json"
 
@@ -103,7 +103,7 @@ def load_jsonl(path: Path) -> list:
 
 
 def materialize_judge_prompts() -> None:
-    """物化判分契约到 data/judge_prompts（审计/调试用；消费者为本脚本自身与人工复核）。"""
+    """物化判分契约到 judge_prompts/（审计/调试用；消费者为本脚本自身与人工复核）。"""
     JUDGE_PROMPTS_DIR.mkdir(parents=True, exist_ok=True)
     (JUDGE_PROMPTS_DIR / "edit_score_prompts.json").write_text(
         EDIT_PROMPTS_FILE.read_text(encoding="utf-8"), encoding="utf-8")
@@ -193,7 +193,7 @@ def run(args) -> None:
                 continue
             t0 = time.time()
             try:
-                # _sample_image 相对样本数据区（data/）；题库在其子目录，逐级向上找
+                # _sample_image 相对子模块根（edit/）；题库在其子目录，逐级向上找
                 src = Path(q["_sample_image"])
                 if not src.is_absolute():
                     for base in (args.questions.parent,

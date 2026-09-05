@@ -29,10 +29,38 @@ datasets/demiwtg/meta/*
 state/
 logs/
 
+# data/ 退役残件（collect_v2 已迁 demiwtg-data 仓库，taxonomy/curation 已提升根目录；
+# 本地留档系迁移前旧副本，不入 git；见 AGENTS.md 架构决策 2026-09-05）
+/data/
+
 # 评测结果数据（各赛道子模块内闭环，大体积样本图与题库产物，勿提交）
 benchmark/vlm/data/
 benchmark/t2i/data/
-benchmark/edit/data/
+
+# 评测数据重组 2026-09-05：仅 README/MANIFEST/HANDOFF/summary 文档入库，样本图/出图/题库/判分/溯源等数据不入 git
+# t2i archive/ = 历史批次分桶归档；bench200/ = 终版 200 题评测集；focus1000/data/ = 千实例样本线数据
+benchmark/t2i/archive/*
+!benchmark/t2i/archive/MANIFEST.md
+benchmark/t2i/bench200/*
+!benchmark/t2i/bench200/README.md
+benchmark/focus1000/data/
+# edit archive/ = 历史审计批次；synth_v61_pilot/ = v6.1 出题试点批次；focus200/ = 终版 200 题样本图与出图
+benchmark/edit/archive/*
+!benchmark/edit/archive/audit_doublecheck.summary.md
+!benchmark/edit/archive/MANIFEST.md
+benchmark/edit/synth_v61_pilot/*
+!benchmark/edit/synth_v61_pilot/*.md
+benchmark/edit/focus200/
+# edit 无 data/ 层（2026-09-05，见 AGENTS.md 架构决策）：运行时产物落子模块根
+benchmark/edit/judge_prompts/
+benchmark/edit/samples.jsonl
+benchmark/edit/images/
+benchmark/edit/scores_edit.jsonl
+benchmark/edit/scores_edit.report.json
+benchmark/edit/complexity_audit.jsonl
+benchmark/edit/complexity_audit_synth.jsonl
+benchmark/edit/selected_samples.jsonl
+benchmark/edit/selected_report.json
 .qoder/*
 # 交接文档进仓（V2 重写的权威工作文档）
 !.qoder/handoff_collect_v2.md
@@ -42,8 +70,17 @@ benchmark/edit/data/
 # 本地临时验证目录（stream 冒烟等一次性产物，勿提交）
 _st_tmp/
 
-# bagel 子项目（独立仓库，自带 .git 与 .gitignore，整体不入主仓；见 AGENTS.md 架构决策 2026-08-23）
-bagel/
+# bagel 子项目（2026-09-05 用户拍板入主仓，废止 2026-08-23 独立仓库整体排除方案；见 AGENTS.md 架构决策 2026-09-05）
+# 代码入库、重物不入：Bagel/models（BAGEL-7B-MoT 权重 ~28G）、eval/vlm/data（评测下载数据 mmbench ~50M）
+# 上游 Bagel 自带 .gitignore（wandb/results/eval_results/notebooks/tests 等）在子树内继续生效
+/bagel/Bagel/models/
+/bagel/Bagel/eval/vlm/data/
+
+# benchmark/bagel/ 第 4 评测场景（BAGEL-7B-MoT 官方基准评测，2026-09-05 整合）：
+# data/ 实体数据（题库/出图/缓存 ~1.2G）与 vendored 官方 git 仓 qib_official/、VLMEvalKit/（可再克隆）不入主仓
+benchmark/bagel/data/
+benchmark/bagel/gen/qib_official/
+benchmark/bagel/vlm/VLMEvalKit/
 
 # modelhub 子项目（独立仓库，自带 .git 与 .gitignore，整体不入主仓；见 AGENTS.md 架构决策 2026-08-25）
 modelhub/

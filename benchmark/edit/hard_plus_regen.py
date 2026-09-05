@@ -17,8 +17,8 @@ from typing import Iterable
 
 
 HERE = Path(__file__).resolve().parent
-DATA = HERE / "data" / "focus200" / "quality_regen_v1"
-FOCUS = HERE / "data" / "focus200"
+DATA = HERE / "focus200" / "quality_regen_v1"
+FOCUS = HERE / "focus200"
 MANIFEST = FOCUS / "manifest.jsonl"
 PLAN = DATA / "plan.jsonl"
 MERGED = DATA / "merged_results.jsonl"

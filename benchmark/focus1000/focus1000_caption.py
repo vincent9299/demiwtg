@@ -24,8 +24,8 @@ from pathlib import Path
 
 import aiohttp
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = Path(__file__).resolve().parent / "data" / "focus1000"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = Path(__file__).resolve().parent / "data"
 OUT_F = DATA_DIR / "detail_captions.jsonl"
 META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
 METADATA_F = META_DIR / "metadata.jsonl"

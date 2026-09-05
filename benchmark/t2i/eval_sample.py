@@ -51,12 +51,14 @@ META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
 OUT_DIR = SUB_DIR / "data"
 
 # 默认排除集：三赛道样本清单（跨赛道防重复出题；不存在的清单自动跳过）。
-# glob samples*.jsonl：版本化批次（如 samples_20260828_v2.jsonl）全量在册，
-# 任何历史批次样本永不回流（含归档副本）。
-DEFAULT_EXCLUDES = sorted(
+# glob samples*.jsonl：版本化批次全量在册（t2i 历史批次已归档 archive/；
+# edit 已去 data/ 层、批次目录落顶层，故整目录递归扫描，
+# 确保任何历史批次样本永不回流，含归档副本）。
+DEFAULT_EXCLUDES = sorted({
     p for sub in ("vlm", "t2i", "edit")
-    for p in (BENCH_ROOT / sub / "data").glob("samples*.jsonl")
-)
+    if (BENCH_ROOT / sub).is_dir()
+    for p in (BENCH_ROOT / sub).rglob("samples*.jsonl")
+})
 
 OWN_IMG_RE = re.compile(r"^\d{4}_")    # 本脚本产出的样本拷贝命名前缀
 

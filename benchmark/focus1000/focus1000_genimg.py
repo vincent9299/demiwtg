@@ -36,14 +36,14 @@ import sys
 import time
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = Path(__file__).resolve().parent / "data" / "focus1000"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = Path(__file__).resolve().parent / "data"
 IMGS_DIR = DATA_DIR / "gen_imgs"
 PROMPTS_F = DATA_DIR / "gen_prompts.jsonl"
 RESULTS_F = DATA_DIR / "gen_results.jsonl"
 FOCUS_F = REPO_ROOT / "state" / "collect" / "focus1000_instances.json"
 TAXONOMY_F = REPO_ROOT / "datasets" / "demiwtg" / "meta" / "taxonomy.json"
-V60_PROMPT_F = Path(__file__).resolve().parent / "synthesize_prompt_gen_v6.0.md"
+V60_PROMPT_F = Path("/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i/synthesize_prompt_gen_v6.0.md")
 ENV_F = REPO_ROOT / "modelhub" / ".env"
 
 TEXT_MODEL = "qwen3.8-max"

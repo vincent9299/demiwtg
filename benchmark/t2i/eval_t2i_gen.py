@@ -28,8 +28,8 @@ from pathlib import Path
 
 import requests
 
-DEFAULT_QUESTIONS = Path(__file__).resolve().parent / "data" / "eval_bagel_v55" / "questions.jsonl"
-DEFAULT_OUT = Path(__file__).resolve().parent / "data" / "eval_models_v55"
+DEFAULT_QUESTIONS = Path(__file__).resolve().parent / "bench200" / "questions.jsonl"
+DEFAULT_OUT = Path(__file__).resolve().parent / "data" / "gen_out"
 IMG_ENDPOINT_HINT = re.compile(r"images? (?:endpoint|api)|/images", re.IGNORECASE)
 LIST_CONTENT_HINT = re.compile(r"valid list|content.*(list|array)", re.IGNORECASE)
 

@@ -24,7 +24,7 @@ import aiohttp
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-DATA = HERE / "data"
+DATA = HERE    # edit 无 data/ 层：focus200 与活素材落子模块根
 FOCUS = DATA / "focus200"
 IMAGES = FOCUS / "images"
 NEEDED = FOCUS / "supplement_needed.json"

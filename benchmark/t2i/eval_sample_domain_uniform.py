@@ -44,10 +44,11 @@ OUT_DIR = SUB_DIR / "data"
 DEFAULT_FILTER = ("quality >= 9.0 AND identity = true "
                   "AND least(width, height) >= 768")
 
-DEFAULT_EXCLUDES = sorted(
+DEFAULT_EXCLUDES = sorted({
     p for sub in ("vlm", "t2i", "edit")
-    for p in (BENCH_ROOT / sub / "data").glob("samples*.jsonl")
-)
+    if (BENCH_ROOT / sub).is_dir()
+    for p in (BENCH_ROOT / sub).rglob("samples*.jsonl")
+})
 
 OWN_IMG_RE = re.compile(r"^\d{5}_")     # 本脚本产物命名前缀（五位，避开四位旧批）
 ID_BASE = 60000                          # sample_id 起点（避开主样本号段）

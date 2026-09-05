@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-BASE = Path(__file__).resolve().parent / "data" / "focus1000"
+BASE = Path(__file__).resolve().parent / "data"
 PROMPTS = BASE / "gen_prompts.jsonl"
 SCORES = BASE / "gen_scores.jsonl"
 REPORT = BASE / "gen_scores.report.json"

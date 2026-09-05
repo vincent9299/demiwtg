@@ -10,17 +10,17 @@
    短边>=512；可用 --no-edit-gate 关掉编辑适配门只留质量门）；
 2. 分层：按树 L1/L2 分支配额（sqrt 平滑防头部刷屏），每实例至多
    --per-instance 张；
-3. 排除集：三个赛道子模块（vlm/t2i/edit）各自 data/samples.jsonl 的
-   sha256 全量剔除（跨赛道防同一张图重复出题 → 判分模型背答案），
-   可用 --exclude 覆盖。
+3. 排除集：三个赛道（vlm/t2i/edit）目录递归扫描 samples*.jsonl 的
+   sha256 全量剔除（跨赛道防同一张图重复出题 → 判分模型背答案；
+   含 archive/ 历史批次，旧样本永不回流），可用 --exclude 覆盖。
 
 每次运行全量重抽：直接抽 --n 张，覆盖写 --out 清单（数据分布可能变化，
 不维护增量）；--img-dir 里本脚本产出的旧样本拷贝（^\\d{4}_ 命名）落盘前
 清除，编号从 0001 起。所有路径均为参数，默认取仓库标准布局。
 
 产物（评测结果数据，在 edit/ 下且不入 git，默认路径）：
-    benchmark/edit/data/samples.jsonl     # 本次抽样的权威清单（覆盖写）
-    benchmark/edit/data/images/<nnnn>_<实例>_<sha8>.<ext>   # 图片拷贝
+    benchmark/edit/samples.jsonl     # 本次抽样的权威清单（覆盖写）
+    benchmark/edit/images/<nnnn>_<实例>_<sha8>.<ext>   # 图片拷贝
 
 用法：
     python3 benchmark/edit/eval_sample.py [--n 1000] [--seed 20260823] [--dry-run]
@@ -47,13 +47,15 @@ sys.path.insert(0, str(REPO_ROOT / "data"))    # taxonomy 包已迁至 data/taxo
 from collect_v2.mount_map import load_mount_map                 # noqa: E402
 
 META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
-OUT_DIR = SUB_DIR / "data"
+OUT_DIR = SUB_DIR    # edit 无 data/ 层：批次目录同级，抽样默认落子模块根
 
-# 默认排除集：三赛道样本清单（跨赛道防重复出题；不存在的清单自动跳过）
-DEFAULT_EXCLUDES = [
-    BENCH_ROOT / sub / "data" / "samples.jsonl"
-    for sub in ("vlm", "t2i", "edit")
-]
+# 默认排除集：三赛道目录递归扫描 samples*.jsonl（跨赛道防重复出题；
+# 含 archive/ 历史批次与顶层默认落点，旧样本永不回流；缺失路径自动跳过）
+DEFAULT_EXCLUDES = sorted({
+    p for sub in ("vlm", "t2i", "edit")
+    if (BENCH_ROOT / sub).is_dir()
+    for p in (BENCH_ROOT / sub).rglob("samples*.jsonl")
+})
 
 OWN_IMG_RE = re.compile(r"^\d{4}_")    # 本脚本产出的样本拷贝命名前缀
 
