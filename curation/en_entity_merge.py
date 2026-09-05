@@ -541,6 +541,71 @@ def cmd_apply(args):
     print("写库完成 + name 唯一性校验通过；备份在", bak)
 
 
+def cmd_orphans(args):
+    """游离 EN 实体兜底入库：对齐流程只覆盖双边名单非空的节点，
+    EN 独有节点（中文侧空/无桥接）与 EN 侧未挂载实例会漏掉——
+    按 2026-08-24 占位全量入库先例补 source=derived，能挂树的挂中文树。"""
+    import shutil
+    alias_ops, new_entities, _ = merge_ops()
+    en2zh = {}
+    for zh, ens in alias_ops.items():
+        for e in ens:
+            en2zh.setdefault(e, zh)
+    insts_doc = json.loads((META / "instances.json").read_text(encoding="utf-8"))
+    tax_doc = json.loads((META / "taxonomy.json").read_text(encoding="utf-8"))
+    en_doc = json.loads((META / "instances_en.json").read_text(encoding="utf-8"))
+    en_rosters = load_rosters(META / "taxonomy_en.json")
+    bridge = load_bridge()
+    en2zhpath = {}
+    for ep, elist in en_rosters.items():
+        zp = bridge.get(ep)
+        if zp:
+            for e in elist:
+                en2zhpath.setdefault(e, zp)
+    by_name = {i["name"]: i for i in insts_doc["instances"]}
+    nodes_by_path = {}
+
+    def walk(n):
+        nodes_by_path[n["path"]] = n
+        for c in n.get("children") or []:
+            walk(c)
+
+    walk(tax_doc["tree"])
+    added, mounted = 0, 0
+    for rec in en_doc["instances"]:
+        nm = rec["name"]
+        if nm in by_name or nm in en2zh:
+            continue
+        by_name[nm] = {"name": nm, "source": "derived"}
+        insts_doc["instances"].append(by_name[nm])
+        added += 1
+        node = nodes_by_path.get(en2zhpath.get(nm) or "")
+        if node is not None:
+            lst = node.setdefault("instances", [])
+            if nm not in lst:
+                lst.append(nm)
+                mounted += 1
+    print(json.dumps({"orphans_added": added, "orphans_mounted": mounted,
+                      "instances_total_after": len(insts_doc["instances"])},
+                     ensure_ascii=False))
+    if args.dry_run:
+        print("（dry-run，未写库）")
+        return
+    bak = ROOT / "state/taxonomy/backup_pre_orphan_ingest"
+    bak.mkdir(parents=True, exist_ok=True)
+    for f in ("instances.json", "taxonomy.json"):
+        if not (bak / f).exists():
+            shutil.copy2(META / f, bak / f)
+    (META / "instances.json").write_text(
+        json.dumps(insts_doc, ensure_ascii=False, indent=1), encoding="utf-8")
+    (META / "taxonomy.json").write_text(
+        json.dumps(tax_doc, ensure_ascii=False, indent=1), encoding="utf-8")
+    names = [i["name"] for i in json.loads(
+        (META / "instances.json").read_text(encoding="utf-8"))["instances"]]
+    assert len(names) == len(set(names)), "name 唯一性被破坏"
+    print("写库完成 + name 唯一性校验通过；备份在", bak)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -551,9 +616,11 @@ def main():
     ep = sub.add_parser("escalate"); ep.add_argument("--max-nodes", type=int, default=2000)
     sub.add_parser("report")
     app = sub.add_parser("apply"); app.add_argument("--dry-run", action="store_true")
+    op = sub.add_parser("orphans"); op.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     dict(tier0=cmd_tier0, calibrate=cmd_calibrate, bulk=cmd_bulk,
-         escalate=cmd_escalate, report=cmd_report, apply=cmd_apply)[args.cmd](args)
+         escalate=cmd_escalate, report=cmd_report, apply=cmd_apply,
+         orphans=cmd_orphans)[args.cmd](args)
 
 
 if __name__ == "__main__":
