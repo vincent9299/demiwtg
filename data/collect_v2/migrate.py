@@ -52,7 +52,7 @@ import httpx
 
 from collect_v2 import op_annotate, op_backfill
 from collect_v2.op_search import Item
-from taxonomy.mount_map import load_mount_map, tree_sibling_of
+from collect_v2.mount_map import load_mount_map, tree_sibling_of
 
 # v2 最小兼容字段集（对齐 op_sink._record_for 的读端识别面；
 # v1 特有字段 tiers/source_rank/source_score/source_kind/

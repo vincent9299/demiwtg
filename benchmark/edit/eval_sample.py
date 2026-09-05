@@ -44,7 +44,7 @@ BENCH_ROOT = SUB_DIR.parent                                  # benchmark/
 REPO_ROOT = BENCH_ROOT.parent                                # 仓库根
 sys.path.insert(0, str(REPO_ROOT / "data"))    # taxonomy 包已迁至 data/taxonomy/
 
-from taxonomy.mount_map import load_mount_map                 # noqa: E402
+from collect_v2.mount_map import load_mount_map                 # noqa: E402
 
 META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
 OUT_DIR = SUB_DIR / "data"

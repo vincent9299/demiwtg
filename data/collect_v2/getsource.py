@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+import json
+
 from collect_v2.op_search import Seed
 
 # 新源（虚拟角色向）：对所有语言的 seed 全量投递（用户拍板）；
@@ -42,10 +44,52 @@ ROUTE_TABLE: dict = {
     "latin": ["wikimedia"] + _CHAR_SOURCES + _LATIN_ONLY_SOURCES,
 }
 
+# 条件源（2026-08-29 源策略，--source-agent 门控）：按实例挂载路径关键词命中才投递。
+# anilist/mal 是动画/漫画角色库（2026-08-22 全量场 404 浪费摘除；条件路由复产——
+# 只打挂载路径含动漫关键词的实例，中英树关键词并收，路径段 substring 匹配）。
+_DOMAIN_SOURCES: dict[str, tuple] = {
+    "anilist": ("Anime", "Manga", "Animation", "动画", "漫画", "动漫"),
+    "mal": ("Anime", "Manga", "Animation", "动画", "漫画", "动漫"),
+}
 
-def route(seed: Seed) -> list:
+
+def route(seed: Seed, domains=None, *, agent: bool = False) -> list:
     """单 seed 路由：返回 [(seed, 源), ...]，源序按表内顺序。
 
     未登记的 lang 返回空列表（认缺，不回落不放宽）。
+    agent=False（默认）：行为与 2026-08-29 前完全一致（中文链不传旗零变化）。
+    agent=True（源策略扩展，EN 链先跑通）：deviantart 复挂 latin 路（健康账本
+    监护，死源自动停用）；domains 为该实例的挂载路径段集合（load_domain_segs
+    现算），命中 _DOMAIN_SOURCES 关键词的条件源追加投递。
     """
-    return [(seed, source) for source in ROUTE_TABLE.get(seed.lang, [])]
+    sources = list(ROUTE_TABLE.get(seed.lang, []))
+    if agent:
+        if seed.lang == "latin":
+            sources.append("deviantart")
+        for src, kws in _DOMAIN_SOURCES.items():
+            if src in sources:
+                continue
+            if domains and any(kw in seg for seg in domains for kw in kws):
+                sources.append(src)
+    return [(seed, s) for s in sources]
+
+
+def load_domain_segs(tree_path: str) -> dict:
+    """读树现算 实例名 → 挂载路径段集合（全层级段名并集，供关键词匹配）。
+
+    消费者现场聚合模式（同 mount_map）：不落盘；一实例多挂=多路径段并集；
+    未挂载实例不在表内（返回 dict 缺键，条件源不投递——待认领池无路由依据）。
+    """
+    doc = json.loads(open(tree_path, encoding="utf-8").read())
+    out: dict[str, set] = {}
+
+    def walk(node) -> None:
+        for inst in node.get("instances") or []:
+            out.setdefault(inst, set()).update(node.get("path", "").split(" / "))
+        for ch in node.get("children") or []:
+            walk(ch)
+
+    tree = doc.get("tree") or {}
+    if tree:
+        walk(tree)
+    return out

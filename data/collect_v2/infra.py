@@ -140,6 +140,10 @@ class RateLimiter:
         self._lock = asyncio.Lock()
         self._next_at = 0.0
 
+    def set_rate(self, rate: float) -> None:
+        """改速率（源策略节流/回升专用；单事件循环内调用，无锁）。"""
+        self._interval = 1.0 / rate
+
     async def acquire(self) -> None:
         async with self._lock:
             loop = asyncio.get_running_loop()
@@ -158,6 +162,9 @@ class SourceGate:
         self.limits = limits
         self._sem = asyncio.Semaphore(limits.concurrency)
         self._rl = RateLimiter(limits.rate)
+
+    def set_rate(self, rate: float) -> None:
+        self._rl.set_rate(rate)
 
     @asynccontextmanager
     async def slot(self) -> AsyncIterator[None]:
@@ -178,6 +185,28 @@ def gate_for(source: str) -> SourceGate:
             raise ValueError(f"源 {source!r} 未在限速表 SOURCE_LIMITS 登记")
         gate = _gates[source] = SourceGate(limits)
     return gate
+
+
+def set_gate_rate(source: str, rate: float) -> bool:
+    """调已建闸门的速率（源策略专用）；闸门未建（未用过）返回 False 不动它。"""
+    gate = _gates.get(source)
+    if gate is None:
+        return False
+    gate.set_rate(rate)
+    return True
+
+
+# ---------------------------------------------------------------------------
+# 源健康记录钩子（2026-08-29 源策略）：未 attach 时零开销零行为变化
+# ---------------------------------------------------------------------------
+
+_health = None   # Optional[object]：duck-typed note_http(source, status)
+
+
+def attach_health(recorder) -> None:
+    """挂源健康账本（collect_v2.source_health.HealthLedger）；中文链不挂=原行为。"""
+    global _health
+    _health = recorder
 
 
 # ---------------------------------------------------------------------------
@@ -333,6 +362,9 @@ async def request(
                 verdict = classify_status(resp.status_code)
                 if verdict == "ok":
                     return resp
+                if _health is not None:
+                    _health.note_http(source.removeprefix("dl:"),
+                                      resp.status_code)
                 if verdict == "deterministic":
                     raise DeterministicError(f"{source} {url}: HTTP {resp.status_code}")
                 last_exc, last_status = None, resp.status_code
@@ -396,6 +428,8 @@ async def stream(
             status = resp.status_code
             await resp.aclose()
             resp = None
+            if _health is not None:
+                _health.note_http(source.removeprefix("dl:"), status)
             if verdict == "deterministic":
                 raise DeterministicError(f"{source} {url}: HTTP {status}")
             last_exc, last_status = None, status

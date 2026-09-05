@@ -43,6 +43,7 @@ for _k in list(os.environ):
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEFAULT_INSTANCES = os.path.join(REPO_ROOT, "datasets", "demiwtg", "meta", "instances.json")
+DEFAULT_INSTANCES_EN = os.path.join(REPO_ROOT, "datasets", "demiwtg", "meta", "instances_en.json")
 DEFAULT_DATASET = os.path.join(REPO_ROOT, "datasets", "demiwtg")
 DEFAULT_ALIAS_CACHE = os.path.join(REPO_ROOT, "datasets", "demiwtg", "meta", "alias_western.json")
 
@@ -88,19 +89,24 @@ class Stats:
 
 
 async def search_worker(q_pairs, q_cands, *, k: int, top_n: int,
-                        stats: Stats) -> None:
+                        stats: Stats, ledger=None) -> None:
     """search 级：取 (seed, 源) → 检索 → top_n 固定切片逐条放行（认缺只计数）。"""
     while True:
         t = await q_pairs.get()
         if t is None:                          # sentinel：投影已全部投递
             return
         seed, source = t
+        if ledger is not None and ledger.disabled(source):
+            stats.add_miss("source:disabled")  # 源策略停用：认缺不断链
+            continue
         try:
             items = await op_search.search(seed, source, k=k)
         except (infra.InfraError, httpx.HTTPError) as exc:
             # 同下载路径：读流阶段原样上抛的网络异常也认缺不断链
             stats.add_miss(f"search:{type(exc).__name__}")
             continue
+        if ledger is not None:
+            ledger.note_search(source, bool(items))
         if not items:
             stats.add_miss("search:empty")
             continue
@@ -110,7 +116,7 @@ async def search_worker(q_pairs, q_cands, *, k: int, top_n: int,
             await q_cands.put(it)
 
 
-async def download_worker(q_cands, q_dl, stats: Stats) -> None:
+async def download_worker(q_cands, q_dl, stats: Stats, ledger=None) -> None:
     """download 级：候选 → 下载，成功者放行打标（拒收/异常只计数）。"""
     while True:
         it = await q_cands.get()
@@ -122,7 +128,11 @@ async def download_worker(q_cands, q_dl, stats: Stats) -> None:
             # InfraError=分类重试语义；httpx.HTTPError=读流阶段原样上抛的网络异常
             # （infra.stream 契约），两者都认缺不断链（2026-08-21 夜跑崩溃后补防）
             stats.add_miss("download:网络异常")
+            if ledger is not None and it.source:
+                ledger.note_download(it.source, False)
             continue
+        if ledger is not None and it.source:
+            ledger.note_download(it.source, got is not None)
         if got is None:                      # 非图/超限拒收（正常流转）
             stats.rejected += 1
             continue
@@ -131,8 +141,12 @@ async def download_worker(q_cands, q_dl, stats: Stats) -> None:
 
 
 async def annotate_worker(q_dl, *, sink, kb, vlm_client,
-                          stats: Stats) -> None:
-    """annotate 级：打标 + 落盘合并一级（sink 是毫秒级本地 IO，不值得独立队列）。"""
+                          stats: Stats, annotate: bool = True) -> None:
+    """annotate 级：打标 + 落盘合并一级（sink 是毫秒级本地 IO，不值得独立队列）。
+
+    annotate=False：跳过 VLM 打标直接落盘（标注字段写 null，后续由
+    migrate/op_backfill 补标；纯下载扩图模式）。
+    """
     while True:
         got = await q_dl.get()
         if got is None:
@@ -144,9 +158,10 @@ async def annotate_worker(q_dl, *, sink, kb, vlm_client,
             continue
         # 不加 try：annotate 内部失败置字段 None 正常返回；真异常上抛终止整链
         # （与旧版崩溃语义一致）。打标失败不阻断落盘（kb_match=None 照样 sink）。
-        await op_annotate.annotate(got, kb, client=vlm_client)
-        if got.kb_match is not None:
-            stats.annotated += 1
+        if annotate:
+            await op_annotate.annotate(got, kb, client=vlm_client)
+            if got.kb_match is not None:
+                stats.annotated += 1
         if await sink.sink(got):
             stats.sunk += 1
         else:
@@ -162,7 +177,12 @@ def load_instances(path: str) -> list[dict]:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="collect_v2 算子链（零数据处理逻辑，纯编排；适合夜跑长驻）")
-    p.add_argument("--instances", default=DEFAULT_INSTANCES)
+    p.add_argument("--lang", choices=["zh", "en"], default="zh",
+                   help="语言版：zh=中文湖（默认）；en=英文平行实例"
+                        "（实例名即西文 query 零 LLM；清单 metadata_en.jsonl，"
+                        "2026-08-29 拍板分开清单共 blobs）")
+    p.add_argument("--instances", default=None,
+                   help="实例表路径（默认按 --lang 选 instances[_en].json）")
     p.add_argument("--dataset", default=DEFAULT_DATASET)
     p.add_argument("--alias-cache", default=DEFAULT_ALIAS_CACHE)
     p.add_argument("--limit", type=int, default=0,
@@ -185,6 +205,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--vlm-concurrency", type=int,
                    default=VLM_CONCURRENCY_DEFAULT,
                    help="annotate worker 数，即 VLM 调用并发（旧信号量由 worker 数等价替代）")
+    p.add_argument("--annotate", action=argparse.BooleanOptionalAction,
+                   default=True,
+                   help="annotate worker 先 VLM 打标再落盘（--no-annotate 跳过打标"
+                        "直接落盘，标注字段写 null，后续 migrate/op_backfill 补标）")
     p.add_argument("--search-concurrency", type=int,
                    default=SEARCH_CONCURRENCY_DEFAULT,
                    help="search worker 数；有效速率受 infra 按源闸门封顶，调大只增排队")
@@ -194,6 +218,18 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--instance-concurrency", type=int, default=16,
                    help="实例级投影并发（源限速由 infra 闸门把关，不会打爆源）；"
                         "投影产出 (seed, 源) 对，是全链路供给的源头")
+    p.add_argument("--source-agent", action=argparse.BooleanOptionalAction,
+                   default=False,
+                   help="源策略（2026-08-29，EN 链先跑通）：健康账本+自适应闸门"
+                        "（429/403 节流回落、低命中源自动停用复挂）+ 条件源路由"
+                        "（anilist/mal 按挂载路径动漫关键词、deviantart 复挂监护）；"
+                        "中文链不带旗=代码路径与之前完全一致")
+    p.add_argument("--source-plan", action=argparse.BooleanOptionalAction,
+                   default=False,
+                   help="分支粒度 LLM 选源（--source-agent 进阶）：按主分支"
+                        "（域/二级）glm-5.3-flash 一次决策全组复用，缓存 "
+                        "state/collect/branch_routes_<lang>.json；规划结果整体"
+                        "替换路由表，失败回退通用源路由")
     p.add_argument("--shuffle", type=int, default=None, metavar="SEED",
                    help="按给定随机种子打乱实例顺序（抽样看 case 用）")
     p.add_argument("--log-every", type=int, default=20,
@@ -203,10 +239,16 @@ def parse_args() -> argparse.Namespace:
 
 async def main() -> None:
     args = parse_args()
+    if args.instances is None:
+        args.instances = (DEFAULT_INSTANCES_EN if args.lang == "en"
+                          else DEFAULT_INSTANCES)
+    # 清单分流（2026-08-29 拍板）：en 链写 metadata_en.jsonl，与中文湖不共清单
+    manifest_name = "metadata_en.jsonl" if args.lang == "en" else "metadata.jsonl"
     insts = load_instances(args.instances)
     if args.skip_covered > 0:
         counts = op_coverage.load_coverage(
-            args.dataset, min_quality=args.min_quality,
+            args.dataset, manifest_name=manifest_name,
+            min_quality=args.min_quality,
             require_identity=args.require_identity)
         insts, skipped = op_coverage.filter_uncovered(
             insts, counts, args.skip_covered)
@@ -220,6 +262,11 @@ async def main() -> None:
         # 稳定分区保原表序，不改变集合本身（跳与不跳仍由阈值决定）。
         head = [i for i in insts if counts.get(i.get("name") or "", 0) == 0]
         tail = [i for i in insts if counts.get(i.get("name") or "", 0) > 0]
+        # v3.1 零图占位（source=derived）再提前（2026-08-27 用户拍板）：原表前段
+        # 混着「有图但不合格」难啃实例、撞车率高，纯零图区先落盘；
+        # 稳定分区内各组仍保原表序，不改变集合本身。
+        head = ([i for i in head if i.get("source") == "derived"]
+                + [i for i in head if i.get("source") != "derived"])
         insts = head + tail
     if args.shuffle is not None:
         random.Random(args.shuffle).shuffle(insts)
@@ -227,15 +274,51 @@ async def main() -> None:
     if args.limit > 0:
         insts = insts[:args.limit]
     print(f"[chain] 待消费实例 {len(insts)}（top_n={args.top_n} k={args.k} "
+          f"标注={'开' if args.annotate else '关'} "
           f"vlm并发={args.vlm_concurrency} 检索并发={args.search_concurrency} "
           f"下载并发={args.download_concurrency} "
           f"实例并发={args.instance_concurrency}）", flush=True)
 
     kb = op_annotate.load_instance_kb(args.instances)
-    cache = op_seed.SeedCache(args.alias_cache)
-    sink = op_sink.Sink(args.dataset)
+    cache = (op_seed.SeedCache(args.alias_cache)
+             if args.lang == "zh" else None)  # en 链零 LLM：无别名判定，不碰词表
+    sink = op_sink.Sink(args.dataset, manifest_name=manifest_name)
     print(f"[chain] sink 去重索引 {sink.load_index()} 条 "
           f"（清单 {sink.manifest}）", flush=True)
+
+    # 源策略（2026-08-29，--source-agent 门控；中文链不带旗零行为变化）
+    ledger = None
+    domain_segs = None
+    planner = None
+    inst_branch = branch_samples = None
+    if args.source_agent:
+        from collect_v2 import source_health
+        ledger = source_health.HealthLedger(
+            os.path.join(REPO_ROOT, "state", "collect",
+                         f"source_health_v2_{args.lang}.json"))
+        ledger.load()
+        infra.attach_health(ledger)
+        tree_name = ("taxonomy_en.json" if args.lang == "en"
+                     else "taxonomy.json")
+        domain_segs = getsource.load_domain_segs(os.path.join(
+            os.path.dirname(os.path.abspath(args.instances)), tree_name))
+        print(f"[源策略] 健康账本已挂（{ledger.path}）；域路由表 "
+              f"{len(domain_segs)} 实例（条件源 anilist/mal + deviantart 复挂）",
+              flush=True)
+        if args.source_plan:
+            from collect_v2 import source_plan
+            glm_base, glm_key = source_plan.load_glm_conf()
+            planner = source_plan.BranchPlanner(
+                os.path.join(REPO_ROOT, "state", "collect",
+                             f"branch_routes_{args.lang}.json"),
+                glm_base, glm_key)
+            planner.load()
+            inst_branch, branch_samples = source_plan.load_branch_index(
+                os.path.join(os.path.dirname(os.path.abspath(args.instances)),
+                             tree_name))
+            print(f"[源策略] 分支规划器已挂（{len(inst_branch)} 实例 / "
+                  f"{len(branch_samples)} 分支，缓存 {planner.path}）",
+                  flush=True)
 
     # 连接池必须显式给足：httpx 裸默认 keepalive 仅 20，且 _call_vlm 的
     # timeout=600 会连带「等连接」也放大到 10 分钟——夜跑实测 vLLM 关
@@ -258,15 +341,32 @@ async def main() -> None:
             name = inst["name"]
             seeds = await op_seed.project(
                 name, inst.get("aliases") or [], cache,
-                desc=inst.get("desc") or "", client=vlm_client)
+                desc=inst.get("desc") or "", client=vlm_client,
+                lang=args.lang)
             pairs = []
+            segs = domain_segs.get(name) if domain_segs is not None else None
             for sd in seeds:
-                pairs.extend(getsource.route(sd))
+                planned = False
+                if planner is not None:
+                    br = inst_branch.get(name)
+                    if br is not None:
+                        try:
+                            srcs = await planner.sources_for(
+                                br, branch_samples.get(br) or [])
+                        except Exception as exc:  # noqa: BLE001 - 规划失败回退路由
+                            stats.add_miss(f"plan:{type(exc).__name__}")
+                        else:
+                            if srcs:
+                                pairs.extend((sd, s) for s in srcs)
+                                planned = True
+                if not planned:
+                    pairs.extend(getsource.route(sd, segs,
+                                                 agent=args.source_agent))
             stats.pairs += len(pairs)
             for sd, source in pairs:
                 await q_pairs.put((sd, source))
             stats.instances += 1
-            if stats.instances % SAVE_EVERY == 0:
+            if cache is not None and stats.instances % SAVE_EVERY == 0:
                 cache.save()
             if stats.instances % args.log_every == 0:
                 elapsed = time.time() - t0
@@ -277,13 +377,39 @@ async def main() -> None:
                       flush=True)
 
     search_tasks = [asyncio.create_task(search_worker(
-        q_pairs, q_cands, k=args.k, top_n=args.top_n, stats=stats))
+        q_pairs, q_cands, k=args.k, top_n=args.top_n, stats=stats,
+        ledger=ledger))
         for _ in range(args.search_concurrency)]
-    download_tasks = [asyncio.create_task(download_worker(q_cands, q_dl, stats))
-                      for _ in range(args.download_concurrency)]
+    download_tasks = [asyncio.create_task(download_worker(
+        q_cands, q_dl, stats, ledger=ledger))
+        for _ in range(args.download_concurrency)]
     annotate_tasks = [asyncio.create_task(annotate_worker(
-        q_dl, sink=sink, kb=kb, vlm_client=vlm_client, stats=stats))
+        q_dl, sink=sink, kb=kb, vlm_client=vlm_client, stats=stats,
+        annotate=args.annotate))
         for _ in range(args.vlm_concurrency)]
+
+    async def agent_loop() -> None:
+        """源策略周期评估：节流/停用判定 → 调闸门速率；账本落盘；周期摘要。"""
+        i = 0
+        while True:
+            await asyncio.sleep(60)
+            actions = ledger.evaluate()
+            for src in ledger.sources():
+                mult = ledger.rate_mult(src)
+                for key, lim in ((src, infra.SOURCE_LIMITS.get(src)),
+                                 (f"dl:{src}",
+                                  infra.SOURCE_LIMITS.get(f"dl:{src}"))):
+                    if lim is not None:
+                        infra.set_gate_rate(key, lim.rate * mult)
+            if actions:
+                print("[源策略] " + "；".join(actions), flush=True)
+            i += 1
+            if i % 10 == 0:
+                print(f"[源策略] {ledger.summary()}", flush=True)
+            ledger.save()
+
+    agent_task = (asyncio.create_task(agent_loop())
+                  if ledger is not None else None)
 
     try:
         await asyncio.gather(*(asyncio.create_task(worker(i)) for i in insts))
@@ -299,7 +425,14 @@ async def main() -> None:
             await q_dl.put(None)
         await asyncio.gather(*annotate_tasks)
     finally:
-        cache.save()
+        if agent_task is not None:
+            agent_task.cancel()
+        if ledger is not None:
+            ledger.save()
+        if planner is not None:
+            await planner.aclose()
+        if cache is not None:
+            cache.save()
         await vlm_client.aclose()
         await infra.close_client()
     elapsed = time.time() - t0

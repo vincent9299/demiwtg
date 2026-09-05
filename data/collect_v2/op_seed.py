@@ -155,13 +155,18 @@ async def project(
     client: Optional[httpx.AsyncClient] = None,
     endpoint: str = DEFAULT_ENDPOINT,
     model: str = DEFAULT_MODEL,
+    lang: str = "zh",
 ) -> list:
     """单实例投影：返回 [中文 seed] 或 [中文 seed, 西文 seed]。
 
     中文本体 seed 必有；西文 seed 依词表/LLM 判定产出（最多一条）。
     desc 为实体背景知识（instances.json 的 desc，全量送判不截断），
     拼入判定上下文提升冷门实体判定准确率。
+    lang="en"（2026-08-29 拍板）：EN 实例名本身即西文 query，直接作
+    latin seed 走国际源路由；无别名判定零 LLM，不读写词表（cache 可为 None）。
     """
+    if lang == "en":
+        return [Seed(name=name, query=name, lang="latin")]
     seeds = [Seed(name=name, query=name, lang="zh")]
     judged, value = cache.get(name)
     if not judged:

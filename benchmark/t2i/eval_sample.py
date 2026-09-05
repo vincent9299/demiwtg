@@ -45,16 +45,18 @@ BENCH_ROOT = SUB_DIR.parent                                  # benchmark/
 REPO_ROOT = BENCH_ROOT.parent                                # 仓库根
 sys.path.insert(0, str(REPO_ROOT / "data"))    # taxonomy 包已迁至 data/taxonomy/
 
-from taxonomy.mount_map import load_mount_map                 # noqa: E402
+from collect_v2.mount_map import load_mount_map                 # noqa: E402
 
 META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
 OUT_DIR = SUB_DIR / "data"
 
-# 默认排除集：三赛道样本清单（跨赛道防重复出题；不存在的清单自动跳过）
-DEFAULT_EXCLUDES = [
-    BENCH_ROOT / sub / "data" / "samples.jsonl"
-    for sub in ("vlm", "t2i", "edit")
-]
+# 默认排除集：三赛道样本清单（跨赛道防重复出题；不存在的清单自动跳过）。
+# glob samples*.jsonl：版本化批次（如 samples_20260828_v2.jsonl）全量在册，
+# 任何历史批次样本永不回流（含归档副本）。
+DEFAULT_EXCLUDES = sorted(
+    p for sub in ("vlm", "t2i", "edit")
+    for p in (BENCH_ROOT / sub / "data").glob("samples*.jsonl")
+)
 
 OWN_IMG_RE = re.compile(r"^\d{4}_")    # 本脚本产出的样本拷贝命名前缀
 
@@ -138,7 +140,7 @@ def stratified_pick(pool: list, n: int, per_instance: int,
         rem -= 1
 
     rng = random.Random(seed)
-    picked, inst_cnt = [], defaultdict(int)
+    picked, inst_cnt, sha_cnt = [], defaultdict(int), defaultdict(int)
     for b in sorted(by_branch):                      # 分支序确定性
         if quota[b] <= 0:
             continue
@@ -150,6 +152,10 @@ def stratified_pick(pool: list, n: int, per_instance: int,
             inst = rec["instances"][0]
             if inst_cnt[inst] >= per_instance:
                 continue
+            sha = rec["sha256"]
+            if sha_cnt[sha] >= 1:    # 一图一题：多实例图（同 sha 多行）不重复抽
+                continue
+            sha_cnt[sha] += 1
             inst_cnt[inst] += 1
             picked.append(rec)
     return picked
