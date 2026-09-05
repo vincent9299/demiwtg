@@ -7,7 +7,7 @@ edit（图像编辑）评测基准的难度七维中，「定位精度」「保�
 疑点：审计模型对**密集生成图**的打分可能系统性偏乐观（维度虚高、同类组编造、载体误报）。本复核任务 = 抽样人工级核验审计质量，结论决定审计数据能否直接用于选图。
 
 **数据**：
-- 审计结果：`benchmark/edit/data/complexity_audit_synth.jsonl`（每行一张图，字段见附录 A）
+- 审计结果：`benchmark/edit/complexity_audit_synth.jsonl（历史轮次归档见 archive/）`（每行一张图，字段见附录 A）
 - 图片：行内 `path` 字段（绝对路径，PNG）
 - 抽样方案见文末
 

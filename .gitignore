@@ -44,13 +44,15 @@ benchmark/t2i/archive/*
 benchmark/t2i/bench200/*
 !benchmark/t2i/bench200/README.md
 benchmark/focus1000/data/
-# edit archive/ = 历史审计批次；synth_v61_pilot/ = v6.1 出题试点批次；focus200/ = 终版 200 题样本图与出图
+# edit 整编（见 AGENTS.md 架构决策 2026-09-05「edit 子模块目录对齐 t2i」）：archive/ 仅 MANIFEST.md 入库；
+# synth_v61_pilot/ 批次目录、focus200/ 活图池、judge_prompts/ 物化区、complexity_audit*.jsonl 活素材账本均不入 git
 benchmark/edit/archive/*
-!benchmark/edit/archive/audit_doublecheck.summary.md
 !benchmark/edit/archive/MANIFEST.md
-benchmark/edit/synth_v61_pilot/*
-!benchmark/edit/synth_v61_pilot/*.md
+benchmark/edit/synth_v61_pilot/
 benchmark/edit/focus200/
+benchmark/edit/judge_prompts/
+benchmark/edit/complexity_audit.jsonl
+benchmark/edit/complexity_audit_synth.jsonl
 # edit 无 data/ 层（2026-09-05，见 AGENTS.md 架构决策）：运行时产物落子模块根
 benchmark/edit/judge_prompts/
 benchmark/edit/samples.jsonl
