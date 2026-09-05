@@ -15,16 +15,17 @@
   tier0_pairs.jsonl / node_align.jsonl / node_align_flash.jsonl / done 标记内嵌于文件本身
 
 用法：
-  python3 data/collect_v2/en_entity_merge.py tier0
-  python3 data/collect_v2/en_entity_merge.py calibrate
-  python3 data/collect_v2/en_entity_merge.py bulk [--workers 64]
-  python3 data/collect_v2/en_entity_merge.py escalate [--max-nodes 2000]
-  python3 data/collect_v2/en_entity_merge.py apply [--dry-run]
+  python3 curation/en_entity_merge.py tier0
+  python3 curation/en_entity_merge.py calibrate
+  python3 curation/en_entity_merge.py bulk [--workers 64] [--backend vllm|flash]
+  python3 curation/en_entity_merge.py escalate [--max-nodes 2000]
+  python3 curation/en_entity_merge.py apply [--dry-run]
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
+import itertools
 import json
 import random
 import re
@@ -36,17 +37,24 @@ from pathlib import Path
 
 import httpx
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 META = ROOT / "datasets/demiwtg/meta"
 CSV = ROOT / "state/taxonomy/v31_交付包/taxonomy_v3.1_交付包/data/taxonomy_tree_instances_en.csv"
 OUT = ROOT / "state/taxonomy/en_merge"
 GOLDEN = Path("/tank/tmp/kilo/en_zh_align/per_node.jsonl")
 SEP = " / "
-VLLM_BASE = "http://127.0.0.1:8000/v1"
+VLLM_BASE = "http://127.0.0.1:8001/v1"   # 本地 Qwen3.8-27B（另一 agent 部署，端口 8001）
 VLLM_MODEL = "qwen3.8-27b"
 FLASH_BASE = "http://127.0.0.1:4001/v1"
-FLASH_MODEL = "galaxy/deepseek-v4-flash-0731"
-FLASH_KEY = ""  # 从 modelhub/.env GLM_API_KEY_1 读
+FLASH_MODEL = "glm/glm-5.3-flash"
+FLASH_KEY = ""  # 本机网关不校验 key；留空即可
+# escalate 模型池（轮转分摊限流；extra_body 关思考——全部实测解析 OK）
+FLASH_POOL = [
+    ("qianwen/qwen3.7-plus", {"enable_thinking": False}),
+    ("galaxy/qwen3.6-flash", {"enable_thinking": False}),
+    ("glm/glm-5.3-flash", {}),
+    ("galaxy/glm-5.3", {}),
+]
 RANDOM_SEED = 20260902
 
 SYS = (
@@ -225,6 +233,11 @@ def cmd_tier0(_args):
         for nm in lst:
             zh2zhnodes[nm].add(zp)
     pairs, n_cand = [], 0
+    # 归一化 EN 名 → [(EN 原名, zh 节点)]，保持 nodes 迭代序（等价原"取第一个同节点的"语义）
+    en_by_norm = defaultdict(list)
+    for zp, zz, ez in nodes:
+        for e in ez:
+            en_by_norm[nrm(e)].append((e, zp))
     for rec in insts:
         name = rec["name"]
         raw = aw.get(name)
@@ -238,17 +251,10 @@ def cmd_tier0(_args):
             continue
         n_cand += 1
         for c in cands:
-            if c in en_norm and (en_norm[c] & zh2zhnodes.get(name, set())):
-                # 同节点精确命中 → 反查 EN 原名（取第一个同节点的）
-                tgt = None
-                for zp, zz, ez in nodes:
-                    if zp in (en_norm[c] & zh2zhnodes.get(name, set())):
-                        for e in ez:
-                            if nrm(e) == c:
-                                tgt = e
-                                break
-                    if tgt:
-                        break
+            hits = en_by_norm.get(c)
+            if hits and (en_norm[c] & zh2zhnodes.get(name, set())):
+                inter = en_norm[c] & zh2zhnodes.get(name, set())
+                tgt = next((e for e, zp in hits if zp in inter), None)
                 if tgt:
                     pairs.append({"zh": name, "en": tgt})
                 break
@@ -258,15 +264,19 @@ def cmd_tier0(_args):
 
 # ---------------- LLM 调用 ----------------
 
-async def call_node(client, base, model, zp, zz, ez, key=None):
+async def call_node(client, base, model, zp, zz, ez, key=None, extra_body=None):
     headers = {"Authorization": f"Bearer {key}"} if key else {}
-    body = {"model": model, "temperature": 0, "max_tokens": 3072,
+    body = {"model": model, "temperature": 0, "max_tokens": 16384,
             "chat_template_kwargs": {"enable_thinking": False},
             "messages": [{"role": "system", "content": SYS},
                          {"role": "user", "content": make_prompt(zp, zz, ez)}]}
+    if extra_body is not None:            # API 池：去 vLLM 专有参数，合并关思考参数
+        body.pop("chat_template_kwargs", None)
+        body["max_tokens"] = 8192
+        body.update(extra_body)
     for attempt in range(3):
         try:
-            r = await client.post(f"{base}/chat/completions", headers=headers, json=body, timeout=240)
+            r = await client.post(f"{base}/chat/completions", headers=headers, json=body, timeout=600)
             r.raise_for_status()
             text = r.json()["choices"][0]["message"]["content"]
             d = parse_align(text)
@@ -278,7 +288,7 @@ async def call_node(client, base, model, zp, zz, ez, key=None):
     return None
 
 
-async def run_bulk(nodes, out_path, base, model, key, workers, limit=None):
+async def run_bulk(nodes, out_path, base, model, key, workers, limit=None, backends=None):
     done = {r["node"] for r in load_jsonl(out_path) if r.get("confidence") not in (None, "err")}
     todo = [(zp, zz, ez) for zp, zz, ez in nodes if zp not in done]
     if limit:
@@ -286,17 +296,19 @@ async def run_bulk(nodes, out_path, base, model, key, workers, limit=None):
     sem = asyncio.Semaphore(workers)
     cnt = [0]
     sink = out_path.open("a", encoding="utf-8")
+    pool = itertools.cycle(backends) if backends else None
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(trust_env=False) as client:  # 网关在本机，禁走环境代理
         async def one(zp, zz, ez):
             async with sem:
+                m, extra = next(pool) if pool else (model, None)
                 t0 = time.time()
-                d = await call_node(client, base, model, zp, zz, ez, key)
+                d = await call_node(client, base, m, zp, zz, ez, key, extra)
                 rec = {"node": zp, "zh_n": len(zz), "en_n": len(ez),
                        "pairs": (d or {}).get("pairs", []),
                        "en_unmatched": (d or {}).get("en_unmatched", []),
                        "confidence": (d or {}).get("confidence", "err"),
-                       "model": model, "secs": round(time.time() - t0, 1),
+                       "model": m, "secs": round(time.time() - t0, 1),
                        "zh_names": zz, "en_names": ez}
                 sink.write(json.dumps(rec, ensure_ascii=False) + "\n")
                 cnt[0] += 1
@@ -304,7 +316,7 @@ async def run_bulk(nodes, out_path, base, model, key, workers, limit=None):
                     sink.flush()
                     print(f"  {cnt[0]}/{len(todo)}（失败累计见 confidence=err）", flush=True)
 
-        await asyncio.gather(*[one(*t) for t in todo])
+        await asyncio.gather(*[one(*t) for t in todo], return_exceptions=True)
     sink.close()
     fails = sum(1 for r in load_jsonl(out_path) if r.get("confidence") == "err")
     print(f"bulk 完成 {len(todo)} 节点（累计解析失败 {fails}）→ {out_path.name}")
@@ -386,7 +398,7 @@ def cmd_escalate(args):
     print(f"escalate：{len(suspects)} 个不确定节点 → flash 复核")
     todo = [(zp, *nodes_map[zp]) for zp in suspects if zp in nodes_map]
     asyncio.run(run_bulk(todo, OUT / "node_align_flash.jsonl", FLASH_BASE, FLASH_MODEL,
-                         FLASH_KEY, 8))
+                         FLASH_KEY, 24, backends=FLASH_POOL))
 
 
 def merge_ops():
