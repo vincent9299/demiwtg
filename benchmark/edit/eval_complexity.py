@@ -25,16 +25,16 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import io
 import json
 import re
+import shutil
 import sys
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-
-import requests
 
 SUB_DIR = Path(__file__).resolve().parent                    # edit/
 BENCH_ROOT = SUB_DIR.parent                                  # benchmark/
@@ -91,14 +91,14 @@ AUDIT_PROMPT = """审计这张图片的场景复杂度。按 12 个维度打分�
 
 
 # ---------------------------------------------------------------------------
-# 池聚合（metadata.jsonl 现算，不落派生索引）
+# 池聚合（instance_images.jsonl 现算，不落派生索引）
 # ---------------------------------------------------------------------------
 def build_synth_pool() -> dict[str, dict]:
     """合成源池：双清单合流 → instance -> {sha256: 池行}。
 
     - gen_results.jsonl（qwen-image 主体批，t2i 侧产物原件）
     - focus200/missing19_jobs.jsonl（GPT-Image-2 补齐批，edit 侧）
-    图不进湖（metadata.jsonl 是采集清单）；sha256 沿用生成时算好的值。
+    图不进湖（instance_images.jsonl 是采集清单）；sha256 沿用生成时算好的值。
     """
     manifests = [(FOCUS200_MANIFEST, "manifest"), (GEN_RESULTS, "qwen-image"),
                  (GEN_JOBS_19, "gpt-image-2")]
@@ -132,7 +132,7 @@ def load_focus_instances() -> set:
     if not FOCUS_LIST.exists():
         sys.exit(f"focus1000 清单不存在：{FOCUS_LIST}")
     data = json.loads(FOCUS_LIST.read_text(encoding="utf-8"))
-    return {it["name"] for it in data["instances"]}
+    return {it["name"] for it in (data.get("concepts") or data.get("instances") or [])}
 
 
 def pass_edit_gate(row: dict) -> bool:
@@ -160,7 +160,7 @@ def build_pools(focus: set, gate: str = "edit") -> dict[str, dict]:
     gate_fn = pass_edit_gate if gate == "edit" else pass_size_gate
     pools: dict[str, dict] = defaultdict(dict)
     seen = set()
-    with (META_DIR / "metadata.jsonl").open(encoding="utf-8") as f:
+    with (META_DIR / "instance_images.jsonl").open(encoding="utf-8") as f:
         for line in f:
             row = json.loads(line)
             hit = focus.intersection(row.get("instances") or [])
@@ -198,6 +198,7 @@ def encode_image(img_path: Path, max_edge: int) -> str:
 
 
 def call_vlm(args, content: list) -> str:
+    import requests
     payload = {
         "model": args.model,
         "stream": False,
@@ -378,6 +379,132 @@ def rank_key(row: dict):
             min(row.get("width") or 0, row.get("height") or 0))
 
 
+def prepare_mixed(args) -> None:
+    """复用历史质量快照/复杂度审计，物化采集源图复核；不修改正式选图。"""
+    out = args.out_dir.resolve()
+    plan = [json.loads(l) for l in args.plan.read_text().splitlines() if l.strip()]
+    by_instance = {r["instance"]: r for r in plan}
+    done = {json.loads(l)["_instance"] for l in args.questions.read_text().splitlines() if l.strip()}
+    reviewed = {json.loads(l)["sha256"] for l in args.exclude_reviewed.read_text().splitlines() if l.strip()} if args.exclude_reviewed else set()
+    audits = {}
+    for line in (EVAL_DIR / "archive" / "complexity_audit.jsonl").read_text().splitlines():
+        r = json.loads(line)
+        if not r.get("error") and "scene_count" in r:
+            audits[r["sha256"]] = r
+    candidates = []
+    for name in ("samples_v60_uniform.jsonl", "samples_v60_uniform_r11.jsonl",
+                 "samples_v60_uniform_r11b.jsonl"):
+        for line in (args.sample_dir / name).read_text().splitlines():
+            r = json.loads(line)
+            p = by_instance.get(r["instance"])
+            audit = audits.get(r["sha256"])
+            if p is None or r["instance"] in done or audit is None:
+                continue
+            if r["sha256"] in reviewed:
+                continue
+            # 复用可得的数值门；identity 缺失必须交给下方看图复核，不能从 kb_match 伪造。
+            if not pass_size_gate(r) or (r.get("quality") or 0) < 8 or (r.get("focus") or 0) < FOCUS_EDIT:
+                continue
+            caption = r.get("caption") or ""
+            if not re.search("照片|摄影|实拍|实物|实景", caption) or re.search(
+                    "插画|插图|海报|拼图|拼接|截图|渲染|效果图|宣传图|扫描|伪彩|示意图", caption):
+                continue
+            # 候选初筛比旧 select(scene>=2)更关注复杂实景；最终仍以看图和题目门槛为准。
+            if not args.simple and (audit["scene_count"] < {"L1": 3, "L2": 5, "L3": 7}[p["level"]] or audit.get("scene_strong", 0) < 2):
+                continue
+            image = (args.sample_dir / r["image"]).resolve()
+            if hashlib.sha256(image.read_bytes()).hexdigest() != r["sha256"]:
+                raise ValueError(f"源图哈希错误：{image}")
+            candidates.append({**r, "qid": p["qid"], "level": p["level"],
+                               "path": str(image), "historical_audit": audit,
+                               "identity": None, "sample_manifest": str((args.sample_dir / name).resolve())})
+    candidates.sort(key=lambda r: rank_key({**r["historical_audit"], "quality": r["quality"]}), reverse=True)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "candidates.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in candidates))
+    template = AUDIT_PROMPT + "\n\n" + (
+        "补充本轮源图适配核验：每个 JSON 对象额外包含 qid、sha256（照抄输入）、"
+        "source_kind（photo_candidate/non_photo/uncertain）、identity（true/false/null，"
+        "仅当可见主体与输入实例相符时为true；无法确定具体实体则null）、"
+        "usable_for_edit（布尔）及review_reason（说明实际可编辑对象、可保持内容或拒收理由）。"
+        "photo_candidate仅表示外观符合单张实拍且未见明显拼接/渲染线索，不代表已验证相机来源。"
+        "逐张用view_image看图；场景维度只认像素事实，不能凭实体知识补场景。"
+        "水印、字幕、拼接、多视图、难以定位的目标均需在review_reason说明。"
+        "不能为复杂度凑数；图像主体难辨、明显非单张实拍或无法支持明确编辑时usable_for_edit=false。"
+        "只读取本md及列出的图片，不读取历史评分、其他文件或对话。"
+    )
+    if args.simple:
+        template += "\n本轮允许简单场景与简单编辑：单一清晰主体、简单背景、没有复杂后果载体均不构成拒收理由。只需能提出一个明确可执行、可核验的改色/增加/删除/替换/提取等操作，并有具体保持内容。不要为通过而虚报复杂度；复杂度低可以正常接收。"
+    for lane in range(args.lanes):
+        batch = candidates[lane::args.lanes]
+        target = out / f"review_{lane}.jsonl"
+        prompt = template + f"\n\n逐张处理下面 {len(batch)} 张图片，将每图一个完整 JSON 对象按行写入 {target}。最终只回复该文件路径。\n"
+        prompt += "\n".join(json.dumps({k: r[k] for k in ("qid", "instance", "sha256", "path")}, ensure_ascii=False) for r in batch)
+        (out / f"review_{lane}.md").write_text(prompt, encoding="utf-8")
+    print(json.dumps({"candidates": len(candidates), "lanes": args.lanes, "out_dir": str(out)}, ensure_ascii=False))
+
+
+def select_mixed(args) -> None:
+    """读取复核结果，按原 rank_key 选每实例一张合格采集图；生成图仍由出题驱动补齐。"""
+    out = args.out_dir.resolve()
+    candidates = {r["qid"]: r for r in map(json.loads, (out / "candidates.jsonl").read_text().splitlines())}
+    reviews = {}
+    for p in sorted(out.glob("review_*.jsonl")):
+        for line in p.read_text().splitlines():
+            r = json.loads(line)
+            if r.get("qid") not in candidates or r["qid"] in reviews:
+                raise ValueError(f"复核 qid 重复或未知：{r.get('qid')}")
+            if r.get("sha256") != candidates[r["qid"]]["sha256"]:
+                raise ValueError("复核图片绑定不符")
+            if set(r.get("scene_sources", {})) != set(SCENE_DIMS) or any(type(v) is not int or v not in (0, 1, 2) for v in r["scene_sources"].values()):
+                raise ValueError(f"复杂度输出不合规：{r['qid']}")
+            reviews[r["qid"]] = r
+    if set(reviews) != set(candidates):
+        raise ValueError(f"缺复核：{sorted(set(candidates)-set(reviews))}")
+    selected, rejected = [], []
+    for qid, c in candidates.items():
+        r = reviews[qid]
+        audit = parse_audit(json.dumps(r, ensure_ascii=False))
+        reason = []
+        if r.get("source_kind") != "photo_candidate": reason.append("非确认的实拍候选")
+        if r.get("identity") is not True: reason.append("实例身份未确认")
+        if r.get("usable_for_edit") is not True: reason.append("编辑适配未通过")
+        gate = {**c, "identity": r.get("identity")}
+        if not pass_edit_gate(gate): reason.append("编辑质量门未通过")
+        if not args.simple and audit["scene_count"] < {"L1": 3, "L2": 5, "L3": 7}[c["level"]]: reason.append("复核后复杂度不足")
+        if reason:
+            rejected.append({"qid": qid, "instance": c["instance"], "reasons": reason,
+                             "review_reason": r.get("review_reason"), "scene_count": audit["scene_count"]})
+            continue
+        source = Path(c["path"])
+        rel = Path("collected") / f"{c['sha256']}{source.suffix.lower()}"
+        target = EVAL_DIR / "focus200" / rel
+        if hashlib.sha256(source.read_bytes()).hexdigest() != c["sha256"]:
+            raise ValueError("源图字节已变化")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if target.exists():
+            if hashlib.sha256(target.read_bytes()).hexdigest() != c["sha256"]:
+                raise ValueError("目标内容寻址文件不符")
+        else:
+            shutil.copyfile(source, target)
+        selected.append({"instance": c["instance"], "sha256": c["sha256"], "file": str(rel),
+                         "generator": "collected", "batch": "real_photo", "width": c["width"],
+                         "height": c["height"], "quality": c["quality"], "identity": True,
+                         "focus": c["focus"], "audit": audit,
+                         "construction_profile": "simple" if args.simple else "standard",
+                         "original_path": c["path"], "sample_manifest": c["sample_manifest"]})
+    selected.sort(key=lambda r: rank_key({**r["audit"], **{k:r[k] for k in ("quality","width","height")}}), reverse=True)
+    eligible_count = len(selected)
+    if args.simple:
+        selected.sort(key=lambda r: (r["quality"], r["focus"], -r["audit"]["scene_count"], min(r["width"], r["height"])), reverse=True)
+    if args.max_sources:
+        selected = selected[:args.max_sources]
+    (out / "selected_sources.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False)+"\n" for r in selected))
+    report = {"candidates": len(candidates), "eligible_photo_candidates": eligible_count, "selected_photo_candidates": len(selected),
+              "rejected": rejected, "source_policy": "每实例一题；已完成题保留；实拍候选失败时沿原尝试序列由生成图补位"}
+    (out / "selection_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2))
+    print(json.dumps({"selected_photo_candidates": len(selected), "rejected": len(rejected)}, ensure_ascii=False))
+
+
 def run_select(args) -> None:
     by_inst: dict[str, list] = defaultdict(list)
     with AUDIT_OUT.open(encoding="utf-8") as f:
@@ -473,6 +600,18 @@ def main() -> None:
                               "synth=qwen-image 生成图（gen_results.jsonl 外部清单）")
     p_sel = sub.add_parser("select", help="每实例 top-K 选取与批次校准")
     p_sel.add_argument("--top-k", type=int, default=3)
+    p_mix = sub.add_parser("prepare-mixed", help="历史采集源图筛选与内置子代理复核文本物化")
+    p_mix.add_argument("--sample-dir", type=Path, required=True)
+    p_mix.add_argument("--plan", type=Path, required=True)
+    p_mix.add_argument("--questions", type=Path, required=True)
+    p_mix.add_argument("--out-dir", type=Path, required=True)
+    p_mix.add_argument("--lanes", type=int, default=3)
+    p_mix.add_argument("--simple", action="store_true", help="简单实拍补充：不设复杂度硬门")
+    p_mix.add_argument("--exclude-reviewed", type=Path, help="排除已复核候选清单中的图片")
+    p_mix_select = sub.add_parser("select-mixed", help="收录源图复核并物化混合候选")
+    p_mix_select.add_argument("--out-dir", type=Path, required=True)
+    p_mix_select.add_argument("--simple", action="store_true")
+    p_mix_select.add_argument("--max-sources", type=int, default=0)
     for x in (ap, p_audit, p_sel):
         x.add_argument("--endpoint", default=DEFAULT_ENDPOINT)
         x.add_argument("--model", default=DEFAULT_MODEL)
@@ -483,6 +622,10 @@ def main() -> None:
         run_audit(args)
     elif args.mode == "select":
         run_select(args)
+    elif args.mode == "prepare-mixed":
+        prepare_mixed(args)
+    elif args.mode == "select-mixed":
+        select_mixed(args)
     else:
         ap.error("请指定子命令：audit 或 select")
 

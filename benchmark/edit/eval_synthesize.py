@@ -4,17 +4,18 @@
 输入（只读）：
     focus200/manifest.jsonl                   553 行图池（main 371 + 双载体补 93
                                               + hard++++ 89，generator/batch 分桶）
-    state/collect/focus_bench_v1.json         200 实例权威顺序
-    state/collect/focus1000_instances.json    实体 desc（防幻觉锚定；103/200 有）
+    ../t2i/bench200/questions.jsonl          200 实例权威顺序与逐实例 level
+    datasets/demiwtg/meta/concepts.json      概念行（name 主键；desc 退役，知识文本
+                                              在 state/collect/concepts_docs_draft.jsonl）
     datasets/demiwtg/meta/taxonomy.json       分类路径（mount_map 现算 → 主域）
     complexity_audit_synth.jsonl              初审素材（371 旧图；已知偏乐观，
                                               复核见 archive/audit_doublecheck.report.json）
     focus200/supplement_prompts.jsonl         双载体补图已核实素材（93）
     focus200/quality_regen_v1/*               hard++++ 已核实素材（89）
-    benchmark/t2i/data/focus1000/gen_prompts.jsonl 等  gen_prompt（题面 caption 角色）
+    benchmark/focus1000/data/gen_prompts.jsonl 等  gen_prompt（题面 caption 角色）
 
 批次设计（2026-09-03 v6.1）：
-    默认逐实例继承正式 t2i bench_v1 的 level（同实例同档，整体
+    默认逐实例继承正式 t2i bench200 的 level（同实例同档，整体
     L1=10% / L2=60% / L3=30%）；任一 paired level 缺失即失败。显式关闭对齐时
     才按同配比均衡补位。suite 在各 level 内独立分配，避免 knowledge 与 L3
     完全共线；9 类 edit_type 轮转。
@@ -33,6 +34,10 @@
     run_report.json         批次汇总（含 xcheck 交叉核验复审名单）
 
 用法：
+    python3 benchmark/edit/eval_synthesize.py --emit-plan --out-dir benchmark/edit/bench200 \
+        --reuse-questions benchmark/edit/synth_v61_pilot/questions.jsonl \
+        --reuse-plan benchmark/edit/synth_v61_pilot/plan.jsonl
+    # 内置子代理：--render-question → 裸 JSON → --ingest-question → --validate；不调 API。
     GALAXY_API_KEY=sk-... python3 benchmark/edit/eval_synthesize.py --dry-run
     GALAXY_API_KEY=sk-... python3 benchmark/edit/eval_synthesize.py --limit 20 \
         --peak-shave --lanes 2
@@ -43,6 +48,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import io
 import json
 import math
@@ -54,26 +60,25 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import requests
-
 REPO = Path(__file__).resolve().parent.parent.parent          # edit/ -> benchmark/ -> 仓库根
-sys.path.insert(0, str(REPO / "data"))
+sys.path.insert(0, str(REPO))
 
-from collect_v2.mount_map import load_mount_map               # noqa: E402
+from taxonomy.mount_map import load_mount_map                 # noqa: E402
+from benchmark.edit.eval_complexity import rank_key           # noqa: E402
 
 SUB_DIR = Path(__file__).resolve().parent                     # edit/
 EVAL_DIR = SUB_DIR    # edit 无 data/ 层：批次目录（synth_v61_pilot 等）落子模块根
 FOCUS = EVAL_DIR / "focus200"
 QRV = FOCUS / "quality_regen_v1"
-T2I_F1000 = REPO / "benchmark" / "t2i" / "data" / "focus1000"
+T2I_F1000 = REPO / "benchmark" / "focus1000" / "data"
 PROMPT_FILE = SUB_DIR / "prompts" / "synthesize_prompt_edit_v6.1.md"
+SIMPLE_PROMPT_FILE = SUB_DIR / "prompts" / "synthesize_prompt_edit_v6.1_simple.md"
 MANIFEST = FOCUS / "manifest.jsonl"
-BENCH_INSTANCES = REPO / "state" / "collect" / "focus_bench_v1.json"
-FOCUS1000_INSTANCES = REPO / "state" / "collect" / "focus1000_instances.json"
 TAXONOMY = REPO / "datasets" / "demiwtg" / "meta" / "taxonomy.json"
+DOCS_DRAFT = REPO / "state" / "collect" / "concepts_docs_draft.jsonl"
 AUDIT_SYNTH = EVAL_DIR / "complexity_audit_synth.jsonl"
 SUPP_PROMPTS = FOCUS / "supplement_prompts.jsonl"
-T2I_QUESTIONS = REPO / "benchmark" / "t2i" / "data" / "bench_v1" / "questions.jsonl"
+T2I_QUESTIONS = REPO / "benchmark" / "t2i" / "bench200" / "questions.jsonl"
 
 API_URL = "https://token.ai-galaxy.com/v1/chat/completions"
 MODEL = "qwen3.7-plus"
@@ -140,21 +145,26 @@ def read_jsonl(path: Path) -> list[dict]:
     return rows
 
 
-def load_inputs() -> dict:
+def load_inputs(source_manifest: Path | None = None) -> dict:
     manifest = read_jsonl(MANIFEST)
-    bench = json.loads(BENCH_INSTANCES.read_text(encoding="utf-8"))
-    # desc：focus1000 优先，缺的回退 meta instances.json
+    additional_sources = read_jsonl(source_manifest) if source_manifest else []
+    manifest.extend(additional_sources)
+    # 现行正式 T2I 题库同时提供实例顺序与逐实例难度，避免迁移前的名单副本。
+    t2i_questions = read_jsonl(T2I_QUESTIONS)
+    bench = [q["_query_label"] for q in t2i_questions]
+    if len(set(bench)) != len(bench):
+        raise ValueError("T2I bench200 实例重复")
+    # desc（防幻觉锚定）：docs 层草稿——instances.json 概念化迁移（2026-09-07）
+    # 后知识文本的唯一落点（mini 表已不带 desc，全量 desc 都在草稿里）
     desc: dict[str, str] = {}
-    for rec in json.loads(FOCUS1000_INSTANCES.read_text(encoding="utf-8"))["instances"]:
-        if rec.get("desc"):
-            desc[rec["name"]] = rec["desc"]
-    meta_inst = REPO / "datasets" / "demiwtg" / "meta" / "instances.json"
-    if meta_inst.exists():
-        for rec in json.loads(meta_inst.read_text(encoding="utf-8"))["instances"]:
-            desc.setdefault(rec["name"], rec.get("desc") or "")
+    if DOCS_DRAFT.exists():
+        for r in read_jsonl(DOCS_DRAFT):
+            if r.get("body"):
+                desc[r["name"]] = r["body"]
     mounts = load_mount_map(str(TAXONOMY))
     # 初审素材（371 旧图，sha 键）
     audit = {r["sha256"]: r for r in read_jsonl(AUDIT_SYNTH) if r.get("sha256")}
+    audit.update({r["sha256"]: r["audit"] for r in additional_sources if r.get("audit")})
     # hard++++ 已核实素材（sha 键；review 按 candidate_id 关联）
     qrv_rev: dict[str, dict] = {}
     for sh in "abc":
@@ -200,6 +210,7 @@ def load_inputs() -> dict:
                 raise ValueError(f"t2i 同一实体 level 冲突：{name}: {t2i_levels[name]} / {lvl}")
             t2i_levels[name] = lvl
     return {"manifest": manifest, "bench": bench, "desc": desc, "mounts": mounts,
+            "simple_instances": {r["instance"] for r in additional_sources if r.get("construction_profile") == "simple"},
             "audit": audit, "qrv": qrv, "supp": supp, "gen_prompt": gp,
             "t2i_levels": t2i_levels}
 
@@ -313,10 +324,29 @@ def _largest_remainder_counts(group_sizes: dict[str, int], share: int) -> dict[s
     return out
 
 
-def suite_slots(levels: list[str], knowledge_share: int) -> list[str]:
+def suite_slots(levels: list[str], knowledge_share: int,
+                fixed: dict[int, str] | None = None) -> list[str]:
     """在每个 level 内均匀铺开 knowledge，避免 suite=level 的统计混杂。"""
     sizes = {lvl: levels.count(lvl) for lvl in LEVELS}
     wants = _largest_remainder_counts(sizes, knowledge_share)
+    if fixed:
+        out = [fixed.get(i, "basic") for i in range(len(levels))]
+        for lvl in LEVELS:
+            available = [i for i, value in enumerate(levels) if value == lvl and i not in fixed]
+            have = sum(levels[i] == lvl and value == "knowledge" for i, value in fixed.items())
+            need = wants[lvl] - have
+            if not 0 <= need <= len(available):
+                raise ValueError(f"保留题 suite 与 {lvl} 总配额冲突")
+            positions = {max(0, min(len(available) - 1,
+                                   round((j + 1) * (len(available) + 1) / (need + 1)) - 1))
+                         for j in range(need)}
+            for i in range(len(available)):
+                if len(positions) >= need:
+                    break
+                positions.add(i)
+            for i in positions:
+                out[available[i]] = "knowledge"
+        return out
     knowledge_positions: dict[str, set[int]] = {}
     for lvl in LEVELS:
         n, k = sizes[lvl], wants[lvl]
@@ -338,17 +368,21 @@ def suite_slots(levels: list[str], knowledge_share: int) -> list[str]:
     return out
 
 
-def image_candidates(rows: list[dict], level: str) -> list[dict]:
-    prefs = ("quality_regen_v1", "dual_carrier_supplement", "main") if level == "L3" \
-        else ("main", "dual_carrier_supplement", "quality_regen_v1")
+def image_candidates(rows: list[dict], level: str, audits: dict | None = None) -> list[dict]:
+    prefs = ("real_photo", "quality_regen_v1", "dual_carrier_supplement", "main") if level == "L3" \
+        else ("real_photo", "main", "dual_carrier_supplement", "quality_regen_v1")
     out: list[dict] = []
     for b in prefs:
-        out.extend(r for r in rows if (r.get("batch") or "main") == b)
+        bucket = [r for r in rows if (r.get("batch") or "main") == b]
+        if audits:
+            bucket.sort(key=lambda r: rank_key((audits or {}).get(r["sha256"], {})), reverse=True)
+        out.extend(bucket)
     return out
 
 
 def build_jobs(inputs: dict, limit: int, mix: dict, *, align_t2i_levels: bool = True,
-               knowledge_share: int = DEFAULT_KNOWLEDGE_SHARE) -> list[dict]:
+               knowledge_share: int = DEFAULT_KNOWLEDGE_SHARE,
+               reused: list[dict] | None = None) -> list[dict]:
     manifest = inputs["manifest"]
     by_inst: dict[str, list[dict]] = {}
     for r in manifest:
@@ -364,22 +398,32 @@ def build_jobs(inputs: dict, limit: int, mix: dict, *, align_t2i_levels: bool = 
         levels = [t2i_levels[name] for name in bench]
     else:
         levels = fallback_slots
-    suites = suite_slots(levels, knowledge_share)
+    fixed = {}
+    for idx, name in enumerate(bench):
+        if name in inputs.get("simple_instances", set()):
+            fixed[idx] = "basic"
+    for q in reused or []:
+        idx = int(q["qid"][1:]) - 1
+        if not 0 <= idx < len(bench) or bench[idx] != q["_instance"] or levels[idx] != q["level"]:
+            raise ValueError(f"保留题 {q['qid']} 与 T2I 实例顺序/难度不一致")
+        fixed[idx] = q["suite"]
+    suites = suite_slots(levels, knowledge_share, fixed)
     jobs = []
     for i, name in enumerate(bench):
         lvl = levels[i]
         rows = by_inst.get(name) or []
         if not rows:
             raise ValueError(f"{name}: manifest 无图；不能静默缩短确定性 paired 批次")
-        imgs = image_candidates(rows, lvl)
+        imgs = image_candidates(rows, lvl, inputs.get("audit"))
         jobs.append({
             "qid": f"e{i + 1:03d}", "seq": i, "instance": name,
             "level": lvl, "suite": suites[i],
+            "construction_profile": "simple" if name in inputs.get("simple_instances", set()) else "standard",
             "edit_type": EDIT_TYPES[i % len(EDIT_TYPES)],
             "alt_type": EDIT_TYPES[(i + 3) % len(EDIT_TYPES)],
             "images": imgs,
             "main_domain": main_domain(name, inputs["mounts"]),
-            "level_source": "t2i_bench_v1" if align_t2i_levels else "mix_slots",
+            "level_source": "t2i_bench200" if align_t2i_levels else "mix_slots",
         })
     return jobs
 
@@ -411,8 +455,9 @@ def build_text(job: dict, img_row: dict, edit_type: str, inputs: dict,
         f"【套系】{job['suite']}"
         + ("（知识编辑套：题面给定原因/状态/规则目标，未明说的必要视觉结果由公认知识唯一约束）"
            if job["suite"] == "knowledge" else "（直接编辑套）"),
-        f"【目标层级】{job['level']}（输出 level 必须与此完全一致，以保持与 T2I 的逐实例 paired 分布；"
-        "图确实无法支撑时走不可出题分支）",
+        (f"【T2I 参考层级】{job['level']}（仅照抄到 level 作实例对齐标签，不是本题难度；本题采用 simple 配置，不要求该层级的多跳或义务计数）"
+         if job.get("construction_profile") == "simple" else
+         f"【目标层级】{job['level']}（输出 level 必须与此完全一致，以保持与 T2I 的逐实例 paired 分布；图确实无法支撑时走不可出题分支）"),
         "【素材清单】\n" + mat,
         MATERIAL_DISCLAIMER,
         "【证据回执再强调】题面和 reasoning 使用的每个源图目标、定位锚、干扰项、"
@@ -440,8 +485,16 @@ def cmd_emit_plan(args, inputs, jobs) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     plan_path = out_dir / "plan.jsonl"
     n_text = 0
+    frozen = load_plan(Path(args.reuse_plan)) if args.reuse_plan else {}
     with plan_path.open("w", encoding="utf-8") as f:
         for job in jobs:
+            if job["qid"] in frozen:
+                row = frozen[job["qid"]]
+                if any(row[k] != job[k] for k in ("qid", "instance", "level", "suite")):
+                    raise ValueError(f"保留 plan 与任务不一致：{job['qid']}")
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+                n_text += len(row["texts"])
+                continue
             texts = []
             for img_idx, etype in ATTEMPT_PLANS(job):
                 if img_idx >= len(job["images"]):
@@ -459,13 +512,16 @@ def cmd_emit_plan(args, inputs, jobs) -> None:
                         "_edit_type": etype, "_generator": im["generator"],
                         "_batch": im.get("batch") or "main",
                         "_sample_image": f"focus200/{im['file']}",
-                        "difficulty": job["level"],
+                        "difficulty": "simple" if job.get("construction_profile") == "simple" else job["level"],
+                        "_construction_profile": job.get("construction_profile", "standard"),
+                        "_t2i_level": job["level"],
                     },
                 })
                 n_text += 1
             row = {
                 "qid": job["qid"], "seq": job["seq"], "instance": job["instance"],
                 "level": job["level"], "suite": job["suite"],
+                "construction_profile": job.get("construction_profile", "standard"),
                 "protocol_version": "edit-v6.1-image-first",
                 "level_source": job["level_source"],
                 "edit_type": job["edit_type"], "alt_type": job["alt_type"],
@@ -527,7 +583,8 @@ def load_plan(plan_path: Path) -> dict[str, dict]:
 def plan_as_job(p: dict) -> dict:
     return {"qid": p["qid"], "instance": p["instance"], "level": p["level"],
             "suite": p["suite"], "edit_type": p["edit_type"],
-            "alt_type": p["alt_type"], "main_domain": p.get("main_domain")}
+            "alt_type": p["alt_type"], "main_domain": p.get("main_domain"),
+            "construction_profile": p.get("construction_profile", "standard")}
 
 
 def cmd_dispatch(args) -> None:
@@ -566,6 +623,114 @@ def cmd_dispatch(args) -> None:
     print(text if text.strip() else "（无动态调整）")
 
 
+def min_targeting_types(level: str, edit_type: str, simple: bool = False) -> int:
+    minimum = 1 if simple else {"L1": 1, "L2": 2, "L3": 3}[level]
+    if edit_type in {"style", "background"}:
+        return 1
+    return min(minimum, 2) if edit_type == "extract" else minimum
+
+
+def rendered_validation_notes(p: dict, edit_type: str) -> str:
+    """显式呈现既有机审要求；不改门槛或冻结模板，避免遗漏未列入模板表格的约束。"""
+    simple = p.get("construction_profile") == "simple"
+    minimum = min_targeting_types(p["level"], edit_type, simple)
+    weak_minimum = 1 if simple else GATES[p["level"]][5]
+    return (
+        "\n\n【既有机审要求自查】\n"
+        f"本题 targeting_types 至少 {minimum} 种、weak_points 至少 {weak_minimum} 种，"
+        "均须在题面/推理中真实使用并有对应证据，不可只加标签。\n"
+        "level_reason.longest_hops 等于 reasoning 每行箭头数的最大值，"
+        "每个 → 或 -> 均计一跳，包括终端前的箭头；每个非空行恰有一个 [结论] Rn、"
+        "[保持] Pn 或 [不得画] Nn 终端。\n"
+        "知识节点按（知识·类别；域·知识域）独立标注，括号中不得在知识·之前加推导类型；"
+        "knowledge_categories 与这些知识类别去重集合一致。\n"
+        "evidence_receipt.used_in 只能包含 edit_instruction 或实际 R/P/N 编号；"
+        "edit_targets 中每个 Vn 都须有 used_in 包含 edit_instruction 的回执。"
+    )
+
+
+def cmd_render_question(args) -> None:
+    """物化单题输入；子代理只需读取此 md 和绑定源图，运行元数据留在旁路。"""
+    plan = load_plan(Path(args.plan))
+    p = plan[args.render_question]
+    attempt = p["texts"][args.attempt_index]
+    rows = read_jsonl(Path(args.questions)) if args.questions and Path(args.questions).exists() else []
+    if any(q["qid"] == p["qid"] for q in rows):
+        raise ValueError(f"{p['qid']} 已完成，禁止重复出题")
+    records = [q for q in rows if q.get("status") == "constructed"]
+    bans, avoid, sol_c, sol_s = shape_dispatch(records)
+    counts: dict[str, int] = {}
+    for q in records:
+        for c in q.get("consequence_types") or []:
+            for key in (c, f"{q['level']}::{c}"):
+                counts[key] = counts.get(key, 0) + 1
+    adj = adjustment_text(bans, avoid, sol_c, sol_s, plan_as_job(p), counts)
+    source = (FOCUS / p["images"][attempt["image_index"]]["file"]).resolve()
+    sha = hashlib.sha256(source.read_bytes()).hexdigest()
+    if sha != attempt["expected_meta"]["_sha256"]:
+        raise ValueError(f"{p['qid']} 源图哈希不符")
+    template = SIMPLE_PROMPT_FILE if p.get("construction_profile") == "simple" else PROMPT_FILE
+    prompt = template.read_text(encoding="utf-8") + "\n\n" + attempt["text"].replace("{ADJUSTMENT}", adj)
+    prompt += rendered_validation_notes(p, attempt["edit_type"])
+    out = Path(args.out_dir).resolve()
+    stem = f"{p['qid']}_a{args.attempt_index}_r{args.revision}"
+    md = out / "prompts" / f"{stem}.md"
+    raw = out / "raw" / f"{stem}.json"
+    receipt = out / "dispatch" / f"{stem}.json"
+    if md.exists() or receipt.exists() or raw.exists():
+        raise ValueError(f"{stem} 已物化，复用现有文件或递增 --revision")
+    for folder in (md.parent, raw.parent, receipt.parent):
+        folder.mkdir(parents=True, exist_ok=True)
+    md.write_text(prompt, encoding="utf-8")
+    rec = {"qid": p["qid"], "attempt_index": args.attempt_index,
+           "prompt": str(md), "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+           "template_sha256": hashlib.sha256(template.read_bytes()).hexdigest(),
+           "source_image": str(source), "source_sha256": sha, "raw": str(raw),
+           "expected_meta": {**attempt["expected_meta"], "_adjustment": adj},
+           "model": args.model, "reasoning_effort": args.reasoning_effort}
+    receipt.write_text(json.dumps(rec, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps({"receipt": str(receipt), "prompt": str(md), "source_image": str(source),
+                      "raw": str(raw)}, ensure_ascii=False))
+
+
+def cmd_ingest_question(args) -> None:
+    """收录裸 JSON；仅注入绑定元数据，复用原机审，原始响应不改写。"""
+    receipt = Path(args.ingest_question)
+    rec = json.loads(receipt.read_text(encoding="utf-8"))
+    for file, key in ((rec["prompt"], "prompt_sha256"), (rec["source_image"], "source_sha256")):
+        if hashlib.sha256(Path(file).read_bytes()).hexdigest() != rec[key]:
+            raise ValueError(f"物化输入哈希变化：{file}")
+    q = json.loads(Path(rec["raw"]).read_text(encoding="utf-8"))
+    p = load_plan(Path(args.plan))[rec["qid"]]
+    if q.get("qid") != p["qid"]:
+        raise ValueError("裸输出 qid 不匹配")
+    if q.get("status") == "cannot_construct":
+        print(f"CANNOT_CONSTRUCT {q['qid']}: {q.get('cannot_reason_code')}: {q.get('notes')}")
+        return
+    q.update(rec["expected_meta"])
+    job = plan_as_job(p)
+    job["edit_type"] = rec["expected_meta"]["_edit_type"]
+    warns, reject = audit_v61_edit(q, job)
+    warns += _adjustment_errors(q)
+    if reject or warns:
+        raise ValueError(f"{q['qid']}: " + "; ".join(warns))
+    q["_synthesis"] = {"model": rec["model"], "reasoning_effort": rec["reasoning_effort"],
+                       "prompt_sha256": rec["prompt_sha256"],
+                       "raw_sha256": hashlib.sha256(Path(rec["raw"]).read_bytes()).hexdigest(),
+                       "receipt": str(receipt.resolve())}
+    qfile = Path(args.questions)
+    rows = read_jsonl(qfile) if qfile.exists() else []
+    existing = {r["qid"]: r for r in rows}
+    if q["qid"] in existing:
+        if q != existing[q["qid"]]:
+            raise ValueError("已收录题禁止覆盖")
+        print(f"UNCHANGED {q['qid']}")
+        return
+    rows.append(q)
+    _write_jsonl_atomic(qfile, sorted(rows, key=lambda r: r["qid"]))
+    print(f"ACCEPTED {q['qid']}: {len(rows)}/{len(load_plan(Path(args.plan)))}")
+
+
 def _plan_attempt(p: dict, q: dict, kind: str) -> tuple[int, dict, str] | None:
     """返回命中的 (image_index, image_row, edit_type)，并核验确定性尝试组合。"""
     sha = str(q.get("_sha256") or "")
@@ -595,7 +760,10 @@ def _meta_errors(q: dict, p: dict, im: dict, etype: str,
     }
     if kind == "questions":
         expected["_edit_type"] = etype
-        expected["difficulty"] = p["level"]
+        expected["difficulty"] = "simple" if p.get("construction_profile") == "simple" else p["level"]
+        if "construction_profile" in p:
+            expected["_construction_profile"] = p["construction_profile"]
+            expected["_t2i_level"] = p["level"]
     else:
         expected["_attempt_type"] = etype
     for key, value in expected.items():
@@ -868,6 +1036,7 @@ def encode_image(img_path: Path, cache_dir: Path, cache_key: str,
 # ---------------------------------------------------------------------------
 def call_api(api_key: str, api_url: str, model: str, system_prompt: str,
              user_message: list, tag: str, max_tokens: int) -> dict:
+    import requests  # API 兼容入口才需要网络依赖；离线出题不导入。
     payload = {"model": model, "stream": False, "temperature": TEMPERATURE,
                "max_tokens": max_tokens,
                "messages": [{"role": "system", "content": system_prompt},
@@ -934,6 +1103,7 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
     if str(q.get("status") or "") == "cannot_construct":
         return ["cannot_construct 只能写入 --validate-cc 文件"], True
     warns, reject = [], False
+    simple = job.get("construction_profile") == "simple"
     required_fields = {
         "task", "qid", "status", "edit_instruction", "edit_type", "suite", "level",
         "level_reason", "targeting_types", "consequence_types",
@@ -977,7 +1147,7 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
     if not rs.strip():
         warns.append("缺 reasoning")
     else:
-        if "→" not in rs and "->" not in rs:
+        if not simple and "→" not in rs and "->" not in rs:
             warns.append("reasoning 无推导箭头（→）")
         kind_prefix = {"结论": "R", "保持": "P", "不得画": "N"}
         for lineno, line in enumerate((x for x in rs.splitlines() if x.strip()), 1):
@@ -1000,7 +1170,7 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
         eff = lvl if lvl in LEVELS else job["level"]
         n_conc, n_keep, n_neg = (len(terminal_ids["R"]), len(terminal_ids["P"]),
                                  len(terminal_ids["N"]))
-        g = GATES[eff]
+        g = (1, 1, 0, 0, 0, 1) if simple else GATES[eff]
         if n_conc < g[0]:
             warns.append(f"{eff} 门槛：[结论] {n_conc} < {g[0]}")
         if n_keep < g[1]:
@@ -1031,7 +1201,7 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
     )
     for f, name, menu in enum_fields:
         v = q.get(f)
-        allow_empty = ((f == "consequence_types" and q.get("edit_type") in {
+        allow_empty = (simple and f in {"consequence_types", "special_obligation_types", "hop_types", "scene_types", "knowledge_categories"}) or ((f == "consequence_types" and q.get("edit_type") in {
             "style", "extract", "background"
         }) or (f == "special_obligation_types" and q.get("edit_type") not in {
             "style", "extract", "background"
@@ -1065,21 +1235,17 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
     if rs.strip() and set(q.get("knowledge_categories") or []) != kinds:
         warns.append("knowledge_categories 必须与 reasoning 的（知识·类别）去重集合完全一致")
     if lvl in LEVELS:
-        min_target = {"L1": 1, "L2": 2, "L3": 3}[lvl]
-        if q.get("edit_type") in {"style", "background"}:
-            min_target = 1
-        elif q.get("edit_type") == "extract":
-            min_target = min(min_target, 2)
+        min_target = min_targeting_types(lvl, q.get("edit_type"), simple)
         if len(set(q.get("targeting_types") or [])) < min_target:
             warns.append(f"{lvl} 门槛：定位方式 {len(set(q.get('targeting_types') or []))} < {min_target}")
-        min_hops = {"L1": 1, "L2": 2, "L3": 3}[lvl]
+        min_hops = 0 if simple else {"L1": 1, "L2": 2, "L3": 3}[lvl]
         if len(set(q.get("hop_types") or [])) < min_hops:
             warns.append(f"{lvl} 门槛：跳类型 {len(set(q.get('hop_types') or []))} < {min_hops}")
     st = [x for x in (q.get("scene_types") or []) if x in SCENE_MENU]
-    if lvl in LEVELS and len(set(st)) < GATES[lvl][3]:
+    if not simple and lvl in LEVELS and len(set(st)) < GATES[lvl][3]:
         warns.append(f"{lvl} 门槛：场景固定行 {len(set(st))} < {GATES[lvl][3]}（自造类名不计门槛）")
     kd = q.get("knowledge_domains")
-    if not isinstance(kd, list) or not kd:
+    if not isinstance(kd, list) or (not kd and not simple):
         warns.append("knowledge_domains 应为非空数组（29 域菜单名）")
     else:
         bad = [d for d in kd if d not in DOMAINS_MENU]
@@ -1089,7 +1255,7 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
         if len(kd) != len(set(map(str, kd))):
             warns.append("knowledge_domains 含重复值")
     wps = q.get("weak_points")
-    if isinstance(wps, list) and lvl in LEVELS and len(set(map(str, wps))) < GATES[lvl][5]:
+    if isinstance(wps, list) and lvl in LEVELS and len(set(map(str, wps))) < (1 if simple else GATES[lvl][5]):
         warns.append(f"{lvl} 门槛：弱项去重 {len(set(map(str, wps)))} < {GATES[lvl][5]}")
     ea = q.get("evidence_audit") or {}
     visible = ea.get("visible_facts")
@@ -1198,7 +1364,7 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
                 warns.append(f"level_reason.{key}={lr.get(key)!r} 与实际 {value} 不一致")
         if lr.get("meets_target") is not True:
             warns.append("level_reason.meets_target 必须为 true")
-        min_hops = {"L1": 1, "L2": 2, "L3": 3}[lvl]
+        min_hops = 0 if simple else {"L1": 1, "L2": 2, "L3": 3}[lvl]
         if not isinstance(lr.get("longest_hops"), int) or lr["longest_hops"] < min_hops:
             warns.append(f"{lvl} 门槛：level_reason.longest_hops < {min_hops}")
         elif lr["longest_hops"] != max_arrows:
@@ -1207,9 +1373,11 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
     if not isinstance(pcs, list):
         warns.append("product_checks 必须为数组")
     else:
+        if simple and pcs:
+            warns.append("simple 配置 product_checks 必须为空")
         if lvl in {"L1", "L2"} and pcs:
             warns.append(f"{lvl} product_checks 必须为空")
-        if lvl == "L3" and not pcs:
+        if not simple and lvl == "L3" and not pcs:
             warns.append("L3 至少需要 1 个 product_check")
         for i, pc in enumerate(pcs):
             oid = str(pc.get("obligation_id") or "") if isinstance(pc, dict) else ""
@@ -1221,7 +1389,7 @@ def audit_v61_edit(q: dict, job: dict) -> tuple[list[str], bool]:
                     or any(x not in set(q.get("weak_points") or []) for x in factors or [])):
                 warns.append(f"product_checks[{i}] obligation_id/factors 不合规")
     # level 是目标档而不是最低档：不能靠低标签承载一整套高档门槛。
-    if lvl in {"L1", "L2"}:
+    if not simple and lvl in {"L1", "L2"}:
         higher = "L2" if lvl == "L1" else "L3"
         hg = GATES[higher]
         reaches_higher = all((
@@ -1324,10 +1492,11 @@ def adjustment_text(bans: list, avoid: list, sol_c: list, sol_s: list,
 # ---------------------------------------------------------------------------
 def run(args) -> None:
     system_prompt = PROMPT_FILE.read_text(encoding="utf-8")
-    inputs = load_inputs()
+    inputs = load_inputs(Path(args.source_manifest) if args.source_manifest else None)
     jobs = build_jobs(inputs, args.limit, args.mix,
                       align_t2i_levels=args.align_t2i_levels,
-                      knowledge_share=args.knowledge_share)
+                      knowledge_share=args.knowledge_share,
+                      reused=read_jsonl(Path(args.reuse_questions)) if args.reuse_questions else None)
     if not jobs:
         sys.exit("无出题任务（manifest/实例清单为空？）")
 
@@ -1656,7 +1825,24 @@ def main() -> None:
                          "配合 --questions（已完成题库）与 --plan")
     ap.add_argument("--questions", type=str, default="",
                     help="dispatch 用：已完成 questions 文件路径（缺省=空批次）")
+    ap.add_argument("--reuse-questions", default="", help="保留既有题目的实例/难度/suite")
+    ap.add_argument("--reuse-plan", default="", help="emit-plan 原样保留已有 pilot 计划")
+    ap.add_argument("--source-manifest", default="", help="额外已复核源图清单（不改 focus200 生成图清单）")
+    ap.add_argument("--render-question", default="", help="离线物化单题 md + 输入绑定")
+    ap.add_argument("--attempt-index", type=int, default=0)
+    ap.add_argument("--revision", type=int, default=0)
+    ap.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh"), default="high")
+    ap.add_argument("--ingest-question", default="", help="离线收录 dispatch receipt 绑定的裸 JSON")
     args = ap.parse_args()
+
+    if args.render_question or args.ingest_question:
+        if not args.plan or not args.questions or not args.out_dir:
+            sys.exit("render/ingest 需要 --plan、--questions、--out-dir")
+        if args.render_question:
+            cmd_render_question(args)
+        else:
+            cmd_ingest_question(args)
+        return
 
     if args.assemble_drafts:
         if not args.plan:
