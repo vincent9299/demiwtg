@@ -29,7 +29,7 @@
 
 契约：每连接器返回 [evidence dict]（src/title/url/text），miss/校验不过返回 []；
 错实体校验在连接器内部完成（防串味入包）。请求全部走 infra 闸门（sk: 前缀，
-在 search_kb.SOURCE_LIMITS 登记）。不改 instances.json，不落任何盘。
+在 search_kb.SOURCE_LIMITS 登记）。不改 concepts.json，不落任何盘。
 """
 from __future__ import annotations
 

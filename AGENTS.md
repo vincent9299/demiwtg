@@ -6,22 +6,21 @@
 
 ```
 demiwtg/
-├── viewer/                     # 【代码】查看器闭环：tag_tree_explorer.html（+ tag_tree_explorer_en.html 英文平行页，由 build_viewer.py --lang en 从主页生成）+ build_viewer.py + build/、build_en/ 产物（gitignore）
+├── viewer/                     # 【代码】查看器闭环：tag_tree_explorer.html + build_viewer.py + build/ 产物（gitignore；英文平行页已随 2026-09-06 统一版退役删除）
 ├── benchmark/                  # 【代码】评测基准：按三大题型拆成 vlm/、t2i/、edit/ 三子模块（抽样-出题-判分流水线 + reviews/ 下 question_dev/results_review notebooks）；评测数据不入 git：t2i=bench200/+archive/+data/，edit=无 data/ 层（批次目录、archive/、活素材全落子模块根，见架构决策 2026-09-05）；bagel/=第 4 场景（BAGEL-7B-MoT 官方基准评测：README/results_review.ipynb/gen+vlm 脚本入库，data/ 与 vendored 官方仓不入库）
+├── taxonomy/                   # 【代码】标签体系维护与富化（audit_nodes / mount_map / gen_taxonomy_kb / gen_instance_kb / upgrade_v31；2026-09-05 还原盘起提升根目录，data/ 同名件为兼容 shim）
+├── curation/                   # 【代码】数据策展与检索接地（search_kb / annotate_backfill / focus_sample / migrate_concepts / en_entity_merge / meta_unify + 分析 notebooks；同上提升根目录）
 ├── bagel/                      # 【子项目】Bagel 官方模型包（Bagel/ 训练/推理代码 + 权重区；2026-09-05 起入主仓——代码入库，Bagel/models 权重与 eval/vlm/data 重物 gitignore；见架构决策 2026-09-05）
 ├── modelhub/                   # 【子项目】LLM 网关（LiteLLM）+ 静态出口代理（mihomo）：本地 vLLM/Galaxy 直连、OpenRouter 走静态住宅 IP；独立仓库，整体不入主仓（见架构决策 2026-08-25）
 ├── .venv/                      # 【环境】项目公共 Python 环境（conda py3.10，torch 2.6+cu124；原 bagel/env，2026-08-24 提升为公共并由 env/ 改名；不入 git）
 ├── datasets/                   # 【纯数据】数据集根目录（一数据集一目录；原 data/datasets/，2026-08-24 升为顶层）
 │   ├── demiwtg/                #   自建数据集 demiwtg（硬约束见第 2 节）
 │   │   ├── blobs/              #     图片原始字节区（内容寻址，不可变，不入 git）
-│   │   └── meta/               #     真相区：images.jsonl/metadata.jsonl 与 taxonomy 三件套 + 英文平行两件套 taxonomy_en.json/instances_en.json（三件套与英文两件套入 git）
+│   │   └── meta/               #     真相区：instance_images.jsonl（统一权威主清单）+ taxonomy 两件套（taxonomy.json/concepts.json 入 git；2026-09-06 起中英统一，英文平行件与 alias_western 已退役；2026-09-07 instances.json 概念化为 concepts.json）
 │   └── .../                    #   开源数据集落盘区（danbooru2024/coco2017 等，不入 git）
-├── data/                       # 【代码】数据构建代码（原仓库根五模块中的三个，2026-08-24 收编入 data/）
-│   ├── collect_v2/             #   采集（检索→下载→落盘/打标链路编排）
-│   ├── taxonomy/               #   体系维护与富化（mount_map / gen_taxonomy_kb / gen_instance_kb / audit_nodes / upgrade_v31）
-│   └── curation/               #   数据策展（分析 notebook：dataset_analysis.ipynb 已从 IDE 快照恢复归位，见架构决策 2026-08-24）
+├── data/                       # 【兼容 shim】collect_v2.* import 面的 re-export 层（2026-09-05 还原盘布局适配：focus_sample/search_kb/llm_common/mount_map 转发顶层模块；infra/op_annotate 为缺失占位——真实现在 demiwtg-data 仓库；不放新代码，不入 git）
 ├── state/                      # 运行时状态，按模块归属分子目录（不入 git）
-│   ├── collect/                #   datasets/（下载过程脚本，只读归档）+ v1 遗留运行时状态（死信/health/runs，只读归档）
+│   ├── collect/                #   datasets/（下载过程脚本，只读归档）+ v1 遗留运行时状态（死信/health/runs，只读归档）+ concepts_docs_draft.jsonl（docs 层草稿）+ query_terms_cache.json（检索词运行时缓存）
 │   ├── dataset_index/          #   COCO 标注缓存
 │   ├── taxonomy/               #   taxonomy 模块 LLM 断点缓存与审计报告
 │   ├── curation/               #   curation 历史分析残留（标签树 CSV、watermark 实验产物等）
@@ -32,15 +31,17 @@ demiwtg/
 ```
 
 - `datasets/` 下**只是数据存储**：任何代码、页面、生成产物都不许放进去。
-- 代码只允许放在 `data/` 下三模块（`collect_v2/`、`taxonomy/`、`curation/`）与仓库根 `viewer/`、`benchmark/`。
+- 代码只允许放在顶层 `taxonomy/`、`curation/` 与 `viewer/`、`benchmark/`（2026-09-05 还原盘起模块提升根目录；`data/` 为兼容 shim，不放新代码）。
 - 仓库顶层禁止新增散落的脚本或数据目录（`datasets/`、`data/`、`state/`、`logs/` 是明确登记过的例外；`bagel/` 为登记的子项目例外（2026-09-05 起入主仓），内部布局自治，不受本仓模块/数据边界规则约束，权重与评测数据等重物仍不入 git；`modelhub/` 为登记的独立子项目例外（LLM 网关 + 静态代理），内部布局自治，同不受约束；`.venv/` 为登记的公共环境例外，只放环境不放代码）。
 - 文档只有两份：`AGENTS.md`（约束）与 `README.md`（指针）。历史过程文档（docs/、子目录 README）已删除，**不再恢复**——过程记录看 git 历史。
 
-## 1.5 标签体系数据契约（两个独立概念，定死；两文件同居 datasets/demiwtg/meta/）
+## 1.5 标签体系数据契约（两类独立资产，定死；两文件同居 datasets/demiwtg/meta/）
 
-整个标签体系**只存在两个概念**，代码、数据字段、文档一律使用这两个词，禁止再引入其他分类术语（category、leaf、root 已废除）。数据模型以本节为准（原 schema/tag_taxonomy.schema.json 已删除：无校验消费者、与 instances.json 顶层结构不符，勿恢复）。
+整个标签体系**只存在两类资产**——树（taxonomy.json）与概念（concepts.json），代码、数据字段、文档一律使用这两个词，禁止再引入其他分类术语（category、leaf、root 已废除；instance/实体 一词由 concept/概念 取代，2026-09-07）。数据模型以本节为准（原 schema/tag_taxonomy.schema.json 已删除：无校验消费者，勿恢复）。
 
-**两者彻底解耦（架构决策 2026-08-19）**：实例是资产，taxonomy 是视角。实例的生灭与富知识完全不依赖树；树只是展示/导航视图，同一套实例未来可被多套树视角引用。关联关系（谁挂在哪）**不写进任何一方文件**，需要时由消费者从树的 instances 名单现场聚合（`taxonomy/mount_map.py`）。原 build_unified.py（树推导实例表的重建器）已删除：它维护的正是被废除的耦合。
+**两类资产彻底解耦（架构决策 2026-08-19；2026-09-07 概念化迁移沿用）**：概念是资产，taxonomy 是视角。概念的生灭与富知识完全不依赖树；树只是展示/导航视图，同一套概念未来可被多套树视角引用。挂载关系的**真相**写在树一侧（节点 instances 名单）；concepts.json 行内的 `taxonomy` 字段是**快照**（消歧与源路由用，树变更后跑 `curation/migrate_concepts.py --refresh-taxonomy` 刷新）。原 build_unified.py（树推导实例表的重建器）已删除：它维护的正是被废除的耦合。
+
+**概念不区分 class/individual（SKOS 语义：统一主键空间）**。新概念准入规则：可指称（收「词」不收「算式」，成员拼装键禁止入库）、可复现（跨题复现频次 ≥K）、有供给（通用图源可搜、VLM 可认）。
 
 ### taxonomy.json —— 树（展示视角）
 
@@ -52,30 +53,29 @@ node = {
   path: str                    # 完整路径，' / ' 分隔，从根『demiwtg』起算（前缀精简：域直挂根，无中间层）
   depth: int                   # 根为 0
   children?: [node]            # 子树；末端节点省略
-  instances?: [str]            # 挂在本节点下的实例名列表（对 instances.json 的引用，挂载关系的唯一落点）
+  instances?: [str]            # 挂在本节点下的概念名列表（对 concepts.json 的引用，挂载关系的唯一真相落点）
   knowledge_intro?/aliases?/representative_cases?/related_tags?: [KB 字段，可选；knowledge_intro 为 150-350 字维基百科词条风格]
 }
 ```
 
-### instances.json —— 实例（独立权威源，实体资产库）
+### concepts.json —— 概念（独立权威源，统一主键空间）
 
 ```
-{ "schema_version": "...", "meta": {...}, "instances": [instance] }
+{ "schema_version": "...", "meta": {...}, "concepts": [concept] }
 
-instance = {
-  name: str                    # 实例名（全局唯一主键：一个实体只允许一条记录）
-  source: "curated" | "llm" | "derived"   # curated=人工精写；llm=LLM 生成；derived=未富化占位（templated 为历史值，不再新写）
-  desc?: str                   # 详细介绍（唯一富描述字段；150-350 字，维基百科词条风格：具体知识点，拒绝空话套话）
-  aliases?: [str]              # 别名/英文名
-  query?: [str]                # 检索扩展词（LLM 生成，含英文/简称）
+concept = {
+  name: str                    # 概念主键（全局唯一；正名纪律：定了一次不再动，变化由 aliases 吸收）
+  aliases: [str]               # 别名/英文名（身份字段：判重与英文源路由；无别名为 []）
+  carriers: str                # 载体："image+text" | "text"（链路由：图像采集线据此跳过 text-only 概念）
+  taxonomy: [str]              # 挂载路径快照（' / ' 分隔，从域起算，树遍历序；真相在树，仅供消歧与源路由，不承载知识）
 }
 ```
 
-- **实例独立于树**：未挂载任何树节点的实例是合法状态（待认领池）；增删树节点不造成实例的创建或删除，富知识（desc/query/aliases）只存在 instances.json。
-- **`name` 全局唯一是硬约束**：同一实体的知识字段只维护一份；多处挂载表现为多个树节点的 instances 名单同时含该名字（原 taxonomy_paths 字段已废除：它是树的影子，不进实例表）。
-- 没有 `type` 字段：有没有子树看 `children`，挂不挂实例看 `instances`。
-- **英文平行两件套**（架构决策 2026-08-24）：`taxonomy_en.json` / `instances_en.json` 与中文两件套同居 meta/、schema 完全同构（英文树根也是 demiwtg 直挂 29 域）；两套数据完全独立，中英实例名空间零交集，英文实例当前无图片关联（不打标、不映射中文富知识）。
-- 图片打标只存**实例名**（实体标签，不含路径）——体系演化（改路径/重生成树）不需要迁移图数据。看图入口（viewer 的 build/imgs.js）由 meta/images.jsonl 的 instances 字段现场聚合、相对路径指到 blobs 原图（相对 viewer/ 的 ../datasets/demiwtg/blobs/...），不再建软链树。
+- **概念独立于树**：未挂载任何树节点的概念是合法状态（taxonomy=[]，待认领池）；增删树节点不造成概念的创建或删除。
+- **`name` 全局唯一是硬约束**：一个概念一条记录；多处挂载表现为多个树节点的 instances 名单同时含该名字（行内 taxonomy 快照同步多路径）。
+- **退役字段（2026-09-07 概念化迁移，历史 schema 溯 git）**：`desc`（52,980 条）→ `state/collect/concepts_docs_draft.jsonl`（docs 层草稿：{name, kind: summary, body}；被消费后另批转正）；`query`（52,980 条）→ `state/collect/query_terms_cache.json`（{name: [检索词]}，采集 planner 冷启动先验——检索词从静态资产改为运行时状态）；`source` → 行内退役（迁移时分布存 concepts.json meta.source_stats：derived 330,842 / llm 54,262 / curated 158）。
+- **英文平行两件套已退役（架构决策 2026-09-06）**：EN 实体对齐后成为中文概念的 aliases 或独立概念，英文知识以别名形态存活；四个平行文件物理移出 meta/ 归档 state/taxonomy/retired_meta/，search_kb --lang en 与 viewer --lang en 入口拒绝退役提示。
+- 图片打标只存**概念名**（标签不含路径）——体系演化（改路径/重生成树）不需要迁移图数据。看图入口（viewer 的 build/imgs.js）由 meta/instance_images.jsonl 的 instances 字段现场聚合（字段名 instances 沿用 demiwtg-data 采集链契约不改，语义=概念名）、相对路径指到 blobs 原图（相对 viewer/ 的 ../datasets/demiwtg/blobs/...），不再建软链树。
 - 数据字段定义即契约，改字段 = 改本节 + 同步全部消费代码。
 
 ## 2. datasets/demiwtg/ 硬约束（定死，逐条执行）
@@ -97,20 +97,16 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 | 文件 | 角色 |
 |---|---|
-| `images.jsonl` | 唯一权威主清单：一张图一行（sha256 + 全部字段），按 sha256 增量 upsert；instances 字段只存实例名，实例名↔图关系由它单点承载 |
-| `metadata.jsonl` | collect_v2 专属采集清单（2026-08-20 拍板） |
-| `taxonomy.json` | 标签体系树（展示视角，权威源，入 git） |
-| `instances.json` | 实例资产库（实体权威源，入 git） |
-| `alias_western.json` | op_seed 西文别名词表（LLM 判定增量落盘，入 git） |
-| `taxonomy_en.json` | 英文平行标签树（结构同构 taxonomy.json，v3.1 英文底稿入库，入 git） |
-| `instances_en.json` | 英文平行实例资产库（结构同构 instances.json，全量 derived 占位，入 git） |
+| `instance_images.jsonl` | **统一权威主清单**（2026-09-06 起）：去重键 (sha256, instance) 一行一对，逐实例炸开；含 EN 并入行（实例名已归一为中文正名，new 实体保留 EN 名）与原 images.jsonl 并入行（identity/focus/quality=null 待 annotate_backfill 补标）；VLM 补标、质量门、viewer imgs.js 均以它为单一来源 |
+| `taxonomy.json` | 标签体系树（展示视角，权威源，入 git；含并入的 EN 新实体挂载） |
+| `concepts.json` | 概念资产库（统一主键空间权威源，入 git；四字段契约见 1.5；2026-09-07 由 instances.json 概念化迁移而来，历史 schema 溯 git） |
 | `.meta.lock` | 跨进程写锁（运行时瞬态） |
 
 **禁止出现在 meta/ 下的东西：**
 
 - ❌ 审计日志（只写不读的账本一律不建；先有读取代码才允许写入）
 - ❌ 备份文件（*.bak-*、*.bak-sync 之类）
-- ❌ 派生索引（LanceDB、实例名→图反向索引等；需要时由消费者从 images.jsonl 现场聚合）
+- ❌ 派生索引（LanceDB、实例名→图反向索引等；需要时由消费者从 instance_images.jsonl 现场聚合）
 - ❌ 运行时状态（死信队列 sqlite、健康账本、done flags、COCO 缓存）
 
 **判据（新增任何文件前先回答）：**
@@ -125,23 +121,35 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 ### 2.4 一致性规则
 
-- `images.jsonl` 是唯一真相；**不建任何派生索引文件**（原 instance_images.json 已废除：双份存储存在一致性漂移风险，需要实例名→图关系时由消费者从 images.jsonl 现场聚合，如 viewer/build_viewer.py）。
-- `images.jsonl` 的 instances 字段只应是当前体系的实例名；体系演化后残留的死名打标从 images.jsonl 剥离（无隔离区）。
-- 一张图的 instances 变更（改名/隔离）改的是 images.jsonl，**图字节不动**。
+- `instance_images.jsonl` 是唯一真相（2026-09-06 起；前身 metadata.jsonl，同日更名；原 images.jsonl 已收官退役归档 state/taxonomy/retired_meta/）；**不建任何派生索引文件**（历史上先后废除的派生件：instance_images.json（旧实例→图反向索引，2026-08-21 废）与 images.jsonl（2026-09-06 退役），双份存储有一致性漂移风险；需要实例名→图关系时由消费者从 instance_images.jsonl 现场聚合，如 viewer/build_viewer.py）。
+- `instance_images.jsonl` 的 instances 字段只应是当前体系的概念名（字段名沿用 demiwtg-data 采集链契约）；体系演化后残留的死名打标从 instance_images.jsonl 剥离（无隔离区）。
+- 一张图的 instances 变更（改名/隔离）改的是 instance_images.jsonl，**图字节不动**。
 - 新元数据字段设计时必须先问"哪个消费者读它"；答案为空就不加。
 
 ## 3. 代码模块职责
 
+> **简单实拍补充（2026-09-07，用户拍板）**：已完成的 23 题原样计入总量，剩余题适量增加简单实拍，避免过度降低整体难度。当前选图为 55 张照片候选与 145 张生成图，其中 19 张采用独立 `synthesize_prompt_edit_v6.1_simple.md`；原 v6.1 标准协议不变。简单配置沿用原脚本的证据、图题绑定与收录校验，取消多跳及高义务数量门槛；`construction_profile=simple`、`difficulty=simple` 显式区分，`level` 只保留 T2I 逐实例参考层级，不宣称为编辑实测难度。新增清单合并为 bench200/source_review/combined_sources.jsonl 供 emit-plan 消费；最终比例按成功题实际来源统计。
+
+> **选图补充（2026-09-07，用户拍板）**：edit bench200 改为采集照片候选与生成图共同覆盖同一 200 实例，一实例最终一图一题，已完成合格题保留。用户明确指定可复用 `_staging/benchmark/t2i/data/` 的历史采集源图副本；不改湖、不重抽实例。`eval_complexity.py prepare-mixed/select-mixed` 以历史样本质量快照和成功复杂度记录初筛，再由显式 `gpt-5.6-sol/high` 子代理逐图补核身份、实拍外观与编辑适配；缺 identity 不从 kb_match 推断。复核通过的图片按 SHA256 原字节复制到 edit/focus200/collected/，清单在 bench200/source_review/selected_sources.jsonl，由 eval_synthesize --source-manifest 消费；原生成图清单不改。照片优先；生成图沿原层级素材偏好，并复用 rank_key 在同批次内择复杂图，不能混用照片 10 分制质量与生成图百分制评分。候选失败沿原三步尝试序列补位，最终来源以 questions 的实际绑定为准，统计分来源并按 level 分层。
+
+> **架构决策（2026-09-07）**：edit 正式出题批次落 `benchmark/edit/bench200/`（运行数据不入 git），沿用 v6.1 出题协议与 `eval_synthesize.py` 的选图、类型尝试序列、削峰及严格机审。实例顺序和难度来自 `benchmark/t2i/bench200/questions.jsonl`；pilot 20 题及其计划原样保留并计入 200 题总配额，只补其余 180 个实例。出题不用 OpenRouter/API，使用显式指定 `gpt-5.6-sol` / `high` 的全新子代理；每题只给物化 md 与绑定源图，不继承调度对话；必须完整读取 md 到文件末尾，不能截取前 240 行而漏掉末尾批次调整。后续 render 从同一校验函数显式附带原有定位方式数量及机械格式自查，修复原 v6.1 表格漏列定位门槛的问题；不修改冻结模板与任何既有验收门槛，旧渲染/题目保留。离线流程为 emit-plan → render-question → 子代理裸 JSON → ingest-question → validate；输入哈希与模型配置保存在批次 dispatch 供收录校验消费。正式判分配置由用户定为修订 QIB v2.2 + `gpt-6-astra` / `medium`，覆盖下文旧 sol 定案；此次先完成出题。
+
+> **架构决策（2026-09-07）**：instances.json → concepts.json 概念化迁移（用户拍板：改名 + 契约瘦身为四字段；2026-09-05/06「归一化概念体系」方法论讨论的真相层落地，采集交接件 concepts_batch_200.json 已先行新契约）。定案：① 概念行 = {name, aliases, carriers, taxonomy}，顶层 schema_version+meta+concepts；`curation/migrate_concepts.py` 一次性迁移 385,262 行（干跑→--apply，幂等防重跑；--refresh-taxonomy 供树变更后刷新快照），carriers 存量默认 image+text，taxonomy 快照从域起算、树遍历序（全量有挂载；多挂分布 1 处 348,122 / 2 处 25,574 / ≥3 处 11,566，存量按树实况全量保留，多挂≤3 为新概念策展纪律）。挂载真相仍在树——2026-08-19「挂载关系不持久化」就快照维度修订：快照只作消歧与源路由、不承载知识，禁手改、刷新走脚本。② 退役字段去向：desc → state/collect/concepts_docs_draft.jsonl（docs 层草稿 {name, kind: summary, body}，策展精修 105 条优先保留不覆盖，终态 52,980 条；docs 正式层待消费后另批转正）；query → state/collect/query_terms_cache.json（52,980 名，planner 冷启动先验——检索词从静态资产改为运行时状态）；source 行内退役（分布存 meta.source_stats：derived 330,842 / llm 54,262 / curated 158）。③ 消费端同步：viewer（build_viewer 读 concepts.json + docs 草稿 join 进概念行 docs 字段、sidecar 更名 concepts.js、缓存号 v5、HTML fetch 回退/查表键 window.__CONCEPTS__/stats 改「概念」、source 标签删除、standalone 同步；重建产物 concepts.js 115.8MB，imgs.js 空为图片全量丢失后预期态）；curation/focus_sample（mini 表改 concepts 键，四字段整条拷贝，产物名 focus*_concepts.json）；curation/search_kb（targets 改 concepts 键、--only-empty 判据改 docs 草稿名单、english_alias/all_aliases 的 query 半边改读采集缓存、source==curated 跳过删除）；taxonomy/gen_instance_kb 重写为概念富化器（aliases 回写 concepts.json + docs 追加草稿，不再生成 query/source，写盘持 .meta.lock 原子替换）；curation/annotate_backfill（kb 查表改由 concepts + docs 草稿现场构建，脱离 op_annotate.load_instance_kb）；benchmark edit eval_synthesize / dual_carrier_supplement 与 focus1000 caption/genimg/eval_complexity（desc 改读 docs 草稿，mini 表键兼容 concepts/instances 两代）；三册 curation notebook 路径键同步；taxonomy.json meta.description 自指更新；mount_map/README/.gitignore 例外链（!concepts.json，85MB < 原 98MB）。④ 同批修复 data/ 时代 ROOT 深度残留（focus_sample/search_kb/annotate_backfill/gen_instance_kb 原推导到仓库根上一层）与 import 面（顶层 taxonomy.* 直连；data/ shim 仅保留兼容存量 collect_v2.* 调用方）；§1 树形图同步顶层布局。⑤ 历史一次性脚本（en_entity_merge/meta_unify/upgrade_v31/upgrade_v31_en）不改造：读端对已删文件自然 FileNotFoundError 自守卫，历史溯 git。⑥ instance_images.jsonl 的 instances 字段名与 demiwtg-data 采集链契约不动（外部仓 --concepts 批任务模式已由集群侧上线对齐四字段契约；概念模式打标 kb 的 docs sidecar 补丁+bench283 种子 105 条已备 state/collect/demiwtg_data_sync/——本机无 GitHub 推送凭据，待 SG 授权机推送，2026-09-08）；30 个 candidate 新概念键已随人审合入（2026-09-08：+30 新键建议挂载写树生效、385,262→385,292，快照与树零失配校验通过；253 个既有概念批次与真相零差异无需同步；草稿留档 state/collect/concepts_batch_200.json）。
+
 | 模块 | 职责 | 入口 |
 |---|---|---|
-| `taxonomy/` | 标签体系维护：树审计（audit_nodes 死叶子审查）、挂载聚合（mount_map，只读现算不落盘）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 实例知识，各一次 LLM 调用） | 各脚本 `--write` |
-| `curation/` | 数据策展与检索接地：search_kb 实例知识检索接地管线（search_kb_sources 直供源扩充 / search_kb_supervise 全量跑监督）、annotate_backfill 补标驱动（kb_match=None 行 VLM 打标回写）、en_entity_merge EN/ZH 实体合并、focus_sample 重点补图池抽样、质量分析 notebook（download_quality / search_kb_quality）、数据集分析 notebook（dataset_analysis.ipynb，参数写在 cell 内部，直接运行：① danbooru2024 字段下钻；② demiwtg 权威清单分布与过滤；③ taxonomy 视角节点量级与抽样，只读） | 各脚本 `--help`；notebook 直接运行 |
-| `viewer/` | 查看器闭环：页面 tag_tree_explorer.html（+ tag_tree_explorer_en.html 英文平行页，由 --lang en 从主页现场替换生成，单一来源防漂移）+ 构建脚本 build_viewer.py（--lang en 读英文两件套）+ 产物 build/、build_en/（sidecar taxonomy.js/instances.js/imgs.js 与 standalone 单文件，gitignore；英文侧 imgs.js 注入 null，英文版无图）；HTML 与 build/ 同址是 file:// 双击可用的硬要求 | `viewer/build_viewer.py` |
+| `taxonomy/` | 标签体系维护：树审计（audit_nodes 死叶子审查）、挂载聚合（mount_map，只读现算不落盘）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 概念富化——aliases 回写 concepts.json、知识文本追加 docs 草稿，各一次 LLM 调用） | 各脚本 `--write` |
+| `curation/` | 数据策展与检索接地：search_kb 概念知识检索接地管线（search_kb_sources 直供源扩充 / search_kb_supervise 全量跑监督；--lang en 赛道已随统一版退役）、annotate_backfill 补标驱动（kb_match=None 行 VLM 打标回写）、migrate_concepts（instances→concepts 迁移器与 taxonomy 快照刷新）、en_entity_merge EN/ZH 实体合并（tier0/bulk/escalate/apply/orphans）、meta_unify meta 收口（images 退役并入 / en 归一并入）、focus_sample 重点补图池抽样、质量分析 notebook（download_quality / search_kb_quality）、数据集分析 notebook（dataset_analysis.ipynb，参数写在 cell 内部，直接运行：① danbooru2024 字段下钻；② demiwtg 权威清单分布与过滤；③ taxonomy 视角节点量级与抽样，只读） | 各脚本 `--help`；notebook 直接运行 |
+| `viewer/` | 查看器闭环：页面 tag_tree_explorer.html + 构建脚本 build_viewer.py（读 taxonomy/concepts/docs 草稿/主清单四源，docs join 进概念行；imgs.js 只收录 VLM 打标行、每概念 top-50、caption 截断 100 字）+ 产物 build/（sidecar taxonomy.js/concepts.js/imgs.js 与 standalone 单文件，gitignore；英文平行页已随统一版退役删除）；HTML 与 build/ 同址是 file:// 双击可用的硬要求 | `viewer/build_viewer.py` |
 | `benchmark/` | 评测基准：按三大题型拆成三子模块（见架构决策 2026-08-24 三子模块拆分）。**t2i/**（生成）与 **edit/**（编辑）各带完整四件套：抽样（eval_sample.py 分层配额，--filter 一条 duckdb SQL WHERE；edit 版默认叠加编辑适配门）、出题（eval_synthesize.py，Galaxy API；t2i 版含 facet 词表审计、edit 版 9 类 edit_type 轮转 + 每第 5 题知识编辑套）、判分（eval_score.py 调本地 vLLM judge，score/dump 子命令；t2i 版 FACETS 权威源 + φ 映射聚合，edit 版 EDIT_DIMS 三维钳制）、gen_results_review.py（生成审阅 notebook）；**vlm/**（理解）暂不拆代码，只放 notebook。每子模块两个 notebook（现在 reviews/ 下）：question_dev.ipynb（抽样+分布+题库审阅，for 题目构造）、results_review.ipynb（打分/评估结果分析）。评测数据布局见架构决策 2026-09-05（t2i：bench200/ 现行 + archive/ 历史 + data/ 默认落点；edit：无 data/ 层，批次目录 synth_v*/、活图池 focus200/、归档 archive/ 全落子模块根）；样本图/题库/判分产物均不入 git（.gitignore 登记）；出题/判分协议 md 在 prompts/、随代码入 git；编辑评分契约 edit/edit_score_prompts.json（ImgEdit 官方原文，随代码入 git） | 各脚本 `--help`；各子模块 `reviews/question_dev.ipynb` / `reviews/results_review.ipynb` |
 
 > **架构决策（2026-09-05）**：bagel/ 子项目入主仓 + benchmark/bagel/ 第 4 场景入 git（用户拍板，推翻 2026-08-23「独立 git 仓库 + 主仓整体排除」方案——该子仓 .git 已随旧机迁移不复存在）。定案：① 主仓 .gitignore 撤销未锚定 `bagel/` 整体排除，bagel/ 以普通目录随代码入库；重物仅定向排除：`bagel/Bagel/models/`（BAGEL-7B-MoT 权重 ~28G）与 `bagel/Bagel/eval/vlm/data/`（VLM 评测下载数据 mmbench ~50M）；上游 Bagel 自带 .gitignore（wandb/results/eval_results/notebooks/tests 等）在子树内继续生效；`bagel/models -> Bagel/models` 兼容软链随库入库；子项目内部布局自治不变。② 未锚定规则撤销的连带效应：`benchmark/bagel/`（第 4 场景：以 BAGEL-7B-MoT 为被测模型的标准基准评测，2026-09-05 物理整合，详见其 README 与 results_review.ipynb）此前被整体遮蔽未入 git，本次入库——仅代码与文档入 git（README、results_review.ipynb、gen/+vlm/ 脚本），data/（~1.2G 题库/出图/运行缓存）与 vendored 官方 git 仓（gen/qib_official、vlm/VLMEvalKit，可再克隆）不入主仓。③ t2i 线评测数据排除边界同步登记：archive/（仅 MANIFEST.md 入库）、bench200/（仅 README.md 入库）、focus1000/data/ 不入 git（题库/出图/判分/溯源留本地，口径见各目录文档）；edit/ 边界以下条「edit 子模块目录对齐 t2i 并废除 data/ 层」为准。④ /data/ 登记 .gitignore 不再入库：现存为 collect_v2 退役残件（根目录 taxonomy/、curation/ 现行版本的迁移前旧副本/重复件），留档本地不删。
 >
+> **架构决策（2026-09-06）**：edit 判分协议角色分离（用户拍板：判官提示词不得混入 codex 任务书内容——原 v2 合并文本会把「不得读取 caption/reasoning/level/suite/模型名/另一候选」等编排语义喂给判官，构成判定噪音与锚定风险）。定案：① 新增 `edit/prompts/judge_prompt_edit_qib_v2.md` = 判官唯一权威源（TEMPLATE 块 + 9 个 `<!--TYPE:x-->` 分型块；只含 rubric 三档定义、分型核对重点、落档硬判据、判分流程、特殊情况与裸输出 JSON；φ 映射与 d2/d3≤d1 钳制规则**刻意不向判官展示**——换算与钳制是管线确定性计算，防钳制语义反向锚定判官原始落档，此点与 ImgEdit 官方把钳制句写进判官 prompt 的做法有意分歧）。② 原 `codex_score_prompt_edit_v2.md` 重写为编排协议（任务书契约）：判定主体与盲评隔离的物质保障、prepare→render→逐字判定流程、分数行字段契约（身份/哈希字段从 manifest 逐字照抄，mapped=φ(tier) 与 official_* 机械换算）、有效性政策（model_failure 计 0 / invalid_question 成对剔除 / 基础设施重试）、aggregate/compare 命令、冻结后审计规则——其内容永不进入判官输入。③ `eval_codex_score.py` 新增 `render` 子命令（解析模板标记块，按题渲染 eNNN.txt + index.jsonl 登记 prompt_sha256/instruction_sha256，--manifest 时附盲评图片绑定），与 t2i 的 judge_prompt_gen_v6.0_V2.md 惯例对齐；新增 `ingest` 子命令（判官裸输出 raw/<qid>.txt → 机械补齐身份/哈希/换算字段并逐题校验维度契约 → part_*.jsonl；--format json=QIB 裸 JSON / imgedit=官方 Brief reasoning+分数行，MODEL_FAILURE 标记按各自口径记失败；part 文件禁止手写），管线成 prepare→render→派发→ingest→aggregate/compare 五段。判官调用方式定为**每题一个全新子代理上下文**（输入只有单题物化 prompt + BEFORE/AFTER 两图，零附加）——上下文隔离由结构保证，编排者只调度不亲判；任务书因此收缩为派发规则+命令清单。④ pilot 已冻结两轮（Gemini/Bagel QIB）判定用旧合并文本，`synth_v61_pilot/scores_qib/prompts/` 为新协议复建渲染（审计对照）；此后任何新判分轮必须 prepare→render 后逐字判，未物化产物无效。⑤ v1（1–5，冻结）与官方 rubric 实验臂（本就逐字物化）不受影响。⑥ edit 赛道判官模型钉定 `gpt-5.6-sol`（用户拍板：与 pilot 已冻结两轮一致，新轮次含实验臂一律沿用，跨协议对比不混入判官差异；曾短暂考虑换 gpt-6-astra，否决），任务书 `--judge` 固定写 `gpt-5.6-sol-built-in-imgedit-official`。⑦ 对照臂文档对称化与 prompt 世代归档：官方 rubric 臂增两份 `prompts/judge_prompt_edit_imgedit_official.md`（判官原文载体：ImgEdit 官方九类 rubric 逐字内置为 OFFICIAL_TYPE 九块，只 `<edit_prompt>` 单处替换；render 与契约 `edit_score_prompts.json` 逐字节一致性校验，块或契约任一侧被改写即拒跑（已负测试）；官方钳制句与 ≤20 词纪律原样保留——对照臂忠实性优先，与 QIB 臂"钳制不进判官输入"的防锚定策略有意分歧；判官文档不含任何编排内容）与 `prompts/codex_score_prompt_edit_imgedit_official.md`（通用编排协议，与 QIB 协议结构平行；1–5 与 QIB 百分制禁线性互换，臂产物永不进主口径结论）；`render` 支持官方臂 md/json 与 QIB md 三种模板（pilot 官方臂 20 题以 md 模板重渲染 sha256 20/20 复现）；退役 prompt 归档 archive/prompts_v1_v60/（出题协议初版+v6.0、判分协议 v1）与 archive/audit_doublecheck_prompt.md（复核轮已结、结论已落地 eval_synthesize，留作模板），archive/MANIFEST.md 登记；reviews/ 两册退役审阅 notebook 移 archive/notebooks_retired/（results_review.ipynb 的冒烟分析对象本机已不存在、audit_review.ipynb 属复核轮），question_dev.ipynb 按惯例留位且路径文案同步新布局。⑧ 两份判官 prompt 经 gpt-6-astra 全文评审（报告存档 `reviews/judge_prompts_review_gpt-6-astra_20260906.md`：文档 A 23 条 + 文档 B 机制 7 条 + 官方文本观察项 18 条）。处置：无副作用修复即时落地——QIB md 补九类三维名称附录快照（A01：拆分时维度表只留在代码 EDIT_DIMS 的权威源闭合回归）、官方 md 头部来源登记（B-M01：GitHub 出处 + 契约 sha256 基线 f9468dc8…，并如实声明双副本校验的已知边界）、render 加载期闭锁（B-M03：块唯一性/九类完整性/占位符唯一校验，重复块负测试通过）；两臂渲染 sha 修复前后 20/20 一致，判官所见零变化，pilot 冻结分数不受影响。判据类修改（A02 Excel 门槛机会偏差、A04 通用硬判据误罚 style/background/extract 合法重绘、A09 异常态与 JSON 契约闭合等）一律不在冻结期动，汇入 200 题正式批次前的 QIB v2.1 修订；官方 rubric 原文一字不动，18 条观察项（钳制非独立、钳制句锚定、style 无参考图、compose 部分成功奖励差、"两臂比较不只换分制"等）作为三臂结果解读的必读注记。⑨ QIB 判官 prompt 去内部键名（用户拍板 2026-09-06）：判官输入/输出全面改用维度名与"维度一/二/三"（d1/d2/d3 降为纯存储层位置键，仅存在于 EDIT_DIMS、分数行 schema 与 aggregate 校验中），TEMPLATE 增设显式「输入/输出」节，判官上下文不跳转；ingest 校验改为按序匹配维度名并自动补 key（兼容带 key 输出，错维度名负测试拒收）；pilot 复建渲染已按新模板刷新（sha 变化，冻结两轮分数不受影响），官方臂渲染经回归验证 20/20 不变。⑩ QIB 判准 v2.1 落定（用户拍板：v2 不再开新轮次）：新增现役判官模板 `prompts/judge_prompt_edit_qib_v2.1.md`——逐档硬判据全部下沉到九个 TYPE 块（每型 =「类型前提」+ 三维度各自的 0/1/2 判据，按该维在该类型下的真实语义写），通用节只留类型无关骨架（角色/输入/三档定义/三条通用判定原则/流程/特殊情况/输出契约）；吸收 astra 评审修正项：A02（Excel 改为"全部精确达成 + 任务内可核验的精确执行"，废除"超常规"相对参照，简单题同有可达档 2）、A03（0/1 边界 = 硬约束违反 vs 连续量偏差；记 0 必须有可指认证据，存疑不记 0）、A04（style/background/extract 的全图重绘属授权操作，不再被通用"大范围重绘 Fail"条款误伤）、A05（独立归因：任务失败不等于其他维度自动失败）、A06（编辑归因：只判新引入缺陷，源图既有缺陷不扣分、未授权修复不奖励）、A07（辨识限度条款）、A09（invalid/judge_unscorable 的 detail 必填、model_failure 的 reason 规则）、A21（extract 可见部分不得补全、天然浅色轮廓不算白边、相对布局改变属偏差）、A22（background 前景投影归属规则：投在背景区域的阴影/倒影按新光源重建、归 background 区域，协调性入 Physical Consistency 判）、A23（compose 先拆两个子操作逐个核对，细节偏差不等于少做一项）。render 默认模板切至 v2.1，编排协议角色表与步骤 2 同步；v2 原文保留（pilot 冻结两轮的判准，`scores_qib/prompts/` 即其渲染，审计对照），pilot 分数不追溯重算；**v2.1 与 v2 的分数不可直接互比**（档位语义与判据均变），跨批次对比必须显式标注判准版本；200 题正式批次首轮起用 v2.1。⑪ 判官文档纯净化（用户拍板：判官文件不写渲染机制——判官拿到的已是渲染成品，维护者注对判官是噪音、对人是错位置）：两份现役判官 md（judge_prompt_edit_qib_v2.1.md、judge_prompt_edit_imgedit_official.md）删除头部维护者引语与 v2.1 文末附录，只含标题 + 模板块；机制信息归位编排协议——九类三维名称快照表 + EDIT_DIMS 权威源声明 + "判官文件不写维护者注"规则入 codex_score_prompt_edit_v2.md 附录，官方臂来源登记（arXiv/GitHub 出处 + 契约 sha256 + 校验边界 + 钳制句与 20 词要求属官方口径逐字保留）入 codex_score_prompt_edit_imgedit_official.md；清理后三臂渲染回归：v2 冻结模板与官方臂 sha 20/20 不变、v2.1 渲染 20/20 零占位符；v2 历史模板头部原样保留（审计定位，不改写历史文件）。⑫ 判官 prompt 精简终态（用户拍板，推翻⑪中"v2 头部保留"处置：分型判据 = 全部判定文本，通用节即噪音；对齐 ImgEdit 官方的精简形态）：v2.1 TEMPLATE 收敛为「角色→输入→本题判据（分型块）→输出→题面」——判分规则元规则节、三条通用判定原则、判分流程、特殊情况节、{{DIMS}} 维度清单节全部删除；validity 四态语义与 observations 四组定义折叠进输出节（字段定义所在处）；"存疑不记 0、拿不准 1/2 给 1、同题同标准、任务失败不连坐"等跨类型纪律随通用节移出判官文本——分型判据的逐维锚点承载档位边界，未来校准如需恢复纪律条款，以分型判据形态写回；v2 冻结模板同步瘦身为"标题+模板块"（删头部维护者注与附录快照；TEMPLATE/TYPE 一字未动，渲染 sha 回归 20/20 不变）；编排协议附录快照表删除（EDIT_DIMS 代码表为维度名唯一权威源，任何文档不维护快照副本，规则并入职责边界段）；TYPE 分型块改为 ImgEdit 官方同款布局（维度名单独行 + "0/1/2 + 两空格 + 判据"纯文本行，无 markdown 修饰，"类型前提"取消、其语义并入对应档位判据），v2.1 单题判官 prompt 6313→3922 bytes，三臂渲染回归全绿。随后用户手排 v2.1 定版布局（一、输入 / 二、打分规则（九类判据逐节陈列）/ 三、输出 / 四、题面 四部分编号结构）并删除 v2 模板文件；机械修复恢复可执行：补 TEMPLATE-END、恢复四、题面与"两张图"收尾句、九个 TYPE 块移出 TEMPLATE 至模板块外（渲染只注入本题类型判据，判官不见其他八类，杜绝跨型锚点污染与提示词膨胀）、`## 类型` 标题归一到标记外；v2 删除后的审计凭 `scores_qib/prompts/` 渲染产物与 index sha 登记保存（协议角色表同步）；v2.1 终版 = 四段编号结构（一输入 / 二打分规则＝{{TYPE_NOTES}} 注入本题类型判据 / 三输出 / 四题面＝{{EDIT_TYPE}}+{{INSTRUCTION}}），九个 TYPE 块在模板块外作素材区（渲染只注入本题类型，判官不见其余八类，杜绝跨型锚点污染），中途试验过"判据内嵌模板、渲染剪裁"方案经用户定夺回退为占位注入式；单题判官 prompt ~3.8KB，QIB 渲染 20/20、官方臂 sha 回归 20/20 绿。⑬ 文档去重收口（用户质疑两份任务书冗余后定案）：官方臂独立编排协议 `codex_score_prompt_edit_imgedit_official.md` 删除，其独有内容（变体参数对照表、口径禁令、来源与完整性登记）并入主协议 `codex_score_prompt_edit_v2.md` 的「官方 rubric 对照臂」一节——编排协议全仓只此一份，两臂走同一六步流程仅参数不同；批次执行仍由各批次 TASK 承担（冷启动执行者需要实例化路径的具体工作指令，通用协议带占位符不可直接执行）。文档终态：判官文本 ×2（QIB v2.1 / 官方原文载体）+ 编排协议 ×1（含对照臂变体节）+ 批次任务书 ×1（TASK_official_rubric_codex.md）+ 契约 edit_score_prompts.json + 管线 eval_codex_score.py；官方臂渲染回归 sha 20/20 不变。
+>
 > **架构决策（2026-09-05）**：edit 子模块目录对齐 t2i 并废除 data/ 层（用户拍板），同日登记 ImgEdit 官方 rubric 实验臂。定案：① edit/ 新布局：prompts/（出题协议 synthesize_prompt_edit*.md + 判分协议 codex_score_prompt_edit_v{1,2}.md + audit_doublecheck_prompt.md，随代码入 git）、reviews/（四册 notebook：question_dev / results_review / results_review_v61 / audit_review）、archive/（synth_v60 世代批次 + complexity_audit 账本 + audit_doublecheck 复核产物，MANIFEST.md 入 git）、批次目录与活素材落子模块根（synth_v61_pilot/、focus200/、complexity_audit_synth.jsonl、judge_prompts/ 物化区，均 gitignore）；data/ 层撤销（t2i 维持既有布局不动）。② 排除集机制统一升级：三份 eval_sample*.py 的 DEFAULT_EXCLUDES 改为三赛道整目录递归扫描 samples*.jsonl（原 data/+archive/+bench200 定向桶列表在 edit 去 data/ 后会漏扫顶层落点），任何布局演化下历史样本永不回流；t2i/archive/MANIFEST.md 排除集条款同步改写。③ 全部脚本目录常量随迁（EVAL_DIR/OUT_DIR/DATA→子模块根，audit_doublecheck 默认读物→archive/，gen_results_review 产物→reviews/），py_compile 全过。④ 12 份盲评 manifest/identity（scores_qib×4、scores_official×4、scores/codex_blind×2 等）的绝对路径全部改写至新址并逐一验证文件存在，旧机器 /tank 前缀残件一并清理。⑤ results_review_v61.ipynb 迁 reviews/ 重建重跑（demiwtg 内核，零报错，report 对账一致）。⑥ ImgEdit 官方 rubric 实验臂（判分文本物化）：官方 prompts.json 逐字渲染 20 题 judge prompt 落 synth_v61_pilot/scores_official/prompts/{eNNN.txt,index.jsonl}（sha256 登记，判官不得回读源 rubric），判官=codex 内置模型盲评（TASK_official_rubric_codex.md），产物只落 scores_official/，与 QIB 主口径物理隔离、永不混入正式结论；动机=量化 rubric 文本本身的协议效应，并保留与 ImgEdit-Bench 官方口径对话通道。
+>
+> **架构决策（2026-09-06）**：meta 真相区统一收口（用户拍板：EN 并入中文湖成统一版、images.jsonl 收官退役、VLM 补标后置另跑）。EN/ZH 实体合并由 `curation/en_entity_merge.py` 五层执行：tier0 确定性配对（别名/西文串≡EN 名限同节点，38,701 对，0 调用）→ bulk 逐节点 LLM 对齐（本地 vLLM Qwen3.8-27B @8001，16,527 节点全完成、341,302 对、0 API 调用）→ escalate 红旗节点复核（四模型轮转 glm/glm-5.3-flash + qianwen/qwen3.7-plus + galaxy/qwen3.6-flash + galaxy/glm-5.3，关思考防思维链截断，368/375 有效）→ apply 写库（matched/variant→中文实体 aliases 326,272 名、new→新实体 88,249 个 source=derived 入库挂树 99,013 处、tier0 回填 1,330 对；instances 296,010→384,259）→ orphans 兜底（对齐未覆盖的 EN 独有节点实体 1,003 个全量入库挂树）。配套 `curation/meta_unify.py`：metadata_en.jsonl 73,962 行归一并入（EN 实例名按对齐映射归一中文正名，(sha,instance) 去重）+ images.jsonl 322,332 行炸开并入（v1 采集字段 tiers/credit/source_rank 等照 migrate.py 先例丢弃，identity/focus/quality=null 待补标）。收口：images.jsonl/metadata_en.jsonl/taxonomy_en.json/instances_en.json 四文件物理移出 meta/ 归档 state/taxonomy/retired_meta/（改前另有 backup_pre_en_merge、backup_pre_orphan_ingest）；2.2 白名单收敛为 metadata.jsonl+三件套+.meta.lock，metadata.jsonl 升统一权威主清单；消费端同步（viewer/build_viewer.py 改读 metadata.jsonl、imgs.js 精选口径=打标行+top50+caption 截断、缓存号 v4、--lang en 与 tag_tree_explorer_en.html 删除；search_kb --lang en 拒绝退役；upgrade_v31_en.py 加防误跑守卫；eval_sample×2/annotate_backfill 注释更新；.gitignore 英文件例外链移除）。终态校验：metadata.jsonl 2,849,013 行 / 2,116,511 sha / 304,190 实例全部在册、name 唯一性通过、并入零新增重复键（存量遗留 261 个重复键为老采集链时代产物待后续清理）。追加定案（同日）：alias_western.json 退役归档 retired_meta/——49,197 个非空西文串 100% 已含于 instances.aliases（数据零独有），246,813 个 null 的负缓存语义（op_seed 防重问）由用户后续改 demiwtg-data 仓库 op_seed 读端承接；en_entity_merge tier0 读端已容错缺文件；meta/ 白名单收敛为 metadata.jsonl + taxonomy 两件套 + .meta.lock。追加定案（同日晚）：metadata.jsonl 更名 **instance_images.jsonl**（用户拍板：语义=实例×图片观测对，避开已退役的 images.jsonl 旧名防止契约混淆；本条目前文中的 metadata.jsonl 均指此文件）；主仓 11 个引用文件同步改名（bagel 的 geneval 自带同名文件不动）；instances.json 维持实体+富知识一体（拆分否决：desc/query 是实体 1:1 正典记录而非模态样本，aliases 是结构性匹配字段；体积增长留观，每实体一份 desc 的规模问题届时再议）。
 >
 > **架构决策（2026-08-25）**：新开 `modelhub/` 独立子项目（用户拍板：可单独 push GitHub、其他机器 pull 直接复用；静态代理全套并入）。定位：本地 LLM 统一接入层——LiteLLM 网关（127.0.0.1:4000，OpenAI 兼容）路由三条线：本地 vLLM（qwen3.8-27b，no_proxy 直连）、Galaxy 专线（qwen3.7-plus，no_proxy 直连）、OpenRouter 通配（进程级代理注入 → mihomo 按域名分流走静态住宅 IP 出口）；静态代理模块即原 `/root/gpu-static-proxy`（mihomo v1.19.30 双层链式：10808 隧道换源 IP → 静态 IP 节点 216.132.205.99；modelhub 只维护「AI API 域名走 STATIC 双层静态出口」一层规则，其余流量 modelhub 视角直连、继承宿主策略、不感知不维护）整体迁入 `modelhub/static_proxy/`（二进制与 GeoIP 库随迁，旧目录作废可删）。定案：① 照 bagel 先例：独立 git 仓库、主仓 .gitignore 整体排除、内部自治（自带 README，不受主仓「文档只两份」约束）；② 机密零入库：.env（API keys）与 static_proxy/config.yaml（节点凭据）只进 gitignore，仓内只有 *.example 模板；mihomo 二进制不入库（fetch_mihomo.sh 下载/旧机拷贝）；③ Python 环境独立：modelhub/.venv（litellm[proxy]==1.98.0 锁定），不碰主仓 .venv（不动主仓 openai/httpx/pydantic）；④ 消费端零改动启用：网关为 OpenAI 兼容端点，既有脚本换 LLM_BASE_URL=http://127.0.0.1:4000/v1 即接入，逐步迁移；上游端点与 key 全部 .env 可配置，启动时 gateway/gen_local_models.py 自动发现各 *_API_BASE 端点的模型并注册进 /v1/models（openrouter/* 通配 litellm 原生展开；Cline 按 OpenAI Compatible 配置网关地址即自动带出模型列表）；⑤ 端口登记（均仅本机监听）：4000 网关 / 7891 mihomo mixed / 9091 mihomo API / 1053 mihomo DNS。
 >
@@ -195,15 +203,15 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 >
 > **架构决策（2026-08-17）**：broader/ 模块（Open-BROADER 上下位关系模型）迁出本仓库，回归独立项目 `/root/data/projects/open_broader/`（代码、55G 训练语料、训练产物、历史日志整体搬移，脚本内绝对路径已批量改写至新家）。理由：上下位判断本质依赖世界知识，通用大模型（Qwen3.8-27B 批审计 + 现成 embedding 检索）已可覆盖 taxonomy 树审计场景，且训练语料正确性存疑、课题短期难推进，故冻结训练、语料与 checkpoint 原地归档。本决策推翻 2026-08-16 的并入决策；未来如复活，先做大模型 vs BROADER 的 head-to-head 评测再立项。
 
-- 跨模块 import 一律 `from <包>.<文件> import ...`：`data/` 下的包（collect_v2/taxonomy）以 `data/` 为包根（消费者先 `sys.path.insert(0, REPO_ROOT/'data')`，见 benchmark 各 eval_sample）；viewer/benchmark 直接位于仓库根。
-- 路径常量一律从脚本自身向上推导到仓库根（注意脚本所在层级：data/ 下模块需推导三层），不依赖 cwd 之外的魔法。
+- 跨模块 import 一律 `from <包>.<文件> import ...`：`taxonomy/`、`curation/`、`viewer/`、`benchmark/` 位于仓库根（消费者先 `sys.path.insert(0, REPO_ROOT)`）；`data/` 为 collect_v2.* 兼容 shim（re-export 顶层模块），仅存量调用方使用，新代码直连顶层包。
+- 路径常量一律从脚本自身向上推导到仓库根（顶层模块脚本推导两层），不依赖 cwd 之外的魔法。
 - 新增脚本必须先归属到一个模块；归不进去的说明职责边界有问题。
 
 ## 4. 数据与代码的边界
 
-- `datasets/`、`state/`、`logs/` 是本地数据/运行时产物，**不入 git**（.gitignore 强制；例外：datasets/demiwtg/meta 下 taxonomy 三件套）。
-- 入库的只有：代码（taxonomy、curation、viewer、benchmark，含 viewer 页面 HTML）、约束文档（AGENTS.md、README.md）、以及 `datasets/demiwtg/meta/` 下的权威 JSON（taxonomy.json/instances.json/alias_western.json）。
-- 大 JSON（images.jsonl、blobs）永远不进 git；需要备份走独立通道。
+- `datasets/`、`state/`、`logs/` 是本地数据/运行时产物，**不入 git**（.gitignore 强制；例外：datasets/demiwtg/meta 下 taxonomy 两件套）。
+- 入库的只有：代码（taxonomy、curation、viewer、benchmark，含 viewer 页面 HTML）、约束文档（AGENTS.md、README.md）、以及 `datasets/demiwtg/meta/` 下的权威 JSON（taxonomy.json/concepts.json）。
+- 大 JSON（instance_images.jsonl、blobs）永远不进 git；需要备份走独立通道。
 - 生成产物（`viewer/build/`）不入 git，数据改动后重跑 build_viewer.py。
 
 ## 5. 关键命令
@@ -211,7 +219,10 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 ```bash
 # 标签体系富化（LLM 各一次调用；需 LLM_API_KEY 等环境变量；dry-run 零成本预览）
 python3 taxonomy/gen_taxonomy_kb.py --only-empty --write       # 节点 KB（knowledge_intro 等 4 字段）
-python3 taxonomy/gen_instance_kb.py --only-empty --write   # 实例知识（desc/query/aliases）
+python3 taxonomy/gen_instance_kb.py --only-empty --write   # 概念富化（aliases→concepts.json；知识文本→docs 层草稿）
+
+# 概念体系维护（2026-09-07 概念化迁移器；instances.json 已退役，勿恢复）
+python3 curation/migrate_concepts.py --refresh-taxonomy    # 树变更后刷新 concepts.json 挂载快照
 
 # viewer 产物重建（数据改动后）
 python3 viewer/build_viewer.py
@@ -234,9 +245,10 @@ bash modelhub/start.sh && bash modelhub/smoke.sh   # 启动+冒烟；停止: bas
 - ❌ 在 `taxonomy/`、`curation/`、`viewer/`、`benchmark/` 之外新增脚本（`bagel/`、`modelhub/` 子项目内部自治，不受此限）
 - ❌ 往 datasets/ 里放代码、页面或生成产物（viewer 页面与产物在 viewer/ 内闭环）
 - ❌ 恢复历史过程文档（docs/、子目录 README）
-- ❌ 在数据/代码里使用 category、leaf、root 作为分类概念
-- ❌ 在 instances.json 里为同一 name 写多条记录（一个实体一条；多处挂载表现为多个树节点名单同名）
-- ❌ 往 instances.json 里写树派生字段（挂载路径等）——挂载关系从树现算（taxonomy/mount_map.py），不持久化
+- ❌ 在数据/代码里使用 category、leaf、root 作为分类概念（instance/实体 一词亦已由 concept/概念 取代，2026-09-07）
+- ❌ 在 concepts.json 里为同一 name 写多条记录（一个概念一条；多处挂载表现为多个树节点名单同名 + 行内 taxonomy 快照多路径）
+- ❌ 手改 concepts.json 行内的 taxonomy 快照（挂载真相在树；树变更后跑 `curation/migrate_concepts.py --refresh-taxonomy` 刷新，不手工编辑）
+- ❌ 恢复 instances.json 或 desc/query/source 行级字段（已退役：desc→docs 层草稿、query→采集运行时缓存、source→meta.source_stats；历史溯 git）
 - ❌ 把 `datasets/`（demiwtg/meta 权威 JSON 例外）、`state/`、`logs/`、`data/`（collect_v2 退役残件）或 `modelhub/` 提交进主仓
 - ❌ 把 `bagel/` 与 `benchmark/bagel/` 的重物（模型权重、评测数据、vendored 官方 git 仓）提交进主仓
 - ❌ 把运行时状态塞进 data/（放顶层 state/ 对应模块子目录）

@@ -1,31 +1,36 @@
 #!/usr/bin/env python3
 """Generate file://-friendly data for tag_tree_explorer.html (no HTTP server needed).
 
-The viewer normally fetch()es taxonomy.json + instances.json (datasets/demiwtg/meta/), which
+The viewer normally fetch()es taxonomy.json + concepts.json (datasets/demiwtg/meta/), which
 browsers BLOCK under the file:// protocol (null origin). This script wraps each JSON
-as a classic <script> that assigns a global (window.__TAXONOMY__ / window.__INSTANCES__),
+as a classic <script> that assigns a global (window.__TAXONOMY__ / window.__CONCEPTS__),
 so the viewer works on double-click with NO running server.
 
+概念行来自 concepts.json（四字段契约：name/aliases/carriers/taxonomy）；docs 层草稿
+（state/collect/concepts_docs_draft.jsonl，desc 退役后的知识文本落点）在构建时以
+docs 字段 join 进概念行，供详情面板展示。
+
 Generated artifacts (gitignored, NOT data) go to viewer/build/:
-    build/taxonomy.js / build/instances.js          sidecars (default)
-    build/imgs.js                                    实例 → 图片索引（路径 + VLM 打分）
-                                                      （由 datasets/demiwtg/meta/images.jsonl 现场聚合，
-                                                      每项 {p, km, ri, cap}：相对路径/kb_match/richness/caption，
-                                                      按 kb_match 降序（同分按 richness 降序）；
-                                                      路径为 ../datasets/demiwtg/blobs/... 原图，不生成缩略图；
-                                                      需经 HTTP 服务打开查看器才能显示图片，
-                                                      双击 file:// 时浏览器禁止读取父目录资源）
+    build/taxonomy.js / build/concepts.js          sidecars (default)
+    build/imgs.js                                    概念 → 图片索引（路径 + VLM 打分）
+                                                       （由 datasets/demiwtg/meta/instance_images.jsonl
+                                                       ——统一权威主清单（2026-09-06 起，原 images.jsonl
+                                                       已收官退役）——现场聚合，
+                                                       每项 {p, km, ri, cap}：相对路径/kb_match/richness/caption，
+                                                       按 kb_match 降序（同分按 richness 降序）；
+                                                       路径为 ../datasets/demiwtg/blobs/... 原图，不生成缩略图；
+                                                       需经 HTTP 服务打开查看器才能显示图片，
+                                                       双击 file:// 时浏览器禁止读取父目录资源）
     build/tag_tree_explorer.standalone.html              single self-contained file
-                                                          （standalone 不含图片：不内嵌字节）
+                                                           （standalone 不含图片：不内嵌字节）
 
 Usage:
-    python3 viewer/build_viewer.py                 # write build/taxonomy.js + build/instances.js + build/imgs.js (sidecar, default)
-    python3 viewer/build_viewer.py --lang en       # English parallel version: build_en/ sidecars (imgs.js = null, EN has no images)
-                                                     # + regenerate tag_tree_explorer_en.html from the master page
+    python3 viewer/build_viewer.py                 # write build/taxonomy.js + build/concepts.js + build/imgs.js (sidecar, default)
     python3 viewer/build_viewer.py --standalone     # write build/tag_tree_explorer.standalone.html (single self-contained file)
     python3 viewer/build_viewer.py --standalone --out my_viewer.html
 
-Regenerate after ANY change to taxonomy.json, instances.json or images.jsonl.
+Regenerate after ANY change to taxonomy.json, concepts.json, the docs draft
+(state/collect/concepts_docs_draft.jsonl) or instance_images.jsonl.
 """
 import argparse
 import json
@@ -35,43 +40,47 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 BUILD = ROOT / "viewer" / "build"
 TAX = ROOT / "datasets" / "demiwtg" / "meta" / "taxonomy.json"
-META = ROOT / "datasets" / "demiwtg" / "meta" / "instances.json"
+CONCEPTS = ROOT / "datasets" / "demiwtg" / "meta" / "concepts.json"
+DOCS_DRAFT = ROOT / "state" / "collect" / "concepts_docs_draft.jsonl"
 OUT_TAX = BUILD / "taxonomy.js"
-OUT_META = BUILD / "instances.js"
+OUT_CONCEPTS = BUILD / "concepts.js"
 VIEWER = ROOT / "viewer" / "tag_tree_explorer.html"
-IMAGES_JSONL = ROOT / "datasets" / "demiwtg" / "meta" / "images.jsonl"
+IMAGES_JSONL = ROOT / "datasets" / "demiwtg" / "meta" / "instance_images.jsonl"
 BLOBS = ROOT / "datasets" / "demiwtg" / "blobs"
 IMGS_JS = BUILD / "imgs.js"
 
-# English parallel version (2026-08-24): fully independent data pair; no images
-# (EN instance names have zero intersection with images.jsonl tag space).
-BUILD_EN = ROOT / "viewer" / "build_en"
-TAX_EN = ROOT / "datasets" / "demiwtg" / "meta" / "taxonomy_en.json"
-META_EN = ROOT / "datasets" / "demiwtg" / "meta" / "instances_en.json"
-VIEWER_EN = ROOT / "viewer" / "tag_tree_explorer_en.html"
-
-# Marker inserted into tag_tree_explorer.html (the sidecar <script src> references).
+# Marker inserted into tag_tree_explorer.html (the sidecar <script> references).
 # NOTE: the ?v= query is a browser cache buster; bump it when sidecar contents change.
 SIDECAR_MARK = (
-    '<script src="build/taxonomy.js?v=3"></script>\n'
-    '<script src="build/instances.js?v=3"></script>\n'
-    '<script src="build/imgs.js?v=3"></script>'
-)
-# EN page sidecar refs; cache buster counted independently from the zh page.
-SIDECAR_MARK_EN = (
-    '<script src="build_en/taxonomy.js?v=1"></script>\n'
-    '<script src="build_en/instances.js?v=1"></script>\n'
-    '<script src="build_en/imgs.js?v=1"></script>'
+    '<script src="build/taxonomy.js?v=5"></script>\n'
+    '<script src="build/concepts.js?v=5"></script>\n'
+    '<script src="build/imgs.js?v=5"></script>'
 )
 INLINE_REPL = (
-    '<script>window.__TAXONOMY__ = __TAX__;window.__INSTANCES__ = __META__;'
+    '<script>window.__TAXONOMY__ = __TAX__;window.__CONCEPTS__ = __META__;'
     'window.__IMGS__ = null;</script>'
 )
 
 
 def _load():
+    """读三源：树 + 概念行 + docs 层草稿（草稿 body 以 docs 字段 join 进概念行）。"""
     tax = json.loads(TAX.read_text(encoding="utf-8"))
-    meta = json.loads(META.read_text(encoding="utf-8"))
+    meta = json.loads(CONCEPTS.read_text(encoding="utf-8"))
+    docs = {}
+    if DOCS_DRAFT.exists():
+        with open(DOCS_DRAFT, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    r = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                docs[r["name"]] = r.get("body") or ""
+    for c in meta.get("concepts", []):
+        if c.get("name") in docs:
+            c["docs"] = docs[c["name"]]
     return tax, meta
 
 
@@ -81,81 +90,24 @@ def build_sidecar():
         "window.__TAXONOMY__ = " + json.dumps(tax, ensure_ascii=False) + ";\n",
         encoding="utf-8",
     )
-    OUT_META.write_text(
-        "window.__INSTANCES__ = " + json.dumps(meta, ensure_ascii=False) + ";\n",
+    OUT_CONCEPTS.write_text(
+        "window.__CONCEPTS__ = " + json.dumps(meta, ensure_ascii=False) + ";\n",
         encoding="utf-8",
     )
     print(f"sidecar written: {OUT_TAX.name} ({OUT_TAX.stat().st_size/1e6:.1f} MB), "
-          f"{OUT_META.name} ({OUT_META.stat().st_size/1e6:.1f} MB)")
+          f"{OUT_CONCEPTS.name} ({OUT_CONCEPTS.stat().st_size/1e6:.1f} MB)")
     build_imgs_js()
     print("双击 tag_tree_explorer.html 即可使用（图片需经 HTTP 服务打开，见 imgs.js 注释）。")
 
 
-def build_sidecar_en():
-    """English parallel sidecars + EN page regenerated from the master page.
-
-    Single source: tag_tree_explorer_en.html is always rebuilt from
-    tag_tree_explorer.html so the two pages never drift apart.
-    """
-    tax = json.loads(TAX_EN.read_text(encoding="utf-8"))
-    meta = json.loads(META_EN.read_text(encoding="utf-8"))
-    BUILD_EN.mkdir(exist_ok=True)
-    out_tax = BUILD_EN / "taxonomy.js"
-    out_meta = BUILD_EN / "instances.js"
-    out_imgs = BUILD_EN / "imgs.js"
-    out_tax.write_text(
-        "window.__TAXONOMY__ = " + json.dumps(tax, ensure_ascii=False) + ";\n",
-        encoding="utf-8",
-    )
-    out_meta.write_text(
-        "window.__INSTANCES__ = " + json.dumps(meta, ensure_ascii=False) + ";\n",
-        encoding="utf-8",
-    )
-    # EN instances have no images (zero intersection with images.jsonl); the
-    # page supports the null mode (badges show tag-list counts only).
-    out_imgs.write_text("window.__IMGS__ = null;\n", encoding="utf-8")
-    print(f"sidecar(en) written: {out_tax.name} ({out_tax.stat().st_size/1e6:.1f} MB), "
-          f"{out_meta.name} ({out_meta.stat().st_size/1e6:.1f} MB), "
-          f"{out_imgs.name} (__IMGS__ = null)")
-
-    html = VIEWER.read_text(encoding="utf-8")
-    for src, dst in (
-        ("<title>demiwtg - 树形浏览器</title>",
-         "<title>demiwtg (EN) - Tree Explorer</title>"),
-        ('<div id="title">demiwtg</div>',
-         '<div id="title">demiwtg (EN)</div>'),
-        (SIDECAR_MARK, SIDECAR_MARK_EN),
-        # fetch fallback (http mode) points at the EN data pair
-        ("../datasets/demiwtg/meta/taxonomy.json",
-         "../datasets/demiwtg/meta/taxonomy_en.json"),
-        ("../datasets/demiwtg/meta/instances.json",
-         "../datasets/demiwtg/meta/instances_en.json"),
-    ):
-        if src not in html:
-            sys.exit(f"EN page marker not found in master viewer: {src[:60]!r}")
-        html = html.replace(src, dst)
-    VIEWER_EN.write_text(html, encoding="utf-8")
-    print(f"viewer(en) written: {VIEWER_EN.name}（由主页面现场替换生成，"
-          f"标题/侧车/fetch 回退均已切换）")
-
-
 # ---------------------------------------------------------------------------
-# 实例原图索引：由 datasets/demiwtg/meta/images.jsonl（唯一真相主清单）现场聚合，
+# 实例原图索引：由 datasets/demiwtg/meta/instance_images.jsonl（统一权威主清单，
+# 2026-09-06 起；原 images.jsonl 已收官退役）现场聚合，
 # 不再依赖派生索引文件（避免双份存储的一致性问题）。
 # 不复制/不缩图：imgs.js 只存相对路径 ../datasets/demiwtg/blobs/<aa>/<sha256>.<ext>
 # （相对 viewer/tag_tree_explorer.html 所在目录），需以仓库根为站点根起 HTTP 服务
 # （如 python3 -m http.server），浏览器才能加载。
 # ---------------------------------------------------------------------------
-
-def _sorted_recs(recs):
-    def key(r):
-        rank = r.get("source_rank")
-        tiers = r.get("tiers") or []
-        return ((99 if rank is None else rank),
-                (min(tiers) if tiers else 99),
-                r.get("sha256", ""))
-    return sorted(recs, key=key)
-
 
 def _by_score(entries):
     # VLM 打分降序：kb_match 优先，同分按 richness，未打分的排最后
@@ -169,9 +121,13 @@ def _by_score(entries):
 
 def build_imgs_js():
     if not IMAGES_JSONL.exists():
-        print("[warn] images.jsonl 不存在，imgs.js 未生成。")
+        print("[warn] instance_images.jsonl 不存在，imgs.js 未生成。")
         return
-    idx: dict[str, list] = {}
+    blobs_present = BLOBS.is_dir()
+    if not blobs_present:
+        print("[warn] blobs/ 尚未就位（全量包未解压），跳过存在性检查，"
+              "图片路径按 metadata 清单全量写入。")
+    idx: dict[str, dict[str, dict]] = {}
     with open(IMAGES_JSONL, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -183,17 +139,18 @@ def build_imgs_js():
                 continue
             if not rec.get("sha256"):
                 continue
+            if rec.get("kb_match") is None and rec.get("richness") is None:
+                continue  # 精选口径：只收录 VLM 打标行（未打标原池在 instance_images.jsonl 里随取）
             for name in rec.get("instances") or []:
-                idx.setdefault(name, []).append(rec)
+                idx.setdefault(name, {})[rec["sha256"]] = rec  # 同 sha 去重（存量遗留重复键）
     out = {}
-    for name, recs in idx.items():
+    for name, by_sha in idx.items():
         entries = []
-        for r in _sorted_recs(recs):
-            sha = r.get("sha256", "")
-            if not sha:
-                continue
-            rel = f"../datasets/demiwtg/blobs/{sha[:2]}/{sha}.{r.get('ext', 'jpg')}"
-            if not (BLOBS / sha[:2] / f"{sha}.{r.get('ext', 'jpg')}").exists():
+        for r in by_sha.values():
+            sha = r["sha256"]
+            ext = r.get("ext", "jpg")
+            rel = f"../datasets/demiwtg/blobs/{sha[:2]}/{sha}.{ext}"
+            if blobs_present and not (BLOBS / sha[:2] / f"{sha}.{ext}").exists():
                 continue
             e = {"p": rel}
             if r.get("kb_match") is not None:
@@ -201,10 +158,10 @@ def build_imgs_js():
             if r.get("richness") is not None:
                 e["ri"] = r["richness"]
             if r.get("caption"):
-                e["cap"] = r["caption"]
+                e["cap"] = r["caption"][:100]
             entries.append(e)
         if entries:
-            out[name] = _by_score(entries)
+            out[name] = _by_score(entries)[:50]  # 每实体精选 top-50（按打分）
     IMGS_JS.write_text(
         "window.__IMGS__ = " + json.dumps(out, ensure_ascii=False) + ";\n",
         encoding="utf-8",
@@ -236,14 +193,7 @@ def main():
     ap = argparse.ArgumentParser(description="Build file://-friendly viewer data (no server).")
     ap.add_argument("--standalone", action="store_true", help="emit a single self-contained HTML")
     ap.add_argument("--out", type=str, default=None, help="output path for --standalone")
-    ap.add_argument("--lang", choices=["zh", "en"], default="zh",
-                    help="en: build the English parallel sidecars + page (no standalone)")
     args = ap.parse_args()
-    if args.lang == "en":
-        if args.standalone:
-            sys.exit("--standalone only supports --lang zh")
-        build_sidecar_en()
-        return
     BUILD.mkdir(exist_ok=True)
     if args.standalone:
         out = pathlib.Path(args.out) if args.out else (BUILD / "tag_tree_explorer.standalone.html")

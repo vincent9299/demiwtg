@@ -42,6 +42,7 @@ IMGS_DIR = DATA_DIR / "gen_imgs"
 PROMPTS_F = DATA_DIR / "gen_prompts.jsonl"
 RESULTS_F = DATA_DIR / "gen_results.jsonl"
 FOCUS_F = REPO_ROOT / "state" / "collect" / "focus1000_instances.json"
+DOCS_DRAFT = REPO_ROOT / "state" / "collect" / "concepts_docs_draft.jsonl"
 TAXONOMY_F = REPO_ROOT / "datasets" / "demiwtg" / "meta" / "taxonomy.json"
 V60_PROMPT_F = Path("/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i/synthesize_prompt_gen_v6.0.md")
 ENV_F = REPO_ROOT / "modelhub" / ".env"
@@ -168,7 +169,7 @@ async def gen_one_prompt(session, sem, inst, mount_paths, variant, rng):
                 al = []
     if al:
         ctx.append(f"别名：{'、'.join([str(a) for a in al[:6]])}")
-    ctx.append(f"概念介绍：{inst.get('desc') or '（无）'}")
+    ctx.append(f"概念介绍：{inst.get('_docs') or '（无）'}")
     if mount_paths:
         ctx.append(f"分类路径（首段为主概念域）：{mount_paths[0]}" +
                    (f"（另有 {len(mount_paths)-1} 条挂载路径）" if len(mount_paths) > 1 else ""))
@@ -204,11 +205,21 @@ async def gen_one_prompt(session, sem, inst, mount_paths, variant, rng):
 
 async def run_prompts(limit, conc):
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    instances = json.load(open(FOCUS_F))["instances"]
+    doc = json.load(open(FOCUS_F))
+    instances = doc.get("concepts") or doc.get("instances") or []
+    docs = {}
+    if DOCS_DRAFT.exists():
+        with DOCS_DRAFT.open(encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    r = json.loads(line)
+                    docs[r["name"]] = r.get("body") or ""
+    for i in instances:
+        i["_docs"] = docs.get(i["name"], "")
     mounts = {}
     if TAXONOMY_F.exists():
-        sys.path.insert(0, str(REPO_ROOT / "data"))
-        from collect_v2.mount_map import load_mount_map  # noqa: PLC0415
+        sys.path.insert(0, str(REPO_ROOT))
+        from taxonomy.mount_map import load_mount_map  # noqa: PLC0415
         mounts = load_mount_map(str(TAXONOMY_F))
     done = set()
     if PROMPTS_F.exists():

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """focus1000 detail caption（任务2）：对 focus1000 池下载图片批量补 300-500 字细节描述。
 
-- 输入：metadata.jsonl 中 focus1000 实例的行，全局按 sha256 去重，剔除短边 <200px；
+- 输入：instance_images.jsonl 中 focus1000 实例的行，全局按 sha256 去重，剔除短边 <200px；
 - VLM：qianwen1 直连 qwen3.8-max（视觉输入，enable_thinking=false 提速）；
-- 锚定：prompt 带实例名 + instances.json desc 节选，只描述画面可见内容；
+- 锚定：prompt 带实例名 + docs 层草稿知识节选，只描述画面可见内容；
 - 产物：data/focus1000/detail_captions.jsonl（sha256 键控断点续跑，不入 git）。
 
 用法：
@@ -28,8 +28,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = Path(__file__).resolve().parent / "data"
 OUT_F = DATA_DIR / "detail_captions.jsonl"
 META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
-METADATA_F = META_DIR / "metadata.jsonl"
+METADATA_F = META_DIR / "instance_images.jsonl"
 FOCUS_F = REPO_ROOT / "state" / "collect" / "focus1000_instances.json"
+DOCS_DRAFT = REPO_ROOT / "state" / "collect" / "concepts_docs_draft.jsonl"
 BLOBS = REPO_ROOT / "datasets" / "demiwtg" / "blobs"
 ENV_F = REPO_ROOT / "modelhub" / ".env"
 
@@ -66,8 +67,22 @@ BASE = ENV["QIANWEN1_API_BASE"]
 KEY = ENV["QIANWEN1_API_KEY"]
 
 
-def load_targets():
-    focus = {i["name"]: i for i in json.load(open(FOCUS_F))["instances"]}
+def load_focus_and_docs():
+    """focus 名单（mini 表兼容 concepts/instances 两代键）+ docs 层草稿 {name: body}。"""
+    doc = json.load(open(FOCUS_F))
+    rows = doc.get("concepts") or doc.get("instances") or []
+    focus = {i["name"] for i in rows}
+    docs = {}
+    if DOCS_DRAFT.exists():
+        with open(DOCS_DRAFT, encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    r = json.loads(line)
+                    docs[r["name"]] = r.get("body") or ""
+    return focus, docs
+
+
+def load_targets(focus):
     rows = {}
     with open(METADATA_F, encoding="utf-8") as f:
         for line in f:
@@ -97,10 +112,10 @@ class QuotaExhausted(Exception):
     pass
 
 
-async def caption_one(session, sem, item, focus, out_f, lock, stats):
+async def caption_one(session, sem, item, docs, out_f, lock, stats):
     inst_names = item["instances"]
     primary = inst_names[0]
-    desc = (focus[primary].get("desc") or "").strip()
+    desc = (docs.get(primary) or "").strip()
     kb = f"实体名：{primary}" + (f"（画面可能与这些实例相关：{'、'.join(inst_names[:4])}）" if len(inst_names) > 1 else "")
     if desc:
         kb += f"\n实体知识（供核对，画面为准）：{desc[:300]}"
@@ -145,8 +160,8 @@ async def caption_one(session, sem, item, focus, out_f, lock, stats):
 
 
 async def main_run(limit, conc):
-    focus = {i["name"]: i for i in json.load(open(FOCUS_F))["instances"]}
-    targets = load_targets()
+    focus, docs = load_focus_and_docs()
+    targets = load_targets(focus)
     done = set()
     if OUT_F.exists():
         for line in OUT_F.read_text().splitlines():
@@ -176,7 +191,7 @@ async def main_run(limit, conc):
             print(f"[caption] SKIP big {item['sha256'][:12]} {nbytes}", flush=True)
             return
         item["_url"] = url
-        await caption_one(session, sem, item, focus, out_f, lock, stats)
+        await caption_one(session, sem, item, docs, out_f, lock, stats)
 
     try:
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:

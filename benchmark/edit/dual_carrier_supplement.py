@@ -33,7 +33,7 @@ RESULTS = FOCUS / "supplement_results.jsonl"
 MANIFEST = FOCUS / "manifest.jsonl"
 AUDIT = DATA / "complexity_audit_synth.jsonl"
 BENCH = ROOT / "state" / "collect" / "focus_bench_v1.json"
-INSTANCES = ROOT / "datasets" / "demiwtg" / "meta" / "instances.json"
+DOCS_DRAFT = ROOT / "state" / "collect" / "concepts_docs_draft.jsonl"
 ENV_FILE = ROOT / "modelhub" / ".env"
 
 TEXT_MODEL = "qwen3.8-max"
@@ -182,8 +182,13 @@ async def make_prompt(session, sem, base, key, name, desc) -> dict:
 
 async def run_prompts(limit: int, concurrency: int) -> None:
     needed = json.loads(NEEDED.read_text(encoding="utf-8"))["instances"] if NEEDED.exists() else derive_needed()
-    instance_rows = json.loads(INSTANCES.read_text(encoding="utf-8"))["instances"]
-    descriptions = {row["name"]: row.get("desc", "") for row in instance_rows}
+    descriptions = {}
+    if DOCS_DRAFT.exists():
+        with DOCS_DRAFT.open(encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    r = json.loads(line)
+                    descriptions[r["name"]] = r.get("body") or ""
     done = {row["prompt_id"] for row in read_jsonl(PROMPTS) if not row.get("error")}
     jobs = [name for name in needed if f"{name}#s" not in done]
     if limit:

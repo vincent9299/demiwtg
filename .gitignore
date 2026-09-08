@@ -15,17 +15,15 @@ __pycache__/
 .kilo/
 
 # 本地数据与运行时产物（见 AGENTS.md 第 2/4 节，勿提交）
-# 例外：datasets/demiwtg/meta 下 taxonomy 三件套 + 英文平行两件套为权威 JSON，入库（见 AGENTS.md 第 4 节）
+# 例外：datasets/demiwtg/meta 下 taxonomy 两件套为权威 JSON，入库（见 AGENTS.md 第 4 节；
+# 英文平行两件套与 alias_western.json 已于 2026-09-06 随统一版退役，例外链移除）
 datasets/*
 !datasets/demiwtg/
 datasets/demiwtg/*
 !datasets/demiwtg/meta/
 datasets/demiwtg/meta/*
 !datasets/demiwtg/meta/taxonomy.json
-!datasets/demiwtg/meta/instances.json
-!datasets/demiwtg/meta/alias_western.json
-!datasets/demiwtg/meta/taxonomy_en.json
-!datasets/demiwtg/meta/instances_en.json
+!datasets/demiwtg/meta/concepts.json
 state/
 logs/
 
@@ -49,6 +47,7 @@ benchmark/focus1000/data/
 benchmark/edit/archive/*
 !benchmark/edit/archive/MANIFEST.md
 benchmark/edit/synth_v61_pilot/
+benchmark/edit/bench200/
 benchmark/edit/focus200/
 benchmark/edit/judge_prompts/
 benchmark/edit/complexity_audit.jsonl

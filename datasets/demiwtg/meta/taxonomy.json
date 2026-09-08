@@ -3,7 +3,7 @@
  "meta": {
   "generated_at": "2026-08-24T12:28:04",
   "source": "融合世界标签体系 v3.1 交付包（2026-08-24，state/taxonomy/v31_交付包/；三批迁移终版：域级前缀替换+IP 域吸收 29 域+知识与学科清理；路径前缀精简：根 demiwtg 直挂 29 域）",
-  "description": "标签树（taxonomy）：根 demiwtg 直挂 29 域（前缀精简，无中间层），节点含 KB 字段与实例名称列表；实例富描述见 instances.json。"
+  "description": "标签树（taxonomy）：根 demiwtg 直挂 29 域（前缀精简，无中间层），节点含 KB 字段与概念名称列表；概念行与别名见 concepts.json，知识文本草稿见 state/collect/concepts_docs_draft.jsonl。"
  },
  "tree": {
   "name": "demiwtg",
@@ -46544,6 +46544,10 @@
          "Vigreux Column"
         ]
        }
+      ],
+      "instances": [
+       "采样瓶",
+       "试纸"
       ]
      },
      {
@@ -49248,7 +49252,8 @@
            "Paper Lantern String Lights",
            "Paper Lantern With Tassel",
            "Round Paper Lantern Lamp",
-           "Wedding Paper Lantern Decoration"
+           "Wedding Paper Lantern Decoration",
+           "纸灯笼"
           ]
          },
          {
@@ -264669,6 +264674,9 @@
          "Sully Sullenberger"
         ]
        }
+      ],
+      "instances": [
+       "技术员"
       ]
      },
      {
@@ -296277,6 +296285,9 @@
          "Taxi Pickup"
         ]
        }
+      ],
+      "instances": [
+       "横穿马路"
       ]
      },
      {
@@ -377241,6 +377252,9 @@
            "Cathedral Basilica Of The Most Holy Savior"
           ]
          }
+        ],
+        "instances": [
+         "东正教堂"
         ]
        },
        {
@@ -449514,6 +449528,9 @@
          "Ice Stalactite"
         ]
        }
+      ],
+      "instances": [
+       "海冰"
       ]
      },
      {
@@ -450584,7 +450601,9 @@
        "大角星",
        "太阳系八大行星",
        "昴星团",
-       "黄道十二宫"
+       "黄道十二宫",
+       "薄暮",
+       "夜空"
       ],
       "children": [
        {
@@ -452587,7 +452606,8 @@
            "Kakadu Wetlands",
            "Okavango Delta",
            "Pantanal Wetlands",
-           "Sundarbans Mangrove Swamp"
+           "Sundarbans Mangrove Swamp",
+           "泥炭沼"
           ]
          },
          {
@@ -453953,6 +453973,9 @@
          "Trinidad And Tobago"
         ]
        }
+      ],
+      "instances": [
+       "峡湾"
       ]
      },
      {
@@ -453970,7 +453993,8 @@
        "生态规划",
        "生态管理",
        "生态旅游",
-       "生态农业"
+       "生态农业",
+       "蜜露"
       ],
       "children": [
        {
@@ -468175,7 +468199,8 @@
        "生活空间步骤",
        "生活空间注意事项",
        "生活空间历史",
-       "生活空间文化"
+       "生活空间文化",
+       "消声实验室"
       ],
       "children": [
        {
@@ -488735,7 +488760,16 @@
        "透明性步骤",
        "透明性注意事项",
        "透明性历史",
-       "透明性文化"
+       "透明性文化",
+       "倒影同步",
+       "光影联动",
+       "接触受力",
+       "材质互动",
+       "纹理透视",
+       "空间补全",
+       "液流运动",
+       "计数联动",
+       "受力形变"
       ],
       "children": [
        {
@@ -489429,7 +489463,8 @@
        "Cloudburst",
        "Driving Rain",
        "Rain Droplet",
-       "Deluge"
+       "Deluge",
+       "雨后"
       ]
      },
      {
@@ -503086,6 +503121,9 @@
        "Hindquarters"
       ]
      }
+    ],
+    "instances": [
+     "状态指示"
     ]
    },
    {
@@ -508362,7 +508400,8 @@
              "Bronze Axe",
              "Bronze Gear",
              "Bronze Medal",
-             "混合物 / 合金 / 铜基合金 / 青铜"
+             "混合物 / 合金 / 铜基合金 / 青铜",
+             "铸青铜"
             ]
            },
            {
@@ -508622,6 +508661,9 @@
          }
         ]
        }
+      ],
+      "instances": [
+       "慢回弹泡沫"
       ]
      },
      {
@@ -510800,6 +510842,9 @@
            "Stained Glass"
           ]
          }
+        ],
+        "instances": [
+         "单向玻璃"
         ]
        }
       ]
@@ -547542,6 +547587,9 @@
          "Sebastião Salgado - Serra Pelada"
         ]
        }
+      ],
+      "instances": [
+       "微距摄影"
       ]
      },
      {
@@ -550927,6 +550975,9 @@
          }
         ]
        }
+      ],
+      "instances": [
+       "科学插画"
       ]
      },
      {
@@ -572779,7 +572830,8 @@
            "The Bridge At Tenjin Shrine (Hiroshige)",
            "The Courtesan (Utamaro)",
            "The Plum Garden In Kameido (Hiroshige)",
-           "The Whirlpool At Naruto (Hiroshige)"
+           "The Whirlpool At Naruto (Hiroshige)",
+           "浮世绘"
           ]
          },
          {

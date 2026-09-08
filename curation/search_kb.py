@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""search_kb.py — 实例知识检索接地管线（search agent，交接 2026-08-28 落地）。
+"""search_kb.py — 概念知识检索接地管线（search agent，交接 2026-08-28 落地）。
 
-为 instances.json 实例做「多源检索 → 证据包 → glm-5.3-flash 合成视觉知识卡」：
-    源规划（glm-5.3-flash 按实例从源注册表 DIRECT_REGISTRY 选源+给查询词；
+为 concepts.json 概念做「多源检索 → 证据包 → glm-5.3-flash 合成视觉知识卡」：
+    源规划（glm-5.3-flash 按概念从源注册表 DIRECT_REGISTRY 选源+给查询词；
     失败回退规则路由；--no-planner 可关）→ 直供源（zh/en wiki、萌百、Bangumi、
     inaturalist/anilist/jikan/steam/openlibrary/dbpedia/wikidata，见
     search_kb_sources.py）→ 四引擎 SERP（神马/360/bing 直连 + ddg 代理；语言路由
@@ -18,22 +18,23 @@
 SourceHealth（state/taxonomy/search_kb/source_health.json）按滚动命中率自动停用、
 冷却到点恢复。动态发现新站点走 planner 的 serp site: 定向（安全通道内）。
 
-**本管线不改 instances.json**（入库方式待用户拍板后另批执行）；产物全部落
+**本管线不改 concepts.json**（入库方式待用户拍板后另批执行）；产物全部落
 state/taxonomy/search_kb/（证据断点缓存 + 卡 + desc 草稿 + 源健康账本 + 运行日志）。
 
-目标选择（消费者倒排）：metadata.jsonl 质量门合格图（quality>=8 AND
-identity=true）覆盖的实例，排除 source=curated；29 域轮转排序（跨域均衡），
-域内先无 desc、后按合格图数降序。幂等：实体名主键，cards.jsonl 已完成
-（ok/no_evidence）或尝试≥2 次的实体跳过；证据包缓存在 evidence.jsonl。
+目标选择（消费者倒排）：instance_images.jsonl 质量门合格图（quality>=8 AND
+identity=true）覆盖的概念；29 域轮转排序（跨域均衡），
+域内先无知识文本（docs 层草稿缺条目）、后按合格图数降序。幂等：概念名主键，
+cards.jsonl 已完成（ok/no_evidence）或尝试≥2 次的概念跳过；证据包缓存在
+evidence.jsonl。
 
 用法：
-    python3 data/taxonomy/search_kb.py --dry-run --limit 10
-    python3 data/taxonomy/search_kb.py --limit 5 --batch smoke
-    python3 data/taxonomy/search_kb.py --limit 50 --batch pilot
-    python3 data/taxonomy/search_kb.py --limit 1500 --batch scale --workers 4
-    python3 data/taxonomy/search_kb.py --entities 咯吱盒,拉奥孔 --batch debug
-    python3 data/taxonomy/search_kb.py --limit 10 --plan-only      # 只看源规划
-    python3 data/taxonomy/search_kb.py --limit 20 --no-planner     # 规则路由 A/B
+    python3 curation/search_kb.py --dry-run --limit 10
+    python3 curation/search_kb.py --limit 5 --batch smoke
+    python3 curation/search_kb.py --limit 50 --batch pilot
+    python3 curation/search_kb.py --limit 1500 --batch scale --workers 4
+    python3 curation/search_kb.py --entities 咯吱盒,拉奥孔 --batch debug
+    python3 curation/search_kb.py --limit 10 --plan-only      # 只看源规划
+    python3 curation/search_kb.py --limit 20 --no-planner     # 规则路由 A/B
 
 LLM key 只从 modelhub/.env 读（GLM_API_BASE/GLM_API_KEY），不落盘不打印。
 """
@@ -52,7 +53,8 @@ import urllib.parse
 from collections import Counter, defaultdict
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))   # data/ 包根
+REPO_ROOT = Path(__file__).resolve().parent.parent       # 仓库根（curation/ 已提升根目录）
+sys.path.insert(0, str(REPO_ROOT / "data"))              # data/ 兼容 shim（collect_v2.* re-export）
 
 from collect_v2 import infra                                   # noqa: E402
 from collect_v2.infra import (                                  # noqa: E402
@@ -64,52 +66,48 @@ from collect_v2.search_kb_sources import (                        # noqa: E402
     anilist_source, dbpedia_source, inaturalist_source, jikan_source,
     openlibrary_source, steam_source, wikidata_source)
 
-ROOT = Path(__file__).resolve().parent.parent.parent             # 仓库根
+ROOT = REPO_ROOT
 META_DIR = ROOT / "datasets" / "demiwtg" / "meta"
-INSTANCES_PATH = META_DIR / "instances.json"
+CONCEPTS_PATH = META_DIR / "concepts.json"
 TAXONOMY_PATH = META_DIR / "taxonomy.json"
-MANIFEST_PATH = META_DIR / "metadata.jsonl"
+MANIFEST_PATH = META_DIR / "instance_images.jsonl"
 MODELHUB_ENV = ROOT / "modelhub" / ".env"
 OUT_DIR = ROOT / "state" / "taxonomy" / "search_kb"
 EVIDENCE_PATH = OUT_DIR / "evidence.jsonl"
 CARDS_PATH = OUT_DIR / "cards.jsonl"
 DESC_PATH = OUT_DIR / "desc_drafts.jsonl"
 LOG_PATH = OUT_DIR / "run.log"
+DOCS_DRAFT_PATH = ROOT / "state" / "collect" / "concepts_docs_draft.jsonl"
+QUERY_TERMS_PATH = ROOT / "state" / "collect" / "query_terms_cache.json"
 
 LANG = "zh"          # 当前赛道语言（set_lang 切换；所有路径/标记/路由读模块全局）
 
 
 def set_lang(lang: str) -> None:
-    """切换 zh/en 赛道：英文实例（instances_en.json，全裸名无别名无图）直接走
-    英文源（wiki_en/dbpedia/ina/steam/ol/anilist/jikan + SERP 只用 bing/ddg），
-    产物独立落 state/taxonomy/search_kb_en/，与中文轨互不干扰可并行。"""
-    global LANG, INSTANCES_PATH, TAXONOMY_PATH, OUT_DIR, EVIDENCE_PATH, \
+    """切换 zh/en 赛道。en 赛道已随 2026-09-06 统一版退役（英文平行两件套
+    taxonomy_en.json/instances_en.json 已并入中文湖并移出 meta/，见 AGENTS.md），
+    保留入口仅作历史拒绝提示。"""
+    global LANG, CONCEPTS_PATH, TAXONOMY_PATH, OUT_DIR, EVIDENCE_PATH, \
         CARDS_PATH, DESC_PATH, LOG_PATH, ACG_MARKS, GAME_MARKS, BOOK_MARKS, \
         SPECIES_DOMAINS, SERP_ENGINES
     if lang not in ("zh", "en"):
         raise ValueError(f"未知语言 {lang!r}")
+    if lang == "en":
+        sys.exit("en 赛道已退役：英文平行数据已于 2026-09-06 并入中文湖统一版本"
+                 "（EN 实体已成为中文概念的别名/独立概念），请直接用 zh 赛道。")
     if lang == LANG:
         return
     LANG = lang
-    if lang == "en":
-        INSTANCES_PATH = META_DIR / "instances_en.json"
-        TAXONOMY_PATH = META_DIR / "taxonomy_en.json"
-        OUT_DIR = ROOT / "state" / "taxonomy" / "search_kb_en"
-        ACG_MARKS = ("Anime", "Manga", "Light Novel", "Fictional World",
-                     "Virtual Character", "Game Character")
-        GAME_MARKS = ("Game Works",)               # Culture, Arts and Media / Content Works / Game Works
-        BOOK_MARKS = ("Literary Work", "Novel", "Picture Book", "Comic")
-        SPECIES_DOMAINS = ("Animal", "Plant", "Fungi and Microorganisms")
-        SERP_ENGINES = ("bing", "ddg")             # 英文引擎；sm/so360 是中文引擎不浪费配额
-    else:
-        INSTANCES_PATH = META_DIR / "instances.json"
-        TAXONOMY_PATH = META_DIR / "taxonomy.json"
-        OUT_DIR = ROOT / "state" / "taxonomy" / "search_kb"
-        ACG_MARKS = _ZH_ACG_MARKS
-        GAME_MARKS = _ZH_GAME_MARKS
-        BOOK_MARKS = _ZH_BOOK_MARKS
-        SPECIES_DOMAINS = _ZH_SPECIES_DOMAINS
-        SERP_ENGINES = _ZH_SERP_ENGINES
+    if lang == "en":  # 不可达（上方已 exit）；防御性保留拒绝
+        raise RuntimeError("en 赛道已退役")
+    CONCEPTS_PATH = META_DIR / "concepts.json"
+    TAXONOMY_PATH = META_DIR / "taxonomy.json"
+    OUT_DIR = ROOT / "state" / "taxonomy" / "search_kb"
+    ACG_MARKS = _ZH_ACG_MARKS
+    GAME_MARKS = _ZH_GAME_MARKS
+    BOOK_MARKS = _ZH_BOOK_MARKS
+    SPECIES_DOMAINS = _ZH_SPECIES_DOMAINS
+    SERP_ENGINES = _ZH_SERP_ENGINES
     EVIDENCE_PATH = OUT_DIR / "evidence.jsonl"
     CARDS_PATH = OUT_DIR / "cards.jsonl"
     DESC_PATH = OUT_DIR / "desc_drafts.jsonl"
@@ -793,9 +791,24 @@ def is_book(mounts: dict, name: str) -> bool:
     return any(any(m in p for m in BOOK_MARKS) for p in (mounts.get(name) or []))
 
 
+_QUERY_TERMS_CACHE: dict | None = None
+
+
+def query_terms(name: str) -> list:
+    """概念的检索扩展词（query 字段 2026-09-07 退役 → state/collect/query_terms_cache.json，
+    采集 planner 冷启动先验；缺失返回空表）。"""
+    global _QUERY_TERMS_CACHE
+    if _QUERY_TERMS_CACHE is None:
+        if QUERY_TERMS_PATH.exists():
+            _QUERY_TERMS_CACHE = json.load(open(QUERY_TERMS_PATH, encoding="utf-8"))
+        else:
+            _QUERY_TERMS_CACHE = {}
+    return _QUERY_TERMS_CACHE.get(name) or []
+
+
 def english_alias(inst: dict) -> str:
-    """实例的英文别名（aliases/query 里首个 ASCII 主词），无则空串。"""
-    cands = list(inst.get("aliases") or []) + list(inst.get("query") or [])
+    """概念的英文别名（aliases/query 缓存里首个 ASCII 主词），无则空串。"""
+    cands = list(inst.get("aliases") or []) + query_terms(inst.get("name", ""))
     for c in cands:
         c = str(c).strip()
         if not c:
@@ -809,7 +822,8 @@ def english_alias(inst: dict) -> str:
 def all_aliases(inst: dict) -> list:
     """全部别名/检索扩展词（源规划器的候选词池，含中文，去重保序，≤10 个）。"""
     out, seen = [], set()
-    for c in [*list(inst.get("aliases") or []), *list(inst.get("query") or [])]:
+    for c in [*list(inst.get("aliases") or []),
+              *query_terms(inst.get("name", ""))]:
         c = str(c).strip()
         if c and c not in seen:
             seen.add(c)
@@ -817,14 +831,30 @@ def all_aliases(inst: dict) -> list:
     return out[:10]
 
 
-def load_targets(args) -> list:
-    """目标实体列表，29 域轮转排序（跨域均衡；域内先无 desc、后按合格图数降序）。
+def docs_draft_names() -> set:
+    """docs 层草稿在册概念名（desc 退役后的知识文本判据）。"""
+    out = set()
+    if DOCS_DRAFT_PATH.exists():
+        with open(DOCS_DRAFT_PATH, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    out.add(json.loads(line)["name"])
+                except (json.JSONDecodeError, KeyError):
+                    continue
+    return out
 
-    --all：全量口径（2026-08-29 拍板）——不做质量门过滤、包含 curated，
-    且**合格图池实体排前面、24 万尾量 derived 殿后**（消费优先：跑不完时
-    先损耗的是无消费者的尾量）。默认口径不变（合格图覆盖 × 非 curated）。
-    英文赛道（--lang en）：实例无图无别名，跳过 metadata.jsonl 合格图扫描，
-    alias=实体名本身。"""
+
+def load_targets(args) -> list:
+    """目标概念列表，29 域轮转排序（跨域均衡；域内先无知识文本、后按合格图数降序）。
+
+    --all：全量口径（2026-08-29 拍板）——不做质量门过滤，
+    且**合格图池概念排前面、尾量 derived 殿后**（消费优先：跑不完时
+    先损耗的是无消费者的尾量）。默认口径不变（合格图覆盖）。
+    --only-empty：跳过 docs 层草稿已有条目的概念（desc 字段 2026-09-07 退役，
+    知识文本判据移 docs 草稿）。"""
     qual = Counter()
     if LANG == "zh":
         with open(MANIFEST_PATH, encoding="utf-8") as f:
@@ -839,13 +869,14 @@ def load_targets(args) -> list:
                 if (r.get("quality") or 0) >= 8 and r.get("identity"):
                     for i in r.get("instances") or []:
                         qual[i] += 1
-    doc = json.load(open(INSTANCES_PATH, encoding="utf-8"))
+    doc = json.load(open(CONCEPTS_PATH, encoding="utf-8"))
+    has_docs = docs_draft_names()
     mounts = load_mount_map(str(TAXONOMY_PATH))
     wanted = None
     if args.entities:
         wanted = {x.strip() for x in args.entities.split(",") if x.strip()}
     by_domain = defaultdict(list)
-    for it in doc.get("instances", []):
+    for it in doc.get("concepts", []):
         name = it.get("name", "")
         if not name:
             continue
@@ -856,9 +887,7 @@ def load_targets(args) -> list:
             if not args.all:
                 if qual.get(name, 0) == 0:       # 质量门合格图覆盖外（抽样池外）
                     continue
-                if it.get("source") == "curated":
-                    continue
-            if args.only_empty and it.get("desc"):
+            if args.only_empty and name in has_docs:
                 continue
         if args.domains:
             doms = [x.strip() for x in args.domains.split(",") if x.strip()]
@@ -866,7 +895,7 @@ def load_targets(args) -> list:
                 continue
         by_domain[domain_of(mounts, name)].append(
             (name, qual.get(name, 0), is_acg(mounts, name),
-             english_alias(it) if LANG == "zh" else name, bool(it.get("desc")),
+             english_alias(it) if LANG == "zh" else name, name in has_docs,
              is_game(mounts, name), is_book(mounts, name),
              all_aliases(it), list(mounts.get(name) or [])[:3],
              branch_of(mounts, name)))
@@ -1647,7 +1676,8 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="最多处理 N 实体")
     ap.add_argument("--batch", default="adhoc", help="批次标记（smoke/pilot/scale）")
     ap.add_argument("--domains", default="", help="L1 域过滤（逗号分隔子串）")
-    ap.add_argument("--only-empty", action="store_true", help="只处理无 desc 实例")
+    ap.add_argument("--only-empty", action="store_true",
+                    help="只处理 docs 层草稿无条目的概念")
     ap.add_argument("--entities", default="", help="显式实体名（逗号分隔，调试用）")
     ap.add_argument("--workers", type=int, default=3, help="并发实体数")
     ap.add_argument("--max-tokens", type=int, default=8192,
@@ -1673,15 +1703,13 @@ def main():
                     help="分片 I/N（0 基）：按序取 k%%N==I 的实体。多进程并行用，"
                          "注意每进程引擎闸门独立=引擎总速率×N（ban 风险随 N 升）")
     ap.add_argument("--lang", choices=["zh", "en"], default="zh",
-                    help="赛道：zh=instances.json（默认）；en=instances_en.json "
-                         "382k 英文实例，纯英文源路由（wiki_en/dbpedia/ina/steam/"
-                         "ol/anilist/jikan + bing/ddg SERP），产物独立落 "
-                         "state/taxonomy/search_kb_en/，可与中文轨并行")
+                    help="赛道：zh=concepts.json（默认）。en 已退役（2026-09-06 "
+                         "英文平行数据并入中文湖统一版本），传入即拒绝退出")
     ap.add_argument("--by-branch", action="store_true",
                     help="按 L2 分支聚簇排序（分支决策/剪枝生效更快，片内实体同构；"
                          "跨域轮转默认关闭此序）")
     ap.add_argument("--all", action="store_true",
-                    help="全量口径：不做质量门过滤、含 curated，合格图池先行尾量殿后")
+                    help="全量口径：不做质量门过滤，合格图池先行尾量殿后")
     ap.add_argument("--plan-only", action="store_true",
                     help="只跑源规划器打印计划，不采集不出卡（调试用）")
     ap.add_argument("--dry-run", action="store_true", help="只列目标不联网")
