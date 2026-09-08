@@ -30,7 +30,7 @@ DEFAULT_MODEL = "openrouter/google/gemini-3.1-flash-image"
 DEFAULT_ENDPOINT = "http://127.0.0.1:4001/v1/chat/completions"
 ASPECTS = {"1:1": 1.0, "3:4": 3 / 4, "4:3": 4 / 3, "9:16": 9 / 16,
            "16:9": 16 / 9, "2:3": 2 / 3, "3:2": 3 / 2}
-ALLOWED_SOURCE_ROOT = (SUB_DIR / "data" / "focus200").resolve()
+ALLOWED_SOURCE_ROOT = (SUB_DIR / "focus200").resolve()
 RUNNER_SCHEMA = "edit-gen-v1"
 QID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
 
@@ -62,7 +62,7 @@ def resolve_source(q: dict, questions: Path) -> Path:
         raise ValueError("题目缺 _sample_image/_file")
     src = Path(rel)
     candidates = [src] if src.is_absolute() else [
-        questions.parent / src, questions.parent.parent / src, SUB_DIR / "data" / src
+        questions.parent / src, questions.parent.parent / src, SUB_DIR / src
     ]
     for cand in candidates:
         if not cand.exists():

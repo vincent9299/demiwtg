@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""meta_unify.py — meta 真相区统一收口（2026-09-05：EN 并入中文湖 + images.jsonl 并入 metadata.jsonl）。
+"""meta_unify.py — meta 真相区统一收口（2026-09-05：EN 并入中文湖 + images.jsonl 并入 instance_images.jsonl）。
 
-  images [--apply]   images.jsonl 逐实例炸开并入 metadata.jsonl（本次不打标：identity/focus/quality=null
+  images [--apply]   images.jsonl 逐实例炸开并入 instance_images.jsonl（本次不打标：identity/focus/quality=null
                      待 annotate_backfill 补；v1 采集字段 tiers/credit/source_rank/asset_ids/
                      source_kind/source_authorized/source_score 照 migrate.py 先例丢弃）
-  en [--apply]       metadata_en.jsonl 并入 metadata.jsonl：EN 实例名按 en_entity_merge 对齐结果归一
+  en [--apply]       metadata_en.jsonl 并入 instance_images.jsonl：EN 实例名按 en_entity_merge 对齐结果归一
                      （matched/variant→中文正名；new→保留 EN 名，apply 已入库挂树）；(sha256, instance) 去重
   report             只打印两边可并入统计，不写任何文件
 
@@ -30,9 +30,9 @@ V1_DROP = {"tiers", "source_rank", "source_score", "asset_ids", "credit",
 
 
 def load_keys():
-    """metadata.jsonl 现有 (sha256, instance) 键集 + sha 集（一次流式扫描）。"""
+    """instance_images.jsonl 现有 (sha256, instance) 键集 + sha 集（一次流式扫描）。"""
     keys, shas = set(), set()
-    with open(META / "metadata.jsonl", encoding="utf-8") as f:
+    with open(META / "instance_images.jsonl", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -81,7 +81,7 @@ def explode(row: dict, rewrite=None) -> list[dict]:
 
 
 def _append(rows: list[dict], op: str, extra: dict):
-    with open(META / "metadata.jsonl", "a", encoding="utf-8") as f:
+    with open(META / "instance_images.jsonl", "a", encoding="utf-8") as f:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
     REPORT.parent.mkdir(parents=True, exist_ok=True)
@@ -89,7 +89,7 @@ def _append(rows: list[dict], op: str, extra: dict):
         "ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "op": op,
         "rows_appended": len(rows), **extra,
     }, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"已追加 {len(rows):,} 行 → metadata.jsonl")
+    print(f"已追加 {len(rows):,} 行 → instance_images.jsonl")
 
 
 def _validate_registry(rows: list[dict]):
@@ -184,7 +184,7 @@ def cmd_en(args):
 
 def cmd_report(_args):
     keys, shas = load_keys()
-    print(f"metadata.jsonl：{len(shas):,} sha / {len(keys):,} (sha,instance)")
+    print(f"instance_images.jsonl：{len(shas):,} sha / {len(keys):,} (sha,instance)")
     for name in ("images.jsonl", "metadata_en.jsonl"):
         n = dup = empty = 0
         with open(META / name, encoding="utf-8") as f:

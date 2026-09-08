@@ -168,7 +168,7 @@ def main() -> None:
     ap.add_argument("--id-base", type=int, default=ID_BASE,
                     help="sample_id 起号（默认 60000；新批次应避开已用号段，"
                          "如 r10 用 60001-60010，r11 从 60011 起）")
-    ap.add_argument("--manifest", type=Path, default=META_DIR / "metadata.jsonl")
+    ap.add_argument("--manifest", type=Path, default=META_DIR / "instance_images.jsonl")
     ap.add_argument("--taxonomy", type=Path, default=META_DIR / "taxonomy.json")
     ap.add_argument("--blobs", type=Path,
                     default=REPO_ROOT / "datasets" / "demiwtg" / "blobs")

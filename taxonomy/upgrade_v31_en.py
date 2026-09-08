@@ -163,6 +163,9 @@ def build_en_tree(rows_en, clean_stats):
 
 
 def main():
+    import sys as _sys
+    _sys.exit("已退役（2026-09-06）：英文平行两件套已并入中文湖统一版本"
+              "（en_entity_merge.py 完成，见 AGENTS.md），本脚本为历史建库记录，勿再运行。")
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--apply", action="store_true",
                     help="落盘（默认干跑只打印）")

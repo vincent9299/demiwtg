@@ -219,7 +219,10 @@ def _clean_align(d: dict) -> dict:
 
 def cmd_tier0(_args):
     OUT.mkdir(parents=True, exist_ok=True)
-    aw = json.loads((META / "alias_western.json").read_text(encoding="utf-8"))
+    aw_path = META / "alias_western.json"
+    aw = json.loads(aw_path.read_text(encoding="utf-8")) if aw_path.exists() else {}
+    # alias_western.json 已于 2026-09-06 退役归档 state/taxonomy/retired_meta/
+    # （49,197 个非空西文串 100% 已在 instances.aliases；负缓存语义移交 demiwtg-data op_seed）
     insts = json.loads((META / "instances.json").read_text(encoding="utf-8"))["instances"]
     nodes = build_nodes(min_list=1)
     # EN 名 → 出现的 zh 节点集合

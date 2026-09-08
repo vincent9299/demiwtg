@@ -1,7 +1,7 @@
 """t2i（生成）赛道评测样本抽样：从本仓数据集分层抽评测用图。
 
-抽样源是 collect_v2 权威清单 metadata.jsonl（质量字段 quality/identity/focus
-在它身上，不在 images.jsonl）；实例 → 树分支经 taxonomy/mount_map.py 现算
+抽样源是 collect_v2 权威清单 instance_images.jsonl（质量字段 quality/identity/focus
+在它身上；images.jsonl 已于 2026-09-06 收官退役）；实例 → 树分支经 taxonomy/mount_map.py 现算
 （挂载关系不落盘的解耦契约，AGENTS.md 1.5）。
 
 流水线：
@@ -196,8 +196,8 @@ def main() -> None:
                          "可叠加如 width >= 1024 AND height >= 1024）")
     ap.add_argument("--per-instance", type=int, default=2)
     ap.add_argument("--seed", type=int, default=20260823)
-    ap.add_argument("--manifest", type=Path, default=META_DIR / "metadata.jsonl",
-                    help="抽样源清单（默认 demiwtg meta/metadata.jsonl）")
+    ap.add_argument("--manifest", type=Path, default=META_DIR / "instance_images.jsonl",
+                    help="抽样源清单（默认 demiwtg meta/instance_images.jsonl）")
     ap.add_argument("--taxonomy", type=Path, default=META_DIR / "taxonomy.json",
                     help="标签树（分支分层用，默认 meta/taxonomy.json）")
     ap.add_argument("--blobs", type=Path,
