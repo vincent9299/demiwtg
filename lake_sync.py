@@ -88,6 +88,9 @@ BATCH_FILES = 1000         # 每 tar 流文件数（2026-09-09 定格：400→20
                             # 批耗时 700-900s 贴 900s 超时红线；1000 ≈ 400s/批
                             # 留安全余量，摊薄轮次开销的目的同样达成）
 GRACE_HOURS = 24           # 校验后保留宽限（小时）再清理源端
+STREAMS_PER_READER = 3     # 每 reader 并发流数（2026-09-09 实测：单流
+                            # 1.75MB/s 为跨境 TCP 窗口限制且不随流数摊薄；
+                            # 节点 cosfs 单机 16 files/s ≈ 3-5 流余量）
 CLEAN_MAX = 20000          # 每轮清理上限（谨慎 ramp）
 CYCLE_SECONDS = 3600
 SSH_OPTS = ["-o", "BatchMode=yes", "-o", "ConnectTimeout=20"]
@@ -289,7 +292,7 @@ def pull_group(state: State, group: str, rels: set, max_batches: int) -> dict:
         by_reader.setdefault(reader_for(group, rel), []).append(rel)
     blob_root = GROUPS[group]["blob_root"]
 
-    def _reader_pull(reader: str, items: list) -> dict:
+    def _reader_pull(reader: str, items: list, tag: str = "0") -> dict:
         st = {"ok": 0, "bad": 0, "fail": 0}
         for i in range(0, len(items), BATCH_FILES):
             if max_batches and i // BATCH_FILES >= max_batches:
@@ -306,11 +309,11 @@ def pull_group(state: State, group: str, rels: set, max_batches: int) -> dict:
                             stdin=payload, timeout=1200)
             except subprocess.TimeoutExpired:
                 st["fail"] += len(batch)   # 超时计失败续下批——线程不死
-                print(f"[sync] blob批 {reader} #{i // BATCH_FILES + 1}"
+                print(f"[sync] blob批 {reader}.{tag} #{i // BATCH_FILES + 1}"
                       f" 超时{time.time() - t_batch:.0f}s（fail+{len(batch)}）",
                       flush=True)
                 continue
-            print(f"[sync] blob批 {reader} #{i // BATCH_FILES + 1}"
+            print(f"[sync] blob批 {reader}.{tag} #{i // BATCH_FILES + 1}"
                   f"（{len(batch)}）：{time.time() - t_batch:.0f}s "
                   f"ok={st['ok']} bad={st['bad']} fail={st['fail']}",
                   flush=True)
@@ -349,12 +352,21 @@ def pull_group(state: State, group: str, rels: set, max_batches: int) -> dict:
 
     threads: list = []
     results: dict = {}
+    lock = threading.Lock()
+
+    def _run(rd: str, it: list, tag: str):
+        st = _reader_pull(rd, it, tag)
+        with lock:
+            results[f"{rd}:{tag}"] = st
+
     for reader, items in by_reader.items():
-        def _run(rd=reader, it=items):
-            results[rd] = _reader_pull(rd, it)
-        t = threading.Thread(target=_run)
-        t.start()
-        threads.append(t)
+        k = min(STREAMS_PER_READER, max(1, (len(items) + BATCH_FILES - 1)
+                                        // BATCH_FILES))
+        for j in range(k):
+            t = threading.Thread(target=_run,
+                                 args=(reader, items[j::k], str(j)))
+            t.start()
+            threads.append(t)
     for t in threads:
         t.join()
     stat = {"ok": 0, "bad": 0, "fail": 0}
@@ -458,7 +470,7 @@ def pull_pages(state: State, group: str, want: dict, max_batches: int) -> dict:
         by_reader.setdefault(reader_for(group, rel), []).append(rel)
     root = GROUPS[group]["pages_root"]
 
-    def _reader_pull(reader: str, items: list) -> dict:
+    def _reader_pull(reader: str, items: list, tag: str = "0") -> dict:
         st = {"ok": 0, "bad": 0, "empty": 0, "dup": 0, "fail": 0}
         for i in range(0, len(items), BATCH_FILES):
             if max_batches and i // BATCH_FILES >= max_batches:
@@ -472,10 +484,10 @@ def pull_pages(state: State, group: str, want: dict, max_batches: int) -> dict:
                                     '-cf - -T -', stdin=payload, timeout=1200)
             except subprocess.TimeoutExpired:
                 st["fail"] += len(batch)
-                print(f"[sync] pages批 {reader} #{i // BATCH_FILES + 1}"
+                print(f"[sync] pages批 {reader}.{tag} #{i // BATCH_FILES + 1}"
                       f" 超时（fail+{len(batch)}）", flush=True)
                 continue
-            print(f"[sync] pages批 {reader} #{i // BATCH_FILES + 1}"
+            print(f"[sync] pages批 {reader}.{tag} #{i // BATCH_FILES + 1}"
                   f"（{len(batch)}）：{time.time() - t_batch:.0f}s "
                   f"ok={st['ok']} bad={st['bad']} fail={st['fail']}",
                   flush=True)
@@ -499,12 +511,21 @@ def pull_pages(state: State, group: str, want: dict, max_batches: int) -> dict:
 
     threads: list = []
     results: dict = {}
+    lock = threading.Lock()
+
+    def _run(rd: str, it: list, tag: str):
+        st = _reader_pull(rd, it, tag)
+        with lock:
+            results[f"{rd}:{tag}"] = st
+
     for reader, items in by_reader.items():
-        def _run(rd=reader, it=items):
-            results[rd] = _reader_pull(rd, it)
-        t = threading.Thread(target=_run)
-        t.start()
-        threads.append(t)
+        k = min(STREAMS_PER_READER, max(1, (len(items) + BATCH_FILES - 1)
+                                        // BATCH_FILES))
+        for j in range(k):
+            t = threading.Thread(target=_run,
+                                 args=(reader, items[j::k], str(j)))
+            t.start()
+            threads.append(t)
     for t in threads:
         t.join()
     stat = {"ok": 0, "bad": 0, "empty": 0, "dup": 0, "fail": 0}
