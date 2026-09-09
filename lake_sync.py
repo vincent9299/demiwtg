@@ -84,7 +84,9 @@ REMOTE_META = "~/lake/meta"                   # 各节点清单根（本地盘�
 MANIFEST_GLOBS = ("image-shard-*.jsonl", "docs*.jsonl",
                   "backfill-shard-*.jsonl", "dead-shard-*.jsonl")
 
-BATCH_FILES = 400          # 每 tar 流文件数（argv 与失败重试粒度的折中）
+BATCH_FILES = 1000         # 每 tar 流文件数（2026-09-09 定格：400→2000 实测
+                            # 批耗时 700-900s 贴 900s 超时红线；1000 ≈ 400s/批
+                            # 留安全余量，摊薄轮次开销的目的同样达成）
 GRACE_HOURS = 24           # 校验后保留宽限（小时）再清理源端
 CLEAN_MAX = 20000          # 每轮清理上限（谨慎 ramp）
 CYCLE_SECONDS = 3600
@@ -228,8 +230,22 @@ def sync_manifests(state: State) -> dict:
 # ② 缺集现算
 # ---------------------------------------------------------------------------
 
+def _store_listing(prefix: str) -> set:
+    """湖侧某内容店（blobs/pages）的实存相对路径集：一次目录遍历代替
+    逐文件 stat（2026-09-09：220 万引用 × 网络 PVC stat 实测小时级，
+    遍历分钟级——缺集现算从瓶颈变回零头）。"""
+    out: set = set()
+    root = f"{STORE_ROOT}/{prefix}"
+    for dirpath, _, names in os.walk(root):
+        rel_dir = os.path.relpath(dirpath, STORE_ROOT)
+        for n in names:
+            out.add(f"{rel_dir}/{n}")
+    return out
+
+
 def needed_blobs(state: State) -> dict:
     """mirror 全扫 → {group: {rel_path}}（湖侧实存与已删除的剔除）。"""
+    have = _store_listing("blobs")
     out: dict = {"sg": set(), "cn": set()}
     for node, group in NODE_GROUP.items():
         mdir = f"{SYNC_ROOT}/manifests/{node}"
@@ -246,7 +262,7 @@ def needed_blobs(state: State) -> dict:
                     sha = rel.rsplit("/", 1)[-1].split(".")[0]
                     if sha in state.deleted:
                         continue
-                    if os.path.exists(f"{STORE_ROOT}/{rel}"):
+                    if rel in have:
                         continue
                     bucket.add(rel)
     return out
@@ -262,32 +278,44 @@ def reader_for(group: str, rel: str) -> str:
 
 
 def pull_group(state: State, group: str, rels: set, max_batches: int) -> dict:
-    """一组缺集 → 按 reader 分桶批量 tar 流拉取。返回 {ok, bad, fail}。"""
+    """一组缺集 → 按 reader 分桶，**每 reader 一线程全并发** tar 流拉取。
+
+    2026-09-09 修正：原实现组内 reader 串行 for（一台拉完份额才轮下一台，
+    实测单 reader 拖全程——sg 组收工后 cn 组只剩 f 一台在拉）。现组内
+    全并发（与 cycle 的组间并行叠加 = 全部 readers 同时拉）；stat 各线程
+    自持合并，max_batches 语义改为每 reader 上限。"""
     by_reader: dict = {}
     for rel in rels:
         by_reader.setdefault(reader_for(group, rel), []).append(rel)
-    stat = {"ok": 0, "bad": 0, "fail": 0}
-    batches = 0
     blob_root = GROUPS[group]["blob_root"]
-    for reader, items in by_reader.items():
+
+    def _reader_pull(reader: str, items: list) -> dict:
+        st = {"ok": 0, "bad": 0, "fail": 0}
         for i in range(0, len(items), BATCH_FILES):
-            if max_batches and batches >= max_batches:
-                return stat
-            batches += 1
+            if max_batches and i // BATCH_FILES >= max_batches:
+                break
             batch = items[i:i + BATCH_FILES]
             # blob_path 形如 blobs/aa/x（相对 STORE_ROOT）；tar -C 已指到
             # 组 blobs 根，成员去掉 blobs/ 前缀
             members = [r_[len("blobs/"):] for r_ in batch]
             payload = ("\n".join(members) + "\n").encode()
             t_batch = time.time()
-            r = ssh_run(reader, f'tar -C {blob_root} --ignore-failed-read '
-                                '-cf - -T -', stdin=payload, timeout=900)
-            print(f"[sync] blob批 {reader} #{batches}（{len(batch)}）："
-                  f"{time.time() - t_batch:.0f}s "
-                  f"ok={stat['ok']} bad={stat['bad']} fail={stat['fail']}",
+            try:
+                r = ssh_run(reader, f'tar -C {blob_root} '
+                                    '--ignore-failed-read -cf - -T -',
+                            stdin=payload, timeout=1200)
+            except subprocess.TimeoutExpired:
+                st["fail"] += len(batch)   # 超时计失败续下批——线程不死
+                print(f"[sync] blob批 {reader} #{i // BATCH_FILES + 1}"
+                      f" 超时{time.time() - t_batch:.0f}s（fail+{len(batch)}）",
+                      flush=True)
+                continue
+            print(f"[sync] blob批 {reader} #{i // BATCH_FILES + 1}"
+                  f"（{len(batch)}）：{time.time() - t_batch:.0f}s "
+                  f"ok={st['ok']} bad={st['bad']} fail={st['fail']}",
                   flush=True)
             if r.returncode != 0:
-                stat["fail"] += len(batch)
+                st["fail"] += len(batch)
                 print(f"[sync] {reader} tar 流失败（{len(batch)} 文件）："
                       f"{r.stderr.decode()[:150]}", flush=True)
                 continue
@@ -296,12 +324,12 @@ def pull_group(state: State, group: str, rels: set, max_batches: int) -> dict:
             p = subprocess.run(["tar", "-xf", "-", "-C", tmpdir],
                                input=r.stdout, capture_output=True)
             if p.returncode != 0:
-                stat["fail"] += len(batch)
+                st["fail"] += len(batch)
                 continue
             for rel, member in zip(batch, members):
                 src = f"{tmpdir}/{member}"
                 if not os.path.exists(src):
-                    stat["fail"] += 1
+                    st["fail"] += 1
                     continue
                 sha = rel.rsplit("/", 1)[-1].split(".")[0]
                 h = hashlib.sha256()
@@ -309,14 +337,30 @@ def pull_group(state: State, group: str, rels: set, max_batches: int) -> dict:
                     for c in iter(lambda: f.read(1 << 20), b""):
                         h.update(c)
                 if h.hexdigest() != sha:
-                    stat["bad"] += 1
+                    st["bad"] += 1
                     os.unlink(src)
                     continue
                 dst = f"{STORE_ROOT}/{rel}"
                 os.makedirs(os.path.dirname(dst), exist_ok=True)
                 os.replace(src, dst)
                 state.append_verified(sha, group)
-                stat["ok"] += 1
+                st["ok"] += 1
+        return st
+
+    threads: list = []
+    results: dict = {}
+    for reader, items in by_reader.items():
+        def _run(rd=reader, it=items):
+            results[rd] = _reader_pull(rd, it)
+        t = threading.Thread(target=_run)
+        t.start()
+        threads.append(t)
+    for t in threads:
+        t.join()
+    stat = {"ok": 0, "bad": 0, "fail": 0}
+    for st in results.values():
+        for k in stat:
+            stat[k] += st[k]
     return stat
 
 
@@ -336,6 +380,7 @@ def needed_pages(state: State) -> tuple:
     """
     claims: dict = {}                # rel -> (group, content_sha|None)
     mismatch = 0
+    have = _store_listing("pages")
     for group in GROUPS:             # GROUPS 序即组优先序（sg 先claim）
         for node, node_group in NODE_GROUP.items():
             if node_group != group:
@@ -360,7 +405,7 @@ def needed_pages(state: State) -> tuple:
                                 hashlib.sha256(str(url).encode()).hexdigest() != sha:
                             mismatch += 1
                             continue
-                        if os.path.exists(f"{STORE_ROOT}/{rel}") or rel in claims:
+                        if rel in have or rel in claims:
                             continue
                         claims[rel] = (group, row.get("content_sha"))
     out = {g: {} for g in GROUPS}
@@ -404,45 +449,68 @@ def _publish_page(state: State, group: str, tmpdir: str, member: str,
 
 
 def pull_pages(state: State, group: str, want: dict, max_batches: int) -> dict:
-    """一组 pages 缺集 → 按 reader 分桶批量 tar 流拉取（pull_group 同构）。
+    """一组 pages 缺集 → 按 reader 分桶，**每 reader 一线程全并发**拉取
+    （2026-09-09 与 pull_group 同步修正组内串行坑）。
 
     want: {rel: content_sha|None}；返回 {ok, bad, empty, dup, fail}。"""
     by_reader: dict = {}
     for rel in want:
         by_reader.setdefault(reader_for(group, rel), []).append(rel)
-    stat = {"ok": 0, "bad": 0, "empty": 0, "dup": 0, "fail": 0}
-    batches = 0
     root = GROUPS[group]["pages_root"]
-    for reader, items in by_reader.items():
+
+    def _reader_pull(reader: str, items: list) -> dict:
+        st = {"ok": 0, "bad": 0, "empty": 0, "dup": 0, "fail": 0}
         for i in range(0, len(items), BATCH_FILES):
-            if max_batches and batches >= max_batches:
-                return stat
-            batches += 1
+            if max_batches and i // BATCH_FILES >= max_batches:
+                break
             batch = items[i:i + BATCH_FILES]
             members = [r[len("pages/"):] for r in batch]   # 剥 pages/ 前缀
             payload = ("\n".join(members) + "\n").encode()
             t_batch = time.time()
-            r = ssh_run(reader, f'tar -C {root} --ignore-failed-read '
-                                '-cf - -T -', stdin=payload, timeout=900)
-            print(f"[sync] pages批 {reader} #{batches}（{len(batch)}）："
-                  f"{time.time() - t_batch:.0f}s "
-                  f"ok={stat['ok']} bad={stat['bad']} fail={stat['fail']}",
+            try:
+                r = ssh_run(reader, f'tar -C {root} --ignore-failed-read '
+                                    '-cf - -T -', stdin=payload, timeout=1200)
+            except subprocess.TimeoutExpired:
+                st["fail"] += len(batch)
+                print(f"[sync] pages批 {reader} #{i // BATCH_FILES + 1}"
+                      f" 超时（fail+{len(batch)}）", flush=True)
+                continue
+            print(f"[sync] pages批 {reader} #{i // BATCH_FILES + 1}"
+                  f"（{len(batch)}）：{time.time() - t_batch:.0f}s "
+                  f"ok={st['ok']} bad={st['bad']} fail={st['fail']}",
                   flush=True)
             if r.returncode != 0:
-                stat["fail"] += len(batch)
+                st["fail"] += len(batch)
                 print(f"[sync] {reader} pages tar 流失败（{len(batch)} 文件）："
                       f"{r.stderr.decode()[:150]}", flush=True)
                 continue
-            tmpdir = f"{SYNC_ROOT}/tmp/pages_{group}_{reader.replace('-', '_')}"
+            tmpdir = (f"{SYNC_ROOT}/tmp/pages_{group}_"
+                      f"{reader.replace('-', '_')}")
             os.makedirs(tmpdir, exist_ok=True)
             p = subprocess.run(["tar", "-xf", "-", "-C", tmpdir],
                                input=r.stdout, capture_output=True)
             if p.returncode != 0:
-                stat["fail"] += len(batch)
+                st["fail"] += len(batch)
                 continue
             for rel, member in zip(batch, members):
-                stat[_publish_page(state, group, tmpdir, member, rel,
-                                   want[rel])] += 1
+                st[_publish_page(state, group, tmpdir, member, rel,
+                                 want[rel])] += 1
+        return st
+
+    threads: list = []
+    results: dict = {}
+    for reader, items in by_reader.items():
+        def _run(rd=reader, it=items):
+            results[rd] = _reader_pull(rd, it)
+        t = threading.Thread(target=_run)
+        t.start()
+        threads.append(t)
+    for t in threads:
+        t.join()
+    stat = {"ok": 0, "bad": 0, "empty": 0, "dup": 0, "fail": 0}
+    for st in results.values():
+        for k in stat:
+            stat[k] += st[k]
     return stat
 
 
