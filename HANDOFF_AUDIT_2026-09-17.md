@@ -155,10 +155,21 @@ audit_join2.py cos_deepcheck.py audit_blob_magic.py(旧版cosfs方案,弃用)`�
 
 ## 8. r1-r20 并行恢复手册（人工执行，按序）
 
+**网络前提（2026-09-17 实测）**：训练机 lake **无外部出口**——GitHub
+DNS 不通、COS 域名与 IP 直连均 000。因此：
+- lake 只能做**离线计算**（join2 等，需先把 $A 工件拉到 /yzp，且
+  /yzp 仅剩 **5.1TB**——重收的原图目标存储必须是 COS blobs，不能写 /yzp）；
+- **剩余嗅探（~65 万行 Range-GET）与后续 Wikimedia 重收必须在有出口的
+  机器跑**（r1-r20 若为出口机型则承担全部线上步骤）。每台 r 机启动前
+  先跑 §5.0 curl 自检（期望 206），不通的机器别进队列；
+- 文档+代码已直递 lake：`/yzp/zhaozy/yangzepeng/0905/demiwtg-data/`
+  （`HANDOFF_AUDIT_2026-09-17.md` + `audit/*.py`）。lake 无 GitHub 出口，
+  **git pull 不可用**，以直递内容为准（与 sg 侧 origin/main bf73857 同源）。
+
 0. 前置：每台 r 机验证匿名 COS 访问（§5.0 的 curl，期望 206；403 则
    整套审计只能从白名单节点跑）。挂载或可访问
    `/lhcos-data/demiwtg-data/audit/kb_images_20260917/`（下称 $A）。
-   `git pull` 本仓库取 `audit/` 脚本。
+   代码取 `audit/` 目录（或从 lake 的 /yzp 仓库副本分发）。
 1. **领任务**（每台 r 机 k=0..19 不同值）：
    ```bash
    mkdir -p ~/kbstate && cd ~/kbstate
