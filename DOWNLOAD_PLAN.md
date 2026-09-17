@@ -1,158 +1,107 @@
-# 下载计划（2026-09-17 起版 · 活文档）
+# 下载计划（2026-09-17 重构版 · 活文档 · 三大批次）
 
 > 维护方：训练机（lake，代码/文档权威源，仓库 `demiwtg-data`）
 > 执行舰队：r1-r20（p1-p5 已于 2026-09-17 退役，全部数据已保全 COS）
 > COS 桶：`lhcos-368f6-1256345599`（ap-singapore），树根 `lhcos-data/demiwtg-data/`
-> 通道实测（2026-09-17）：r 机匿名读 COS ✓（206）；写走签名（`/tmp/cos_creds`，r5-r9 已补发）
+> 通道实测（2026-09-17）：r 机匿名读 COS ✓（206）；写走签名（`/tmp/cos_creds`）
+>
+> **🔴 红线（2026-09-17 用户指令）：一切图片下载须等用户放行。本计划当前阶段只产出下载清单。**
 
-## 〇、总览
+## 〇、总览：三大批次
 
-| 部分 | 内容 | 体量预估 | 前置条件 | 状态 |
-|---|---|---|---|---|
-| 一 | kb 图池毒行重收 + 缩略图升级 | ~6-10TB | 无（清单已就绪） | **可执行** |
-| 二 | wm 中文概念补图续跑（wk_backfill） | ~2TB | 无（断点在 COS） | 可执行（在途接续） |
-| 三 | iNat 采图 | 待出清单 | ③-1 元数据关联差一步 | 排产前先做清单 |
-| 四 | Smithsonian media 直取 | 待 v2 解析出清单 | ③-2 | 待解析 |
-| 五 | OpenImages 图片 | ~500GB | P646 消歧命中率达标 | 门控未过 |
-| 六 | Met 采图 | 小（24.8万 PD 对象） | met_fetch.py 加前缀 | 小活 |
-| 七 | 挂起项 | WIT 27GB 等 | 解封/凭证 | 等外部 |
-
----
-
-## 第一部分：kb 图池毒行重收 + 缩略图升级（最高优先级）
-
-### 1.1 事实基础（2026-09-17 全量审计定案）
-
-887 万行账本（8,861,354 行 / 8,866,002 对象 / 0.772TB）经**全量字节级嗅探**：
-
-- **毒行 7,904,315 行**（89.2%）：内容为 Wikimedia 429 错误页（err_code=429 × 7,904,265，
-  99.999%），账本名义字节合计仅 16.9GB（每行 ~2.1KB）。
-- **真图 957,039 行**（10.8%）：>6KB 大图 930,104 + ≤6KB 小真图 26,934
-  （2 万大档抽样仅 1 个 HTML，0.005%，上界验证通过）。
-- 异常行（empty/missing/err）**0 行**；账本×库存 missing=0（join1）。
-- 污染时间窗：**09-12 ~ 09-14**（4.65M / 3.04M / 0.22M，三天占 99.96%）；
-  账本十等分每档 7.7-8.2 万毒行均匀分布——全池性，非局部。
-- 根因：旧版 `flow_images_batch.py` 不查 HTTP 状态码（已修复入库，
-  冒烟 `smokes/download_guard.py` 9 断言全过）。
-
-### 1.2 重收清单（输入，全在 COS）
-
-| 清单 | 路径（`lhcos-data/demiwtg-data/` 下） | 行数 | 说明 |
+| 批次 | 内容 | 体量 | 状态（2026-09-17 晚） |
 |---|---|---|---|
-| ① 毒行 | `audit/2026-09-17/poison_html_rows.jsonl.gz` | 7,904,315 | 1GB，行内含 err_code |
-| ② 缩略图 | `node-backup/2026-09-17/p5/demi/raw/state/thumb1200_rows.jsonl.gz` | 340,951 | 真图但降级存了 1200px，升 orig |
-| ③ 异常行 | `audit/2026-09-17/poison_other_rows.jsonl.gz` | 0 | 空文件，无需处理 |
+| **第 1 批** | kb 图池毒行重收 + 缩略图升级 + wm 中文补图续跑 | ~6-10TB + ~2TB | 毒行/缩略清单就绪**待放行**；wm 补图在途（20 机 fleet_curl，调度器已随 p5 退役，自然收尾） |
+| **第 2 批** | iNat / Smithsonian / OI / Met 四源（先挂载出清单再采图） | OI ~500GB；SI/iNat 待清单；Met 小 | 挂载进展见 §二：**Met ✅ OI ✅**，SI 8 机分片 🏃，iNat 抽取 🏃 |
+| **第 3 批** | SDC 新图（fetch_list 2026-09-17 03:24 终版） | ~21TB（原图口径） | 等**原图 vs 缩略**决策 + 放行（与第 1 批 WM 任务串行，fleet_curl 收尾后） |
 
-去重任务数 ≈ 7,904,219（(qid, commons_file) 口径，与行数基本 1:1）。
-
-### 1.3 执行工具与口径
-
-```bash
-# ① 毒行重收（每台 r 机一片，i=0..N-1）
-PYTHONPATH=<repo> python3 backfill_orig.py \
-  --tasks-file /path/poison_html_rows.jsonl.gz \
-  --blobs-root <COS 写通道，见 1.5> \
-  --manifest qid_images-backfill-poison-shard-i.jsonl --shard i/N
-
-# ② 缩略图升级
-PYTHONPATH=<repo> python3 backfill_orig.py \
-  --ledger .../kb/qid_images.jsonl.gz --tier thumb1200 \
-  --blobs-root <同上> \
-  --manifest qid_images-backfill-thumb-shard-i.jsonl --shard i/N
-```
-
-- 采集口径（修复后）：原图直取（`info.url`，不降级）、200 校验、
-  429 按 RETRY_BACKOFF 退避、HTML 首字节拦截（`HTML_ERR_HEADS`）、
-  新计数 `miss_html`（>0 即又被限流，立即降速）。
-- 64MB 封顶仍在：巨物全景图（原缩略图通道服务的那批）会认缺；
-  如必须收，加 `--hard-cap-mb` 并核算内存 = dl_conc × cap。
-
-### 1.4 排产纪律（血泪红线）
-
-- **礼貌上限 ≤8 机 × 2rps** 起步（25 机 × 4rps 曾触发 429 连坐，即本次事故根源）。
-- 分批放量：先 1 机 × 1 万行试跑 → 验收（miss_html=0、sha 回读抽检）→ 再放量。
-- r 机磁盘小（40-60GB）：产物**直写 COS**，不留本地大文件。
-- 双实例教训：同一 shard 只允许一个采集进程（发射脚本加锁/先 pgrep）。
-
-### 1.5 COS 写通道（r 机无 cosfs，二选一）
-
-- 方案 A（推荐）：给 backfill 落盘层加 `stream_cos.py` 签名直传适配
-  （模板已在 `audit/fleet/`，creds 各机 `/tmp/cos_creds` 已就位）。
-- 方案 B：r 机挂 cosfs（creds 有，但 cosfs 大文件直写静默截断坑，
-  >100MB 必分块+读回校验——不推荐重收这种海量小文件场景之外使用）。
-
-### 1.6 体量与容量预估
-
-- 毒行重收：7.90M × 原图均值（数百 KB 量级，参照真图均值 ~800KB 打上限）
-  ≈ **2.4 - 6.3TB**。
-- 缩略图升级：340,951 × >10MB 原图 ≈ **≥3.4TB**。
-- 合计 **~6-10TB** 级；开跑前核 COS 容量与带宽预算，先出试跑实测均值再精算。
-
-### 1.7 验收与收尾（重收完成后）
-
-1. 复查：对重收 blob 重跑 `cos_sniff` 抽样（HTML 命中应 = 0）+
-   `cos_deepcheck`（400 sha + 300 PIL）补完整性基线。
-2. 并账：同 (qid, commons_file) 保 tier=orig 新行，剔旧毒行/旧行。
-3. 清理（按引用计数，勿整前缀 rm）：毒 blob 7,904,311 个唯一 sha、
-   孤儿对象 43,015 个（2.24GB）、0 字节残骸对象 1 个、撕裂账本行 1 条。
-4. 释放空间回蘸：清完后桶内 kb 树应回落到 ~1TB 量级（真图）+ 新重收增量。
+**决策队列（按阻塞面排序）**：
+1. 概念集放宽（影响第 2/3 批清单规模——建议在 SI/iNat 清单定稿前拍板）
+2. Wikimedia 全局礼貌预算（第 1 批毒行重收 + wm 补图 + 第 3 批 SDC 同打 WM，须全局串行记账）
+3. 湖侧容量口径（湖 /yzp 仅 ~5T 空闲 vs 第 1 批 6-10TB + 第 3 批 21TB；桶 256T 无压力，需定"哪些回湖"）
+4. OI 500GB 采不采（命中率已出：89.4% 类挂载 / 289 万图）
+5. SDC 原图 vs 缩略（`hist_ledger_stats.py` 可出三档 TB 数）
+6. 桶根脏树 ~200GB 清理（`demiwtg-data/` 根级误传副本，实测仍在）
 
 ---
 
-## 第二部分：wm 中文概念补图续跑（wk_backfill，在途接续）
+## 一、第 1 批：kb 图池修复与补图
 
-- 现状：p2/p3/p4 已下线，三台各自完成 1,294+ / 4,074 行（wm_20/21/22 三片），
-  **断点清单（done/dead）与候选已保全 COS**：
-  `node-backup/2026-09-17/p2|p3|p4/wk_backfill/`。
-- 主候选池：`node-backup/2026-09-17/p5/candidates.jsonl.gz`（1,958,026 行）。
-- 工具：`fleet_curl.py`（curl 串行驱动，防护齐全：200 校验 + SHA256 复验 +
-  20MB 上限 + done/dead 幂等）——已验证不会重蹈 429 落库覆辙。
-- 接续方案：r 机领 wm 分片 + 断点，`--out-dir` 指向新 run 目录，
-  产物同样直传 COS（同第一部分通道）。
-- 注意：p2/p3/p4 已下载未发货的 ~11GB 图片本体已随机器释放放弃
-  （done 清单在，可重下，无净损失）。
+### 1-1 毒行重收 + 缩略图升级（最高优先级，清单已就绪）
 
-## 第三部分：iNat（先清单后下载）
+事实基础（2026-09-17 全量字节级嗅探定案）：887 万行账本中毒行 7,904,315（89.2%，err=429 占 99.999%），真图 957,039；污染窗 09-12~14；根因旧采集器不查状态码（已修复 + 冒烟 9 断言过）。
 
-前置：③-1 元数据关联差最后一步——用新版 `cos_cat.py`（带 Range 断点续读）
-在任一 r 机重跑 iNat tar 抽取（taxa/photos/observations CSV）→
-P3151+P225 双桥 join 概念集 → 产出采图清单后再排下载。
-原料：`datasets/raw/inat/` 33 块（已内容级验证）。
+| 清单 | 路径（`lhcos-data/demiwtg-data/` 下） | 行数 |
+|---|---|---|
+| ① 毒行 | `audit/2026-09-17/poison_html_rows.jsonl.gz` | 7,904,315 |
+| ② 缩略图 | `node-backup/2026-09-17/p5/demi/raw/state/thumb1200_rows.jsonl.gz` | 340,951 |
+| ③ 异常行 | `audit/2026-09-17/poison_other_rows.jsonl.gz` | 0（空） |
 
-## 第四部分：Smithsonian media 直取
+执行：`backfill_orig.py --tasks-file/--tier`，r 机分片；礼貌红线 **≤8 机 × 2rps 起步**（25 机 × 4rps 曾引发 429 连坐）；先 1 机 × 1 万行试跑验收（miss_html=0 + sha 回读）再放量；产物直写 COS（stream_cos 签名直传）；体量预估 2.4-6.3TB（毒行）+ ≥3.4TB（缩略升级）。
+收尾：重收 blob 复嗅探抽样（HTML 应=0）→ 并账（同 (qid,commons_file) 保 orig 新行）→ 按引用计数清理毒 blob 7,904,311 + 孤儿 43,015 + 0B 残骸 1。
 
-前置：③-2 v2 解析（JSONL 流式，按新认知重写 `smith_parse.py`，
-产出 id/title/unitCode/license/digital_assets/name 表）→
-记录↔media 文件名映射确认后，从同桶 `media/` 前缀匿名 S3 直取。
-metadata 已全量在 COS（13,608 片）。
+### 1-2 wm 中文概念补图续跑（在途接续）
 
-## 第五部分：OpenImages（消歧门控）
+- 主候选池 `node-backup/2026-09-17/p5/candidates.jsonl.gz`（1,958,026 行）；断点 done/dead 在 `node-backup/2026-09-17/p2|p3|p4/`。
+- 工具 `fleet_curl.py`（200 校验+SHA256 复验+20MB 上限+幂等）——当前 20 机在跑（各领 ~4K 行分片，r11 已近完）。
+- 调度器（原 p5）已退役，**不会再派新分片**；各机跑完自然结束。
+- p2/p3/p4 未发货的 ~11GB 已随机器释放放弃（done 清单在，可重下）。
 
-MID→QID 消歧（P646 一对多；优先级：EN sitelink → P279 通用 → 字符串相似度）。
-产出命中率报表 → 用户拍板是否启动 ~500GB 图片下载。
-输入全在 COS：oidv6-class-descriptions + oidv7-train-annotations + concept_xref。
+---
 
-## 第六部分：Met 采图（小活）
+## 二、第 2 批：四源融合挂载 → 采图清单（先融合后下载）
 
-`met_fetch.py` 两段式采集器已就绪，**改 blob key 加 `lhcos-data/` 前缀**后即可跑。
-MetObjects.csv 24.8 万 PD 对象 × Artist ULAN（P245 桥）+ Object Wikidata 直挂 461。
+### 融合方法与状态（2026-09-17 晚实况）
 
-## 第七部分：挂起项
+| 源 | 桥 | 状态 | 产物（COS `kb/batch2/<源>/`） |
+|---|---|---|---|
+| Met | P245(ULAN) + Object Wikidata 直挂 | ✅ **完成** | fetch_list：484,956 对象→PD 248,472→**挂载 56,819(artist)+461(direct，与基准分毫不差)** 行；URL 由 met_fetch 两段式 API 取 |
+| OpenImages | P646 消歧（EN sitelink 优先；P279 不可得已记录） | ✅ **完成** | 19,994 类挂 17,855（89.4%）→扫 4,210 万标注→**2,889,193 图**；fetch_list 133MB + mid_map + disambig.json |
+| Smithsonian | scientific_name→P225 学名桥 + 名字→概念标题桥 | 🏃 8 机分片（r2/r3/r4/r6-r9/r13，两遍扫+全局建桥，~40 分钟） | 阶段1 记录表 1,733 万已入；media 直下 URL 在记录内（`ids.si.edu/ids/download`）+ 每 media 独立 license |
+| iNat | P3151(taxon_id) + P225 双桥 | 🏃 r5 流式抽取 | observations.csv ✅（**2.76 亿行/32GB**→13.6GB gz 入 COS，含 taxon_id）；photos/taxas 抽取中；join 待照片列头 |
 
-- WIT 27GB：GCS 对机房 ASN 级限速 ~1KB/s，等解封。
-- ImageNet / VisualSem / Rijksmuseum / Europeana：等 HF token / 作者密码邮件 / API key。
-- 概念集放宽（未决项①）：放宽后 SDC 可挂载边 +40%、Met 直挂 461→4.6万——
-  影响多部分清单规模，建议在各部分出清单前拍板。
+目录结构与机器纪律见 git 历史"批次 2 融合执行设计"节（本版并入上表）；内存纪律：概念集 220M 位图（27MB）防 r 机 OOM。
+
+### 第 2 批执行历史坑（本轮新增，写代码前必读）
+
+位图上限 140M 不够（Q 号已超，扩 220M）；bytes/str 混用；SI media 路径在 `content.descriptiveNonRepeating.online_media.media[]`（连错两层）；SI 学名真字段 `indexedStructured.scientific_name`（taxonomicName 是分类路径串）；MetObjects CSV 无图列（两段式 API 取）；pkill 自匹配再犯两次；r 机解 iNat 须流式边解边压（三 CSV 解压 ~45G 超单机盘）。
+
+---
+
+## 三、第 3 批：SDC 新图（fetch_list 已就绪，待决策）
+
+- **清单**：`kb/sdc_fetch/fetch_list.tsv.gz`（125MB，2026-09-17 03:24 终版）——4,736,141 文件 / 5,415,631 边 / 877,720 概念 / img_size 合计 **20,973GB（原图口径）**；漏斗数与上游文档分毫不差。
+- **关系现状**：SDC 挂老池的 2,288,880 边已入库（sdc_attach，零下载，实测行数吻合）；本批下载的是**排除已有后的新图**，下完账本入库（parts 收集→**去重合并**→`kb/qid_images_ext/sdc_fetch.jsonl.gz`）SDC 线即闭环。
+- **断点**：test 期 10,253 行（各机 `~/sdc_fetch/ledger.jsonl` + COS parts），幂等续跑。
+- **工具**：`sdc_fetch_fleet.py` v3（MD5 路径 URL→sha256→COS blob→双落账本；分片必须 `I/N` 完整格式）；发射/停止脚本 `fleet_relaunch.sh`/`fleet_stop.sh`（纯 r 机版，r1-r20 各领 `i/20`）。
+- **⚠️ 舰队已由 /23 重分片为 /20**（p1-p5 退役所致）：旧 done 集按机器本地 `orig_file` 记账，重分片后约 95% 已完成文件会换机重下（blob 内容寻址去重，无害），**各机 ledger 将出现跨机重复行（预期 ~1 万）**——收官合并必须去重，勿用裸 zcat 直灌：
+  ```bash
+  zcat parts/*.jsonl.gz | python3 -c '
+  import sys, json
+  seen = set()
+  for l in sys.stdin:
+      r = json.loads(l)
+      k = (r["qid"], r["orig_file"])
+      if k not in seen:
+          seen.add(k)
+          sys.stdout.write(l)' | gzip > kb/qid_images_ext/sdc_fetch.jsonl.gz
+  ```
+- **放行硬前置**：r1-r20 与第 1 批 wm 补图（fleet_curl）**同机**——放行前须确认 fleet_curl 已全部自然收尾（`fleet_relaunch` 只清 sdc 自己的进程，不会动它）；两线并发即双打 WM，必触发 429 连坐。
+- **前置决策**：①原图 vs 缩略分层（改缩略改动小：fetch_bytes 加 thumb 分支+账本 tier 字段；`hist_ledger_stats.py` 可出精确 TB 数）②Wikimedia 限流现实：**单 IP ~0.7 张/秒**（Retry-After:11），r1-r20 满编 20 机 ≈14 张/s，全量 **≈3.9 天**连续；礼貌预算与第 1 批共享（WM 任务全局串行）。
+
+---
+
+## 四、挂起项（用户裁定 2026-09-17：五源搁置不追）
+
+WIT 27GB（GCS ASN 限速）；VisualSem（图源即 Commons，重叠最高）；Rijksmuseum / Europeana（博物馆轴已有 Met+Smithsonian 覆盖）；ImageNet（唯一留意：图多来自 Flickr 等非 Commons 渠道、WordNet 标签独立，未来扩类别标注再单独立项）。凭证到手也不主动开线。
 
 ---
 
 ## 附：公共约定
 
-- 凭证：各 r 机 `/tmp/cos_creds`（70B sid:key；母本备份训练机
-  `/root/cluster_backups/`）；`/tmp` 可能被清理，丢了从备份补发。
-- 发货/验收脚本模板：`audit/fleet/`（stream_cos 签名直传、head_cos 校验、
-  ship_node 幂等发货——同尺寸跳过即验证通过）。
-- 巡检错峰：对舰队并发建连会触发代理 CONNECT 惩罚，顺序 + sleep；
-  ssh 偶发黑洞是 pconn 代理层问题，命令一律包 `timeout` + 重试。
+- 凭证：各 r 机 `/tmp/cos_creds`（母本 `/root/cluster_backups/`）；丢失从备份补发。
+- 发货/验收：`stream_cos.py` 签名直传 + `head_cos`/湖侧签名 HEAD 读回校验（同尺寸跳过=验证通过）。
+- 巡检错峰：代理惩罚突发 CONNECT，顺序 + sleep；ssh 黑洞包 `timeout` + 重试。
+- **图片下载一律等用户放行**；WM 类任务全局礼貌预算串行。
 - 匹配检查用读回（cat|wc / md5），stat 相等 ≠ 内容正确。
-- 本文档更新随仓库走：改完 commit+push（训练机为权威源）。
+- 本文档随仓库走：改完 commit+push（训练机为权威源）。
