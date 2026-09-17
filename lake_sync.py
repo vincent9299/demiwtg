@@ -61,9 +61,11 @@ SYNC_ROOT = f"{LAKE_ROOT}/sync"
 
 # 组定义：readers=可读该组共享桶的节点（lake 视角 ssh 别名），
 # blob_root=该组桶挂载内的 blob 根，ledger=组共享防重下账本（桶内）
+# 2026-09-17 舰队重编号：p5=sg-master(降级普通节点)、p1~p4=pipeline-a~d；
+# 湖机为唯一 master，全部走公网直连（见 ~/.ssh/config 头部对照表）。
+# cn 组（pipeline-e~i）2026-09-10 已释放，仅留档未删。
 GROUPS = {
-    "sg": {"readers": ["sg-master", "pipeline-a", "pipeline-b",
-                       "pipeline-c", "pipeline-d"],
+    "sg": {"readers": ["p5", "p1", "p2", "p3", "p4"],
            "blob_root": "/lhcos-data/demiwtg-data/datasets/demiwtg/blobs",
            "pages_root": "/lhcos-data/demiwtg-data/datasets/demiwtg/pages",
            "ledger": "/lhcos-data/demiwtg-data/meta/synced_shas.jsonl"},
@@ -74,8 +76,8 @@ GROUPS = {
            "ledger": "/lhcos-data/demiwtg-data/meta/synced_shas.jsonl"},
 }
 NODE_GROUP = {  # 清单来自哪台 → blob 在哪个组的桶
-    "sg-master": "sg", "pipeline-a": "sg", "pipeline-b": "sg",
-    "pipeline-c": "sg", "pipeline-d": "sg",
+    "p5": "sg", "p1": "sg", "p2": "sg",
+    "p3": "sg", "p4": "sg",
     "pipeline-e": "cn", "pipeline-f": "cn",
     "pipeline-g": "cn", "pipeline-h": "cn", "pipeline-i": "cn",
 }
