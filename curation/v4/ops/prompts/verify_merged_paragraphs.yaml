@@ -1,0 +1,10 @@
+version: verify-merged-paragraphs-v2-pixels-and-topic
+instruction: |
+  只核验topics中的输出block，reviews的block_id集合必须恰好等于expected_block_ids，每项仅一次。items是原段落参考材料，不是待核验输出，禁止对items返回review。
+  核对整合后的每个文字block与原始passages，返回reviews:[{block_id,status:"supported"或"deferred",reason}]。
+  逐项检查实质陈述、引文、必要条件及范围，尤其一般类别到具体对象的越界、对历史事件的过度概括，以及合并时丢失的条件。
+  不要因为整段有一条引文就批准未获支持的其他陈述。
+  本轮提供实际图片；直接核对图片观察及image_refs指向的视觉正文，不沿用上游身份结论。文字允许由citations或image_refs支持；视觉证据不能证明不可见属性。
+  所有block各返回一次。不因单块失败否定无关内容。仅与来源一致不构成独立事实核验。
+  同时返回topic_reviews:[{topic_index,status:"supported"或"repair"或"deferred",reason}]，从0起覆盖每个主题。
+  根据本轮支持的剩余块判断：标题必须准确且有正文支撑，正文独立可读，配图与正文有关且不冒认身份；缺正文、标题失效或时间指代不全则repair，无可靠相关内容则deferred。

@@ -1,0 +1,20 @@
+version: image-relevance-v2
+instruction: |
+  在知识提炼之前筛选目标概念的图片材料。查看每张实际图片，先描述画面，再判断概念关系。
+  概念身份说明用于消歧；来源标题、图注和机器预标注只是线索，不能替代像素。
+  每个输入image_id恰好返回一项images：
+  {image_id, relation: direct|background|unrelated|uncertain,
+   concept_relation: target|related_activity|text_only|namesake|unrelated|uncertain,
+   decision: keep|exclude|pending,
+   observability: usable|limited|unusable, reason, visible_information, limitations}。
+  visible_information只描述实际可见的对象、动作、图形或文字，不照抄预标注或猜测不可见内容。
+  target：目标本体或表达目标的图解可辨；related_activity：可见与目标有关的操作、制作、使用、状态或关系。
+  text_only：只在标题/标签/图注中提及目标，画面没有目标相关信息；namesake：同名但不同概念，画面没有目标相关信息。
+  namesake/text_only/unrelated必须decision=exclude、relation=unrelated。不能将同名作品、商标或文字标签当作目标本体。
+  target必须relation=direct，related_activity必须relation=background；有可观察信息时decision=keep。
+  画面清楚但无关仍可observability=usable；不要用unusable代替“不相关”。
+  身份或关系无法确认时concept_relation=uncertain、relation=uncertain、decision=pending，说明缺少什么。
+  清晰度不足以观察相关内容时decision=pending、observability=unusable，不作为无关排除。
+  不能按海报、插画、照片等形式一刀切；图中确有目标信息仍可保留。概念本身是作品、文字或符号时，相关文字/图形也可能就是目标本体。
+  不凭美观、水印或尺寸排除。未认出来不等于无关。不能仅凭相近外形认证细粒度身份。
+  不要求支持现成知识，不提前提炼知识。保留有信息的相关背景；空泛背景或仅名称关联不能送入联合提炼。

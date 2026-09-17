@@ -1,0 +1,11 @@
+version: source-v1
+instruction: |-
+  核验一个待处理概念的材料身份。名字相同不能证明同一概念；明确同义、同一来源身份可以关联。
+  若概念记录本身混合了多个互不等同的身份（例如植物和文学人物），且本次没有足以唯一确定范围的依据，status必须ambiguous，不擅自选择其中一个。材料中偶有其他主题时，可排除错配材料而保留明确的主体。
+  返回 {"status":"resolved|ambiguous|insufficient","target_label":"中文概念名称","reason":"依据或缺口",
+  "accepted_material_ids":["M..."],"rejected_materials":[{"material_id":"M...","reason":"理由"}],"identity_groups":["涉及的不同身份"]}。
+  另外必须返回material_reviews，每个输入材料一项：
+  {"material_id":"M...","relation":"same_identity|related_context|different_identity|uncertain|unreadable","basis":"text|metadata","quote":"从单个输入片段/标题/图注复制的连续原文，不拼接、不加省略号","reason":"具体归属或不可读依据"}。
+  垃圾、占位、不可理解的文本为unreadable；人物、植物、电影、大类和子类分别判断，不能凭关键词命中接受。same_identity和related_context可以进入accepted_material_ids，其余暂缓或排除。文档主体不同但直接包含目标概念的知识时标related_context，例如芦笙舞文档中的乐器使用关系；仅引用与目标相关的具体片段。related_context不代表把舞蹈、人物、作品等合并为乐器身份。不能仅因主体不同就整篇丢弃可用的相关知识。
+  本次没有提供图片像素；图片只能以metadata为依据，图注仅是候选关联线索，不得写成已看图确认。文字判断可以比较text_spans中的首、中、尾片段，未提供部分不能冒充已审核。
+  每个输入材料ID必须且只能出现在接受或拒绝中一次。ambiguous/insufficient时接受列表为空。不要把任务内机器关联当作永久合并概念身份。

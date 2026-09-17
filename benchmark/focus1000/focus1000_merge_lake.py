@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""focus1000 生成图并入数据湖：blobs 内容寻址落盘 + instance_images.jsonl 追加。
+"""focus1000 生成图并入数据湖：blobs 内容寻址落盘 + images.jsonl 追加。
 
 契约（AGENTS.md 2.1/2.2）：
 - blobs/<aa>/<sha256>.<ext>，先算内容哈希，同名已存在则跳过（只增不删）；
-- 清单走 v2 拍板：只写 instance_images.jsonl（legacy images.jsonl 不碰，避免双写漂移）；
+- 清单走 v2 拍板：只写 images.jsonl（统一权威主清单，2026-09-08 由
+  instance_images.jsonl 更名而来；v1 时代同名旧文件已退役归档
+  state/taxonomy/retired_meta/，与本文件无涉）；
 - 生成图行保持既有 schema 子集：source=qwen-image-3.0-pro 标识来源，
   无打标字段（caption/quality 任务已取消），landing/content_url 置 null；
 - 跨进程写锁用 .meta.lock（flock），写前扫描既有 sha 集合防重复。
@@ -27,7 +29,7 @@ RESULTS_F = DATA_DIR / "gen_results.jsonl"
 DATASET = REPO_ROOT / "datasets" / "demiwtg"
 BLOBS = DATASET / "blobs"
 META = DATASET / "meta"
-MANIFEST_F = META / "instance_images.jsonl"
+MANIFEST_F = META / "images.jsonl"
 LOCK_F = META / ".meta.lock"
 
 GEN_SOURCE = "qwen-image-3.0-pro"

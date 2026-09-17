@@ -13,7 +13,7 @@ docs 字段 join 进概念行，供详情面板展示。
 Generated artifacts (gitignored, NOT data) go to viewer/build/:
     build/taxonomy.js / build/concepts.js          sidecars (default)
     build/imgs.js                                    概念 → 图片索引（路径 + VLM 打分）
-                                                       （由 datasets/demiwtg/meta/instance_images.jsonl
+                                                       （由 datasets/demiwtg/meta/images.jsonl
                                                        ——统一权威主清单（2026-09-06 起，原 images.jsonl
                                                        已收官退役）——现场聚合，
                                                        每项 {p, km, ri, cap}：相对路径/kb_match/richness/caption，
@@ -30,7 +30,7 @@ Usage:
     python3 viewer/build_viewer.py --standalone --out my_viewer.html
 
 Regenerate after ANY change to taxonomy.json, concepts.json, the docs draft
-(state/collect/concepts_docs_draft.jsonl) or instance_images.jsonl.
+(state/collect/concepts_docs_draft.jsonl) or images.jsonl.
 """
 import argparse
 import json
@@ -45,7 +45,7 @@ DOCS_DRAFT = ROOT / "state" / "collect" / "concepts_docs_draft.jsonl"
 OUT_TAX = BUILD / "taxonomy.js"
 OUT_CONCEPTS = BUILD / "concepts.js"
 VIEWER = ROOT / "viewer" / "tag_tree_explorer.html"
-IMAGES_JSONL = ROOT / "datasets" / "demiwtg" / "meta" / "instance_images.jsonl"
+IMAGES_JSONL = ROOT / "datasets" / "demiwtg" / "meta" / "images.jsonl"
 BLOBS = ROOT / "datasets" / "demiwtg" / "blobs"
 IMGS_JS = BUILD / "imgs.js"
 
@@ -101,7 +101,7 @@ def build_sidecar():
 
 
 # ---------------------------------------------------------------------------
-# 实例原图索引：由 datasets/demiwtg/meta/instance_images.jsonl（统一权威主清单，
+# 实例原图索引：由 datasets/demiwtg/meta/images.jsonl（统一权威主清单，
 # 2026-09-06 起；原 images.jsonl 已收官退役）现场聚合，
 # 不再依赖派生索引文件（避免双份存储的一致性问题）。
 # 不复制/不缩图：imgs.js 只存相对路径 ../datasets/demiwtg/blobs/<aa>/<sha256>.<ext>
@@ -121,7 +121,7 @@ def _by_score(entries):
 
 def build_imgs_js():
     if not IMAGES_JSONL.exists():
-        print("[warn] instance_images.jsonl 不存在，imgs.js 未生成。")
+        print("[warn] images.jsonl 不存在，imgs.js 未生成。")
         return
     blobs_present = BLOBS.is_dir()
     if not blobs_present:
@@ -140,7 +140,7 @@ def build_imgs_js():
             if not rec.get("sha256"):
                 continue
             if rec.get("kb_match") is None and rec.get("richness") is None:
-                continue  # 精选口径：只收录 VLM 打标行（未打标原池在 instance_images.jsonl 里随取）
+                continue  # 精选口径：只收录 VLM 打标行（未打标原池在 images.jsonl 里随取）
             for name in rec.get("instances") or []:
                 idx.setdefault(name, {})[rec["sha256"]] = rec  # 同 sha 去重（存量遗留重复键）
     out = {}

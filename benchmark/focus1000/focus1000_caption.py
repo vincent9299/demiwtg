@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """focus1000 detail caption（任务2）：对 focus1000 池下载图片批量补 300-500 字细节描述。
 
-- 输入：instance_images.jsonl 中 focus1000 实例的行，全局按 sha256 去重，剔除短边 <200px；
+- 输入：images.jsonl 中 focus1000 实例的行，全局按 sha256 去重，剔除短边 <200px；
 - VLM：qianwen1 直连 qwen3.8-max（视觉输入，enable_thinking=false 提速）；
 - 锚定：prompt 带实例名 + docs 层草稿知识节选，只描述画面可见内容；
 - 产物：data/focus1000/detail_captions.jsonl（sha256 键控断点续跑，不入 git）。
@@ -25,10 +25,13 @@ from pathlib import Path
 import aiohttp
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from curation.blob_presence import blob_shas  # noqa: E402
 DATA_DIR = Path(__file__).resolve().parent / "data"
 OUT_F = DATA_DIR / "detail_captions.jsonl"
 META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
-METADATA_F = META_DIR / "instance_images.jsonl"
+METADATA_F = META_DIR / "images.jsonl"
 FOCUS_F = REPO_ROOT / "state" / "collect" / "focus1000_instances.json"
 DOCS_DRAFT = REPO_ROOT / "state" / "collect" / "concepts_docs_draft.jsonl"
 BLOBS = REPO_ROOT / "datasets" / "demiwtg" / "blobs"
@@ -83,6 +86,7 @@ def load_focus_and_docs():
 
 
 def load_targets(focus):
+    have = blob_shas()   # 全量 preloss 清单：只收 blob 实存行（缺图行待集群补采）
     rows = {}
     with open(METADATA_F, encoding="utf-8") as f:
         for line in f:
@@ -91,7 +95,7 @@ def load_targets(focus):
             hit = [i for i in insts if i in focus]
             if not hit:
                 continue
-            if r["sha256"] in rows:
+            if r["sha256"] in rows or r["sha256"] not in have:
                 continue
             w, h = r.get("width") or 0, r.get("height") or 0
             if min(w, h) < MIN_SHORT_SIDE:

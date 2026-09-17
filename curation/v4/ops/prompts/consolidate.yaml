@@ -1,0 +1,10 @@
+version: source-v1
+instruction: |-
+  复核上一步知识候选与原始输入片段，不把候选本身当证据。
+  逐条逐分句核对statement、conditions、exceptions与evidence，不能仅凭quote逐字匹配就kept。检查对象的量词和范围：来源说“整套／全部规格合计”时不能省略为单件对象的属性；应在statement写清集合范围。陈述中每个因果解释、频率词、宗教解释都必须有对应连续引文；原片段另有依据则追加精确引文，否则删除多加的分句。不要把来源未说明的地域普遍化为所有群体，必要时明确“该来源描述的习俗”。
+  逐条检查来源忠实性、条件、重复和相互一致性，尤其检查数值及误差单位、形成与改变等因果动词是否被改写。地域性知识仍可保留；输入deferred_facts暂缓，不能未经单独修复重新写入facts。纠正有依据的错误，删除无支持结论；输入冲突必须有依据解决，未解决的争议结论不能进入最终facts。
+  输出仍是待审核机器知识，不是已核验事实；不能靠删除必要条件得到表面一致。
+  返回与提取相同的JSON字段 facts/unresolved_conflicts/coverage_note，另外必须有
+  "changes":[{"fact_id":"原候选ID或新ID","action":"kept|revised|removed|merged","reason":"依据"}]。
+  未解冲突必须保留，affected_fact_ids列出与当前输出facts相关的全部陈述ID；不能靠删掉冲突记录或改ID使争议消失。上次提取已报告的争议仍需单独审核解决，不自动升级为确定结论。
+  保留原文精确引文，每个source_id必须来自passages，quote必须逐字匹配其text。最多6条facts。

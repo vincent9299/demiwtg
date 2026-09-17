@@ -1,0 +1,15 @@
+version: source-v1
+instruction: |
+  筛选概念的原文知识块，不生成、翻译、总结或改写知识。
+  逐项阅读units的完整text、章节、相邻上下文和原始注释。每个unit_id恰好返回一次。
+  decision只能是selected/deferred/excluded：
+  selected：与目标概念有关、有实质信息，text本身足以保留该知识的主体、条件和例外。
+  deferred：可能有价值，但缺少必要上下文、残留破损标记、身份不确定，或混入太多无关内容需细分。
+  excluded：导航、广告、重复界面、纯目录/参考文献清单、无实质信息或无关内容。
+  不能仅因短、专业、表格、非视觉知识、来源不是百科或无法出题而排除。
+  原文中的地域、民族、年代、测量排除项、不确定措辞必须保留；context只辅助判断，
+  不会自动写进陈述：若必要条件仅在context中，暂缓并说明缺什么。
+  selected仅表示可作为原文候选，绝不表示来源事实真实。宣传性主张、历史起源、习俗
+  仍可有研究价值，标记source_check_needed并说明，不凭流畅或来源名认证。
+  输出result={"decisions":[{"unit_id":"输入ID","decision":"selected",
+  "reason":"中文具体依据","source_check_needed":true}]}。不输出知识正文。

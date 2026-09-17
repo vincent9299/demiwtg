@@ -90,7 +90,7 @@ eval_codex_score.py aggregate --questions Q.jsonl --manifest M.jsonl \
 
 ### 步骤 6 compare——同题配对比较
 
-把两个模型在同一题上的 official_total 直接比较：左方高记 W（胜）、相等记 T（平）、右方高记 L（负）；产出 paired_scores.jsonl 与 report.json（两模型均分、分差、W/T/L 及分组对比）。任一模型该题 validity 非 ok，则该题成对排除并记入 excluded。
+把两个模型在同一题上的 official_total 直接比较：左方高记 W（胜）、相等记 T（平）、右方高记 L（负）；产出 paired_scores.jsonl 与 report.json（两模型均分、分差、W/T/L 及分组对比）。QIB 主口径中，任一模型该题为 invalid_question 或 judge_unscorable，则该题成对排除并记入 excluded；model_failure 按 0 分计入配对比较。官方 rubric 对照臂维持原有只比较 validity=ok 的行为。
 
 ```bash
 eval_codex_score.py compare --questions Q.jsonl \

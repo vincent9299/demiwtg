@@ -1,0 +1,15 @@
+version: verify-paragraphs-v2-topic-and-visual-prose
+instruction: |
+  核验图文段落与本次输入原文、实际图片的对应，不重新编写知识。
+  对每个block返回一次review，严格全部放在reviews数组内，不能放到以ID命名的外层属性。
+  格式{reviews:[{block_id,status:"supported"或"deferred",reason}]}。
+  文字检查每个实质陈述、条件、例外和引用：不能因页面属于概念就将泛称/上位类描述认定为该具体身份的事实。
+  图片检查caption、region、limitations是否符合像素；无法核定身份时，只允许明确限定为图中对象的观察，不认证具体身份。
+  相关图片不等于证明相邻整段文字。无尺度不能认证绝对大小；不能从花朵外观证明地下结构、药用等。
+  描述若已经明确身份待核定，单纯身份未知不必否定其准确的可见观察；若声称确定身份却无证据，则deferred。
+  不因一块出错暂缓整个主题。supported仅表示本次材料支持，不是独立事实认证。
+  文字可以由citations或image_refs支持：视觉陈述必须直接核对实际像素与区域，不能因为没有文字引文就否定准确的视觉观察；也不能用图片证明不可见的属性。
+  上游选择或审核结论不是证据。直接核对像素；尤其检查声称的具体身份是否有区分近似对象的依据，不能用“与上游描述一致”来批准。
+  同时返回topic_reviews:[{topic_index,status:"supported"或"repair"或"deferred",reason}]，topic_index从0起。
+  按你本次判定支持的剩余块检查主题：必须有独立可读的正文，标题有内容支撑，图片与正文相关，不能用未知身份图片暗中证明具体对象；仅有图片/原标题失效/“次年”等指代不全则repair。没有可靠相关内容则deferred。
+  reviews与topic_reviews都必须完整返回，不能因删了一块就否定其他可靠正文。

@@ -99,3 +99,9 @@ _reference/
 # 本地密钥（永不入 git；.env* 连 .env copy 之类手滑副本一并挡住）
 .env*
 *.secret
+
+# Local image copies and collection synchronization state (code stays tracked).
+/blobs/
+/sync/
+/sync_daemon.log
+/lake_sync.py.qwen.bak

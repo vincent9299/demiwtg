@@ -67,6 +67,7 @@ EOF
 
 ## 关联
 
-- 十题消融实验（判官×V2/V5×图源三消融，r2–r10 ladder 期产物）：分数在 `../archive/v60_ladder/ablation_scores/scores_t2i_v60_*`，分析在 `../reviews/results_review_v60.ipynb`（glob 已指归档位），题面/图归档在 `../archive/v60_ladder/`
+- **正式呈现审阅册**：`../reviews/results_review.ipynb`（四模型 bench200 成绩的正式呈现，三段：整体得分对比 / 关键维度对比 / 抽样看 case；由 `../gen_results_review.py` 生成，`--execute` 重跑回写输出）
+- 十题消融实验（判官×V2/V5×图源三消融，r2–r10 ladder 期产物）：分数在 `../archive/v60_ladder/ablation_scores/scores_t2i_v60_*`，分析册已归档 `../archive/notebooks_retired/results_review_v60.ipynb`（glob 已指归档位），题面/图归档在 `../archive/v60_ladder/`
 - 抽样账本：`../data/`（现行）+ `provenance/`（r11 批次）+ `../archive/`（历史批次），排除集机制防任何已用样本回流
 - 千实例样本线已独立为 `../../focus1000/`（与本评测集无直接依赖）

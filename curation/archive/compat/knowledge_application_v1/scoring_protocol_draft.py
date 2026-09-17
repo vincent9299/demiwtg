@@ -1,0 +1,1 @@
+../../shared/scoring_protocol_draft.py

@@ -9,18 +9,18 @@ demiwtg/
 ├── viewer/                     # 【代码】查看器闭环：tag_tree_explorer.html + build_viewer.py + build/ 产物（gitignore；英文平行页已随 2026-09-06 统一版退役删除）
 ├── benchmark/                  # 【代码】评测基准：按三大题型拆成 vlm/、t2i/、edit/ 三子模块（抽样-出题-判分流水线 + reviews/ 下 question_dev/results_review notebooks）；评测数据不入 git：t2i=bench200/+archive/+data/，edit=无 data/ 层（批次目录、archive/、活素材全落子模块根，见架构决策 2026-09-05）；bagel/=第 4 场景（BAGEL-7B-MoT 官方基准评测：README/results_review.ipynb/gen+vlm 脚本入库，data/ 与 vendored 官方仓不入库）
 ├── taxonomy/                   # 【代码】标签体系维护与富化（audit_nodes / mount_map / gen_taxonomy_kb / gen_instance_kb / upgrade_v31；2026-09-05 还原盘起提升根目录，data/ 同名件为兼容 shim）
-├── curation/                   # 【代码】数据策展与检索接地（search_kb / annotate_backfill / focus_sample / migrate_concepts / en_entity_merge / meta_unify + 分析 notebooks；同上提升根目录）
+├── curation/                   # 【代码】V4策展编排（v4/，demiflow底座）＋公共预标注工具；历史代码按archive/pre_v1、v1、v2、v3、shared、legacy_tools归档
 ├── bagel/                      # 【子项目】Bagel 官方模型包（Bagel/ 训练/推理代码 + 权重区；2026-09-05 起入主仓——代码入库，Bagel/models 权重与 eval/vlm/data 重物 gitignore；见架构决策 2026-09-05）
 ├── modelhub/                   # 【子项目】LLM 网关（LiteLLM）+ 静态出口代理（mihomo）：本地 vLLM/Galaxy 直连、OpenRouter 走静态住宅 IP；独立仓库，整体不入主仓（见架构决策 2026-08-25）
 ├── .venv/                      # 【环境】项目公共 Python 环境（conda py3.10，torch 2.6+cu124；原 bagel/env，2026-08-24 提升为公共并由 env/ 改名；不入 git）
 ├── datasets/                   # 【纯数据】数据集根目录（一数据集一目录；原 data/datasets/，2026-08-24 升为顶层）
 │   ├── demiwtg/                #   自建数据集 demiwtg（硬约束见第 2 节）
 │   │   ├── blobs/              #     图片原始字节区（内容寻址，不可变，不入 git）
-│   │   └── meta/               #     真相区：instance_images.jsonl（统一权威主清单）+ taxonomy 两件套（taxonomy.json/concepts.json 入 git；2026-09-06 起中英统一，英文平行件与 alias_western 已退役；2026-09-07 instances.json 概念化为 concepts.json）
+│   │   └── meta/               #     真相区：images.jsonl（统一权威主清单，2026-09-08 由 instance_images.jsonl 更名）+ taxonomy 两件套（taxonomy.json/concepts.json 入 git；2026-09-06 起中英统一，英文平行件与 alias_western 已退役；2026-09-07 instances.json 概念化为 concepts.json）
 │   └── .../                    #   开源数据集落盘区（danbooru2024/coco2017 等，不入 git）
 ├── data/                       # 【兼容 shim】collect_v2.* import 面的 re-export 层（2026-09-05 还原盘布局适配：focus_sample/search_kb/llm_common/mount_map 转发顶层模块；infra/op_annotate 为缺失占位——真实现在 demiwtg-data 仓库；不放新代码，不入 git）
 ├── state/                      # 运行时状态，按模块归属分子目录（不入 git）
-│   ├── collect/                #   datasets/（下载过程脚本，只读归档）+ v1 遗留运行时状态（死信/health/runs，只读归档）+ concepts_docs_draft.jsonl（docs 层草稿）+ query_terms_cache.json（检索词运行时缓存）
+│   ├── collect/                #   datasets/（下载过程脚本，只读归档）+ v1 遗留运行时状态（死信/health/runs，只读归档）+ concepts_docs_draft.jsonl（docs 层摘要草稿）+ query_terms_cache.json（检索词运行时缓存）+ docs_clean/（历史清洗产物的兼容链接，已归档；新编排禁用）
 │   ├── dataset_index/          #   COCO 标注缓存
 │   ├── taxonomy/               #   taxonomy 模块 LLM 断点缓存与审计报告
 │   ├── curation/               #   curation 历史分析残留（标签树 CSV、watermark 实验产物等）
@@ -33,7 +33,62 @@ demiwtg/
 - `datasets/` 下**只是数据存储**：任何代码、页面、生成产物都不许放进去。
 - 代码只允许放在顶层 `taxonomy/`、`curation/` 与 `viewer/`、`benchmark/`（2026-09-05 还原盘起模块提升根目录；`data/` 为兼容 shim，不放新代码）。
 - 仓库顶层禁止新增散落的脚本或数据目录（`datasets/`、`data/`、`state/`、`logs/` 是明确登记过的例外；`bagel/` 为登记的子项目例外（2026-09-05 起入主仓），内部布局自治，不受本仓模块/数据边界规则约束，权重与评测数据等重物仍不入 git；`modelhub/` 为登记的独立子项目例外（LLM 网关 + 静态代理），内部布局自治，同不受约束；`.venv/` 为登记的公共环境例外，只放环境不放代码）。
-- 文档只有两份：`AGENTS.md`（约束）与 `README.md`（指针）。历史过程文档（docs/、子目录 README）已删除，**不再恢复**——过程记录看 git 历史。
+- 常规文档为 `AGENTS.md`（约束）与 `README.md`（指针）。**明确例外（2026-09-10，用户要求固化研究方向）：[`curation/DESIGN.md`](curation/DESIGN.md) 为 curation 模块知识核心集的长期设计约定。** 新增此例外的理由是防止后续策展、审核与出题偏离用户已确认的研究目标；不是恢复历史过程文档。其他历史过程文档（docs/、子目录 README）仍不恢复，过程记录看 git 历史。
+- **相关工作必读**：修改 curation 模块知识核心集的提取、筛选、审核及策展校准流程前，先阅读 `curation/DESIGN.md`。其中的研究设计约束适用于这些工作；存储和布局遵循本文件。当前代码并未全部符合设计约定，不得以现有实现反向替代设计标准。
+- **图片预标注入口（2026-09-10）**：`curation/image_preannotate.py`；用户已授权本地 8000 Qwen 小批验证后全量处理 images.jsonl 清单关联图片。协议与任务边界见 `curation/DESIGN.md` 第 11 节，状态与结果在 `state/curation/image_preannotation_v1/`，不回写权威清单或人工标签。
+
+### Curation归档与V4编排（2026-09-14，用户授权的架构调整）
+
+理由：用户要求历史实验按V1／V2／V3归档，V4独立，并在curation内使用已安装的demiflow编排。以下分工替代旧“curation根目录pipeline.py为现役入口”的说明；历史记录与评分不覆盖。
+
+- `curation/v4/`为新流程；入口`/yzp/zhaozy/yangzepeng/0905/env/bin/python -m curation.v4.flow`支持inventory／prepare／review材料准备；`-m curation.v4.pipeline`支持小批本地模型候选提取及逐阶段停靠、检查、续跑。业务算子、来源适配、材料契约均在此，不能依赖archive中的旧实验实现。用户本次明确要求先小批实现pipeline、逐过程审查，故接入现有本地Qwen，不启动正式出题或改评分，暂停notebook工作。机器候选不能自动转为已核验知识。
+- `curation/archive/pre_v1/`为首轮12题之前的核心集、校准与知识probe；`v1/`为首轮及非物体／场景补充；`v2/`为expansion20；`v3/`为version3_20；`shared/`为跨版本旧运行器、展示、诊断和未采纳评分草案；`legacy_tools/`保存此前_archived内容。不能把早期core_pilot_v3误当第三版20题。
+- `curation/DESIGN.md`继续是长期约定；`common.py`、`blob_presence.py`及图片预标注／守护／启动脚本继续服务当前任务，未当实验退役。现有服务不重启、不换模型；公共工具不依赖归档实验。
+- `curation/knowledge_application_v1`与`curation/_archived`为旧路径兼容符号链接；`curation.__path__`保留旧core／pipeline等导入兼容，不能将这些兼容入口误当V4实现。归档代码仅调整路径和可核验的冻结哈希兼容，不修改冻结题目、输出、评分或请求；原始源码快照与移动映射由`python -m curation.archive.manage verify`核验。
+- 运行数据仍在`state/curation/`；历史实验数据目录与case notebook原位置不变。V4试运行放`state/curation/v4/`。其中内部ID登记为新结构的试运行注册表，不修改现有concepts.json主键、权威taxonomy或新旧清单；全库身份合并／拆分与正式迁移另行实现。
+- 模型配置、输入、版本和状态按DESIGN第21节执行。demiflow并发与落盘成功不等于知识已核验；当前入口验证不宣称全库覆盖、COS取图接通或V4题目已完成。
+
+### 知识整理端到端入口约定（2026-09-14，用户明确更新）
+
+理由：旧小批使用了历史临时清洗文件，无法检验从采集材料到知识库的完整链路。当前概念知识整理的入口限定为datasets中的采集原始材料及必要元数据；整体目标输出为干净、可追溯、带审核状态的知识库，详见curation/DESIGN.md第25节。页面保存格式不一定是HTML，采集正文与派生文本必须区别。
+
+- 不将历史clean_docs、拼接摘要或旧候选当新编排输入；解析、规则清洗、过滤、去重等需要的能力重新编排为现役版本化算子，可复制改造旧代码，但不运行依赖archive的业务链。继续复用demiflow执行底座。
+- 历史4件清洗产物已移至state/curation/archive/legacy_processing/docs_clean_20260908/，原state/collect/docs_clean路径仅保留历史兼容链接，校验清单为同级docs_clean_20260908.sha256。旧脚本已归档不再迁移。旧实验可读，不修改冻结输入输出或评分。
+- 现役入口已移除clean_docs并拒绝用含其的旧材料包启动新提取；inspect/status仍可查看历史结果。新清洗和最终知识库验收尚未实现，不宣称已端到端完成。运行结果仍放state/curation，代码在curation，不回写datasets原始材料或迁移权威概念名契约。
+
+### 逐算子调试入口（2026-09-14，用户最新要求）
+
+用户已重新授权notebook，覆盖此前暂停决定。入口curation/v4/knowledge_debug.ipynb逐cell经demiflow运行真实业务算子；数据展示支持limit及固定种子抽样。源码与运行输出分别在curation和state/curation。新增流程内CleanMaterials（cleaning.py、knowledge_stages.py），在identity前从采集材料生成可追溯清洗版本，不读取历史clean_docs。清洗初版与审核限制见DESIGN第26节；默认notebook执行至清洗，模型步骤显式配置后逐cell调试，当前不宣称知识库端到端质量验收。此条更新上一节“清洗尚未实现”的状态，原始数据和历史实验仍不修改。
+
+### 采集记录数据流取代概念查询入口（2026-09-14，用户要求）
+
+现役入口改为`python -m curation.v4.record_flow`及`curation/v4/knowledge_debug.ipynb`。按采集文件逐条处理，顺序记录概念页面对应、附加已有概念关联，再通过可选ID／固定种子采样过滤；后续读取、清洗、材料关联和知识算子不接收入口ID列表。小批与完整文件处理共用实现，关闭过滤／采样／读入上限即可使用同一主线。记录与关联落盘state/curation，demiflow执行流式算子，不将全量材料装入列表。细节及当前语义覆盖缺口见DESIGN第27节；不宣称全库或跨窗口知识已核验。
+
+旧flow.py／pipeline.py查询批次入口保留历史兼容、status／inspect及共享实现，不能继续称为现役端到端主线。旧notebook保留在其历史run中的knowledge_debug_query_snapshot.ipynb；原始datasets、历史结果、评分和运行服务不改动。
+
+### 概念驱动知识整理，资料层共享执行（2026-09-14，用户再次明确）
+
+理由：用户确认业务主线为“概念→原始资料→多模态知识”，此前将避免重复扫描误解为以材料行决定业务入口。现役入口更新为`python -m curation.v4.concept_flow`，notebook仍为`curation/v4/knowledge_debug.ipynb`。此条覆盖上一节将record_flow作为业务主线的说明；其流式读取、磁盘索引、共享清洗、断点复用保留为底层能力。
+
+概念过滤／采样在资料关联之前执行；未入选概念不因共享资料自动进入任务，无资料概念保留缺口，未知／歧义材料单独保留待识别。资料和知识分别保存并关联，概念结果汇总不能替代跨材料语义整合。具体当前实现、标识及限制见DESIGN第28节。仅本流程冻结且解析器与原始文件版本一致的原始读取结果可复用，历史clean_docs和旧清洗／知识输出不作为这轮原始输入；原始datasets、评分、历史输出不改写。
+
+### 分类型Dataset与显式关联（2026-09-14，用户明确要求）
+
+理由：通用kind/record封装遮蔽概念、文档、图片的字段与关联过程。现役notebook和命令行转为`curation/v4/dataset_flow.py`，业务schema在`curation/v4/datasets.py`：分别保存概念、文档、图片、关联、全文、清洗、图片检查及知识表，字段直接可见；同schema分片可以进入同类Dataset。demiflow负责惰性Dataset与算子执行，已安装版本没有通用join API，因此使用显式SQL关联并将结果流交给demiflow，不伪称调用了不存在的API。concept_flow/record_flow保留原始读取及旧知识算子的内部兼容能力，不再作为业务表契约。
+
+原始完整字段在独立来源追溯存储中保留，不能把来源额外字段作为事实默默丢弃，也不让统一record封装贯穿业务算子。文档与图片分别关联，避免笛卡尔积；输入输出字段、关联键、未匹配行在notebook可看。知识输出仍是机器候选，身份及跨窗口整合限制见DESIGN第29节。原始datasets、已有实验及评分不改写。
+
+### 三条Dataset扩列、按需汇集（2026-09-14，用户采纳第三种方案）
+
+理由：用户认为第29节逐处理步拆表过散，明确选择概念、文档、图片分别处理／扩列，必要时才嵌套联合处理。现役交互入口仍为knowledge_debug.ipynb，使用column_flow.ColumnFlow。文档链实际经demiflow map_async连续读取、保存读取列、清洗、保存清洗列；图片链独立扩展字节检查列；概念选择和覆盖计数扩在concepts。关联索引、来源追溯和断点为底层实现，不作为必须逐表查看的业务主线。详情见DESIGN第30节。
+
+读取／清洗／图片检查的旧分步表名在新run中仅作兼容视图，不保存独立步骤输出。新run保留原始字段和完整扩列结果，不覆盖历史run。仅在需要身份匹配或多材料推导时按概念汇集，继续保留联合核验与知识审核边界，不提前把所有资料嵌入概念。
+
+### demiflow 原生算子主线，取消 SQLite（2026-09-14，用户明确要求）
+
+理由：用户要求使用 demiflow Dataset 算子串联，不再用 SQLite／SQL 实现资料关联和处理。现役入口更新为 `curation/v4/stream_flow.py:StreamFlow`（命令行 `python -m curation.v4.stream_flow`）与 `knowledge_debug.ipynb`，覆盖前述 column_flow／dataset_flow 主线决定。直接从原始 datasets 读入，概念、文档、图片分别扩列，必要时分批汇集。通用 join、reduce_by_key、group_batches、map_cached、checkpoint 已扩展到兄弟 demiflow 仓库并安装到公共环境，当前 local backend 采用可落盘排序和文件缓存，不调用数据库。具体语义和限制见 DESIGN 第31节。
+
+旧 SQLite 编排代码与运行保留历史兼容，不作为新主线输入。原始数据、blobs、旧实验、服务和评分不变。知识阶段沿用共享算子并保存文件，默认不重新发模型请求；本次执行方式修正不等于身份、冲突、图像支持及最终知识库质量已经验收。
 
 ## 1.5 标签体系数据契约（两类独立资产，定死；两文件同居 datasets/demiwtg/meta/）
 
@@ -75,7 +130,7 @@ concept = {
 - **`name` 全局唯一是硬约束**：一个概念一条记录；多处挂载表现为多个树节点的 instances 名单同时含该名字（行内 taxonomy 快照同步多路径）。
 - **退役字段（2026-09-07 概念化迁移，历史 schema 溯 git）**：`desc`（52,980 条）→ `state/collect/concepts_docs_draft.jsonl`（docs 层草稿：{name, kind: summary, body}；被消费后另批转正）；`query`（52,980 条）→ `state/collect/query_terms_cache.json`（{name: [检索词]}，采集 planner 冷启动先验——检索词从静态资产改为运行时状态）；`source` → 行内退役（迁移时分布存 concepts.json meta.source_stats：derived 330,842 / llm 54,262 / curated 158）。
 - **英文平行两件套已退役（架构决策 2026-09-06）**：EN 实体对齐后成为中文概念的 aliases 或独立概念，英文知识以别名形态存活；四个平行文件物理移出 meta/ 归档 state/taxonomy/retired_meta/，search_kb --lang en 与 viewer --lang en 入口拒绝退役提示。
-- 图片打标只存**概念名**（标签不含路径）——体系演化（改路径/重生成树）不需要迁移图数据。看图入口（viewer 的 build/imgs.js）由 meta/instance_images.jsonl 的 instances 字段现场聚合（字段名 instances 沿用 demiwtg-data 采集链契约不改，语义=概念名）、相对路径指到 blobs 原图（相对 viewer/ 的 ../datasets/demiwtg/blobs/...），不再建软链树。
+- 图片打标只存**概念名**（标签不含路径）——体系演化（改路径/重生成树）不需要迁移图数据。看图入口（viewer 的 build/imgs.js）由 meta/images.jsonl 的 instances 字段现场聚合（字段名 instances 沿用 demiwtg-data 采集链契约不改，语义=概念名）、相对路径指到 blobs 原图（相对 viewer/ 的 ../datasets/demiwtg/blobs/...），不再建软链树。
 - 数据字段定义即契约，改字段 = 改本节 + 同步全部消费代码。
 
 ## 2. datasets/demiwtg/ 硬约束（定死，逐条执行）
@@ -97,7 +152,7 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 | 文件 | 角色 |
 |---|---|
-| `instance_images.jsonl` | **统一权威主清单**（2026-09-06 起）：去重键 (sha256, instance) 一行一对，逐实例炸开；含 EN 并入行（实例名已归一为中文正名，new 实体保留 EN 名）与原 images.jsonl 并入行（identity/focus/quality=null 待 annotate_backfill 补标）；VLM 补标、质量门、viewer imgs.js 均以它为单一来源 |
+| `images.jsonl` | **统一权威主清单**（2026-09-06 起统一，时名 instance_images.jsonl；2026-09-08 更名复用简名 images.jsonl）：去重键 (sha256, instance) 一行一对，逐实例炸开；含 EN 并入行（实例名已归一为中文正名，new 实体保留 EN 名）与原 v1 images.jsonl 并入行（identity/focus/quality=null 待 annotate_backfill 补标）；VLM 补标、质量门、viewer imgs.js 均以它为单一来源（v1 同名退役件在 state/taxonomy/retired_meta/，同名不冲突，勿混淆） |
 | `taxonomy.json` | 标签体系树（展示视角，权威源，入 git；含并入的 EN 新实体挂载） |
 | `concepts.json` | 概念资产库（统一主键空间权威源，入 git；四字段契约见 1.5；2026-09-07 由 instances.json 概念化迁移而来，历史 schema 溯 git） |
 | `.meta.lock` | 跨进程写锁（运行时瞬态） |
@@ -106,7 +161,7 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 - ❌ 审计日志（只写不读的账本一律不建；先有读取代码才允许写入）
 - ❌ 备份文件（*.bak-*、*.bak-sync 之类）
-- ❌ 派生索引（LanceDB、实例名→图反向索引等；需要时由消费者从 instance_images.jsonl 现场聚合）
+- ❌ 派生索引（LanceDB、实例名→图反向索引等；需要时由消费者从 images.jsonl 现场聚合）
 - ❌ 运行时状态（死信队列 sqlite、健康账本、done flags、COCO 缓存）
 
 **判据（新增任何文件前先回答）：**
@@ -121,12 +176,20 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 ### 2.4 一致性规则
 
-- `instance_images.jsonl` 是唯一真相（2026-09-06 起；前身 metadata.jsonl，同日更名；原 images.jsonl 已收官退役归档 state/taxonomy/retired_meta/）；**不建任何派生索引文件**（历史上先后废除的派生件：instance_images.json（旧实例→图反向索引，2026-08-21 废）与 images.jsonl（2026-09-06 退役），双份存储有一致性漂移风险；需要实例名→图关系时由消费者从 instance_images.jsonl 现场聚合，如 viewer/build_viewer.py）。
-- `instance_images.jsonl` 的 instances 字段只应是当前体系的概念名（字段名沿用 demiwtg-data 采集链契约）；体系演化后残留的死名打标从 instance_images.jsonl 剥离（无隔离区）。
-- 一张图的 instances 变更（改名/隔离）改的是 instance_images.jsonl，**图字节不动**。
+- `images.jsonl` 是唯一真相（前身链：metadata.jsonl（2026-09-06 更名）→ instance_images.jsonl → images.jsonl（2026-09-08 更名复用简名，用户拍板，见 2026-09-08 决策块））；**不建任何派生索引文件**（历史上先后废除的派生件：instance_images.json（旧实例→图反向索引，2026-08-21 废）与 v1 images.jsonl（2026-09-06 退役，其名 2026-09-08 起被现清单复用）；双份存储有一致性漂移风险；需要实例名→图关系时由消费者从 images.jsonl 现场聚合，如 viewer/build_viewer.py）。
+- `images.jsonl` 的 instances 字段只应是当前体系的概念名（字段名沿用 demiwtg-data 采集链契约）；体系演化后残留的死名打标从 images.jsonl 剥离（无隔离区）。
+- 一张图的 instances 变更（改名/隔离）改的是 images.jsonl，**图字节不动**。
 - 新元数据字段设计时必须先问"哪个消费者读它"；答案为空就不加。
 
 ## 3. 代码模块职责
+
+
+> **知识核心集试点补充（2026-09-09）**：当前默认 `state/curation/core_pilot_v3`，只调用本机8000上的 `qwen3.8-27b`（仍兼容8001；4001付费网关硬拒绝）。新版图片协议独立判断 T2I 与编辑：完整T2I考点要求 full 覆盖且无未支持部分；编辑允许结构和状态改变，要求可见锚点、充分初始条件与知识依赖，不要求源图已符合目标知识。图片可视化自报值不是删除闸门。`fork --reuse-docs` 仅在相同文本协议下复用 calibration 知识候选；`compare` 对同知识/同图片比较协议结果，变化不等于准确率改善；`run --repair-invalid` 显式限额重试并保留原输出与反馈。人工可纠正图片结果，原模型结果不覆盖；更改知识陈述仍需新批次重核关联图片。`comparison.json`、`review_hints.json` 与 `report.json` 的材料缺口由审核入口消费；助手提示不算人工标签。图片来源只区分已声明生成与未核实，不把网络来源推断为真实照片。
+
+
+
+> **架构决策（2026-09-09，小规模知识核心集）**：用户授权将旧 curation 归档后建设新流程。现役入口为 `python3 -m curation.pipeline`，模块为 `core.py`（存储/校验/人工准入）、`prompts.py`（六类知识内容与模型协议）、`pipeline.py`（选材/物化/推理/收录/统计/导出）、`review.py` + `review.ipynb`（人工审核），历史 `_archived/` 不作为新流程依赖。知识内容与29域分离；概念、树和湖文件只读，不给 concepts.json 恢复 desc 等退役字段。运行产物在 `state/curation/<run>/`，由流水线和审核 notebook 消费：manifest 冻结概念/来源片段/图片候选，tasks 绑定输入哈希，results 保存校验通过的模型候选，reviews 保存人工决定，report/core 为可重建统计与导出。先有来源支持与条件核验、再看图片证据；模型候选不自动成为核心集，fact 与 evidence 均人工接受且对应任务可用才导出。旧门通过/拒绝/未标注三组保留；六类知识多标签不作难度计数。calibration/holdout 按概念隔离，后者需人工校准后 freeze 才能推理/收录；不宣称未见 benchmark 泛化。命令顺序：prepare → render docs → run docs（显式 --limit）→ render evidence → run evidence → notebook/review → report/export。**用户明确限定仅使用本地 Qwen3.8-27B；4001 属付费网关，任何付费接口使用前必须另获明确确认。** 当前 runner 硬限制本机8000/8001、模型 qwen3.8-27b，禁代理及重定向；不启动/停止用户模型服务。事实或提示词需修改时使用新 run，旧模型结果不覆盖。
+
 
 > **简单实拍补充（2026-09-07，用户拍板）**：已完成的 23 题原样计入总量，剩余题适量增加简单实拍，避免过度降低整体难度。当前选图为 55 张照片候选与 145 张生成图，其中 19 张采用独立 `synthesize_prompt_edit_v6.1_simple.md`；原 v6.1 标准协议不变。简单配置沿用原脚本的证据、图题绑定与收录校验，取消多跳及高义务数量门槛；`construction_profile=simple`、`difficulty=simple` 显式区分，`level` 只保留 T2I 逐实例参考层级，不宣称为编辑实测难度。新增清单合并为 bench200/source_review/combined_sources.jsonl 供 emit-plan 消费；最终比例按成功题实际来源统计。
 
@@ -134,12 +197,14 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 > **架构决策（2026-09-07）**：edit 正式出题批次落 `benchmark/edit/bench200/`（运行数据不入 git），沿用 v6.1 出题协议与 `eval_synthesize.py` 的选图、类型尝试序列、削峰及严格机审。实例顺序和难度来自 `benchmark/t2i/bench200/questions.jsonl`；pilot 20 题及其计划原样保留并计入 200 题总配额，只补其余 180 个实例。出题不用 OpenRouter/API，使用显式指定 `gpt-5.6-sol` / `high` 的全新子代理；每题只给物化 md 与绑定源图，不继承调度对话；必须完整读取 md 到文件末尾，不能截取前 240 行而漏掉末尾批次调整。后续 render 从同一校验函数显式附带原有定位方式数量及机械格式自查，修复原 v6.1 表格漏列定位门槛的问题；不修改冻结模板与任何既有验收门槛，旧渲染/题目保留。离线流程为 emit-plan → render-question → 子代理裸 JSON → ingest-question → validate；输入哈希与模型配置保存在批次 dispatch 供收录校验消费。正式判分配置由用户定为修订 QIB v2.2 + `gpt-6-astra` / `medium`，覆盖下文旧 sol 定案；此次先完成出题。
 
+> **架构决策（2026-09-08）**：权威主清单更名 + 图片部分还原（用户拍板两则）。① `meta/instance_images.jsonl` 更名 **`images.jsonl`**（复用简名，实质推翻 2026-09-06「避开 images.jsonl 旧名防混淆」的命名决策——v1 同名退役件仍在 state/taxonomy/retired_meta/，同名不冲突但文档口径以本条为准）；主仓消费端同步：viewer/build_viewer+HTML、benchmark eval_sample×3/eval_complexity/focus1000_caption/focus1000_merge_lake、curation annotate_backfill/focus_sample/search_kb + dataset_analysis.ipynb（共 12 文件）；meta_unify.py 加退役守卫（历史一次性脚本，照 upgrade_v31_en 先例，字符串留作历史记录）。② 图片还原（目标：减少后续下载量）：Sep 5 tar 备份（目录 `/yzp/zhaozy/yangzepeng/0905/1/`，19×4GiB 分片 = 123云盘 DIR"1" 的全部内容）**流在 80GiB 处截断——原上传只到 part_as，缺 at+ 分片**（`.1.part_ad`/`.1.part_ao` 经 md5 证实为同内容重复下载件；云端无更多分片；`demiwtg_all.tar.gz` 10.8GB 为纯代码+结果备份，零 blobs）。已执行：tar 定向抽取 `datasets/demiwtg/blobs`（路径过滤绝不触碰 meta/，防 Sep-5 旧真相覆盖 concepts/taxonomy）还原 150,633 blobs/68GB（归档序前 19 个 sha 前缀目录）；`curation/harvest_blobs.py` 从本地评测样本副本（benchmark/_staging/bagel）按内容寻址收割 +1,453（preloss sha 过滤，生成图不进湖）；`curation/replay_manifest.py` 按 blobs 实存回放 preloss 清单（抽样 64/64 文件名==内容 sha）→ images.jsonl 194,449 行 / 152,081 blobs（含 1,117 无清单行孤儿 blob，blobs 不可变留置）/ 134,941 概念有图 / 质量门合格口径 15,191 概念；viewer 重建（imgs.js 26.3MB，30,565 概念有图；standalone 同步）。preloss 其余 ~196.6 万 sha 的 blob 自该备份不可恢复；云盘残余可选项：results_archive.tar.gz 9GB + taxonomy_sample_cases.zip 937MB（已删评测目录的归档，样本图约 2GB 为湖副本，可选补拉收割）。③ 同日晚用户拍板**恢复全量 preloss 清单**（推翻早间"清单只回放 blob 实存子集"的回放口径）：meta/images.jsonl 直拷归档件恢复 2,849,013 行——缺 blob 行含下载链接（99% 行带 content_url/landing_url），是集群补采的工作面而非悬空行；curation/replay_manifest.py --apply 封死（重跑会截断回 19.4 万子集），干跑保留为 blob 覆盖报表。**图片字节消费者按 blob 实存过滤行**（共用件 curation/blob_presence.py）：t2i/edit eval_sample 池过滤、eval_complexity build_pools、annotate_backfill scan_pending、focus1000_caption load_targets（viewer build_imgs_js 原有逐行 exists 守卫不变，重建验证 imgs.js 输出与子集期一致 26.3MB/30,565 概念）；仅排序/统计类消费者（search_kb 目标排序）不过滤。集群补采双产物（curation/export_cluster_coverage.py + export_refetch_min.py → state/collect/demiwtg_data_sync/）：lake_coverage_for_cluster.jsonl（blob 实存 194,449 行，集群 schema concepts 键——合并后 --skip-covered/配额/去重按湖内覆盖工作）+ **refetch_min.jsonl.gz**（补采工作清单主件：缺 blob 带 URL 行 195.8 万（同 sha 多概念合并），极简五键 {c:[概念], u:url, s:sha256, e:ext, src:源}，gzip 157MB=全字段版 2.4GB 的 7%——用户拍板"只留下载必要字段+概念加一列 url"减传输带宽；无 URL 10,319 行走常规检索线）；集群侧工具 refetch_missing.py（双格式自动识别+gzip 魔数解压；按源防盗链头下载 + sha256 复验唯一入库闸门 + 原子落 blob + norm_rec 补全 24 字段回写行 + 断点/死信轮；湖侧全量清单在册，回灌后按 (sha,concept) join 还原 license/author/打标元数据零丢失）与 merge_lake_coverage.py 已备 demiwtg-data 本地仓（ahead 待推送）。
+
 > **架构决策（2026-09-07）**：instances.json → concepts.json 概念化迁移（用户拍板：改名 + 契约瘦身为四字段；2026-09-05/06「归一化概念体系」方法论讨论的真相层落地，采集交接件 concepts_batch_200.json 已先行新契约）。定案：① 概念行 = {name, aliases, carriers, taxonomy}，顶层 schema_version+meta+concepts；`curation/migrate_concepts.py` 一次性迁移 385,262 行（干跑→--apply，幂等防重跑；--refresh-taxonomy 供树变更后刷新快照），carriers 存量默认 image+text，taxonomy 快照从域起算、树遍历序（全量有挂载；多挂分布 1 处 348,122 / 2 处 25,574 / ≥3 处 11,566，存量按树实况全量保留，多挂≤3 为新概念策展纪律）。挂载真相仍在树——2026-08-19「挂载关系不持久化」就快照维度修订：快照只作消歧与源路由、不承载知识，禁手改、刷新走脚本。② 退役字段去向：desc → state/collect/concepts_docs_draft.jsonl（docs 层草稿 {name, kind: summary, body}，策展精修 105 条优先保留不覆盖，终态 52,980 条；docs 正式层待消费后另批转正）；query → state/collect/query_terms_cache.json（52,980 名，planner 冷启动先验——检索词从静态资产改为运行时状态）；source 行内退役（分布存 meta.source_stats：derived 330,842 / llm 54,262 / curated 158）。③ 消费端同步：viewer（build_viewer 读 concepts.json + docs 草稿 join 进概念行 docs 字段、sidecar 更名 concepts.js、缓存号 v5、HTML fetch 回退/查表键 window.__CONCEPTS__/stats 改「概念」、source 标签删除、standalone 同步；重建产物 concepts.js 115.8MB，imgs.js 空为图片全量丢失后预期态）；curation/focus_sample（mini 表改 concepts 键，四字段整条拷贝，产物名 focus*_concepts.json）；curation/search_kb（targets 改 concepts 键、--only-empty 判据改 docs 草稿名单、english_alias/all_aliases 的 query 半边改读采集缓存、source==curated 跳过删除）；taxonomy/gen_instance_kb 重写为概念富化器（aliases 回写 concepts.json + docs 追加草稿，不再生成 query/source，写盘持 .meta.lock 原子替换）；curation/annotate_backfill（kb 查表改由 concepts + docs 草稿现场构建，脱离 op_annotate.load_instance_kb）；benchmark edit eval_synthesize / dual_carrier_supplement 与 focus1000 caption/genimg/eval_complexity（desc 改读 docs 草稿，mini 表键兼容 concepts/instances 两代）；三册 curation notebook 路径键同步；taxonomy.json meta.description 自指更新；mount_map/README/.gitignore 例外链（!concepts.json，85MB < 原 98MB）。④ 同批修复 data/ 时代 ROOT 深度残留（focus_sample/search_kb/annotate_backfill/gen_instance_kb 原推导到仓库根上一层）与 import 面（顶层 taxonomy.* 直连；data/ shim 仅保留兼容存量 collect_v2.* 调用方）；§1 树形图同步顶层布局。⑤ 历史一次性脚本（en_entity_merge/meta_unify/upgrade_v31/upgrade_v31_en）不改造：读端对已删文件自然 FileNotFoundError 自守卫，历史溯 git。⑥ instance_images.jsonl 的 instances 字段名与 demiwtg-data 采集链契约不动（外部仓 --concepts 批任务模式已由集群侧上线对齐四字段契约；概念模式打标 kb 的 docs sidecar 补丁+bench283 种子 105 条已备 state/collect/demiwtg_data_sync/——本机无 GitHub 推送凭据，待 SG 授权机推送，2026-09-08）；30 个 candidate 新概念键已随人审合入（2026-09-08：+30 新键建议挂载写树生效、385,262→385,292，快照与树零失配校验通过；253 个既有概念批次与真相零差异无需同步；草稿留档 state/collect/concepts_batch_200.json）。
 
 | 模块 | 职责 | 入口 |
 |---|---|---|
 | `taxonomy/` | 标签体系维护：树审计（audit_nodes 死叶子审查）、挂载聚合（mount_map，只读现算不落盘）、富化（gen_taxonomy_kb 节点 KB / gen_instance_kb 概念富化——aliases 回写 concepts.json、知识文本追加 docs 草稿，各一次 LLM 调用） | 各脚本 `--write` |
-| `curation/` | 数据策展与检索接地：search_kb 概念知识检索接地管线（search_kb_sources 直供源扩充 / search_kb_supervise 全量跑监督；--lang en 赛道已随统一版退役）、annotate_backfill 补标驱动（kb_match=None 行 VLM 打标回写）、migrate_concepts（instances→concepts 迁移器与 taxonomy 快照刷新）、en_entity_merge EN/ZH 实体合并（tier0/bulk/escalate/apply/orphans）、meta_unify meta 收口（images 退役并入 / en 归一并入）、focus_sample 重点补图池抽样、质量分析 notebook（download_quality / search_kb_quality）、数据集分析 notebook（dataset_analysis.ipynb，参数写在 cell 内部，直接运行：① danbooru2024 字段下钻；② demiwtg 权威清单分布与过滤；③ taxonomy 视角节点量级与抽样，只读） | 各脚本 `--help`；notebook 直接运行 |
+| `curation/` | 数据策展与检索接地：search_kb 概念知识检索接地管线（search_kb_sources 直供源扩充 / search_kb_supervise 全量跑监督；--lang en 赛道已随统一版退役）、annotate_backfill 补标驱动（kb_match=None 行 VLM 打标回写）、migrate_concepts（instances→concepts 迁移器与 taxonomy 快照刷新）、harvest_blobs（本地残留图副本按内容寻址回灌 blobs）、clean_docs_pages（集群 docs 页清洗出净版：原始 pages/ 只读，净版落 state/collect/docs_clean/，判定序 short_raw→low_density→nav_listing→listing_page→html_noise→gibberish→duplicate→keep）、en_entity_merge EN/ZH 实体合并（tier0/bulk/escalate/apply/orphans）、meta_unify meta 收口（images 退役并入 / en 归一并入）、focus_sample 重点补图池抽样、质量分析 notebook（download_quality / search_kb_quality / docs_analysis=docs 页质量分级与清洗呈现 / lake_sync_details=回湖同步明细抽样：两代 schema 盘点、打标完整度、缩略图墙、误绑探针）、数据集分析 notebook（dataset_analysis.ipynb，参数写在 cell 内部，直接运行：① danbooru2024 字段下钻；② demiwtg 权威清单分布与过滤；③ taxonomy 视角节点量级与抽样，只读） | 各脚本 `--help`；notebook 直接运行 |
 | `viewer/` | 查看器闭环：页面 tag_tree_explorer.html + 构建脚本 build_viewer.py（读 taxonomy/concepts/docs 草稿/主清单四源，docs join 进概念行；imgs.js 只收录 VLM 打标行、每概念 top-50、caption 截断 100 字）+ 产物 build/（sidecar taxonomy.js/concepts.js/imgs.js 与 standalone 单文件，gitignore；英文平行页已随统一版退役删除）；HTML 与 build/ 同址是 file:// 双击可用的硬要求 | `viewer/build_viewer.py` |
 | `benchmark/` | 评测基准：按三大题型拆成三子模块（见架构决策 2026-08-24 三子模块拆分）。**t2i/**（生成）与 **edit/**（编辑）各带完整四件套：抽样（eval_sample.py 分层配额，--filter 一条 duckdb SQL WHERE；edit 版默认叠加编辑适配门）、出题（eval_synthesize.py，Galaxy API；t2i 版含 facet 词表审计、edit 版 9 类 edit_type 轮转 + 每第 5 题知识编辑套）、判分（eval_score.py 调本地 vLLM judge，score/dump 子命令；t2i 版 FACETS 权威源 + φ 映射聚合，edit 版 EDIT_DIMS 三维钳制）、gen_results_review.py（生成审阅 notebook）；**vlm/**（理解）暂不拆代码，只放 notebook。每子模块两个 notebook（现在 reviews/ 下）：question_dev.ipynb（抽样+分布+题库审阅，for 题目构造）、results_review.ipynb（打分/评估结果分析）。评测数据布局见架构决策 2026-09-05（t2i：bench200/ 现行 + archive/ 历史 + data/ 默认落点；edit：无 data/ 层，批次目录 synth_v*/、活图池 focus200/、归档 archive/ 全落子模块根）；样本图/题库/判分产物均不入 git（.gitignore 登记）；出题/判分协议 md 在 prompts/、随代码入 git；编辑评分契约 edit/edit_score_prompts.json（ImgEdit 官方原文，随代码入 git） | 各脚本 `--help`；各子模块 `reviews/question_dev.ipynb` / `reviews/results_review.ipynb` |
 
@@ -211,7 +276,7 @@ datasets/demiwtg/blobs/<aa>/<sha256>.<ext>   # aa = sha256 前两位；sha256 = 
 
 - `datasets/`、`state/`、`logs/` 是本地数据/运行时产物，**不入 git**（.gitignore 强制；例外：datasets/demiwtg/meta 下 taxonomy 两件套）。
 - 入库的只有：代码（taxonomy、curation、viewer、benchmark，含 viewer 页面 HTML）、约束文档（AGENTS.md、README.md）、以及 `datasets/demiwtg/meta/` 下的权威 JSON（taxonomy.json/concepts.json）。
-- 大 JSON（instance_images.jsonl、blobs）永远不进 git；需要备份走独立通道。
+- 大 JSON（images.jsonl、blobs）永远不进 git；需要备份走独立通道。
 - 生成产物（`viewer/build/`）不入 git，数据改动后重跑 build_viewer.py。
 
 ## 5. 关键命令
@@ -255,6 +320,54 @@ bash modelhub/start.sh && bash modelhub/smoke.sh   # 启动+冒烟；停止: bas
 
 ## 7. 网络与下载约定（2026-08-20 新增：环境里残留已宕机代理 100.89.199.67:7890，pip/curl 会被拖死，故将代理策略定死）
 
+### 7.1 采集集群 SSH 互信互通（2026-09-08 建成；2026-09-17 重构：舰队重编号 + 全公网直连 + 废除 sg-master 跳板）
+
+**架构决策（2026-09-17，用户拍板）**：湖机（本机）接管 master 指挥位；全部 25 台腾讯 SG 机改**公网 IP 直连**（经公司代理 CONNECT），不再经 sg-master 跳板；机器重新编号 r1~r20 / p1~p5，sg-master 降级为普通节点 **p5**（kb 审计嗅探收割 + raw/ 工具箱备份完成后可退役）。机器间 10.3.x.x 内网互通、22022-29 反向隧道、各机 cosfs **不受本配置影响**（原样保留）。CN 组 pipeline-e~i 已于 2026-09-10 释放。
+
+**舰队 25 机**（别名=公网 IP + pconn.py 代理直连；同表在湖机 `~/.ssh/config` 头部）：
+
+| 新名 | 旧名 | 公网 | 内网 | 密钥 |
+|---|---|---|---|---|
+| p1~p4 | pipeline-a~d | 43.160.215.28 / 43.160.238.29 / 43.160.201.131 / 43.160.240.239 | 10.3.4.14 / 10.3.4.16 / 10.3.0.17 / 10.3.8.9 | lighthouse_key |
+| p5 | sg-master（VM-0-14） | 43.160.250.196 | 10.3.0.14 | cluster_key |
+| r1~r20 | （09-16 起新机，编号不变） | 见 `~/.ssh/config` | 10.3.x.x | lighthouse_key |
+
+```bash
+ssh p1   # 任意别名直连，无跳板；湖机→集群唯一通路=公司代理 10.127.48.4:3128
+ssh r7
+```
+
+**红线**：公司代理惩罚突发 CONNECT——避免同时对全舰队并发建连（巡检/发射错峰，sleep 间隔）；旧名（sg-master/pipeline-*）已从 ssh config 删除，历史文档中出现的旧名按上表换算。
+
+**集群 → 湖机**（唯一反向隧道在 VM；湖机是无公网 k8s pod 只能反向打通）：
+
+- 隧道（2026-09-14 传输线起扩为 8 条）：`/root/tunnel_keepalive.sh`（常驻保姆，30s 错峰重建 + 4h 超龄换血）——**p5(VM-0-14):22022-22029 → 湖机 sshd(127.0.0.1:2222)**，经 pconn.py 代理反向打通；传输线（882 万图 82% 暂停中）续传依赖它，**勿动**。旧单隧道脚本 `/root/.ssh/lake_tunnel.sh` 进程仍在但已被 keepalive 实质取代。
+- **全部 7 机均已配 `Host lake` 别名**：VM 直连 `localhost:22022`；a/b/c/d/e/f 一律 `ProxyJump`（a–d 跳 ubuntu@43.160.250.196；e/f 跳各自 `Host sg`），密钥统一 lighthouse_key（pub 已入湖机 authorized_keys，标注 "demiwtg 采集集群"；a–d/f 的私钥已分发，e 原有）。
+
+```bash
+ssh lake             # 集群任一机上执行 → 登录湖机 root
+rsync -e ssh data/ lake:/yzp/zhaozy/yangzepeng/0905/demiwtg/...   # 数据回湖
+```
+
+- **隧道重启**（湖机 pod 重启后须重拉）：`setsid nohup /root/.ssh/lake_tunnel.sh >> /root/.ssh/lake_tunnel.log 2>&1 &`
+- **带宽**：SG 组→湖机流量经湖机↔VM 单隧道（跨境），实测 ~10 MB/s 下行 / ~19 MB/s 上行；CN 组→湖机同样经 VM 隧道绕行（CN→SG→湖机）。传清单/代码秒级，传图片级大件按此估算（百万图回湖约数天，建议分批/先 blob 后清单）。
+- 坑位记录：pipeline 首连需 `StrictHostKeyChecking accept-new`；ssh 内 heredoc 会丢（复杂配置本地写好整文件 scp，demiwtg-data HANDOVER 坑 #8）；腾讯云 hostname 按内网尾号命名（pipeline-e 与 SG 的 c 撞名 VM-0-17-ubuntu，非路由错乱）；a/b/c/d/f 原不持 lighthouse_key 私钥（已分发）；ssh -o 选项经 shell 变量展开会打碎含空格的 ProxyCommand（隧道脚本用函数直写命令，勿用 $OPTS 变量拼）。
+- 采集集群全量机器清单（七机二维架构/分片）见 demiwtg-data 仓 HANDOVER.md。
+
+### 7.2 增量回湖管线 lake_sync（2026-09-08 起，仓库根常驻 daemon）
+
+`lake_sync.py`（仓库根的常驻 daemon，每小时一轮）把集群侧新采集的图片与 docs 知识正文增量拉回湖：
+
+- **模型**：清单增量镜像（每节点/文件记字节偏移，tail 只取完整行）→ 缺集现算（**湖侧实存 = 已同步**，无独立传输账本）→ tar 流拉取（按 sha 前缀 aa 分摊到组内多节点口）→ 逐文件校验后原子发布 → 源端回执清理（先写组桶 `meta/synced_shas.jsonl` 记账再删 COS，24h 宽限 + 每轮限量；**pages 暂不清理源端**）。
+- **两类资产两套寻址**：blobs（图片，**内容寻址**，闸门 = sha256(内容)==文件名）；pages（docs 知识正文，**URL 寻址** `page_sha=sha256(url)`，闸门 = **版本化**——2026-09-09 起 docs 行带 `content_sha/page_bytes`（采集端 operators/page.py 记账），湖侧强复验内容哈希；旧行缺省走宽松门（sha256(url)==page_sha + 非空 + 文件名自洽）。同一 URL 重抓内容会变，强门只对新数据成立。）
+- **状态**：`sync/`（state.json 偏移 / verified.jsonl / verified_pages.jsonl / deleted.jsonl / sync.log 轮摘要 jsonl / manifests/<node>/ 镜像清单）。
+- **节点拓扑**（2026-09-17 重编号）：SG 组 p5（原 sg-master）+ p1~p4（原 pipeline-a~d，共享新加坡桶）；CN 组 pipeline-e~i 已于 2026-09-10 释放（湖侧运行副本 `demiwtg/lake_sync.py` 已摘除 cn 组；断点 state.json/镜像目录 manifests/ 已随重编号改名迁移）。**r1~r20 尚未入 NODE_GROUP**——SDC 投喂清单（各 r 机 `~/lake/meta/image-shard-extsdcfetch.jsonl`）待接入，接入时须把 r 机加进 NODE_GROUP（其 blob 在 SG 桶 datasets/demiwtg/blobs，与 kb/blobs 旧池不同树）。
+- **首战成果**：pages 一轮补齐 10,049 页 / 224MB（bench283 知识页覆盖 **283/283**，平均 35.4 页/概念；authority=serp 9,132 / wiki 888）。
+- **运维**：① 改脚本后须重启 daemon 才生效（Python 已载入的模块不会热更）；启动 `setsid nohup python3 lake_sync.py > sync_daemon.log 2>&1 &`；停 `pkill -f '[l]ake_sync.py'`（注意坑：pkill 模式串若原样出现在自己命令行里会自杀，用 `[l]` 括号法）。② 新节点重装导致主机密钥变更 → `ssh-keygen -R <ip>` 后 accept-new 重建（2026-09-08 pipeline-h/i 即此因被拒，已修）。③ 湖侧 `images.jsonl` 尚未合并镜像清单（新采集图在 `sync/manifests/` 可见，湖侧抽样/覆盖统计待合并后才反映）。
+- **pages 清洗（2026-09-08）**：同步回的原始页是爬虫直出、约 80% 字节是站点外壳，故 `curation/clean_docs_pages.py` 出净版另存 `state/collect/docs_clean/`（原始 `datasets/demiwtg/pages/` 只读不动）。全量 10,020 页 → **净版 4,326 页（43%）**、150.9M 字压到 31.0M 字；分源可用率悬殊（wiki 96% / serp 34%）；拒页两大头 gibberish 2,280（反爬诱饵）+ short_raw 2,052（JS 壳站空壳）合占拒页 75%，均属采集端可避免的浪费。净版含 `concept_docs.jsonl`（{name, kind:"passages", body} 与湖侧 docs 层同构，bench283 覆盖 272/283，建议与现存 summary 摘要层**并存不覆盖**）。分析与呈现：`curation/docs_analysis.ipynb`（demiwtg kernel，含质量分级/原始 vs 净版样例/域名诊断/单概念钻取）。已记录的两类内容缺陷：SERP 概念误绑（如 Stargate SG-1 页被绑到「新加坡」）与近似重复页（en.m/en 双站同文，精确 sha 去重抓不到）。
+- **已知缺陷与待办（2026-09-09 明细抽样发现，证据见 `curation/lake_sync_details.ipynb`）**：① **`needed_blobs` 只取 `blob_path`**，而集群两代清单路径键不同——`backfill-shard-*`（7 字段极简、无打标）用 `blob_path`，`image-shard-*`（24 字段、含 width/height/fetched_at）用 `path`，故后者被静默跳过（实测 image-shard 63,883 行中 99% 未回湖）。一行修法：`rel = r.get("blob_path") or r.get("path")`；概念键亦须兼容 `concepts`/`instances`（老 image-shard 用 instances）。② **VLM 打标字段全 null**：镜像里 quality/identity/kb_match/richness/caption 非空率 0.0（连 image-shard 行也是），故湖侧质量门对新采图完全失效（合格行 0）；需集群侧确认打标阶段是否落盘。③ `backfill-shard` 行无 `fetched_at`/`width`/`height`（溯源与尺寸门失效）。④ **概念误绑真实存在**：SERP/fandom 关键词撞车，探针「南丁格尔」14 行中 6 行是 Elder Scrolls 的 Nightingale Armor/Hall、鬼灭之刃与 Terra Battle 角色页。⑤ notebook 性能陷阱：PVC 上逐文件 `stat` 求体积会把整本拖到 ~9 分钟（实测 user CPU 仅 33s），改为「只列目录计数 + 用清单 size_bytes 估算」后全本 **63s**；同理逐行 `os.path.exists` 判回湖应改为一次列目录建 sha 集合。
+- **2026-09-09 修正版部署**（repo demiwtg-data 为唯一真源，本文件副本由其覆盖）：① pages 缺集**跨组全局去重**（同 URL 两队都抓过只拉一份，修首轮 29 页双拉）；② blob/pages **两组并行拉取** + State 审计写锁 + tar 超时收紧 3600→900s + **逐批进度打印**（blob批/pages批 行，含耗时与 ok/bad/fail——此前 21h 无输出无诊断即此缺口）；③ 「镜像→真 meta」例行化 `merge_meta.py`（lake_sync 每轮末尾自动调用，已取代 merge_docs.py）：docs 全量重合并 → `meta/docs.jsonl` 10,023 行（283 概念，键 (page_sha, concepts)）；images **增量追加** → `meta/images.jsonl`（键 (sha256,instances)、偏移状态 sync/merge_state.json、不重写 285 万行大账；首轮 63,883 镜像行追加 50,882 新行，35 秒）。结构对齐：内容真源 {blobs,pages}/、清单 meta/（湖 meta/ 另有 concepts.json/taxonomy.json 既有真源）。backfill/dead 镜像不进账（复原操作/死信留档）。消费端只读 meta/，不碰 sync/manifests/。daemon pid 以 pgrep 为准，日志 sync_daemon.log（逐批）+ sync/sync.log（轮摘要）。
+
 - 国内下载**不走代理**，优先找国内源（如 pypi 用 `pypi.tuna.tsinghua.edu.cn`；注意部分域名 DNS 只返回 IPv6 记录而本机无 IPv6，需确认 A 记录可达）。
 - 确需访问外网（pypi.org、download.pytorch.org、GitHub 等）时才用代理：
 
@@ -268,3 +381,25 @@ export no_proxy="localhost,127.0.0.1,192.168.10.0/24,modelscope.cn,modelscope.or
 
 - 执行任何下载前，先 `env | grep -i proxy` 检查残留：发现已宕机的旧代理（100.89.199.67:7890）必须先 unset 或按上述配置覆盖。
 - **外网链路直连优先**（2026-08-22 拍板）：外网源能直连通就直连，只有实测直连不通的才走代理，减少代理流量；代理源名单按实测增删（collect_v2 落点在 `infra._PROXY_SOURCES` 白名单制：2026-08-22 实测 mal/bing_images/yandex_images 直连可通走直连，wikimedia(_zh)/anilist/pixiv/deviantart 直连超时留代理池）。
+
+> **图片全量守护补充（2026-09-10，用户授权选模型和失败拉起）**：本轮沿用已验证的本地 Qwen3.8-27B，候选模型未下载完整，不宣称横向实测胜出。`curation/run_image_pipeline.sh` / `curation/image_supervisor.py` 可接管并恢复当前本地 8000 服务及图片标注进程；该明确授权覆盖此前“不启动/停止用户模型服务”的限制，仅限本任务精确匹配的服务。状态、日志、断点仍在 `state/curation/image_preannotation_v1/`，详见 DESIGN 第 11 节。新增此条是记录本次运行管理授权，不扩展到付费接口或其他任务服务。
+
+> **GPU 让位补充（2026-09-10，用户明确授权）**：图片预标注是利用空闲 GPU 的后台材料整理任务。当前研究实验需要资源时，助手可自行暂停该标注及其本地 Qwen 服务，保留断点和结果，实验结束后恢复原服务与标注；不再为同一让位操作重复询问。具体编排见 `curation/DESIGN.md` 第 12 节与 `curation/rag_diagnostic_session.py`。不授权删除标注、不混入其他模型、不影响其他无关任务、不使用付费接口。
+
+### Notebook直接编排Dataset（2026-09-15，用户明确调整）
+
+现役交互入口仍为curation/v4/knowledge_debug.ipynb，但不再使用StreamFlow对象隐藏业务编排。原始来源读取、概念选择、资料关联、计数、分批及知识算子直接通过demiflow Dataset操作连接，业务算子在dataset_operators.py与knowledge_stages.py；notebook_io.py只提供文件读取/版本冻结。StreamFlow保留历史命令行兼容，不作为notebook主线。此条覆盖前述StreamFlow为现役交互编排对象的说明，详见DESIGN第36节；业务数据契约、原始datasets只读和历史运行不可覆盖约定不变。
+
+### 知识pipeline统一原生算子接口（2026-09-15，用户要求）
+
+用户要求迁移模型调用，并将包括读数据在内的通用能力尽量下沉到demiflow。现役knowledge_debug.ipynb直接使用read_datasource(ReadSource)、Dataset.union、join、reduce_by_key、group_batches、map_cached、map_prompt_async、checkpoint和read_json。ReadSource实现原生Datasource/ReadTask，通用文件解码/gzip/JSON数组流式读取在demiflow，采集schema解释/来源范围审计在curation。知识actor仅做准备、业务校验和构造候选；逐行缓存与阶段落盘均由demiflow执行，不再在新知识链调用旧Stage缓存或LocalModel。提示词、完整请求响应、持久预算、不确定调用阻塞和版本冻结继续保留。当前默认新run为knowledge_native_prompt_v5，状态和限制见DESIGN第38节；兼容CLI不代表新主线，原始数据、旧run、评分不改写。
+
+### Source直接使用原生读取（2026-09-15，用户纠正）
+
+现役notebook不再使用ReadSource包装：具体文件直接data.read_records → checkpoint保留原始解码行 → filter/map转换业务字段。ConceptFromRecord、DocumentFromRecord、ImageFromRecord不读文件；通用扫描状态、坏行、gzip、JSON解析在demiflow。ReadSource仅供历史兼容。此条覆盖前述现役read_datasource(ReadSource)入口，文件快照冻结、原始材料只读、知识审核及版本边界不变，详见DESIGN第40节。
+
+### 知识忠实性审核四模型对照（2026-09-15，用户明确授权）
+
+理由：用户要求试用本地四个模型，覆盖此前知识整理只准调用Qwen3.8的模型范围限制，限定为本次小批对照。候选为Qwen3.8-27B、Qwen3.6-35B-A3B、gemma-4-26B-A4B-it、gemma-4-31B-it；通过prompt_config.py中显式local_model_comparison选项，仍只允许本机8000/8001直连，禁止付费网关。该选项不改变公共预标注的原Qwen协议与默认模型。
+
+比较仍使用demiflow PrepareFidelity → map_prompt_async → ApplyFidelity，不重跑提取或开始出题；已有错误回归与基于未参与调参原始文章的受控对照分别记录。每模型两次调用，输入、提示词、参数和全部响应先冻结后比较，不按结果调参重试。按已有GPU让位授权等待标注落盘、暂停其服务、顺序加载模型，结束后恢复原Qwen命令与标注断点。细节与实测结果写入DESIGN第46节及state/curation/v4/fidelity_four_models_v1，不把模型同意或格式合格视为人工事实核验。

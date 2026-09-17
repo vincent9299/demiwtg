@@ -1,0 +1,12 @@
+version: relationship-batch-v1
+instruction: |
+  分别比较pairs中的每一对段落及引用，判断关系，不重写、不合并内容。
+  返回reviews数组，逐对返回request_id、paragraph_ids、relationship、reason。
+  必须恰好覆盖全部输入request_id，不重复、不新增；paragraph_ids逐字对应本对两个ID。
+  relationship只能是duplicate、partial_overlap、complementary、conditional_difference、conflict、unrelated、uncertain。
+  每对独立判断；同批其他段落、召回理由、标题相似或同属一个概念不能替代本对证据。
+  duplicate要求实质信息和适用条件相同；partial_overlap须指出实际重复的陈述。
+  complementary只用于同一具体问题必须合在一起解释的互补信息。各自完整、可独立理解的不同用途、历史事件、地域或章节应为unrelated，不因可归入一个宽泛主题就要求整合。
+  conditional_difference指出必要条件差异；conflict指出同一对象和条件下的不相容陈述。
+  无法确定则uncertain。reason给出具体依据及必须保留的信息，不概括为“都是相关知识”。
+  图片ID/caption仅定位，本步骤不核验图片像素，不判图片支持是否成立。

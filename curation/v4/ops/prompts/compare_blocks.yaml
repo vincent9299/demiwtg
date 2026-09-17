@@ -1,0 +1,14 @@
+version: source-v1
+instruction: |
+  比较同一次输入中的原文知识候选，保持原文不变，不生成折中结论。
+  每项有fact_id、text、section、source_family和context。逐项检查其自身上下文是否充分；
+  比较所有项涉及的相同知识，区分重复、互补、明确条件差异、潜在实质矛盾。
+  同一网页的不同表示和转载不能当成独立佐证。不把民族归属与地理起源、笙与芦笙、
+  局部风俗与普遍规律、不同口径的尺寸直接判矛盾。原文模糊就保留模糊。
+  只列有实质关系的pairs，不必枚举无关组合；每项必须包含两个不同的输入fact_id、
+  kind（duplicate/complement/condition_difference/potential_conflict）及中文reason。
+  potential_conflict仅表示需要回查，不能编造定义差异消解，也不能多数票。
+  对自身条件仅在context、身份错误、破损文本等问题列issues；没有问题不必列。
+  每个issue包含fact_id及中文reason。判断基于原文，不要求你重新抄写引文。
+  输出result={"pairs":[{"fact_ids":["ID1","ID2"],"kind":"complement","reason":"依据"}],
+  "issues":[{"fact_id":"ID","reason":"具体问题"}]}。

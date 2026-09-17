@@ -1,6 +1,6 @@
 """t2i（生成）赛道评测样本抽样：从本仓数据集分层抽评测用图。
 
-抽样源是 collect_v2 权威清单 instance_images.jsonl（质量字段 quality/identity/focus
+抽样源是 collect_v2 权威清单 images.jsonl（质量字段 quality/identity/focus
 在它身上；images.jsonl 已于 2026-09-06 收官退役）；实例 → 树分支经 taxonomy/mount_map.py 现算
 （挂载关系不落盘的解耦契约，AGENTS.md 1.5）。
 
@@ -43,7 +43,10 @@ from pathlib import Path
 SUB_DIR = Path(__file__).resolve().parent                    # t2i/
 BENCH_ROOT = SUB_DIR.parent                                  # benchmark/
 REPO_ROOT = BENCH_ROOT.parent                                # 仓库根
-sys.path.insert(0, str(REPO_ROOT / "data"))    # taxonomy 包已迁至 data/taxonomy/
+sys.path.insert(0, str(REPO_ROOT / "data"))    # data/ 兼容 shim（collect_v2.*）
+sys.path.insert(0, str(REPO_ROOT))
+
+from curation.blob_presence import blob_shas  # noqa: E402
 
 from collect_v2.mount_map import load_mount_map                 # noqa: E402
 
@@ -196,8 +199,8 @@ def main() -> None:
                          "可叠加如 width >= 1024 AND height >= 1024）")
     ap.add_argument("--per-instance", type=int, default=2)
     ap.add_argument("--seed", type=int, default=20260823)
-    ap.add_argument("--manifest", type=Path, default=META_DIR / "instance_images.jsonl",
-                    help="抽样源清单（默认 demiwtg meta/instance_images.jsonl）")
+    ap.add_argument("--manifest", type=Path, default=META_DIR / "images.jsonl",
+                    help="抽样源清单（默认 demiwtg meta/images.jsonl）")
     ap.add_argument("--taxonomy", type=Path, default=META_DIR / "taxonomy.json",
                     help="标签树（分支分层用，默认 meta/taxonomy.json）")
     ap.add_argument("--blobs", type=Path,
@@ -222,6 +225,9 @@ def main() -> None:
     print(f"过滤后候选（WHERE {args.filter}）：{len(pool)} 行", flush=True)
     pool = [r for r in pool if r["sha256"] not in exclude]
     print(f"剔除排除集后：{len(pool)} 行", flush=True)
+    have = blob_shas()
+    pool = [r for r in pool if r["sha256"] in have]
+    print(f"blob 实存过滤后：{len(pool)} 行（清单为全量 preloss，缺图行待集群补采）", flush=True)
 
     picked = stratified_pick(pool, args.n, args.per_instance, args.seed)
     branches = defaultdict(int)

@@ -1,0 +1,19 @@
+version: joint-knowledge-v2
+instruction: |
+  联合阅读概念相关正文与实际图片，提炼可追溯知识。不限于适合出题或适合图片表达的知识。
+  保留直接知识、必要背景、相关关系及有价值的文字知识。图片可补充直接可见的结构、状态和关系。
+  图片无法独自证明年代、成分、原因等；不将单个对象的视觉观察泛化为整个类别。
+  对身份uncertain的图片，不把目标身份写成确定事实；只保留有范围说明的观察或暂缓。
+  在本次输入内合并重复，保留互补信息、地域/时间/口径/条件和例外。无关内容不留。
+  未解决实质争议单独暂缓；明确不同条件或不同传说版本不自动判为矛盾。
+  返回facts数组，每项：
+  {fact_id, statement, conditions:[], exceptions:[], basis:text|image|multimodal,
+   status:candidate|deferred, reasons:[],
+   evidence:[{source_id,quote}],
+   image_evidence:[{image_id,region,supports,limitations}]}。
+  evidence.quote必须逐字连续复制输入passages.text，不能省略或翻译引用；正文可以总结但不得更改含义。
+  source_id/image_id只能引用实际输入；纯视觉观察可以没有文字引句，但必须有图片依据与观察范围。
+  不限制固定知识条数，不用全篇摘要代替可核验条目。重复精简不能丢失来源引用。
+  另返回conflicts:[{fact_ids,issue,needed_evidence}]和coverage_note，说明输入内未提取范围。
+  紧密关联的分类、参数列表和表格应作为完整知识条目，不逐个名称、单元格或数值机械拆条。
+  避免对同一信息重复陈述；引文使用足以支撑陈述的最短连续原文，不反复抄写整个长段落。

@@ -1,0 +1,11 @@
+version: cross-batch-relationship-v1
+instruction: |
+  比较输入items的两段跨批内容及其引用，判断是否需要局部整合，不重写内容。
+  候选理由、embedding分数、相同标题或同一来源都不是重复的结论。
+  返回relationship、reason、paragraph_ids。paragraph_ids必须恰好包含输入两个paragraph_id。
+  relationship只能是duplicate、partial_overlap、complementary、conditional_difference、conflict、unrelated、uncertain。
+  duplicate仅用于实质信息和适用条件相同；partial_overlap表示只有部分重复。
+  complementary表示同一具体主题的互补信息，不能因属于同一概念就归为互补。
+  conditional_difference明确指出条件差异；conflict明确指出在相同对象和条件下的不相容陈述。
+  证据不足则uncertain；不同独立主题则unrelated。reason须具体说明比较依据及需保留的条件。
+  图片ID及已有caption只能帮助定位，不在本步骤重新判断像素或图像支持。

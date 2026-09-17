@@ -39,6 +39,9 @@ from pathlib import Path
 SUB_DIR = Path(__file__).resolve().parent                    # edit/
 BENCH_ROOT = SUB_DIR.parent                                  # benchmark/
 REPO_ROOT = BENCH_ROOT.parent                                # 仓库根
+sys.path.insert(0, str(REPO_ROOT))
+
+from curation.blob_presence import blob_shas  # noqa: E402
 EVAL_DIR = SUB_DIR    # edit 无 data/ 层：focus200 与账本落子模块根
 META_DIR = REPO_ROOT / "datasets" / "demiwtg" / "meta"
 DATASET_DIR = REPO_ROOT / "datasets" / "demiwtg"
@@ -91,14 +94,14 @@ AUDIT_PROMPT = """审计这张图片的场景复杂度。按 12 个维度打分�
 
 
 # ---------------------------------------------------------------------------
-# 池聚合（instance_images.jsonl 现算，不落派生索引）
+# 池聚合（images.jsonl 现算，不落派生索引）
 # ---------------------------------------------------------------------------
 def build_synth_pool() -> dict[str, dict]:
     """合成源池：双清单合流 → instance -> {sha256: 池行}。
 
     - gen_results.jsonl（qwen-image 主体批，t2i 侧产物原件）
     - focus200/missing19_jobs.jsonl（GPT-Image-2 补齐批，edit 侧）
-    图不进湖（instance_images.jsonl 是采集清单）；sha256 沿用生成时算好的值。
+    图不进湖（images.jsonl 是采集清单）；sha256 沿用生成时算好的值。
     """
     manifests = [(FOCUS200_MANIFEST, "manifest"), (GEN_RESULTS, "qwen-image"),
                  (GEN_JOBS_19, "gpt-image-2")]
@@ -158,13 +161,15 @@ def build_pools(focus: set, gate: str = "edit") -> dict[str, dict]:
     gate=size：只短边门——补标未完成时的乱序审计口径，select 时再 join 打标。
     """
     gate_fn = pass_edit_gate if gate == "edit" else pass_size_gate
+    have = blob_shas()   # 全量 preloss 清单：只聚合 blob 实存行（缺图行待集群补采）
     pools: dict[str, dict] = defaultdict(dict)
     seen = set()
-    with (META_DIR / "instance_images.jsonl").open(encoding="utf-8") as f:
+    with (META_DIR / "images.jsonl").open(encoding="utf-8") as f:
         for line in f:
             row = json.loads(line)
             hit = focus.intersection(row.get("instances") or [])
-            if not hit or row["sha256"] in seen or not gate_fn(row):
+            if not hit or row["sha256"] in seen or row["sha256"] not in have \
+                    or not gate_fn(row):
                 continue
             seen.add(row["sha256"])
             slim = {

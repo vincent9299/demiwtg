@@ -22,7 +22,7 @@
 | `audit_doublecheck.summary.md` | 复核摘要 | |
 | `prompts_v1_v60/` | 退役提示词世代：出题协议初版（synthesize_prompt_edit.md）与 v6.0（synthesize_prompt_edit_v6.0.md）、判分协议 v1（codex_score_prompt_edit_v1.md，1–5 初版；其唯二消费轮次的 Gemini 分数冻结在 `../synth_v61_pilot/scores/codex_blind/`） | 现役世代在 `../prompts/`：出题 v6.1、QIB v2 判官/编排两份、官方 rubric 臂两份 |
 | `audit_doublecheck_prompt.md` | 复杂度审计抽样复核轮（2026-09-02）任务提示词：codex double-check 独立重判 qwen3.8-27b 的结构化审计，揪虚高/编造/漏报；产物 = 本目录 audit_doublecheck_* 四件 | 复核结论已落地为 eval_synthesize 的素材分级注入；未来新图池开复核轮可复用为模板 |
-| `notebooks_retired/` | 两册退役审阅 notebook：results_review.ipynb（8 月 wkbench_v0 冒烟审阅，其分析对象 bagel/results/wkbench_v0 与 synth_edit 批次本机已不存在）、audit_review.ipynb（复杂度复核轮审阅，数据即本目录 audit_doublecheck_*） | 现役在 `../reviews/`：question_dev.ipynb（路径文案已同步新布局）+ results_review_v61.ipynb |
+| `notebooks_retired/` | 三册退役审阅 notebook：results_review.ipynb（8 月 wkbench_v0 冒烟审阅，其分析对象 bagel/results/wkbench_v0 与 synth_edit 批次本机已不存在）、audit_review.ipynb（复杂度复核轮审阅，数据即本目录 audit_doublecheck_*）、results_review_v61.ipynb（v6.1 pilot 全量分析与三模型正式节并存的历史册；正式呈现已拆出为 `../reviews/results_review.ipynb`，2026-09-08 由 review_bench200_three.py 安装并执行三节：整体得分/关键维度/抽样 case） | 现役在 `../reviews/`：question_dev.ipynb（路径文案已同步新布局）+ results_review.ipynb（三模型正式判分） |
 
 ## 追溯关系
 

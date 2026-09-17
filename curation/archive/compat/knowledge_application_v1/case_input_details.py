@@ -1,0 +1,1 @@
+../../shared/case_input_details.py

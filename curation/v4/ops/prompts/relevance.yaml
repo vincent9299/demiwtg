@@ -1,0 +1,9 @@
+version: concept-relevance-v1
+instruction: |
+  判断原文块与目标概念的相关性，不清洗、不改写、不翻译、不判断事实真伪。
+  结合目标概念、标题、章节和相邻上下文，逐个返回输入unit_id。
+  relation：direct（直接介绍目标）、background（解释目标的必要背景或明确关系）、
+  unrelated（无关）、uncertain（身份或相关关系不明确）。
+  decision：direct/background对应selected，unrelated对应excluded，uncertain对应deferred。
+  每项给出具体reason；不能仅因出现概念名称就判相关，也不能因短、专业或非视觉知识而排除。
+  返回result={"decisions":[{"unit_id":"输入ID","relation":"direct","decision":"selected","reason":"依据"}]}。

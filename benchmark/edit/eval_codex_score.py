@@ -33,6 +33,13 @@ EDIT_DIMS = {
     "compose": ["Instruction Compliance", "Visual Naturalness", "Physical Consistency & Fine Detail"],
 }
 VALIDITY = {"ok", "model_failure", "judge_unscorable", "invalid_question"}
+SCORED_VALIDITY = {"ok", "model_failure"}
+
+
+def scoreable(row: dict) -> bool:
+    """The QIB failure-as-zero policy does not change legacy 1–5 arms."""
+    allowed = SCORED_VALIDITY if row.get("schema") == "edit-codex-v2-qib" else {"ok"}
+    return row.get("validity", {}).get("status") in allowed
 PHI = {0: 0, 1: 60, 2: 100}
 
 
@@ -313,6 +320,11 @@ def aggregate(args: argparse.Namespace) -> None:
             row["raw_total"] = round(sum(raw) / 3, 3)
             row["official_dimensions"] = dict(zip(("d1", "d2", "d3"), official))
             row["official_total"] = round(sum(official) / 3, 3)
+        if qib_v2 and row["validity"]["status"] == "model_failure":
+            row["official_total"] = 0.0
+            row["official_dimensions"] = dict.fromkeys(("d1", "d2", "d3"), 0)
+            if qib_v2:
+                row["official_tiers"] = dict.fromkeys(("d1", "d2", "d3"), 0)
         row["inputs"] = expected["inputs"]
         by_qid[qid] = row
     missing = sorted(set(manifest) - set(by_qid))
@@ -321,8 +333,8 @@ def aggregate(args: argparse.Namespace) -> None:
 
     ordered = [by_qid[qid] for qid in manifest]
     questions = {q["qid"]: q for q in load_jsonl(args.questions)}
-    valid = [r for r in ordered if r["validity"]["status"] == "ok"]
-    invalid = [r for r in ordered if r["validity"]["status"] != "ok"]
+    valid = [r for r in ordered if scoreable(r)]
+    invalid = [r for r in ordered if not scoreable(r)]
     schemes = sorted({r.get("schema", "") for r in ordered})
     if len(schemes) != 1:
         raise ValueError(f"mixed score schemas: {schemes}")
@@ -333,6 +345,10 @@ def aggregate(args: argparse.Namespace) -> None:
         "n": len(ordered),
         "n_valid": len(valid),
         "n_invalid": len(invalid),
+        "validity_counts": {status: sum(r["validity"]["status"] == status for r in ordered)
+                            for status in sorted(VALIDITY)},
+        "validity_policy": ("model_failure=0; invalid_question/judge_unscorable excluded"
+                            if schemes == ["edit-codex-v2-qib"] else "legacy: only status=ok included"),
         "overall": mean(valid),
     }
     for field, report_key in (
@@ -520,10 +536,16 @@ def compare(args: argparse.Namespace) -> None:
         lrow, rrow = left[qid], right[qid]
         lstatus = lrow.get("validity", {}).get("status")
         rstatus = rrow.get("validity", {}).get("status")
-        if lstatus != "ok" or rstatus != "ok":
+        if any(r.get("schema") == "edit-codex-v2-qib"
+               and r.get("validity", {}).get("status") not in VALIDITY for r in (lrow, rrow)):
+            raise ValueError(f"bad validity in comparison: {qid}")
+        if not scoreable(lrow) or not scoreable(rrow):
             excluded.append({"qid": qid, "left_status": lstatus, "right_status": rstatus})
             continue
-        ltotal, rtotal = float(lrow["official_total"]), float(rrow["official_total"])
+        ltotal = (0.0 if lrow.get("schema") == "edit-codex-v2-qib" and lstatus == "model_failure"
+                  else float(lrow["official_total"]))
+        rtotal = (0.0 if rrow.get("schema") == "edit-codex-v2-qib" and rstatus == "model_failure"
+                  else float(rrow["official_total"]))
         winner = "left" if ltotal > rtotal else "right" if rtotal > ltotal else "tie"
         q = questions[qid]
         rows.append({
@@ -545,6 +567,11 @@ def compare(args: argparse.Namespace) -> None:
         "right": args.right_name,
         "overall": paired_summary(rows, args.left_name, args.right_name),
         "excluded": excluded,
+        "excluded_by_status": {status: [r["qid"] for r in excluded
+                                         if status in (r["left_status"], r["right_status"])]
+                               for status in ("invalid_question", "judge_unscorable")},
+        "validity_policy": ("QIB: model_failure=0; other schemas: only status=ok; "
+                            "a non-scoreable candidate excludes the pair"),
     }
     for field, key in (("level", "by_level"), ("edit_type", "by_edit_type"),
                        ("suite", "by_suite"), ("source_batch", "by_source_batch")):
