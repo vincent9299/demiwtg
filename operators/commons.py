@@ -1,15 +1,16 @@
 """kb 线 Phase 3 算子(2026-09-10):概念 P18 主图 → Commons 原图回池。
 
 链路定位:增肥后概念带 p18(主图文件名),本算子逐图调 Commons API
-(一次拿齐 原图URL/尺寸/许可证 extmetadata/1200px 缩略图URL)并下载
-字节。原图档;单图 >10MB 降级缩略图并记 tier(怪物级 TIFF/全景图
-守门)。字节落 COS kb/blobs(内容寻址,与旧图池同构、同 sha 自动重合),
-账本 qid_images.jsonl 复用 AppendManifestStore(幂等续跑零重复)。
+(一次拿齐 原图URL/尺寸/许可证 extmetadata)并下载字节,只取原图
+(2026-09-17 口径变更:废除 >10MB 降级 1200px 缩略图的守门,历史
+tier=thumb1200 行由 backfill_orig.py 重收)。字节落 COS kb/blobs
+(内容寻址,与旧图池同构、同 sha 自动重合),账本 qid_images.jsonl
+复用 AppendManifestStore(幂等续跑零重复)。
 
 行契约:
 - 任务行(源展开):{qid, commons_file}
 - 产物行(CommonsFetchStage):+ {sha256, ext, data, license, author,
-  license_url, content_url, tier(orig|thumb1200), page_bytes,
+  license_url, content_url, tier=orig(历史行含 thumb1200), page_bytes,
   width, height}
 - 落盘(CommonsBlobSink):blob kb/blobs/aa/sha.ext;账本行 {qid,
   commons_file, sha256, ext, tier, license, author, license_url,
@@ -34,9 +35,9 @@ from demiflow.collect.store import AppendManifestStore
 from demiflow.data.plan import StreamStage
 
 API = "https://commons.wikimedia.org/w/api.php"
-ORIG_GUARD_BYTES = 10 << 20       # 超此尺寸降级缩略图(守门)
 HARD_CAP_BYTES = 64 << 20         # 字节封顶(API 尺寸谎报兜底)
-THUMB_WIDTH = 1200
+# 200 状态错误页兜底(2026-09-17 事故:429 的 HTML 体曾被批式采集器当图落库)
+HTML_ERR_HEADS = (b"<!doctype html", b"<html")
 
 net.register_limits({
     "commons_api": net.SourceLimits(rate=2.0, concurrency=4),
@@ -112,8 +113,7 @@ class CommonsFetchStage(StreamStage):
     label = "commons_fetch"
     catch = (net.InfraError, httpx.HTTPError)   # 认缺白名单:429/超时等
 
-    def __init__(self, orig_guard: int = ORIG_GUARD_BYTES):
-        self._guard = orig_guard
+    def __init__(self):
         self.fetched = 0
 
     async def _meta(self, file_title: str) -> dict | None:
@@ -133,8 +133,7 @@ class CommonsFetchStage(StreamStage):
         from urllib.parse import urlencode, quote
         params = {"action": "query", "format": "json",
                   "titles": "|".join(f"File:{t}" for t in file_titles),
-                  "prop": "imageinfo", "iiprop": "url|size|extmetadata",
-                  "iiurlwidth": THUMB_WIDTH}
+                  "prop": "imageinfo", "iiprop": "url|size|extmetadata"}
         base = API + "?" + urlencode(params, safe="|", quote_via=quote)
         for _round in range(4):                      # continue 最多追 3 轮
             r = await net.request("commons_api", "GET", base,
@@ -168,10 +167,7 @@ class CommonsFetchStage(StreamStage):
         return out or None
 
     async def _fetch_one(self, row: dict, info: dict):
-        if info.get("size", 0) <= self._guard:
-            url, tier = info.get("url") or "", "orig"
-        else:
-            url, tier = info.get("thumburl") or "", "thumb1200"
+        url = info.get("url") or ""
         if not url:
             return None
         data = b""
@@ -181,6 +177,9 @@ class CommonsFetchStage(StreamStage):
                 data += chunk
                 if len(data) > HARD_CAP_BYTES:
                     return None                       # 超封顶认缺
+        # 非空校验+200 错误页兜底(net 层已拦非 2xx, 此为 2026-09-17 事故加固)
+        if not data or data[:15].lstrip().lower().startswith(HTML_ERR_HEADS):
+            return None
         em = info.get("extmetadata") or {}
         sha = hashlib.sha256(data).hexdigest()
         self.fetched += 1
@@ -189,7 +188,7 @@ class CommonsFetchStage(StreamStage):
             "sha256": sha,
             "ext": row["commons_file"].rsplit(".", 1)[-1].lower(),
             "data": data,
-            "tier": tier,
+            "tier": "orig",
             "page_bytes": len(data),
             "width": info.get("width"), "height": info.get("height"),
             "content_url": info.get("descriptionurl") or url,

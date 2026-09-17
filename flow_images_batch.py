@@ -9,7 +9,20 @@
 _norm_file)。绕开流引擎的原因见 NIGHT_WATCH/交接文档: 引擎存在
 偶发 worker 无超时 Future 卡死(stream.py:139, 两次复现未根因),
 修复后可在算子层与本件合流。
+
+2026-09-17 修复+口径变更: 旧版 download() 不查 HTTP 状态码, fleet 被
+边缘 429 限速后错误页 HTML 体被当图落库(账本头部约 86% 污染, 详见
+raw/audit_blob_magic.py 审计); 现改为 200 校验 + 429 长退避 + HTML
+首字节兜底。同时按新口径只取原图(info.url), 废除 >10MB 降级 1200px
+缩略图的守门(历史 tier=thumb1200 行可用 backfill_orig.py 重收)。
 """
+import argparse
+import asyncio
+import fcntl
+import gzip
+import hashlib
+import json
+import os
 import re
 import sys
 import time
@@ -18,11 +31,11 @@ from urllib.parse import quote, urlencode
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) or ".")
 
 API = "https://commons.wikimedia.org/w/api.php"
-ORIG_GUARD_BYTES = 10 << 20
-HARD_CAP_BYTES = 64 << 20
-THUMB_WIDTH = 1200
+HARD_CAP_BYTES = 64 << 20     # 字节封顶(内存上界 = dl_conc × 封顶)
 BATCH = 50
 RETRY_BACKOFF = (30.0, 120.0, 300.0)
+# 200 状态错误页兜底(2026-09-17 事故:429 的 HTML 体曾被当图落库)
+HTML_ERR_HEADS = (b"<!doctype html", b"<html")
 UA = ("demiwtg-kb-phase3/1.0 (Wikimedia bulk; contact: "
       f"{os.environ.get('DEMIWTG_CONTACT', 'ops@demiwtg.example')})")
 _TAG_RE = re.compile("<[^>]+>")
@@ -99,6 +112,7 @@ class Fetcher:
         self.sunk = 0
         self.miss_meta = 0
         self.miss_dl = 0
+        self.miss_html = 0
 
     async def aclose(self):
         await self.client.aclose()
@@ -107,8 +121,7 @@ class Fetcher:
         """50 题一批查 imageinfo(continue ≤3 轮);返回 {title_key: info}。"""
         params = {"action": "query", "format": "json",
                   "titles": "|".join(f"File:{t}" for t in titles),
-                  "prop": "imageinfo", "iiprop": "url|size|extmetadata",
-                  "iiurlwidth": THUMB_WIDTH}
+                  "prop": "imageinfo", "iiprop": "url|size|extmetadata"}
         url = API + "?" + urlencode(params, safe="|", quote_via=quote)
         out, last, rounds = {}, None, 0
         for attempt in range(4):
@@ -144,23 +157,32 @@ class Fetcher:
         raise RuntimeError(f"meta_batch 重试用尽 last={last}")
 
     async def download(self, info):
-        """按守门规则取字节;返回 (bytes, tier) 或 None。"""
-        if info.get("size", 0) <= ORIG_GUARD_BYTES:
-            url, tier = info.get("url") or "", "orig"
-        else:
-            url, tier = info.get("thumburl") or "", "thumb1200"
+        """取原图字节;HTTP 200 校验、429 长退避、HTML 错误页兜底。
+        返回 (bytes, "orig") 或 None(认缺,由 miss_dl 计数)。"""
+        url = info.get("url") or ""
         if not url:
             return None
         async with self.dl_sem:
-            await self.dl_bucket.take()
-            data = b""
-            async with self.client.stream("GET", url,
-                                          headers={"User-Agent": UA}) as resp:
-                async for chunk in resp.aiter_bytes(1 << 16):
-                    data += chunk
-                    if len(data) > HARD_CAP_BYTES:
-                        return None
-        return data, tier
+            for attempt in range(len(RETRY_BACKOFF) + 1):
+                await self.dl_bucket.take()
+                data = b""
+                async with self.client.stream(
+                        "GET", url, headers={"User-Agent": UA}) as resp:
+                    if resp.status_code == 429 and attempt < len(RETRY_BACKOFF):
+                        await asyncio.sleep(RETRY_BACKOFF[attempt])
+                        continue
+                    if resp.status_code != 200:
+                        return None          # 错误响应体不是图,勿入库
+                    async for chunk in resp.aiter_bytes(1 << 16):
+                        data += chunk
+                        if len(data) > HARD_CAP_BYTES:
+                            return None      # 超封顶认缺
+                if (not data or data[:15].lstrip().lower()
+                        .startswith(HTML_ERR_HEADS)):
+                    self.miss_html += 1
+                    return None              # 200 错误页兜底
+                return data, "orig"
+        return None
 
 
 class Sink:
@@ -215,7 +237,8 @@ async def run(args):
     def progress():
         el = time.time() - t0
         print(f"[batch] sunk={fetcher.sunk:,} ({fetcher.sunk/el:.2f}/s) "
-              f"miss_meta={fetcher.miss_meta:,} miss_dl={fetcher.miss_dl:,}",
+              f"miss_meta={fetcher.miss_meta:,} miss_dl={fetcher.miss_dl:,} "
+              f"miss_html={fetcher.miss_html:,}",
               flush=True)
 
     async def dl_worker():
