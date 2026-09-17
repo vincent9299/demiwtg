@@ -58,7 +58,8 @@ cosfs 随机读仅 ~110 文件/s（4 核 GIL+网络盘双重瓶颈），故全�
      `cand_large_sample.tsv`（>6KB 随机 2 万）、
      `thumb1200_rows.jsonl.gz`（340,951 行，重收清单②）、
      `join1_stats.json`。
-3. Range-GET 魔数嗅探（`cos_sniff.py`，前 2KB，class+错误码提取）：
+3. Range-GET 魔数嗅探（`cos_sniff.py`，前 2KB，class+错误码提取，**支持
+   断点续跑**——输出已存在的行自动跳过）：
    **本机后台进行中**，4 lane × 24 线程 ~730 行/s，预计 ~3h 完成
    7.93M 候选。产物 `state/sniffout_00..07.tsv`（rel\tclass\terr）。
    ⚠️ 教训：进程拓扑必须是 4 进程×24 线程级别；8 进程×48 线程在 4 核上
@@ -141,5 +142,52 @@ audit_join2.py cos_deepcheck.py audit_blob_magic.py(旧版cosfs方案,弃用)`�
 
 ## 7. 本机遗留运行物
 
-- 4 个受管后台嗅探 lane（shards 00-07，~3h），完成标志各 lane日志
-  `SNIFF_DONE`；如本机中途被回收，训练机按 §3 重跑即可，方法全量可复现。
+- **已全部安全停机（2026-09-17 13:40，p1-p5 释放前）**。嗅探进度
+  **7,272,840 / 7,925,013（91.7%）**：分片 00/02/04/06 完整（各 990,6xx），
+  分片 01/03/05/07 完成至 ~826k/990k。
+- 全部产物 + 工具已双备份：
+  - **COS**：`/lhcos-data/demiwtg-data/audit/kb_images_20260917/`（2.6GB，
+    含 8 片嗅探结果/候选清单/inventory/join1 产物/完整性抽样/日志/脚本，
+    回读校验行数一致）；
+  - **git**：审计脚本在仓库 `tools/kb_audit/`（本文件同 commit）。
+- 脚本已支持 `KB_AUDIT_STATE` / `KB_AUDIT_LEDGER` 环境变量覆盖路径，
+  r 系机器免改代码。
+
+## 8. r1-r20 并行恢复手册（人工执行，按序）
+
+0. 前置：每台 r 机验证匿名 COS 访问（§5.0 的 curl，期望 206；403 则
+   整套审计只能从白名单节点跑）。挂载或可访问
+   `/lhcos-data/demiwtg-data/audit/kb_images_20260917/`（下称 $A）。
+   `git pull` 本仓库取 `tools/kb_audit/` 脚本。
+1. **领任务**（每台 r 机 k=0..19 不同值）：
+   ```bash
+   mkdir -p ~/kbstate && cd ~/kbstate
+   cp $A/cand_small.tsv .                 # 658MB
+   cp $A/sniffout_0{1,3,5,7}.tsv . && cat sniffout_0*.tsv >> my_out.tsv && rm sniffout_0*.tsv
+   awk -F'\t' -v k=$k -v n=20 'NR%n==k' cand_small.tsv > my_slice.tsv
+   # my_out.tsv 是续跑基线(自动跳过已嗅探的 91.7%), 本机只补自己切片的缺口
+   python3 tools/kb_audit/cos_sniff.py my_slice.tsv my_out.tsv 24
+   ```
+   单机 ~40 万候选 × 大多已嗅探 → 实际只补 ~3.3 万，几分钟级。
+   ⚠️ 每台并发别超 24 线程；20 台合计 ~480 并发对匿名桶是压测级，
+   如出现 err 类先降线程。
+2. **汇总**（任一台）：
+   ```bash
+   cat r{0..19}:~/kbstate/my_out.tsv 汇成一文件  # 或各自 cp 回 $A/merge/
+   awk -F'\t' '!seen[$1]++' merged.tsv > sniffout_final.tsv   # 7,925,013 行
+   cp $A/{blobs_inventory.tsv,rows_missing.jsonl.gz,rows_sizemiss.tsv.gz,\
+   thumb1200_rows.jsonl.gz,join1_stats.json,sniff_large.tsv,integrity_sample.json} \
+      ~/kbstate/ 2>/dev/null
+   # join2 需要 state/ 布局: sniffout_final.tsv 改名 sniffout_00.tsv 放 ~/kbstate/
+   KB_AUDIT_STATE=~/kbstate/ KB_AUDIT_LEDGER=<账本路径> \
+     python3 tools/kb_audit/audit_join2.py
+   ```
+   （账本本地副本 5.1GB 未上传，用 kb/qid_images.jsonl.gz 解压，或
+   KB_AUDIT_LEDGER 直指 .gz 时需先解压——join1/join2 读明文。）
+3. 产出 poison_html_rows.jsonl.gz 等 → 按 §5.3 起重收（backfill 支持
+   fleet 分片，注意礼貌限额与 miss_html 盯防）。
+4. 已完成的参考结论（r 机不必重跑）：
+   - >6KB 档 2 万抽样：HTML 仅 1 例 → 大图干净；
+   - sha 400 抽样全对、PIL 300 抽样零解码失败（dims 不匹配 107 例中
+     106 例为 thumb1200 语义、1 例 EXIF 方向）→ **池子无字节级损坏**；
+   - 问题 = 错误页(≤6KB 档) + 缩略图(34 万行) 两类,无第三类。
