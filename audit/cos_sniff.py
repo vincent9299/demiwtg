@@ -4,6 +4,7 @@ Wikimedia 错误码。输入 TSV(rel_path\tsize), 输出 TSV(rel\tclass\terr)。
 
 class: html/jpeg/png/gif/tiff/webp/svg/xml/pdf/djvu/empty/missing/err/other
 """
+import os
 import re
 import sys
 import time
@@ -72,9 +73,17 @@ def main():
             rel = line.split("\t", 1)[0]
             if rel and not rel.endswith("/"):
                 rels.append(rel)
+    done_rels = set()
+    if os.path.exists(out_path):            # 续跑: 跳过已产出
+        with open(out_path, encoding="utf-8") as f:
+            for line in f:
+                done_rels.add(line.split("\t", 1)[0])
+        rels = [r for r in rels if r not in done_rels]
+        print(f"[sniff] 续跑: 已完成 {len(done_rels):,}, 本次余 "
+              f"{len(rels):,}", flush=True)
     t0 = time.time()
     done = 0
-    with open(out_path, "w", encoding="utf-8") as out, \
+    with open(out_path, "a", encoding="utf-8") as out, \
             ThreadPoolExecutor(conc) as ex:
         for rel, (cls, err) in zip(rels, ex.map(sniff, rels)):
             out.write(f"{rel}\t{cls}\t{err}\n")
