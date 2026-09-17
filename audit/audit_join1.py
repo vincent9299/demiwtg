@@ -15,8 +15,10 @@ import random
 from collections import defaultdict
 
 INV = "/home/ubuntu/demi/raw/state/blobs_inventory.tsv"
-LED = "/home/ubuntu/demi/raw/state/qid_images.jsonl"
-ST = "/home/ubuntu/demi/raw/state/"
+LED = _os.environ.get("KB_AUDIT_LEDGER", ST + "qid_images.jsonl")
+import os as _os
+ST = _os.environ.get("KB_AUDIT_STATE",
+                          "/home/ubuntu/demi/raw/state/")
 
 SMALL_MAX = 6000
 LARGE_SAMPLE = 20000

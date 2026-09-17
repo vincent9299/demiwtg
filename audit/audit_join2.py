@@ -15,7 +15,9 @@ import json
 import datetime
 from collections import defaultdict
 
-ST = "/home/ubuntu/demi/raw/state/"
+import os as _os
+ST = _os.environ.get("KB_AUDIT_STATE",
+                          "/home/ubuntu/demi/raw/state/")
 LED = ST + "qid_images.jsonl"
 SMALL_MAX = 6000
 

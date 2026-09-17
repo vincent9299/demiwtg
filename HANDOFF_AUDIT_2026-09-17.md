@@ -149,7 +149,7 @@ audit_join2.py cos_deepcheck.py audit_blob_magic.py(旧版cosfs方案,弃用)`�
   - **COS**：`/lhcos-data/demiwtg-data/audit/kb_images_20260917/`（2.6GB，
     含 8 片嗅探结果/候选清单/inventory/join1 产物/完整性抽样/日志/脚本，
     回读校验行数一致）；
-  - **git**：审计脚本在仓库 `tools/kb_audit/`（本文件同 commit）。
+  - **git**：审计脚本在仓库 `audit/`（本文件同 commit）。
 - 脚本已支持 `KB_AUDIT_STATE` / `KB_AUDIT_LEDGER` 环境变量覆盖路径，
   r 系机器免改代码。
 
@@ -158,7 +158,7 @@ audit_join2.py cos_deepcheck.py audit_blob_magic.py(旧版cosfs方案,弃用)`�
 0. 前置：每台 r 机验证匿名 COS 访问（§5.0 的 curl，期望 206；403 则
    整套审计只能从白名单节点跑）。挂载或可访问
    `/lhcos-data/demiwtg-data/audit/kb_images_20260917/`（下称 $A）。
-   `git pull` 本仓库取 `tools/kb_audit/` 脚本。
+   `git pull` 本仓库取 `audit/` 脚本。
 1. **领任务**（每台 r 机 k=0..19 不同值）：
    ```bash
    mkdir -p ~/kbstate && cd ~/kbstate
@@ -166,7 +166,7 @@ audit_join2.py cos_deepcheck.py audit_blob_magic.py(旧版cosfs方案,弃用)`�
    cp $A/sniffout_0{1,3,5,7}.tsv . && cat sniffout_0*.tsv >> my_out.tsv && rm sniffout_0*.tsv
    awk -F'\t' -v k=$k -v n=20 'NR%n==k' cand_small.tsv > my_slice.tsv
    # my_out.tsv 是续跑基线(自动跳过已嗅探的 91.7%), 本机只补自己切片的缺口
-   python3 tools/kb_audit/cos_sniff.py my_slice.tsv my_out.tsv 24
+   python3 audit/cos_sniff.py my_slice.tsv my_out.tsv 24
    ```
    单机 ~40 万候选 × 大多已嗅探 → 实际只补 ~3.3 万，几分钟级。
    ⚠️ 每台并发别超 24 线程；20 台合计 ~480 并发对匿名桶是压测级，
@@ -180,7 +180,7 @@ audit_join2.py cos_deepcheck.py audit_blob_magic.py(旧版cosfs方案,弃用)`�
       ~/kbstate/ 2>/dev/null
    # join2 需要 state/ 布局: sniffout_final.tsv 改名 sniffout_00.tsv 放 ~/kbstate/
    KB_AUDIT_STATE=~/kbstate/ KB_AUDIT_LEDGER=<账本路径> \
-     python3 tools/kb_audit/audit_join2.py
+     python3 audit/audit_join2.py
    ```
    （账本本地副本 5.1GB 未上传，用 kb/qid_images.jsonl.gz 解压，或
    KB_AUDIT_LEDGER 直指 .gz 时需先解压——join1/join2 读明文。）

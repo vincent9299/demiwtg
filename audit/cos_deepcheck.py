@@ -17,6 +17,7 @@ REGION = "ap-singapore"
 HOST = f"{BUCKET}.cos.{REGION}.myqcloud.com"
 ROOT = "lhcos-data/demiwtg-data/datasets/demiwtg/kb/"
 IMG_EXT = {"jpg", "jpeg", "png", "gif", "tif", "tiff", "webp", "svg"}
+PIL_EXT = {"jpg", "jpeg", "png", "gif", "tif", "tiff", "webp"}  # svg PIL 打不开
 N_SHA = 400
 N_PIL = 300
 
@@ -35,7 +36,8 @@ def fetch(rel):
 
 def main():
     led = sys.argv[1] if len(sys.argv) > 1 else \
-        "/home/ubuntu/demi/raw/state/qid_images.jsonl"
+        os.environ.get("KB_AUDIT_LEDGER",
+                      "/home/ubuntu/demi/raw/state/qid_images.jsonl")
     rows = []
     with open(led, encoding="utf-8") as f:
         for line in f:
@@ -47,7 +49,8 @@ def main():
                 rows.append(r)
     random.seed(4242)
     sample_sha = random.sample(rows, N_SHA)
-    sample_pil = random.sample(rows, N_PIL)
+    pil_rows = [r for r in rows if r.get("ext") in PIL_EXT]
+    sample_pil = random.sample(pil_rows, min(N_PIL, len(pil_rows)))
 
     out = {"sha_checked": 0, "sha_mismatch": [], "sha_fetch_err": 0,
            "pil_checked": 0, "pil_broken": [], "pil_fetch_err": 0}
@@ -66,13 +69,16 @@ def main():
                      "got_bytes": ln, "qid": r["qid"]})
 
     def do_pil(r):
-        data = fetch(r["path"])
-        from PIL import Image
-        im = Image.open(io.BytesIO(data))
-        im.load()
-        if im.size != (r.get("width"), r.get("height")):
-            return r, "dims"
-        return r, None
+        try:
+            data = fetch(r["path"])
+            from PIL import Image
+            im = Image.open(io.BytesIO(data))
+            im.load()
+            if im.size != (r.get("width"), r.get("height")):
+                return r, "dims"
+            return r, None
+        except Exception as e:
+            return r, f"{type(e).__name__}"
 
     with ThreadPoolExecutor(32) as ex:
         for r, why in ex.map(do_pil, sample_pil):
