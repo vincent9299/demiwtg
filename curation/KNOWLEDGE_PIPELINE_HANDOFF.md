@@ -2,6 +2,14 @@
 
 > 下个窗口先读本节，再读 AGENTS.md 与 DESIGN 第21—24、69—74节。下方早期交接仅是历史记录，不能用旧默认配置覆盖当前实现。
 
+## notebook运行检查补充（最新）
+
+用户在长驻内核先后遇到BatchRelationshipReviews缺失、BatchImageSelection不接受neutral。磁盘代码正确，但仅刷新单个模块会混用旧类，已撤销热加载补丁。两个notebook初始化会拒绝算子文件晚于内核启动的会话；必须重启内核。玻璃棒每个后续算子cell还检查冻结的代码、demiflow依赖哈希、配置与RUN是否改变，发现变化立即停止。
+
+当前默认RUN：完整pipeline为bench200_sample5_dual_v2（保留用户最新选样配置），玻璃棒为glass_operator_dual_image_v2。旧run不覆盖。不要建议在旧内核只重跑第32步继续；重新加载文件并重启内核。更改notebook后的新run不能假定兼容旧manifest。
+
+本轮验证：141处算子构造参数与实际签名一致；干净内核用真实玻璃棒blocks的63张图执行第32步，得到16批，未调用模型；完整pipeline空输入执行至最终文件，玻璃棒所有代码cell也在独立干净内核用空输入执行通过。旧内核、冻结后改配置拒绝测试通过。验证记录state/curation/notebook_runtime_check_v1/，包括两个执行notebook和validation.json。57项针对性测试通过。以上不替代非空材料完整双模型链、GPU切换及知识正确性验证；本轮新增模型请求0。
+
 ## 用户目标与范围
 
 继续本项目 V2 工作：原始datasets → 概念相关文档/图片 → 可追溯图文知识。这里的V2是用户对下一阶段工作的称呼，不等同于历史archive/v2；现役代码仍在curation/v4，不搬目录，不代表已实现V4出题。不自动启动出题或修改评分。

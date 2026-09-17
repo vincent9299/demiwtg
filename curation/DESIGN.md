@@ -1805,3 +1805,10 @@ Qwen3.8的明确误收是温度计I6790beeb9453；Gemma31B正确识别并排除�
 
 
 用户随后明确要求两个notebook只保留最新正式版pipeline：knowledge_debug仅保留当前算子说明、配置、完整run_pipeline和当前RUN结果查看；glass_operator_debug保留同链的逐算子cell与当前结果。删除内嵌历史提示词比较、相似度实验及回放展示，修改前完整副本保存在state/curation/notebook_formal_only_20260917/。更正旧“两轮整合”说明、关系算子名称及图片复核cell标题顺序。current_results.py仅渲染当前RUN的标题/正文图片/来源；无结果时明确提示，绝不回退旧run。两个现役notebook清空过时执行输出，不代表重新执行了端到端模型链。
+
+
+### 长驻内核与运行冻结补充（2026-09-17）
+
+连续两次旧模块导入/签名异常说明单模块热加载不足。撤销cross_batch/multimodal单独reload：两个notebook在初始化及执行入口拒绝“已加载算子文件晚于内核启动”的情况，要求重启；glass每个后续cell检查冻结代码、依赖、配置和RUN未改变。默认切换到新v2 run，旧数据不覆盖。增加test_notebook_runtime.py覆盖两入口构造签名与拒绝旧内核，及逐步cell的冻结检查覆盖。
+
+实际检查：141处算子构造参数匹配；独立干净内核执行真实玻璃棒第32步（63张图、16批）；完整pipeline空输入走到sink；玻璃棒所有代码cell空输入执行通过；合计57项针对性测试通过。state/curation/notebook_runtime_check_v1保存验证，无新增模型调用。非空完整模型级联/GPU借用周期/知识质量仍未在本轮验收，不能以空数据走通代替。
