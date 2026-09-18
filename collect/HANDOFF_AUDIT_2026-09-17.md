@@ -162,7 +162,7 @@ DNS 不通、COS 域名与 IP 直连均 000。因此：
 - **剩余嗅探（~65 万行 Range-GET）与后续 Wikimedia 重收必须在有出口的
   机器跑**（r1-r20 若为出口机型则承担全部线上步骤）。每台 r 机启动前
   先跑 §5.0 curl 自检（期望 206），不通的机器别进队列；
-- 文档+代码已直递 lake：`/yzp/zhaozy/yangzepeng/0905/demiwtg-data/`
+- 文档+代码已直递 lake：`/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/`
   （`HANDOFF_AUDIT_2026-09-17.md` + `audit/*.py`）。lake 无 GitHub 出口，
   **git pull 不可用**，以直递内容为准（与 sg 侧 origin/main bf73857 同源）。
 

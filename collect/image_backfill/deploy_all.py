@@ -10,7 +10,7 @@ import time
 
 HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub"
 PENDING = os.path.join(HUB, "pending_all")
-FC = "/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill/fleet_curl.py"
+FC = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/fleet_curl.py"
 UAS = [l.strip() for l in open(os.path.join(HUB, "ua_pool.txt")) if l.strip()]
 # 中央分配表：每出口唯一 UA（assign_uas.py 生成）
 UA_ASSIGN = {}

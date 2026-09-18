@@ -5,7 +5,7 @@ set -u
 HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub
 PXS=$HUB/proxies
 SLICES=$HUB/pending_all
-FC=/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill/fleet_curl.py
+FC=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/fleet_curl.py
 # UA 按出口查中央分配表（hub/ua_assign.tsv，每出口唯一）
 # 48 个健康出口（42 新批 OK + 5 老批 + 1 静态）
 grep -E "wk=200" $PXS/check_all.txt | awk '{print $1}' > $PXS/ok42.txt

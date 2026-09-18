@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 
-STG = "/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill"
+STG = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill"
 HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub"
 COS_PREFIX = "lhcos-data/demiwtg-data/datasets/demiwtg/kb/blobs"
 

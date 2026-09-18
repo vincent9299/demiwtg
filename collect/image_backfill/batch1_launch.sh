@@ -6,7 +6,7 @@
 # 红线：须用户放行后才可运行；WM 任务全局串行（勿与 fleet_curl/SDC 并发）
 set -u
 KEY=$1; N=${2:-1}; RPS=${3:-0.25}
-STG=/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill
+STG=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
 HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub
 TAG=$(basename "$KEY" .jsonl); TAG=${TAG%.jsonl.gz}
 for ((i=0; i<N; i++)); do

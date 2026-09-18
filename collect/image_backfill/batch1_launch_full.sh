@@ -4,7 +4,7 @@
 # 每机先拉一次任务清单，再错峰启动该机的 worker（61 代理前 61 个，后 20 个直连）
 set -u
 KEY=$1; RPS=${2:-0.25}
-STG=/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill
+STG=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
 HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub
 NW=81
 TAG=$(basename "$KEY" .jsonl); TAG=${TAG%.jsonl.gz}

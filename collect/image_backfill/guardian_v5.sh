@@ -5,7 +5,7 @@
 # 启动：setsid nohup bash guardian.sh >> $HUB/guardian.log 2>&1 < /dev/null &
 set -u
 HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1
-STG=/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill
+STG=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
 GDIR=$HUB/guardian
 mkdir -p $GDIR
 START=$(date +%s)

@@ -17,7 +17,7 @@
 
 ## 旧路径兼容
 
-当前工作区 `demiwtg-data -> demiwtg/collect`、`kb_audit -> demiwtg/collect/kb_audit`。新机器克隆后如需兼容旧部署命令，在 demiwtg 的父目录创建上述相对链接；不要覆盖已有实体目录。当前任务未重启采集服务、修改集群路径或改 COS 键。
+按用户后续要求，工作区 `demiwtg-data` 兼容链接已移除，现役本地脚本使用 `demiwtg/collect`；不再创建旧入口。`kb_audit -> demiwtg/collect/kb_audit` 仍保留。历史快照保留当时的路径文字。未重启采集服务、修改集群路径或改 COS 键。
 
 ## Git 历史
 

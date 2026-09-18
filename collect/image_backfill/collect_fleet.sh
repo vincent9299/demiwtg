@@ -4,7 +4,7 @@
 BASE=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1
 IN=$BASE/fleet_in
 PY=/yzp/zhaozy/yangzepeng/0905/env/bin/python
-IMP=/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill/import_blobs.py
+IMP=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/import_blobs.py
 mkdir -p $IN
 
 collect_one () {

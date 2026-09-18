@@ -1,11 +1,11 @@
 #!/bin/bash
 # 国内源看门狗：静默死亡自动拉起，账本幂等；连续两轮无新增则收工
-cd /yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill
+cd /yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
 LOG=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1
 last=-1; stale=0
 while true; do
   for s in 0 1; do
-    PYTHONPATH=/yzp/zhaozy/yangzepeng/0905/demiflow:/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill \
+    PYTHONPATH=/yzp/zhaozy/yangzepeng/0905/demiflow:/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill \
       timeout 14400 /yzp/zhaozy/yangzepeng/0905/env/bin/python -u -m backfill \
       --candidates $LOG/candidates_domestic.jsonl.gz --shard $s/2 \
       --dataset $LOG/run --blob-root /yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg \

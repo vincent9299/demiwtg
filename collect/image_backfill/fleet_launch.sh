@@ -10,7 +10,7 @@ else
 fi
 n=$(printf "%02d" $i)
 HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub
-FC=/yzp/zhaozy/yangzepeng/0905/demiwtg-data/image_backfill
+FC=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
 # r 机直连出口的唯一 UA：按 ssh 别名查分配表（远程真实主机名可能≠rN，故显式传参）
 ua=$(awk -F'\t' -v k="host:$h" '$1==k{print $2}' $HUB/ua_assign.tsv)
 [ -n "$ua" ] || ua="demiflow-backfill/1.2 (image restoration; https://github.com/hollowreed42/demiflow-backfill)"
