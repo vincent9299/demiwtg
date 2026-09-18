@@ -1,0 +1,32 @@
+{
+  "concepts": {
+    "OK手势": {
+      "topics": 8,
+      "paragraphs": 21,
+      "characters": 2149,
+      "images": 3
+    },
+    "玻璃棒": {
+      "topics": 3,
+      "paragraphs": 7,
+      "characters": 752,
+      "images": 2
+    },
+    "白花芍药": {
+      "topics": 4,
+      "paragraphs": 4,
+      "characters": 418,
+      "images": 3
+    }
+  },
+  "calls": 7,
+  "stages": {
+    "verify_paragraphs": 5,
+    "repair_topics": 2
+  },
+  "usage": {
+    "completion_tokens": 6872,
+    "prompt_tokens": 80473,
+    "total_tokens": 87345
+  }
+}

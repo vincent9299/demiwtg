@@ -1,0 +1,284 @@
+{
+  "blob_roots": [],
+  "code_hash": "30a60e5e4bd28f82637f5469d105c93c230648fd6f4521ab7235dfa6e0af365a",
+  "dataset": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg",
+  "max_images_per_concept": 2,
+  "max_rows_per_source": 500,
+  "phase": "entry_validation",
+  "project": "/yzp/zhaozy/yangzepeng/0905/demiwtg",
+  "requests": [
+    {
+      "kind": "legacy",
+      "value": "木兰"
+    },
+    {
+      "kind": "legacy",
+      "value": "皮卡丘"
+    },
+    {
+      "kind": "qid",
+      "value": "Q1"
+    },
+    {
+      "kind": "qid",
+      "value": "Q100087"
+    },
+    {
+      "kind": "qid",
+      "value": "Q31"
+    }
+  ],
+  "schema": "curation-v4-materials/1",
+  "scope": "Explicit engineering cases, bounded scans; not V4 question sampling or a whole-concept completeness claim.",
+  "snapshot_note": "Source size/mtime/inode lock this run; selected records also retain hashes and original fields. No whole-file content-hash claim.",
+  "sources": [
+    {
+      "exists": true,
+      "inode": 144115188323572486,
+      "kind": "legacy_concepts",
+      "mtime_ns": 1788833082430420000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/concepts.json",
+      "size": 85347611
+    },
+    {
+      "exists": true,
+      "inode": 144115188331473255,
+      "kind": "qid_concepts",
+      "mtime_ns": 1789076000373469000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_concepts.fat.jsonl.gz",
+      "size": 251716336
+    },
+    {
+      "exists": true,
+      "inode": 144115188330749605,
+      "kind": "qid_concepts_base",
+      "mtime_ns": 1789028484145274000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_concepts.jsonl",
+      "size": 695058709
+    },
+    {
+      "exists": true,
+      "inode": 144115188331180145,
+      "kind": "legacy_docs",
+      "mtime_ns": 1789051067040126000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/docs.jsonl",
+      "size": 4368748
+    },
+    {
+      "exists": true,
+      "inode": 144115188324671435,
+      "kind": "clean_docs",
+      "mtime_ns": 1788886519105190000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/collect/docs_clean/pages_clean.jsonl",
+      "size": 43850055
+    },
+    {
+      "exists": true,
+      "inode": 144115188323754377,
+      "kind": "legacy_images",
+      "mtime_ns": 1788889217518892000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/images.jsonl",
+      "size": 2661828149
+    },
+    {
+      "exists": true,
+      "inode": 144115188331580582,
+      "kind": "qid_images",
+      "mtime_ns": 1789348310665595000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_images.jsonl.gz",
+      "size": 1133720077
+    },
+    {
+      "exists": true,
+      "inode": 144115188331757997,
+      "kind": "image_roles",
+      "mtime_ns": 1789274999114538000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_image_roles.tsv.gz",
+      "size": 66139923
+    },
+    {
+      "exists": true,
+      "inode": 144115188331454190,
+      "kind": "gallery_captions",
+      "mtime_ns": 1789275001160838000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_gallery_captions.tsv.gz",
+      "size": 21368637
+    },
+    {
+      "exists": true,
+      "inode": 144115188331577507,
+      "kind": "qid_graph",
+      "mtime_ns": 1789076005490066000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_graph.jsonl.gz",
+      "size": 58545720
+    },
+    {
+      "exists": true,
+      "inode": 144115188331551348,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789272858593156000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part1.jsonl.gz",
+      "size": 4066683407
+    },
+    {
+      "exists": true,
+      "inode": 144115188331556202,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273778948010000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part10.jsonl.gz",
+      "size": 1068114445
+    },
+    {
+      "exists": true,
+      "inode": 144115188331681091,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273868052751000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part11.jsonl.gz",
+      "size": 1094621369
+    },
+    {
+      "exists": true,
+      "inode": 144115188331458065,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273955274104000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part12.jsonl.gz",
+      "size": 1073954697
+    },
+    {
+      "exists": true,
+      "inode": 144115188331551560,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274043104833000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part13.jsonl.gz",
+      "size": 1087577826
+    },
+    {
+      "exists": true,
+      "inode": 144115188331416799,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274124300672000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part14.jsonl.gz",
+      "size": 1000141144
+    },
+    {
+      "exists": true,
+      "inode": 144115188331853900,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274214442056000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part15.jsonl.gz",
+      "size": 1114742659
+    },
+    {
+      "exists": true,
+      "inode": 144115188331454188,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274312762100000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part16.jsonl.gz",
+      "size": 1137009586
+    },
+    {
+      "exists": true,
+      "inode": 144115188331225005,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274392802204000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part17.jsonl.gz",
+      "size": 987444773
+    },
+    {
+      "exists": true,
+      "inode": 144115188331556222,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274481694762000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part18.jsonl.gz",
+      "size": 1096454503
+    },
+    {
+      "exists": true,
+      "inode": 144115188331681113,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274564454525000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part19.jsonl.gz",
+      "size": 1022531172
+    },
+    {
+      "exists": true,
+      "inode": 144115188331555987,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273024955449000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part2.jsonl.gz",
+      "size": 2066639864
+    },
+    {
+      "exists": true,
+      "inode": 144115188331454189,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274584496856000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part20.jsonl.gz",
+      "size": 237510843
+    },
+    {
+      "exists": true,
+      "inode": 144115188331680890,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273152029596000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part3.jsonl.gz",
+      "size": 1570597815
+    },
+    {
+      "exists": true,
+      "inode": 144115188331453973,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273259047827000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part4.jsonl.gz",
+      "size": 1318869836
+    },
+    {
+      "exists": true,
+      "inode": 144115188331224994,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273342969221000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part5.jsonl.gz",
+      "size": 1036611547
+    },
+    {
+      "exists": true,
+      "inode": 144115188331416431,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273434074561000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part6.jsonl.gz",
+      "size": 1126873367
+    },
+    {
+      "exists": true,
+      "inode": 144115188331853851,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273524136372000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part7.jsonl.gz",
+      "size": 1115753913
+    },
+    {
+      "exists": true,
+      "inode": 144115188331458042,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273603180401000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part8.jsonl.gz",
+      "size": 979118246
+    },
+    {
+      "exists": true,
+      "inode": 144115188331551537,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789273691995995000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part9.jsonl.gz",
+      "size": 1101842206
+    },
+    {
+      "exists": true,
+      "inode": 144115188331551561,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789274897804089000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-zh.jsonl.gz",
+      "size": 3815373778
+    }
+  ]
+}

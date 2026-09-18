@@ -1,0 +1,533 @@
+{
+  "by_model_condition": {
+    "bagel/baseline": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 0,
+      "observable": 4,
+      "total": 4
+    },
+    "bagel/multimodal": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 8,
+      "knowledge_pass": 4,
+      "observable": 4,
+      "total": 4
+    },
+    "gemini/baseline": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 3,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 7,
+      "knowledge_pass": 3,
+      "observable": 4,
+      "total": 4
+    },
+    "gemini/multimodal": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 6,
+      "knowledge_pass": 2,
+      "observable": 4,
+      "total": 4
+    }
+  },
+  "by_stratum": {
+    "bagel/baseline/application_level/conditional": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/baseline/application_level/direct": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/baseline/domain/动物": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 0,
+      "observable": 4,
+      "total": 4
+    },
+    "bagel/baseline/task/edit": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/baseline/task/t2i": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/multimodal/application_level/conditional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/multimodal/application_level/direct": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/multimodal/domain/动物": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 8,
+      "knowledge_pass": 4,
+      "observable": 4,
+      "total": 4
+    },
+    "bagel/multimodal/task/edit": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/multimodal/task/t2i": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/baseline/application_level/conditional": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/baseline/application_level/direct": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 1,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/baseline/domain/动物": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 3,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 7,
+      "knowledge_pass": 3,
+      "observable": 4,
+      "total": 4
+    },
+    "gemini/baseline/task/edit": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/baseline/task/t2i": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 1,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/multimodal/application_level/conditional": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/multimodal/application_level/direct": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/multimodal/domain/动物": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 6,
+      "knowledge_pass": 2,
+      "observable": 4,
+      "total": 4
+    },
+    "gemini/multimodal/task/edit": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/multimodal/task/t2i": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 2
+    }
+  },
+  "expected": 16,
+  "missing": [],
+  "per_output": [
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__baseline__r3",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__baseline__r2",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__baseline__r3",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__multimodal__r2",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__multimodal__r2",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__multimodal__r3",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__multimodal__r3",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__multimodal__r3",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__multimodal__r3",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__baseline__r3",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__multimodal__r2",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__baseline__r2",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__baseline__r3",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__multimodal__r2",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__baseline__r2",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__baseline__r2",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    }
+  ],
+  "reviewed": 16,
+  "reviewer_type": "assistant_not_human_gold",
+  "scope": "Development results, not formal test accuracy. Quality remains per-output; unobservable is not a pass."
+}

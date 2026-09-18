@@ -1,0 +1,21 @@
+{
+ "counters": {
+  "total": 1,
+  "cc": 3,
+  "reject": 0,
+  "error": 0
+ },
+ "warns": {},
+ "xcheck": [
+  {
+   "qid": "e010",
+   "jaccard": 0.33,
+   "instance": "橄榄枝"
+  }
+ ],
+ "levels": {
+  "L3": 10,
+  "L2": 7,
+  "L1": 3
+ }
+}

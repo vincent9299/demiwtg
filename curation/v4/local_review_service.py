@@ -88,8 +88,12 @@ def image_review_service(run, config, *, needed=True):
             wait_until(lambda: not command(pid), 180, 'original service stop')
             cmd = [sys.executable, '-m', 'vllm.entrypoints.cli.main', 'serve', str(ROOT.parent / 'models/gemma-4-31B-it'),
                    '--served-model-name', model, '--host', '127.0.0.1', '--port', '8001', '--tensor-parallel-size', '2',
-                   '--gpu-memory-utilization', '0.90', '--max-model-len', '32768', '--max-num-seqs', '2',
+                   '--gpu-memory-utilization', '0.90', '--max-model-len', str(config.get('local_review_context_tokens', 32768)), '--max-num-seqs', '2',
                    '--enforce-eager', '--limit-mm-per-prompt', json.dumps({'image': config.get('image_batch_size', 4)})]
+            if config.get('local_review_enable_thinking', False):
+                # Keep Gemma's thought channel out of published article text.
+                # This is opt-in for final-review diagnostics, not image filtering.
+                cmd += ['--reasoning-parser', 'gemma4']
             event('starting_review_service', command=cmd)
             owned = spawn(cmd, logdir / 'gemma.log')
             wait_until(lambda: ready(8001, model), 600, 'Gemma startup', owned)

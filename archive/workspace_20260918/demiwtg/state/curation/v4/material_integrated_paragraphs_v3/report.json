@@ -1,0 +1,68 @@
+{
+  "before": {
+    "OK手势": {
+      "image_blocks": 13,
+      "text_blocks": 43,
+      "topics": 32
+    },
+    "玻璃棒": {
+      "image_blocks": 3,
+      "text_blocks": 16,
+      "topics": 9
+    },
+    "白花芍药": {
+      "image_blocks": 4,
+      "text_blocks": 1,
+      "topics": 3
+    }
+  },
+  "after": {
+    "玻璃棒": {
+      "topics": 4,
+      "text_blocks": 7,
+      "image_blocks": 3
+    },
+    "白花芍药": {
+      "topics": 3,
+      "text_blocks": 3,
+      "image_blocks": 3
+    },
+    "OK手势": {
+      "topics": 9,
+      "text_blocks": 25,
+      "image_blocks": 13
+    }
+  },
+  "extraction_groups_completed": 18,
+  "integration_and_review_calls": 7,
+  "integration_tokens": 171396,
+  "sum_integration_call_elapsed_s": 671.5375773552805,
+  "accounting_repairs": {
+    "玻璃棒": [],
+    "白花芍药": [],
+    "OK手势": [
+      {
+        "action": "used",
+        "input_id": "Bd43631d95f2cbb8a",
+        "output_block_ids": [
+          "t7b2"
+        ],
+        "reason": "Program reconstructed missing inverse mapping from explicit output ancestry; prose unchanged"
+      }
+    ]
+  },
+  "quote_alignment_repairs": {
+    "玻璃棒": [],
+    "白花芍药": [
+      {
+        "after": "科：  |  芍药科 Paeoniaceae  |\n\n|  属：  |  芍药属 _Paeonia_  |\n\n| 种：   |  **白花芍药 _P. sterniana_**",
+        "before": "科： 芍药科 Paeoniaceae | 属： 芍药属 _Paeonia_ | 种： **白花芍药 _P. sterniana_**",
+        "block_id": "t1_b1",
+        "reason": "Unique original span; only whitespace and Markdown table borders differ",
+        "source_id": "U21b92fb0c1626bc8"
+      }
+    ],
+    "OK手势": []
+  },
+  "scope": "All 18 routed groups for the same 3-concept input. Source fidelity/machine review, not independent factual certification. Cross-concept consistency not evaluated."
+}

@@ -1,0 +1,16 @@
+{
+  "actions": [
+    "local_integration_candidate",
+    "local_integration_candidate",
+    "local_integration_candidate",
+    "local_integration_candidate",
+    "local_integration_candidate",
+    "local_integration_candidate",
+    "local_integration_candidate",
+    "local_integration_candidate"
+  ],
+  "calls": 1,
+  "error": null,
+  "pairs": 8,
+  "valid_pairs": 8
+}

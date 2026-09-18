@@ -1,0 +1,130 @@
+{
+  "new_concepts": [
+    "玻璃棒",
+    "OK手势"
+  ],
+  "batch_scope": {
+    "玻璃棒": {
+      "processed": 4,
+      "available": 4
+    },
+    "OK手势": {
+      "processed": 4,
+      "available": 56,
+      "selection": "directed first/middle/last text positions, all 4 selected-image groups"
+    }
+  },
+  "new_model_calls": 16,
+  "new_tokens": 90598,
+  "old_peony_model_calls_reused": 4,
+  "source_filter_calls_rerun": 0,
+  "codex_pixel_review": [
+    "I120e793cde9d",
+    "I43e8a2cab331",
+    "I55393adeb1b4",
+    "I6790beeb9453",
+    "If0e1227bab9a",
+    "Iea385d4fc3f5",
+    "Ic5c8a0a4624d",
+    "Id6c1ed9d1267"
+  ],
+  "exclusions": [
+    {
+      "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/paragraph_more_cases_v1",
+      "batch_id": "4adee7fb885d0eaab655:joint:0:0",
+      "block_id": "T1_B3",
+      "reason": "线描图不能证实所称两端圆滑处理；图中端部为斜平线，描述超过像素依据。",
+      "reviewer": "Codex",
+      "scope": "Local input/output review, not independent fact certification"
+    },
+    {
+      "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/paragraph_more_cases_v1",
+      "batch_id": "4adee7fb885d0eaab655:joint:0:0",
+      "block_id": "T2_B4",
+      "reason": "实际图片可见刻度、内柱及底端结构，更像温度计；不能确认是搅拌玻璃棒，撤回此身份描述。",
+      "reviewer": "Codex",
+      "scope": "Local input/output review, not independent fact certification"
+    },
+    {
+      "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/paragraph_more_cases_v1",
+      "batch_id": "4adee7fb885d0eaab655:joint:1:0",
+      "block_id": "T3_B1",
+      "reason": "实际图片可见刻度、内柱及底端结构，更像温度计；不能确认是搅拌玻璃棒，撤回此身份描述。",
+      "reviewer": "Codex",
+      "scope": "Local input/output review, not independent fact certification"
+    },
+    {
+      "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/paragraph_more_cases_v1",
+      "batch_id": "4adee7fb885d0eaab655:joint:2:0",
+      "block_id": "t2_b2",
+      "reason": "实际图片可见刻度、内柱及底端结构，更像温度计；不能确认是搅拌玻璃棒，撤回此身份描述。",
+      "reviewer": "Codex",
+      "scope": "Local input/output review, not independent fact certification"
+    },
+    {
+      "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/paragraph_more_cases_v1",
+      "batch_id": "4adee7fb885d0eaab655:joint:3:0",
+      "block_id": "T2_B2",
+      "reason": "实际图片可见刻度、内柱及底端结构，更像温度计；不能确认是搅拌玻璃棒，撤回此身份描述。",
+      "reviewer": "Codex",
+      "scope": "Local input/output review, not independent fact certification"
+    },
+    {
+      "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/paragraph_more_cases_v1",
+      "batch_id": "f2e015ceac4356498cc7:joint:13:3",
+      "block_id": "t2_b1",
+      "reason": "材料讲仇恨含义的一次挪用，不能概括为整个OK手势的语义演变始于4chan；丢失历史范围限定。",
+      "reviewer": "Codex",
+      "scope": "Local input/output review, not independent fact certification"
+    },
+    {
+      "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/paragraph_peony_v1",
+      "batch_id": "66d0f85f4a96ebd98630:joint:0:1",
+      "block_id": "t3_b1",
+      "reason": "标题指具体物种，原文却泛称芍药；缺少适用到该具体物种的证据。",
+      "reviewer": "Codex",
+      "scope": "Local input/output review, not independent fact certification"
+    },
+    {
+      "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/paragraph_peony_v1",
+      "batch_id": "66d0f85f4a96ebd98630:joint:0:1",
+      "block_id": "t2_b1",
+      "reason": "段落包含果期，所选引句未涵盖果期；当前按整段保留或不保留，先不纳入。",
+      "reviewer": "Codex",
+      "scope": "Local input/output review, not independent fact certification"
+    }
+  ],
+  "limitations": [
+    "Semantic cross-batch dedup not implemented; counts include overlapping paragraphs/image references.",
+    "Six new text blocks fail local protocol validation: one quote mismatch and five missing citations. Four of those five are visual summaries without text citations; image captions remain. Current text/image separation rejects useful visual summaries and needs future protocol improvement.",
+    "Machine review did not catch thermometer identity or historical scope generalization.",
+    "No independent factual verification of all source claims; final inclusion does not imply correctness."
+  ],
+  "tests": "3 paragraph/export tests passed; earlier base suite 127 passed before this display/export change.",
+  "final_retained": {
+    "白花芍药": {
+      "text": 3,
+      "image": 3,
+      "unique_images": 3
+    },
+    "玻璃棒": {
+      "text": 17,
+      "image": 9,
+      "unique_images": 3
+    },
+    "OK手势": {
+      "text": 10,
+      "image": 14,
+      "unique_images": 14
+    }
+  },
+  "image_filter_regression_cases": [
+    {
+      "concept": "玻璃棒",
+      "image_id": "I6790beeb9453",
+      "observed_problem": "Graduations and inner column; cannot establish stirring-rod identity. Existing keep and downstream acceptance are unreliable.",
+      "required_behavior": "Do not certify as stirring rod; preserve identity uncertainty for review.",
+      "raw_sha256": "953df6bcaf5f8595bedad2de277db15d47b69032d9a12f01807482fda8e179ac"
+    }
+  ]
+}

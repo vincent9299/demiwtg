@@ -1,0 +1,30 @@
+*** Begin Patch
+*** Update File: /yzp/zhaozy/yangzepeng/0905/demiwtg/curation/v4/ops/article.py
+@@
+     notes = re.sub(r'(?<!【)(资料|图)\s*([1-9][0-9]*(?:\s*[,，、/]\s*[1-9][0-9]*)*)',
+                    lambda m: ''.join(f'【{m[1]}{n}】' for n in re.findall(r'[0-9]+', m[2])), notes)
++    # An immediately adjacent numbered chain explicitly shares its first type.
++    # Do not carry that type across prose/punctuation or infer bare references.
++    notes = re.sub(r'【(资料|图)([1-9][0-9]*)】((?:【[1-9][0-9]*】)+)',
++                   lambda m: ''.join(f'【{m[1]}{n}】' for n in [m[2], *re.findall(r'[0-9]+', m[3])]), notes)
+*** Update File: /yzp/zhaozy/yangzepeng/0905/demiwtg/curation/v4/test_article.py
+@@
+-def test_review_article_heading_boundary_keeps_evidence_and_completion_checks():
++def test_adjacent_audit_references_share_explicit_type_only_within_the_chain():
++    from .ops.article import split_review_record
++    sources=SOURCES+[{'source_id':'s2','text':'第二资料'}]
++    prefix='## 审查记录\n'
++    body='\n## 最终知识\n## 事实\n原文事实。【资料1】\n【完成】'
++    text=prefix+'核对【资料1】【2】；不选【图1】【2】。'+body
++    result=ApplyArticle(final=True,image_selection_only=True,review_notes_required=True)(
++        {'prompt_result':text,'source_catalog':sources,'article_image_ids':['a','b']})
++    assert result['article_status']=='reviewed' and result['article_text']==text
++    assert result['article_review_notes']=='核对【资料1】【资料2】；不选【图1】【图2】。'
++    assert not any(t['images'] for t in result['article_topics'])
++    for note in ['【2】','【资料1】，再看【2】','【资料1】【0】']:
++        assert 'unknown_review_marker' in split_review_record(prefix+note+body,sources,[])[2]
++    assert 'unknown_review_reference' in split_review_record(prefix+'【资料1】【3】'+body,sources,[])[2]
++
++
++def test_review_article_heading_boundary_keeps_evidence_and_completion_checks():
+*** End Patch

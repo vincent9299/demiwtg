@@ -163,66 +163,36 @@ def test_reused_superset_comparison_counts_only_active_candidate_pairs():
     assert len(out['knowledge']['facts']) == 1
 
 
-def test_native_notebook_source_branch_runs_and_replays_without_new_calls(data, monkeypatch):
-    """Exercise actual streaming composition, prompt envelopes and final sink."""
-    from .test_explicit_pipeline import notebook_pipeline
-    from .ops.prompt_operators import ApplyIdentity
-    from . import prompt_config
-    pipeline = notebook_pipeline()
-    p, dataset = data
-    calls = []
-
-    async def identity(self, row):
-        materials = row['identity_materials']
-        return {**row, 'identity': {'status': 'resolved', 'target_label': '同名概念',
-            'accepted_material_ids': [m['material_id'] for m in materials]}}
-
-    monkeypatch.setattr(ApplyIdentity, '__call__', identity)
-    monkeypatch.setattr(prompt_config, 'validate_local_endpoint', lambda *a: None)
-
+def test_native_source_selection_runs_and_replays_without_new_calls(tmp_path,monkeypatch):
+    """Legacy verbatim operator remains usable independently of the new article graph."""
+    from demiflow.standalone import local_data
+    from .ops.source_blocks import merge_block_decisions
+    from .ops import prompt_config
+    from .pipeline import DEFAULT
+    calls=[]
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
-            self.send_response(200);self.end_headers()
-            self.wfile.write(json.dumps({'data': [{'id': 'qwen3.8-27b'}]}).encode())
-
+            self.send_response(200);self.end_headers();self.wfile.write(json.dumps({'data':[{'id':'qwen3.8-27b'}]}).encode())
         def do_POST(self):
-            body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
-            calls.append(body)
-            text = body['messages'][1]['content']
-            payload = json.JSONDecoder().raw_decode(text.split('输入数据：\n')[1])[0]
-            if 'request' in payload:
-                result = {'status': 'resolved', 'target_label': '同名概念', 'reason': 'test',
-                          'accepted_material_ids': [], 'rejected_materials': [],
-                          'identity_groups': [], 'material_reviews': []}
-            elif any('fact_id' in u for u in payload['units']):
-                result = {'pairs': [], 'issues': []}
-            else:
-                result = {'decisions': [{'unit_id': u['unit_id'], 'decision': 'selected',
-                          'reason': '完整原文', 'relation':'direct', 'source_check_needed': True, 'relevance_score': 3,
-                          'usability_score': 3, 'standalone': True, 'mixed_content': False} for u in payload['units']]}
+            body=json.loads(self.rfile.read(int(self.headers['Content-Length'])));calls.append(body)
+            payload=json.JSONDecoder().raw_decode(body['messages'][1]['content'].split('输入数据：\n')[1])[0]
+            result={'decisions':[{'unit_id':u['unit_id'],'decision':'selected','relation':'direct','reason':'原文条件'} for u in payload['units']]}
             self.send_response(200);self.end_headers()
-            self.wfile.write(json.dumps({'model': 'qwen3.8-27b', 'choices': [{'finish_reason': 'stop',
-                'message': {'content': json.dumps({'result': result})}}],
-                'usage': {'prompt_tokens': 10, 'completion_tokens': 10}}).encode())
-
-        def log_message(self, *args):
-            pass
-
-    server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True);thread.start()
-    kwargs = dict(ids=['legacy:同名概念'], project=p, through='export', model_config={
-        'text_mode': 'source_blocks', 'body_only': True,
-        'base_url': f'http://127.0.0.1:{server.server_port}/v1', 'max_calls': None})
+            self.wfile.write(json.dumps({'choices':[{'finish_reason':'stop','message':{'content':json.dumps({'result':result})}}]}).encode())
+        def log_message(self,*args):pass
+    server=ThreadingHTTPServer(('127.0.0.1',0),Handler);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+    monkeypatch.setattr(prompt_config,'validate_local_endpoint',lambda *a:None)
+    config={**DEFAULT,'base_url':f'http://127.0.0.1:{server.server_port}/v1'}
+    pack,_=prompt_config.knowledge_prompt_pack(config);options=prompt_config.prompt_execution_options(tmp_path,config)
+    def execute():
+        data=local_data(prompt_packs={'knowledge.yaml':pack},prompt_options=options)
+        source=data.from_items([BuildSourceBlocks(unit_chars=1)(sample())])
+        decisions=(source.flat_map(BatchSourceBlocks()).map_prompt_async('select_blocks',config='knowledge.yaml',inputs={'payload':'block_prompt'},output='prompt_result')
+                   .map_cached(ApplyBlockSelection(relevance_only=True),cache_dir=tmp_path/'cache',version='1').checkpoint(tmp_path/'selection.jsonl',version='1').reduce_by_key('case_id',merge_block_decisions))
+        return source.join(decisions,on='case_id').map(BuildVerbatimCandidates()).checkpoint(tmp_path/'result.jsonl',version='1').take_all()
     try:
-        run = p/'state/curation/source-blocks'
-        rows = list(pipeline(run, dataset, **kwargs).iter_rows())
-        count = len(calls)
-        assert count >= 3
-        pipeline(run, dataset, **kwargs)
-        assert len(calls) == count
-        assert rows[0]['knowledge']['facts']
-        for f in rows[0]['knowledge']['facts']:
-            assert f['statement'] == f['evidence'][0]['quote']
-        assert rows[0]['knowledge']['image_evidence']['status'] == 'not_run'
-    finally:
-        server.shutdown();server.server_close();thread.join()
+        result=execute();assert len(calls)==1
+        assert execute()==result and len(calls)==1
+        assert len(result[0]['knowledge']['facts'])==2
+        for f in result[0]['knowledge']['facts']:assert f['statement']==f['evidence'][0]['quote']
+    finally:server.shutdown();server.server_close();thread.join()

@@ -1,0 +1,76 @@
+{
+    "Overall": 0.5513575331441399,
+    "Reasoning": {
+        "Monitoring": {
+            "calculate": 0.20333333333333334,
+            "intention": 0.19387755102040816,
+            "property": 0.63,
+            "Avg": 0.28714859437751006
+        },
+        "Autonomous_Driving": {
+            "prediction_intention_ego": 0.18421052631578946,
+            "prediction_intention_pedestrian": 0.4077669902912621,
+            "prediction_intention_vehicle": 0.3526570048309179,
+            "relation_interaction_other2other": 0.13432835820895522,
+            "attention_trafficsignal": 0.5944700460829493,
+            "relation_interaction_ego2pedestrain": 0.2169811320754717,
+            "relation_interaction_ego2trafficsignal": 0.29523809523809524,
+            "relation_interaction_ego2vehicle": 0.22772277227722773,
+            "Avg": 0.3005952380952381
+        },
+        "OCR with Complex Context": {
+            "scene understanding": 0.612,
+            "character identification": 0.656,
+            "Avg": 0.634
+        },
+        "Diagram and Table": {
+            "diagram": 0.5057471264367817,
+            "table": 0.4938650306748466,
+            "Avg": 0.498
+        },
+        "Remote Sensing": {
+            "Avg": 0
+        },
+        "Avg": 0.3916256157635468
+    },
+    "Perception": {
+        "Monitoring": {
+            "vehicle/counting": 0.506578947368421,
+            "person/counting": 0.3971774193548387,
+            "vehicle/location": 0.25735294117647056,
+            "person/attribute": 0.10185185185185185,
+            "vehicle/attribute": 0.19886363636363635,
+            "Avg": 0.37249544626593806
+        },
+        "Autonomous_Driving": {
+            "objects_identify": 0.4232515894641235,
+            "attribute_motion_vehicle/attribute": 0.3924050632911392,
+            "attribute_motion_multivehicles/attribute": 0.3511543134872418,
+            "attribute_visual_trafficsignal/attribute": 0.35323383084577115,
+            "attribute_motion_pedestrain/attribute": 0.3353658536585366,
+            "object_count": 0.3861111111111111,
+            "attribute_motion_multipedestrians/attribute": 0.12981744421906694,
+            "Avg": 0.3510928961748634
+        },
+        "OCR with Complex Context": {
+            "license": 0.6490610328638498,
+            "phone_and_address": 0.6481802426343154,
+            "text_recog": 0.7253756260434057,
+            "adver_and_product": 0.7496790757381258,
+            "book_map_poster": 0.8456591639871383,
+            "Avg": 0.7454703832752613
+        },
+        "Diagram and Table": {
+            "diagram": 0.7201413427561838,
+            "table": 0.6724738675958188,
+            "Avg": 0.6848886434750598
+        },
+        "Remote Sensing": {
+            "count": 0.2528548123980424,
+            "color": 0.5250996015936255,
+            "position": 0.6618933969769292,
+            "Avg": 0.48180845371856607
+        },
+        "Avg": 0.573217123320653
+    }
+}

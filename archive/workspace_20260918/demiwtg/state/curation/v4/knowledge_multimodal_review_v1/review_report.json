@@ -1,0 +1,105 @@
+{
+  "scope": "One concept material batch; one of 30 joint groups; not full knowledge quality approval",
+  "selection": {
+    "text_units": 88,
+    "selected_text_units": 87,
+    "original_images": 17,
+    "available_images": 10,
+    "selected_images": 7,
+    "completed_preannotations": 2
+  },
+  "joint_input": {
+    "text_chars": 2404,
+    "images": 4
+  },
+  "joint_batch_scope": {
+    "limit": 1,
+    "planned": 30,
+    "processed": 1,
+    "unprocessed_batch_ids": [
+      "d96e5834f2c17c9f4a90:joint:0:1",
+      "d96e5834f2c17c9f4a90:joint:1:0",
+      "d96e5834f2c17c9f4a90:joint:1:1",
+      "d96e5834f2c17c9f4a90:joint:2:0",
+      "d96e5834f2c17c9f4a90:joint:2:1",
+      "d96e5834f2c17c9f4a90:joint:3:0",
+      "d96e5834f2c17c9f4a90:joint:3:1",
+      "d96e5834f2c17c9f4a90:joint:4:0",
+      "d96e5834f2c17c9f4a90:joint:4:1",
+      "d96e5834f2c17c9f4a90:joint:5:0",
+      "d96e5834f2c17c9f4a90:joint:5:1",
+      "d96e5834f2c17c9f4a90:joint:6:0",
+      "d96e5834f2c17c9f4a90:joint:6:1",
+      "d96e5834f2c17c9f4a90:joint:7:0",
+      "d96e5834f2c17c9f4a90:joint:7:1",
+      "d96e5834f2c17c9f4a90:joint:8:0",
+      "d96e5834f2c17c9f4a90:joint:8:1",
+      "d96e5834f2c17c9f4a90:joint:9:0",
+      "d96e5834f2c17c9f4a90:joint:9:1",
+      "d96e5834f2c17c9f4a90:joint:10:0",
+      "d96e5834f2c17c9f4a90:joint:10:1",
+      "d96e5834f2c17c9f4a90:joint:11:0",
+      "d96e5834f2c17c9f4a90:joint:11:1",
+      "d96e5834f2c17c9f4a90:joint:12:0",
+      "d96e5834f2c17c9f4a90:joint:12:1",
+      "d96e5834f2c17c9f4a90:joint:13:0",
+      "d96e5834f2c17c9f4a90:joint:13:1",
+      "d96e5834f2c17c9f4a90:joint:14:0",
+      "d96e5834f2c17c9f4a90:joint:14:1"
+    ]
+  },
+  "final": {
+    "candidate_facts": 29,
+    "deferred_facts": 0,
+    "text_basis": 28,
+    "multimodal_basis": 1,
+    "supporting_images": 1,
+    "withdrawn_image_links": 2,
+    "truth_status": "not_verified"
+  },
+  "codex_review": {
+    "images_opened": 7,
+    "available_images": 10,
+    "all_29_facts_independently_verified": false,
+    "decisions": {
+      "author_type": "assistant",
+      "decisions": [
+        {
+          "fact_id": "K97183244bdd74ac2",
+          "image_id": "I093ba67a7729",
+          "reason": "图片确可见管束及气箱外观，但相近乐器的具体身份未核定；暂不将其计为芦笙结构的有效支持。文字依据继续保留。",
+          "status": "unobservable"
+        },
+        {
+          "fact_id": "K787d248ebeda1577",
+          "image_id": "I093ba67a7729",
+          "reason": "本图不足以确认每2、3根笙苗共同套入一根共鸣管的结构；原模型将上端形状直接解释为合套，依据不足。文字依据继续保留。",
+          "status": "unobservable"
+        }
+      ],
+      "human_reviewed": false,
+      "reviewer": "Codex",
+      "scope": "Only two positive image-support links reviewed by looking at source pixels; no external fact verification of all 29 statements"
+    }
+  },
+  "execution": {
+    "normalization_model_calls": 0,
+    "scoped_review_model_calls": 0,
+    "v4_complete_calls": 3,
+    "v4_tokens": 37470,
+    "earlier_incomplete_request_cost": "unknown; retained in pilot_v3"
+  },
+  "checks": {
+    "curation_v4_tests": 123,
+    "passed": 123,
+    "final_table_rendered": true,
+    "notebook_compiles": true
+  },
+  "limitations": [
+    "29 joint groups unprocessed",
+    "Image identity and near-duplicate selection need improvement",
+    "Old frozen identity boundary reused",
+    "No full concept cross-material-batch semantic integration",
+    "Model agreement is not independent verification"
+  ]
+}

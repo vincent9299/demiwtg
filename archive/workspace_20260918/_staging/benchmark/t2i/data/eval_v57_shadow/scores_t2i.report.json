@@ -1,0 +1,14 @@
+{
+  "mode": "t2i",
+  "n": 7,
+  "overall": 36.08,
+  "fidelity": 50.55,
+  "alignment": 65.66,
+  "quality": 87.94,
+  "aesthetics": 87.78,
+  "neg_critical_violated": 0,
+  "align_critical_violated": 2,
+  "quality_critical_violated": 0,
+  "fidelity_low": 2,
+  "judge_fail": 3
+}

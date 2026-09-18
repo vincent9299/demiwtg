@@ -1,0 +1,17 @@
+{
+  "images": [
+    {
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/knowledge_application_v1/pilot/gemini/jobs/dev_compositional_pignose_sexes__multimodal__r1/auxiliary/returned_1.png",
+      "sha256": "fae9e5d97f247eaac60988e5cb3dd4ee06a65edf12cc52366e2a2e57c4e40fbd"
+    },
+    {
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/knowledge_application_v1/pilot/gemini/jobs/dev_compositional_pignose_sexes__multimodal__r1/auxiliary/returned_2.png",
+      "sha256": "6603acb749ab3780e62088ee9397b82f3c85fa5d253e8fb7bc1ec3a34b551dd7"
+    },
+    {
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/knowledge_application_v1/pilot/gemini/jobs/dev_compositional_pignose_sexes__multimodal__r1/auxiliary/returned_3.png",
+      "sha256": "3396b4e6843f1e179b6904f8da1e34e22771774f379600f746cd6e4a54692210"
+    }
+  ],
+  "scope": "All unexpected returned images retained; primary single-output contract failure unchanged; no best-of selection or paid retry"
+}

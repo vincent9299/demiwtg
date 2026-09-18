@@ -1,0 +1,131 @@
+{
+ "input_pages": 10020,
+ "kept_pages": 4326,
+ "rejected": {
+  "gibberish": 2280,
+  "short_raw": 2052,
+  "low_density": 631,
+  "duplicate": 537,
+  "nav_listing": 98,
+  "html_noise": 58,
+  "listing_page": 38
+ },
+ "dup_replaced": 25,
+ "keep_ratio": 0.4317,
+ "chars_raw_total": 150915036,
+ "chars_clean_total": 30974907,
+ "chars_clean_median": 2833,
+ "lang": {
+  "en": 2634,
+  "zh": 1692
+ },
+ "by_authority": {
+  "serp": {
+   "reject:gibberish": 2279,
+   "keep": 3083,
+   "reject:short_raw": 2050,
+   "reject:html_noise": 58,
+   "reject:low_density": 595,
+   "reject:nav_listing": 97,
+   "reject:duplicate": 537,
+   "reject:listing_page": 26
+  },
+  "wiki": {
+   "keep": 1243,
+   "reject:low_density": 36,
+   "reject:listing_page": 12,
+   "reject:nav_listing": 1,
+   "reject:gibberish": 1,
+   "reject:short_raw": 2
+  }
+ },
+ "concept_docs": 272,
+ "concepts_with_pages": 272,
+ "bench283_covered": 272,
+ "bench283_total": 283,
+ "body_chars_median": 11999,
+ "top_domains_keep": [
+  [
+   "en.wikipedia.org",
+   971
+  ],
+  [
+   "zh.wikipedia.org",
+   663
+  ],
+  [
+   "baike.baidu.com",
+   277
+  ],
+  [
+   "en.m.wikipedia.org",
+   87
+  ],
+  [
+   "zhuanlan.zhihu.com",
+   81
+  ],
+  [
+   "www.etsy.com",
+   71
+  ],
+  [
+   "www.britannica.com",
+   54
+  ],
+  [
+   "www.royalcaribbean.com",
+   31
+  ],
+  [
+   "github.com",
+   26
+  ],
+  [
+   "www.merriam-webster.com",
+   22
+  ]
+ ],
+ "top_domains_reject": [
+  [
+   "www.microsoft.com",
+   327
+  ],
+  [
+   "www.royalcaribbean.com",
+   232
+  ],
+  [
+   "baike.so.com",
+   173
+  ],
+  [
+   "www.etsy.com",
+   132
+  ],
+  [
+   "baike.baidu.com",
+   111
+  ],
+  [
+   "ai.so.com",
+   110
+  ],
+  [
+   "www.houzz.com",
+   99
+  ],
+  [
+   "www.toyota.com",
+   96
+  ],
+  [
+   "squareup.com",
+   90
+  ],
+  [
+   "zh.wikipedia.org",
+   72
+  ]
+ ]
+}

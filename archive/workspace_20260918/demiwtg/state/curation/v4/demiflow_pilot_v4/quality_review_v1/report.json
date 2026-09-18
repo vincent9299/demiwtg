@@ -1,0 +1,408 @@
+{
+  "scope": {
+    "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/demiflow_pilot_v4",
+    "documents": 130,
+    "regression_sample": 14,
+    "new_sample": 7,
+    "sampling": "固定种子20260916，按概念×v2状态每层最多2篇，排除前14篇；首尾与问题块检查，未逐字全文核验。",
+    "current_output": "待核验资料；一个独立身份协议调用；尚无真实知识候选或图像支持调用。"
+  },
+  "structural_checks": {
+    "blocks": 25652,
+    "failures": [],
+    "eligibility_counts": {
+      "eligible_for_identity": 69,
+      "pending": 61
+    },
+    "next_action_counts": {
+      "fetch_full_document": 25,
+      "parse_source_markup": 11,
+      "separate_article_body": 13,
+      "review_language_and_readability": 12,
+      "check_access_or_reacquire": 2,
+      "reacquire_source": 1
+    },
+    "pipeline_function_unchanged": true,
+    "demiflow_runtime_unchanged": true,
+    "pipeline_resume_seconds": 1.16
+  },
+  "document_reviews": [
+    {
+      "doc_id": "212268a82fde3e5e0fabbd572d9ccdef07ab875787d34ac183868e581faba3f0",
+      "title": "Mulan (1998 film)",
+      "before_chars": 34238,
+      "after_chars": 34238,
+      "clean_status": "cleaned_candidate",
+      "knowledge_eligibility": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "ec926869f3d003bbf6936d0460722587ac5673aa19dfce999cde930a4cf0c53e",
+      "title": "木兰故里说木兰--文史--中国作家网",
+      "before_chars": 2122,
+      "after_chars": 2122,
+      "clean_status": "cleaned_candidate",
+      "knowledge_eligibility": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "ca0bc23bc5dc1325002367a3b07bbd5560c9f96a44bf2791d1bf1053afc6f759",
+      "title": "16种木兰科的植物，在我国栽培欣赏2000多年的树种",
+      "before_chars": 3251,
+      "after_chars": 2140,
+      "clean_status": "cleaned_candidate",
+      "knowledge_eligibility": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "4b543faa75d5ec4ab7677b9fb627b11d23df3cdbf6e99fad236ba58754934e38",
+      "title": "Magnolia - Wikipedia",
+      "before_chars": 51949,
+      "after_chars": 48467,
+      "clean_status": "needs_review",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "parse_source_markup"
+        ],
+        "reasons": [
+          "unexpanded_wiki_template_retained"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "a69e8561119f8ade12f226c790a69b5e6669c734cdcf54971cf6eae37e6ee272",
+      "title": "侗族芦笙",
+      "before_chars": 93,
+      "after_chars": 93,
+      "clean_status": "needs_review",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "2b526151d0b76165df645a4b32c92645140b0bd6c7d1c49958cf394d52bc350d",
+      "title": "The Lusheng: China’s 3,000-Year-Old Bamboo Music – Cultural ...",
+      "before_chars": 3609,
+      "after_chars": 3609,
+      "clean_status": "cleaned_candidate",
+      "knowledge_eligibility": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "a27840c0bf80f84384d0c6d80ba251652584db723b0a41230c049c2501416258",
+      "title": "Lusheng Liang - Search Results - PubMed",
+      "before_chars": 0,
+      "after_chars": 0,
+      "clean_status": "unavailable",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "check_access_or_reacquire",
+          "reacquire_source"
+        ],
+        "reasons": [
+          "no_usable_body",
+          "access_restriction_or_challenge_marker"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "d960da3fa8ffaf1efbda587d693ea650ef702fb48006ee7db130ef05b53f08b2",
+      "title": "Universe",
+      "before_chars": 118442,
+      "after_chars": 118442,
+      "clean_status": "needs_review",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "parse_source_markup"
+        ],
+        "reasons": [
+          "unexpanded_wiki_template_retained"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "b545a2d53cec045fe5153358f83835316b50338ba973af4201315997f7854672",
+      "title": "Rim dijhodo bezopukes mujonot egmutzek 木兰将军 Fodedpa.",
+      "before_chars": 354,
+      "after_chars": 354,
+      "clean_status": "needs_review",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "review_language_and_readability"
+        ],
+        "reasons": [
+          "mixed_script_language_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "4f5e1fbd7cb49b990e29e77e355fa1496c49e46fed195c616d614f1f7066606e",
+      "title": "Mulan | Watch on Disney+",
+      "before_chars": 154,
+      "after_chars": 154,
+      "clean_status": "needs_review",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "c0236c80fe435b4173525e6496b8100c776806bc20142580e4a84574f2727fa9",
+      "title": "Magnolia (film) - Wikipedia",
+      "before_chars": 76687,
+      "after_chars": 71067,
+      "clean_status": "needs_review",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "parse_source_markup"
+        ],
+        "reasons": [
+          "unexpanded_wiki_template_retained"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "fd049ddb70cfdf6032cc46b8406cfe35d35931407baf84ef193f81e51167ac51",
+      "title": "木兰诗 - 维基文库，自由的图书馆",
+      "before_chars": 2598,
+      "after_chars": 2598,
+      "clean_status": "needs_review",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "parse_source_markup",
+          "separate_article_body"
+        ],
+        "reasons": [
+          "residual_navigation_requires_review",
+          "unexpanded_wiki_template_retained"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "c186334cf74a03ef00c62641cbfb0734cae111f56881f26f187ce902cc09695b",
+      "title": "Lusheng",
+      "before_chars": 7908,
+      "after_chars": 7908,
+      "clean_status": "cleaned_candidate",
+      "knowledge_eligibility": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    },
+    {
+      "doc_id": "6104c06b63b77d142bf900aa04c2a8ba04e0a8d858f1df3e1ad90891103442fa",
+      "title": "芦笙 in English - 芦笙 meaning in English - 芦笙 English meaning",
+      "before_chars": 214,
+      "after_chars": 214,
+      "clean_status": "needs_review",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "回归检查标题、首尾及已发现的问题块；符合准入仅表示送身份判断，不是知识核验。"
+    }
+  ],
+  "image_reviews": [
+    {
+      "image_id": "9a8319ac7f6e986817b5e4d36c59a2e8295484f058e6cd90025cb62078063940",
+      "byte_status": "not_local",
+      "pixels_viewed": false,
+      "path": "blobs/75/757ae7b3c2968471c83a2a6403d7afa1d75ed6953215a0618f0a576aa234e63d.webp",
+      "review": "本地缺失，未看像素；caption不能替代看图，不能判断其支持范围。"
+    },
+    {
+      "image_id": "f82468732d2eb485264ae16cc6e9044f69cbf6b7e2c15a76f01477bdcae2891a",
+      "byte_status": "not_local",
+      "pixels_viewed": false,
+      "path": "blobs/82/82d470cc355da683a785ecf8798217064c82bbba6c27d9cfa396f3d47c399856.png",
+      "review": "本地缺失，未看像素；caption不能替代看图，不能判断其支持范围。"
+    },
+    {
+      "image_id": "eff8766b07131d3dbfe369a052da5c96bde356cccbab4f37494c18ff332c71d1",
+      "byte_status": "verified_bytes",
+      "pixels_viewed": true,
+      "path": "blobs/0a/0a4038949babddc0f260677b1bfc10db416232cc42b0f43157f8f016b93821f4.jpg",
+      "review": "已实际看图：演奏姿态绘画。可作为题材线索；绘画不能直接证明真实乐器内部结构、尺寸或制作细节。"
+    },
+    {
+      "image_id": "db48afc158e5763a1a153a5a680ed5dfdb14ee7c3217a785fe03e2775efac621",
+      "byte_status": "verified_bytes",
+      "pixels_viewed": true,
+      "path": "blobs/30/300dd9b9a23ef862440dc3e9d3e5b096c48a955b05fedffcfaf7930cac034ab9.jpg",
+      "review": "已实际看图：主体是背向镜头的服饰场景，未见清晰可辨乐器；不支持乐器结构知识。"
+    }
+  ],
+  "holdout_reviews": [
+    {
+      "doc_id": "f43797cdb8ec22d836500771bd29bf9b7169288952b41afbbc8f48c7752cd376",
+      "title": "《花木兰》明斯克外访 - 香港舞蹈團",
+      "knowledge_eligibility": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "review": "舞蹈团演出网页仍有大量界面残留，规则未检出，进入身份时仍需谨慎；本轮未达到正文清洗合格。"
+    },
+    {
+      "doc_id": "09850f7b8c97cc95774ed4f70a5e30d62532984dbd81b8e4c7ee25c034d7e9b6",
+      "title": "Yulan Magnolia Flower Amazing — Steemit",
+      "knowledge_eligibility": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "review": "Steemit菜单、投票和价格栏仍残留，规则未检出；标题关联植物，不能混入人物。"
+    },
+    {
+      "doc_id": "adc47aa2cf19675661c84bfde6508a27904af67a6c15e32b874ac7a94fa82bbc",
+      "title": "木兰辞全文_百度知道",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "诗文片段末尾省略，已进入补全文分支。"
+    },
+    {
+      "doc_id": "61229ef15138fa67a4177b8d5e327da385aa2942d625cdec992f276a515b0ed7",
+      "title": "木兰辞 definition and meaning | sensagent editor",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "标题为木兰辞但正文是游戏说明且截断；已因截断暂缓，后续还需错配处理。"
+    },
+    {
+      "doc_id": "750062cd9865f405ef2b1a499a37f54f55f2a311c205908baaaf859b2eb079e6",
+      "title": "芦笙 - 维基百科，自由的百科全书",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "separate_article_body"
+        ],
+        "reasons": [
+          "residual_navigation_requires_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "中文维基界面仍残留，已进入正文分离分支。"
+    },
+    {
+      "doc_id": "835f0013911ebaa75234b1c9930b470ad436f7d293d6ccb331e44b3bf7e652d5",
+      "title": "Huang Lusheng",
+      "knowledge_eligibility": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "review": "黄路生人物传记与芦笙乐器不同身份，文本可读不应以关键词匹配接受，需检查身份模型的逐材料判定。"
+    },
+    {
+      "doc_id": "103c382068880e532c38d483e37a70e3707573f39cc6059436e32bb9c8f5b973",
+      "title": "芦笙_视频在线观看- 56.com",
+      "knowledge_eligibility": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "review": "视频列表/说明被截断，已进入补全文分支。"
+    }
+  ],
+  "identity_smoke": {
+    "concept_ref": "legacy:芦笙",
+    "status": null,
+    "blocked": {
+      "detail": "identity quote outside supplied preview",
+      "reason": "ValueError",
+      "stage": "identity"
+    },
+    "ineligible_count": 0,
+    "accepted_count": 0,
+    "reviews": [],
+    "calls": 1,
+    "scope": "Single local text/metadata identity protocol check; no pixels and no whole-concept verification.",
+    "result_file": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/demiflow_pilot_v4/datasets/review_identity_sample.jsonl"
+  },
+  "limits": "图片审核沿用前次相同文件哈希的像素查看。待办已保存但尚不自动采集；原生Wiki标记解析与跨批整合未完成。"
+}

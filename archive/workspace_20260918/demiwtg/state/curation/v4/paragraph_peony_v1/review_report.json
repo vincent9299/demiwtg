@@ -1,0 +1,32 @@
+{
+  "scope": "Same two frozen joint input batches; two extraction and two verification calls; no upstream rerun or cross-batch merge",
+  "calls": 4,
+  "tokens": 18456,
+  "topics_before_cross_batch_merge": 6,
+  "text_blocks": 6,
+  "image_blocks": 3,
+  "machine_candidate_blocks": 8,
+  "machine_deferred_blocks": 1,
+  "codex_findings": [
+    {
+      "batch": "joint:0:1",
+      "block_id": "t3_b1",
+      "finding": "Title names 白花芍药 but text and quoted source refer generically to 芍药; machine accepted. Specific-species applicability remains unresolved. Treat as pending scope review."
+    },
+    {
+      "batch": "joint:0:0",
+      "block_id": "t1_b2,t1_b3",
+      "finding": "Image limitations rely on upstream identity tags; these tags are machine filtering decisions, not independent identification. Retain observations but do not certify target species."
+    },
+    {
+      "batch": "both",
+      "finding": "Interleaved output is more coherent but omits source content such as seed dormancy and medicinal-use statements; coverage_note does not fully enumerate omissions. No claim of completeness."
+    },
+    {
+      "batch": "joint:0:1",
+      "block_id": "t2_b1",
+      "finding": "Fruit season appears in source context but not in selected citation quotes; paragraph-level citation review is still too coarse."
+    }
+  ],
+  "manual_scope": "Read all nine blocks and model reviews, inspected labeled flower image pixels; no independent taxonomy or truth certification; original machine outputs preserved."
+}

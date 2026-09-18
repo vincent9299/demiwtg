@@ -1,0 +1,89 @@
+{
+  "previous": {
+    "concepts": {
+      "OK手势": {
+        "topics": 15,
+        "paragraphs": 17,
+        "characters": 3487,
+        "images": 6
+      },
+      "玻璃棒": {
+        "topics": 8,
+        "paragraphs": 9,
+        "characters": 1209,
+        "images": 15
+      },
+      "白花芍药": {
+        "topics": 2,
+        "paragraphs": 2,
+        "characters": 277,
+        "images": 1
+      }
+    },
+    "calls": 182,
+    "stages": {
+      "identity": 3,
+      "select_images": 29,
+      "joint_paragraphs": 23,
+      "verify_paragraphs": 29,
+      "repair_topics": 6,
+      "review_cross_batch": 72,
+      "merge_paragraphs": 7,
+      "select_blocks": 6,
+      "verify_merged_paragraphs": 7
+    },
+    "usage": {
+      "completion_tokens": 115072,
+      "prompt_tokens": 572193,
+      "total_tokens": 687265
+    }
+  },
+  "current": {
+    "concepts": {
+      "OK手势": {
+        "topics": 25,
+        "paragraphs": 31,
+        "characters": 5842,
+        "images": 7
+      },
+      "玻璃棒": {
+        "topics": 6,
+        "paragraphs": 6,
+        "characters": 876,
+        "images": 6
+      },
+      "白花芍药": {
+        "topics": 2,
+        "paragraphs": 2,
+        "characters": 344,
+        "images": 1
+      }
+    },
+    "calls": 124,
+    "stages": {
+      "select_images": 29,
+      "joint_paragraphs": 23,
+      "verify_paragraphs": 31,
+      "review_relationships": 8,
+      "verify_merged_paragraphs": 8,
+      "repair_topics": 8,
+      "select_blocks": 6,
+      "identity": 3,
+      "merge_paragraphs": 8
+    },
+    "usage": {
+      "completion_tokens": 109608,
+      "prompt_tokens": 501439,
+      "total_tokens": 611047
+    }
+  },
+  "timing": {
+    "start": 1789606264.9464307,
+    "end": 1789608722.9618406,
+    "elapsed_seconds": 2458.015410423279
+  },
+  "content_review": "content_review.json",
+  "input_comparison": "input_comparison.json",
+  "quality_accepted": false,
+  "comparison_scope": "实际端到端重跑，非固定全部上游输出的严格消融"
+}

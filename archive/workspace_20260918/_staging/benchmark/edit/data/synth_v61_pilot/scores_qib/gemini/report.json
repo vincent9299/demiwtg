@@ -1,0 +1,85 @@
+{
+  "schema": "edit-codex-score-report-v2",
+  "score_schema": "edit-codex-v2-qib",
+  "n": 20,
+  "n_valid": 20,
+  "n_invalid": 0,
+  "overall": 42.0,
+  "by_level": {
+    "L1": {
+      "n": 2,
+      "official_total": 30.0
+    },
+    "L2": {
+      "n": 12,
+      "official_total": 25.556
+    },
+    "L3": {
+      "n": 6,
+      "official_total": 78.889
+    }
+  },
+  "by_edit_type": {
+    "action": {
+      "n": 2,
+      "official_total": 0.0
+    },
+    "add": {
+      "n": 1,
+      "official_total": 86.667
+    },
+    "adjust": {
+      "n": 2,
+      "official_total": 43.334
+    },
+    "background": {
+      "n": 4,
+      "official_total": 0.0
+    },
+    "compose": {
+      "n": 2,
+      "official_total": 73.334
+    },
+    "extract": {
+      "n": 2,
+      "official_total": 0.0
+    },
+    "remove": {
+      "n": 2,
+      "official_total": 50.0
+    },
+    "replace": {
+      "n": 3,
+      "official_total": 86.667
+    },
+    "style": {
+      "n": 2,
+      "official_total": 80.0
+    }
+  },
+  "by_suite": {
+    "basic": {
+      "n": 16,
+      "official_total": 47.083
+    },
+    "knowledge": {
+      "n": 4,
+      "official_total": 21.667
+    }
+  },
+  "by_source_batch": {
+    "dual_carrier_supplement": {
+      "n": 3,
+      "official_total": 95.556
+    },
+    "main": {
+      "n": 14,
+      "official_total": 26.191
+    },
+    "quality_regen_v1": {
+      "n": 3,
+      "official_total": 62.222
+    }
+  },
+  "invalid_qids": []
+}

@@ -1,0 +1,2008 @@
+{
+  "concepts": 50,
+  "domain_supply": [
+    {
+      "domain": "政治、法律与社会制度",
+      "with_clean_docs": 1,
+      "with_docs_and_images": 1,
+      "selected": 1
+    },
+    {
+      "domain": "地理与地点",
+      "with_clean_docs": 11,
+      "with_docs_and_images": 11,
+      "selected": 5
+    },
+    {
+      "domain": "宗教与信仰",
+      "with_clean_docs": 0,
+      "with_docs_and_images": 0,
+      "selected": 0
+    },
+    {
+      "domain": "民族、语言与文化",
+      "with_clean_docs": 1,
+      "with_docs_and_images": 1,
+      "selected": 1
+    },
+    {
+      "domain": "人造物体",
+      "with_clean_docs": 26,
+      "with_docs_and_images": 23,
+      "selected": 5
+    },
+    {
+      "domain": "动物",
+      "with_clean_docs": 17,
+      "with_docs_and_images": 17,
+      "selected": 4
+    },
+    {
+      "domain": "真菌与微生物",
+      "with_clean_docs": 3,
+      "with_docs_and_images": 3,
+      "selected": 3
+    },
+    {
+      "domain": "植物",
+      "with_clean_docs": 15,
+      "with_docs_and_images": 15,
+      "selected": 4
+    },
+    {
+      "domain": "人物与人体",
+      "with_clean_docs": 17,
+      "with_docs_and_images": 16,
+      "selected": 4
+    },
+    {
+      "domain": "行为动作",
+      "with_clean_docs": 15,
+      "with_docs_and_images": 14,
+      "selected": 5
+    },
+    {
+      "domain": "食物",
+      "with_clean_docs": 22,
+      "with_docs_and_images": 22,
+      "selected": 4
+    },
+    {
+      "domain": "建筑与基础设施",
+      "with_clean_docs": 22,
+      "with_docs_and_images": 21,
+      "selected": 3
+    },
+    {
+      "domain": "交通工具",
+      "with_clean_docs": 13,
+      "with_docs_and_images": 13,
+      "selected": 3
+    },
+    {
+      "domain": "自然景观",
+      "with_clean_docs": 20,
+      "with_docs_and_images": 14,
+      "selected": 3
+    },
+    {
+      "domain": "场景",
+      "with_clean_docs": 51,
+      "with_docs_and_images": 47,
+      "selected": 11
+    },
+    {
+      "domain": "节日与符号",
+      "with_clean_docs": 14,
+      "with_docs_and_images": 13,
+      "selected": 5
+    },
+    {
+      "domain": "属性与状态",
+      "with_clean_docs": 31,
+      "with_docs_and_images": 26,
+      "selected": 6
+    },
+    {
+      "domain": "材料与物质",
+      "with_clean_docs": 20,
+      "with_docs_and_images": 16,
+      "selected": 3
+    },
+    {
+      "domain": "时间数量与度量",
+      "with_clean_docs": 6,
+      "with_docs_and_images": 6,
+      "selected": 3
+    },
+    {
+      "domain": "文字与信息图形",
+      "with_clean_docs": 10,
+      "with_docs_and_images": 10,
+      "selected": 3
+    },
+    {
+      "domain": "声音",
+      "with_clean_docs": 22,
+      "with_docs_and_images": 22,
+      "selected": 5
+    },
+    {
+      "domain": "文化艺术与媒介",
+      "with_clean_docs": 50,
+      "with_docs_and_images": 46,
+      "selected": 6
+    },
+    {
+      "domain": "知识与学科",
+      "with_clean_docs": 25,
+      "with_docs_and_images": 24,
+      "selected": 4
+    },
+    {
+      "domain": "组织机构与社会事件",
+      "with_clean_docs": 20,
+      "with_docs_and_images": 18,
+      "selected": 4
+    },
+    {
+      "domain": "体育与游戏",
+      "with_clean_docs": 7,
+      "with_docs_and_images": 7,
+      "selected": 3
+    },
+    {
+      "domain": "历史与时代",
+      "with_clean_docs": 3,
+      "with_docs_and_images": 3,
+      "selected": 3
+    },
+    {
+      "domain": "品牌与产品",
+      "with_clean_docs": 21,
+      "with_docs_and_images": 21,
+      "selected": 3
+    },
+    {
+      "domain": "数字与互联网文化",
+      "with_clean_docs": 7,
+      "with_docs_and_images": 7,
+      "selected": 3
+    },
+    {
+      "domain": "医学与健康",
+      "with_clean_docs": 1,
+      "with_docs_and_images": 1,
+      "selected": 1
+    }
+  ],
+  "split_scope": "concept-disjoint curation holdout only; not proof of unseen benchmark concepts",
+  "benchmark_overlap": 44,
+  "tasks": {
+    "docs": {
+      "rendered": 50,
+      "validated_results": 9
+    },
+    "evidence": {
+      "rendered": 48,
+      "validated_results": 27
+    }
+  },
+  "candidate_facts": 27,
+  "core_task_records": 0,
+  "human_reviews": {
+    "fact": 0,
+    "evidence": 0
+  },
+  "matrix": [
+    {
+      "domain": "政治、法律与社会制度",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "政治、法律与社会制度",
+      "content_type": "属性与状态",
+      "candidate_facts": 1,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "政治、法律与社会制度",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "政治、法律与社会制度",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "政治、法律与社会制度",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "政治、法律与社会制度",
+      "content_type": "规则与约定",
+      "candidate_facts": 1,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "地理与地点",
+      "content_type": "特征与结构",
+      "candidate_facts": 2,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "地理与地点",
+      "content_type": "属性与状态",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "地理与地点",
+      "content_type": "关系与组织",
+      "candidate_facts": 2,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "地理与地点",
+      "content_type": "过程与变化",
+      "candidate_facts": 1,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "地理与地点",
+      "content_type": "功能与机制",
+      "candidate_facts": 1,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "地理与地点",
+      "content_type": "规则与约定",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "宗教与信仰",
+      "content_type": "特征与结构",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "宗教与信仰",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "宗教与信仰",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "宗教与信仰",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "宗教与信仰",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "宗教与信仰",
+      "content_type": "规则与约定",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "民族、语言与文化",
+      "content_type": "特征与结构",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "民族、语言与文化",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "民族、语言与文化",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "民族、语言与文化",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "民族、语言与文化",
+      "content_type": "功能与机制",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "民族、语言与文化",
+      "content_type": "规则与约定",
+      "candidate_facts": 2,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人造物体",
+      "content_type": "特征与结构",
+      "candidate_facts": 3,
+      "evidence_records": 5,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人造物体",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人造物体",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人造物体",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人造物体",
+      "content_type": "功能与机制",
+      "candidate_facts": 2,
+      "evidence_records": 3,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人造物体",
+      "content_type": "规则与约定",
+      "candidate_facts": 1,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "动物",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "动物",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "动物",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "动物",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "动物",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "动物",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "真菌与微生物",
+      "content_type": "特征与结构",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "真菌与微生物",
+      "content_type": "属性与状态",
+      "candidate_facts": 2,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "真菌与微生物",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "真菌与微生物",
+      "content_type": "过程与变化",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "真菌与微生物",
+      "content_type": "功能与机制",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "真菌与微生物",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "植物",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "植物",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "植物",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "植物",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "植物",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "植物",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人物与人体",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人物与人体",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人物与人体",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人物与人体",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人物与人体",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "人物与人体",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "行为动作",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "行为动作",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "行为动作",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "行为动作",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "行为动作",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "行为动作",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "食物",
+      "content_type": "特征与结构",
+      "candidate_facts": 1,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "食物",
+      "content_type": "属性与状态",
+      "candidate_facts": 3,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "食物",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "食物",
+      "content_type": "过程与变化",
+      "candidate_facts": 2,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "食物",
+      "content_type": "功能与机制",
+      "candidate_facts": 2,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "食物",
+      "content_type": "规则与约定",
+      "candidate_facts": 2,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "建筑与基础设施",
+      "content_type": "特征与结构",
+      "candidate_facts": 4,
+      "evidence_records": 5,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "建筑与基础设施",
+      "content_type": "属性与状态",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "建筑与基础设施",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "建筑与基础设施",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "建筑与基础设施",
+      "content_type": "功能与机制",
+      "candidate_facts": 2,
+      "evidence_records": 3,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "建筑与基础设施",
+      "content_type": "规则与约定",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "交通工具",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "交通工具",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "交通工具",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "交通工具",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "交通工具",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "交通工具",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "自然景观",
+      "content_type": "特征与结构",
+      "candidate_facts": 3,
+      "evidence_records": 3,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "自然景观",
+      "content_type": "属性与状态",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "自然景观",
+      "content_type": "关系与组织",
+      "candidate_facts": 2,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "自然景观",
+      "content_type": "过程与变化",
+      "candidate_facts": 1,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "自然景观",
+      "content_type": "功能与机制",
+      "candidate_facts": 3,
+      "evidence_records": 3,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "自然景观",
+      "content_type": "规则与约定",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "场景",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "场景",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "场景",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "场景",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "场景",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "场景",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "节日与符号",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "节日与符号",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "节日与符号",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "节日与符号",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "节日与符号",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "节日与符号",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "属性与状态",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "属性与状态",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "属性与状态",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "属性与状态",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "属性与状态",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "属性与状态",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "材料与物质",
+      "content_type": "特征与结构",
+      "candidate_facts": 4,
+      "evidence_records": 3,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "材料与物质",
+      "content_type": "属性与状态",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "材料与物质",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "材料与物质",
+      "content_type": "过程与变化",
+      "candidate_facts": 2,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "材料与物质",
+      "content_type": "功能与机制",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "材料与物质",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "时间数量与度量",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "时间数量与度量",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "时间数量与度量",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "时间数量与度量",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "时间数量与度量",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "时间数量与度量",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文字与信息图形",
+      "content_type": "特征与结构",
+      "candidate_facts": 5,
+      "evidence_records": 5,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文字与信息图形",
+      "content_type": "属性与状态",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文字与信息图形",
+      "content_type": "关系与组织",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文字与信息图形",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文字与信息图形",
+      "content_type": "功能与机制",
+      "candidate_facts": 2,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文字与信息图形",
+      "content_type": "规则与约定",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "声音",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "声音",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "声音",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "声音",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "声音",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "声音",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文化艺术与媒介",
+      "content_type": "特征与结构",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文化艺术与媒介",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文化艺术与媒介",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文化艺术与媒介",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文化艺术与媒介",
+      "content_type": "功能与机制",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "文化艺术与媒介",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "知识与学科",
+      "content_type": "特征与结构",
+      "candidate_facts": 2,
+      "evidence_records": 3,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "知识与学科",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "知识与学科",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "知识与学科",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "知识与学科",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "知识与学科",
+      "content_type": "规则与约定",
+      "candidate_facts": 1,
+      "evidence_records": 2,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "组织机构与社会事件",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "组织机构与社会事件",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "组织机构与社会事件",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "组织机构与社会事件",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "组织机构与社会事件",
+      "content_type": "功能与机制",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "组织机构与社会事件",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "体育与游戏",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "体育与游戏",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "体育与游戏",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "体育与游戏",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "体育与游戏",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "体育与游戏",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "历史与时代",
+      "content_type": "特征与结构",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "历史与时代",
+      "content_type": "属性与状态",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "历史与时代",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "历史与时代",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "历史与时代",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "历史与时代",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "品牌与产品",
+      "content_type": "特征与结构",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "品牌与产品",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "品牌与产品",
+      "content_type": "关系与组织",
+      "candidate_facts": 1,
+      "evidence_records": 1,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "品牌与产品",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "品牌与产品",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "品牌与产品",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "数字与互联网文化",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "数字与互联网文化",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "数字与互联网文化",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "数字与互联网文化",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "数字与互联网文化",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "数字与互联网文化",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "医学与健康",
+      "content_type": "特征与结构",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "医学与健康",
+      "content_type": "属性与状态",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "医学与健康",
+      "content_type": "关系与组织",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "医学与健康",
+      "content_type": "过程与变化",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "医学与健康",
+      "content_type": "功能与机制",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    },
+    {
+      "domain": "医学与健康",
+      "content_type": "规则与约定",
+      "candidate_facts": 0,
+      "evidence_records": 0,
+      "core_t2i": 0,
+      "core_edit": 0
+    }
+  ],
+  "strata_counts": {
+    "calibration/old_reject": {
+      "model_indeterminate": 4,
+      "model_not_applicable": 7,
+      "model_supports": 2
+    },
+    "calibration/unannotated": {
+      "model_not_applicable": 2,
+      "model_supports": 1,
+      "model_indeterminate": 1
+    },
+    "calibration/old_pass": {
+      "model_supports": 5,
+      "model_indeterminate": 5
+    }
+  },
+  "image_origin_counts": {
+    "declared_generated": 9,
+    "unverified_origin": 18
+  },
+  "assistant_review_hints": {
+    "evidence_0bdb7f488d0e297887f4ed76": {
+      "author": "codex",
+      "note": "新版T2I改为needs_more，明确缺少被连接件。请检查编辑任务是否真的不可行，还是仅因需要添加连接结构而被过度拒绝。"
+    },
+    "evidence_855b803804e9853b26f8edaf": {
+      "author": "codex",
+      "note": "新版已不再用全螺纹例子反驳“许多螺栓有光杆段”，但编辑理由仍出现“严格逻辑下可行”却判unusable的摇摆。请独立检查可执行性和知识依赖，避免因模型偏好重生成而误删。"
+    },
+    "evidence_51f22bc92a77754432e2b7a3": {
+      "author": "codex",
+      "note": "该编辑建议通过增加说明牌写出开发方和别名来体现知识；这可能是在复述事实而非让知识决定字形或布局，属于应优先排查的伪知识编辑。请独立核验，机器usable不等于可入核心集。"
+    }
+  },
+  "comparison_summary": {
+    "matched_pairs": 15,
+    "completed_outputs": 15,
+    "validated_pairs": 15,
+    "invalid_outputs": 0,
+    "evidence_transitions": {
+      "indeterminate -> indeterminate": 5,
+      "supports -> supports": 4,
+      "not_applicable -> indeterminate": 1,
+      "supports -> indeterminate": 1,
+      "not_applicable -> not_applicable": 2,
+      "conflicts -> not_applicable": 1,
+      "conflicts -> indeterminate": 1
+    },
+    "task_transitions": {
+      "t2i": {
+        "unusable -> unusable": 9,
+        "usable -> needs_more": 5,
+        "unusable -> needs_more": 1
+      },
+      "edit": {
+        "unusable -> unusable": 15
+      }
+    },
+    "interpretation": "Same facts/images, changed protocol; transitions are not accuracy gains without human labels."
+  },
+  "material_gaps": [
+    {
+      "fact_id": "docs_052f52990bf5e5b38b7c880e_f1",
+      "concept": "伏特加",
+      "statement": "伏特加主要由水和乙醇组成，传统上通过蒸馏发酵的谷物（如黑麦、小麦）或马铃薯制成，现代品牌也可能使用玉米、甘蔗、水果、蜂蜜或枫树汁作为基底。",
+      "visual_target": "可展示蒸馏装置（如柱状或壶式蒸馏器）及不同原料（谷物、马铃薯）的示意图，体现从原料到透明液体的转化过程。",
+      "inspected_image_count": 0,
+      "missing_aspects": [],
+      "status": "image_check_pending",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_052f52990bf5e5b38b7c880e_f2",
+      "concept": "伏特加",
+      "statement": "自19世纪90年代以来，标准伏特加的酒精体积分数（ABV）通常为40%（即80度美国证明度）；欧盟规定伏特加最低酒精含量为37.5%，而美国规定最低为40%。",
+      "visual_target": "可展示酒瓶标签上的ABV数值对比，或不同国家法规对最低酒精含量的图表说明。",
+      "inspected_image_count": 0,
+      "missing_aspects": [],
+      "status": "image_check_pending",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_052f52990bf5e5b38b7c880e_f3",
+      "concept": "伏特加",
+      "statement": "在被称为“伏特加带”的地区（包括白俄罗斯、爱沙尼亚、芬兰、冰岛、拉脱维亚、立陶宛、挪威、波兰、俄罗斯、瑞典和乌克兰），伏特加传统上以“净饮”（neat，不加水、冰或其他混合剂）的方式饮用，且通常冷冻冷藏后供应。",
+      "visual_target": "可展示地图标示“伏特加带”国家范围，并配以小杯净饮（无冰、无混合）的饮用场景图，与鸡尾酒调制场景形成对比。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "“伏特加带”的地理范围（地图展示）",
+        "“净饮”（neat）的具体饮用场景（如小杯盛装）",
+        "“冷冻冷藏”后的供应状态（如杯壁结霜或低温环境）"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_0893759de6a1e78bd441fbbd_f1",
+      "concept": "螺栓",
+      "statement": "螺栓是一种外部螺旋螺纹紧固件，通过扭矩拧紧或松开以匹配螺母，其外部男性螺纹需要与具有预制女性螺纹的螺母配合。",
+      "visual_target": "可以看到螺栓杆部有螺旋状凸起（外螺纹），且通常一端有头部，另一端为螺纹，需与内部有对应凹槽（内螺纹）的螺母旋合。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "螺栓杆部的外螺旋螺纹（外螺纹）结构",
+        "与螺栓配合的螺母及其内部的内螺纹结构"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_0893759de6a1e78bd441fbbd_f2",
+      "concept": "螺栓",
+      "statement": "在学术定义中，螺栓与螺丝的区别在于预期用途：螺栓设计为穿过组件上的无螺纹孔，并借助螺母固定；而螺丝用于包含自身螺纹的组件，或在组件中切割出自身内螺纹。",
+      "visual_target": "虽然外观相似，但此区别主要在于安装方式和配合件（螺母vs本体螺纹），单看单个零件外观难以绝对区分，需结合使用场景或配合件判断。",
+      "inspected_image_count": 2,
+      "missing_aspects": [
+        "未展示“无螺纹孔”的组件，无法直接验证螺栓穿过无螺纹孔这一特征。",
+        "未展示“螺丝”及其自攻/自切螺纹的使用场景，无法对比螺丝与螺栓的区别。",
+        "螺栓穿过无螺纹孔并配合螺母固定的结构特征",
+        "螺丝在组件中切割自身内螺纹或旋入自带螺纹的特征",
+        "螺栓与螺丝在预期用途上的学术定义区别"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_0893759de6a1e78bd441fbbd_f3",
+      "concept": "螺栓",
+      "statement": "螺栓连接通常由螺母施加轴向夹紧力，同时螺栓杆部作为销钉将连接件固定以抵抗侧向剪切力，因此许多螺栓具有未螺纹的光杆部分（称为握持长度）以提供更强的销钉作用。",
+      "visual_target": "可以看到螺栓的一部分杆身是光滑的圆柱体（无螺纹），另一部分是螺纹；在连接结构中，光滑部分穿过孔洞，螺纹部分与螺母配合。",
+      "inspected_image_count": 2,
+      "missing_aspects": [
+        "螺栓杆部（shank）的光滑圆柱体部分（握持长度）",
+        "螺栓的螺纹部分",
+        "螺母施加轴向夹紧力的结构",
+        "螺栓作为销钉抵抗侧向剪切力的机制",
+        "螺栓杆部作为销钉抵抗侧向剪切力的机制",
+        "未螺纹的光杆部分（握持长度）的结构特征",
+        "光杆部分提供更强的销钉作用"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_0dffd91b462251c515e18e5c_f2",
+      "concept": "思源黑体",
+      "statement": "思源黑体包含 7 种字重（ExtraLight, Light, Normal, Regular, Medium, Bold, Heavy），并支持简体中文、繁体中文、日文和韩文，同时包含来自 Source Sans 家族的拉丁、希腊和西里尔字符。",
+      "visual_target": "在字体选择器或排版软件中，可以看到该字体家族下并列的 7 个不同粗细的字重选项；在文本渲染中，同一字符在不同字重下呈现明显的笔画粗细变化。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "未展示全部7种字重（仅展示了Regular, Bold, Heavy三种）",
+        "未展示繁体中文、日文、韩文支持",
+        "未展示拉丁、希腊、西里尔字符支持"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_0dffd91b462251c515e18e5c_f3",
+      "concept": "思源黑体",
+      "statement": "由于各地区书写习惯和标准不同，同一个 Unicode 字符在思源黑体的简体中文、繁体中文（台湾）、繁体中文（香港）、日文和韩文版本中可能具有不同的字形形状。",
+      "visual_target": "在并排显示不同地区版本的同一汉字（如“骨”或“直”）时，可以观察到笔画的转折、钩画或结构细节存在细微差异。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "同一 Unicode 字符在不同地区版本（SC, TC-TW, TC-HK, JP, KR）中的字形对比",
+        "汉字笔画、转折或结构细节的细微差异"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_29a3878c3a7b8f616bb6b311_f1",
+      "concept": "高原",
+      "statement": "高原是指海拔高度在2000米以上，面积广大，地形闭阔，周边以明显的陡坡为界，较完整的大面积隆起地区。",
+      "visual_target": "在地图或地形图上，高原表现为大面积的高程区域，边缘有显著的高程突变（陡坡/断崖），内部相对平坦或起伏较小，与周围低地形成鲜明对比。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "海拔高度在2000米以上",
+        "地形闭阔（内部相对平坦）",
+        "周边以明显的陡坡为界（边缘高程突变）"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_29a3878c3a7b8f616bb6b311_f2",
+      "concept": "高原",
+      "statement": "高原可以由多种过程形成，包括火山岩浆上涌、熔岩挤出、板块构造运动以及水和冰川的侵蚀作用。",
+      "visual_target": "不同成因的高原在地质剖面或卫星影像上呈现不同的岩石结构和地貌特征，例如火山高原可能由层状玄武岩构成，侵蚀高原可能呈现被河流切割的残丘状。",
+      "inspected_image_count": 0,
+      "missing_aspects": [],
+      "status": "image_check_pending",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_29a3878c3a7b8f616bb6b311_f3",
+      "concept": "高原",
+      "statement": "根据周围环境，高原被分类为山间高原（intermontane）、山麓高原（piedmont）或大陆高原（continental）。",
+      "visual_target": "在区域地形图中，山间高原被山脉包围，山麓高原一侧靠山一侧靠平原，大陆高原则四周被平原或海洋包围，空间位置关系清晰可辨。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "山间高原（intermontane）的具体地形特征",
+        "山麓高原（piedmont）的具体地形特征",
+        "大陆高原（continental）的具体地形特征",
+        "高原与周围环境的分类关系"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_59f99ca85b20fd9b097f431c_f2",
+      "concept": "生产流程图",
+      "statement": "生产流程图通常由代表不同步骤或过程的形状、连接这些形状以指示序列的连接线、提供额外上下文的注释以及用于分类或优先级的颜色组成。",
+      "visual_target": "在图表中，可以看到不同形状（如矩形、椭圆）通过线条相连，线条可能带有箭头指示方向，形状或线条可能填充不同颜色以区分部门或优先级，旁边可能有文字注释。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "代表不同步骤或过程的形状",
+        "指示序列的连接线",
+        "提供额外上下文的注释",
+        "用于分类或优先级的颜色"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_59f99ca85b20fd9b097f431c_f3",
+      "concept": "生产流程图",
+      "statement": "生产流程图的功能包括提供生产过程的清晰可视化、帮助识别瓶颈以提效率、促进团队协作、优化运营以及作为文档记录确保流程一致性。",
+      "visual_target": "虽然流程图本身是可视化的，但其'功能'（如提高效率、促进协作）是抽象的管理结果，无法直接从图表的视觉外观中观察到，需要通过实际生产数据的对比或团队行为的观察来验证。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "生产过程的清晰可视化",
+        "识别瓶颈",
+        "促进团队协作",
+        "优化运营",
+        "文档记录"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_5a9beca57d385f6c0c6190ab_f1",
+      "concept": "极光",
+      "statement": "极光是由太阳带电粒子与地球高层大气中的原子碰撞，激发氧和氮原子发光而产生的自然光现象。",
+      "visual_target": "在地球高层大气中可见绿色、红色或紫色的光幕、射线或螺旋状动态图案。",
+      "inspected_image_count": 2,
+      "missing_aspects": [
+        "太阳带电粒子",
+        "地球高层大气",
+        "原子碰撞激发发光机制",
+        "绿色、红色或紫色的光幕/射线",
+        "太阳带电粒子与地球高层大气原子的碰撞过程",
+        "氧和氮原子被激发发光的微观机制"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_5a9beca57d385f6c0c6190ab_f2",
+      "concept": "极光",
+      "statement": "极光主要出现在以磁极为中心的极光带（auroral zone）内，该区域纬度宽度约为6度，中心位于南北纬67度附近。",
+      "visual_target": "在地图上，极光观测高发区呈现为环绕南北磁极的环形带状区域。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "极光带（auroral zone）的地理分布",
+        "南北纬67度附近的纬度范围",
+        "环绕磁极的环形带状区域"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_5a9beca57d385f6c0c6190ab_f3",
+      "concept": "极光",
+      "statement": "极光的颜色取决于激发原子的高度：高层（约200km以上）氧原子发射红光（630nm），中层（约100-150km）氧原子发射绿光（557.7nm），低层（约100km以下）氮分子发射蓝光或紫光。",
+      "visual_target": "极光呈现垂直分层色彩，顶部可能为红色，主体为绿色，底部边缘可能为蓝色或紫色。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "无法直接观测大气高度（200km, 100-150km, 100km以下）。",
+        "无法直接观测具体的原子或分子成分（氧原子、氮分子）。",
+        "无法直接观测具体的发射波长（630nm, 557.7nm, 428nm）。"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_9026c0896640952be684c386_f1",
+      "concept": "教堂",
+      "statement": "哥特式教堂建筑以高、直、尖的造型特征为标志，其尖拱、肋架拱顶和扶壁结构减少了墙体承重需求，从而允许窗户面积增大，使内部空间更加明亮。",
+      "visual_target": "建筑外观呈现高耸的尖塔和细长的垂直线条，内部拥有大面积彩色玻璃窗，光线透过窗户形成斑斓色彩，与罗马式教堂的厚重墙壁和昏暗内部形成鲜明对比。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "肋架拱顶（位于建筑内部，外观不可见）",
+        "内部空间明亮程度（外观无法直接证明内部采光效果）"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_9026c0896640952be684c386_f2",
+      "concept": "教堂",
+      "statement": "传统基督教教堂的平面布局常呈十字形，其中中殿和座位代表垂直梁，祭坛区（圣所）代表水平梁；许多教堂的祭坛朝向东方，这一传统起源于拜占庭并在8-9世纪在西欧普及。",
+      "visual_target": "从平面图上看，建筑呈现拉丁十字或希腊十字形状；从立面或剖面看，祭坛位于建筑东端，信徒面向东方礼拜。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "教堂的平面布局（十字形）",
+        "中殿和座位的垂直梁结构",
+        "祭坛区（圣所）的水平梁结构",
+        "祭坛朝向东方的方位信息"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_9026c0896640952be684c386_f3",
+      "concept": "教堂",
+      "statement": "罗马式教堂建筑采用圆拱、厚墙和小型窗户，外形坚固沉重，类似城堡，旨在显示教会权威；其内部光线幽暗，装饰主要使用壁画和雕塑。",
+      "visual_target": "建筑外观呈现厚重的石墙、半圆形拱门和较小的窗户，整体轮廓低矮坚固；内部空间光线昏暗，墙壁上可见壁画或浮雕装饰。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "圆拱结构",
+        "厚墙特征",
+        "小型窗户",
+        "外形坚固沉重",
+        "内部光线幽暗",
+        "壁画和雕塑装饰"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_9d1565321de924c8eb76fdd9_f1",
+      "concept": "锂",
+      "statement": "在标准条件下，锂是所有金属中密度最低的金属，也是密度最低的固体元素，其密度为0.534 g/cm³。",
+      "visual_target": "锂块可以漂浮在轻质烃类油或水面上，这是其低密度的直接视觉表现。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "锂的密度数值（0.534 g/cm³）",
+        "锂是密度最低的金属/固体元素这一比较属性",
+        "锂在液体中漂浮的视觉表现（图中金属块被固定且浸没）"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_9d1565321de924c8eb76fdd9_f2",
+      "concept": "锂",
+      "statement": "锂是一种柔软的银白色碱金属，在空气中会迅速腐蚀，从金属光泽变为暗淡的银灰色，最终形成黑色氧化层。",
+      "visual_target": "新鲜切割的锂表面呈现银白色金属光泽，但随时间推移颜色变暗直至发黑。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "随时间推移颜色变暗直至发黑的氧化过程",
+        "最终形成的黑色氧化层"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_9d1565321de924c8eb76fdd9_f3",
+      "concept": "锂",
+      "statement": "天然存在的锂主要由两种稳定同位素组成：锂-6和锂-7，其中锂-7更为丰富，自然丰度为95.15%。",
+      "visual_target": "无直接视觉后果，需通过质谱仪等仪器检测同位素比例。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "锂-6和锂-7两种稳定同位素的存在",
+        "锂-7的自然丰度为95.15%"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_fc22f6a188bc94be71b620b0_f1",
+      "concept": "鸡腿菇",
+      "statement": "鸡腿菇（Coprinus comatus）在成熟过程中会发生自溶（deliquescence），菌褶和菌盖液化成黑色墨汁状液体，导致其失去食用价值。",
+      "visual_target": "观察到的蘑菇从白色固体逐渐变为黑色液体，菌盖和菌褶结构消失，呈现墨汁状。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "成熟过程中菌褶和菌盖液化成黑色墨汁状液体的过程",
+        "失去食用价值的状态"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_fc22f6a188bc94be71b620b0_f2",
+      "concept": "鸡腿菇",
+      "statement": "鸡腿菇（Coprinus comatus）的菌盖在幼嫩时呈圆柱形，表面有褐色鳞片，菌柄白色、中空且较细长。",
+      "visual_target": "可见白色圆柱形菌盖，表面覆盖褐色鳞片，菌柄细长且白色，整体形态类似鸡腿。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "鸡腿菇（Coprinus comatus）的圆柱形菌盖",
+        "菌盖表面的褐色鳞片",
+        "白色、中空且细长的菌柄"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    },
+    {
+      "fact_id": "docs_fc22f6a188bc94be71b620b0_f3",
+      "concept": "鸡腿菇",
+      "statement": "鸡腿菇（Coprinus comatus）是一种草腐土生菌，菌丝生长适温为20-30℃，子实体发育适温为16-22℃。",
+      "visual_target": "无直接视觉后果，但影响栽培季节选择和设施环境控制。",
+      "inspected_image_count": 1,
+      "missing_aspects": [
+        "鸡腿菇（Coprinus comatus）的形态特征",
+        "草腐土生菌的生长环境",
+        "菌丝生长适温（20-30℃）",
+        "子实体发育适温（16-22℃）"
+      ],
+      "status": "needs_human_fact_and_evidence_check",
+      "note": "Candidate gap only; verify fact and model rejections before collecting more images."
+    }
+  ],
+  "gap_counts": {
+    "image_check_pending": 3,
+    "needs_human_fact_and_evidence_check": 22
+  },
+  "interpretation": "candidate counts are not correctness estimates; source relevance and truth need human review; multi-label/domain counts are non-additive"
+}

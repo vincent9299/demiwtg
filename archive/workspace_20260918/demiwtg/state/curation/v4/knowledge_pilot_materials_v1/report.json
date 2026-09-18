@@ -1,0 +1,138 @@
+{
+  "bundles": [
+    {
+      "concept_id": "concept:c0220415-65fb-424d-89b3-7a74707974b3",
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/knowledge_pilot_materials_v1/bundles/2309563d0dbf828848d4d0e72a74cf4b09b191091d60770bcccd0f79d512b642.json",
+      "request": {
+        "kind": "legacy",
+        "value": "木兰"
+      },
+      "task_id": "2309563d0dbf828848d4d0e72a74cf4b09b191091d60770bcccd0f79d512b642"
+    },
+    {
+      "concept_id": "concept:b0a2eb78-8347-4560-89b7-23d0ce2946b3",
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/knowledge_pilot_materials_v1/bundles/a277fb2ae45bbd8d04274bfcbe0adaa80a988a3effe4064650dc6a6af9707e5f.json",
+      "request": {
+        "kind": "legacy",
+        "value": "芦笙"
+      },
+      "task_id": "a277fb2ae45bbd8d04274bfcbe0adaa80a988a3effe4064650dc6a6af9707e5f"
+    },
+    {
+      "concept_id": "concept:67576801-a078-4ba0-ae93-6c5974a3ba8d",
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/knowledge_pilot_materials_v1/bundles/510a0cdd77fa27fa19cbb6f7adb47d3294699b9c040814d775e9a83dae557a3a.json",
+      "request": {
+        "kind": "qid",
+        "value": "Q1"
+      },
+      "task_id": "510a0cdd77fa27fa19cbb6f7adb47d3294699b9c040814d775e9a83dae557a3a"
+    }
+  ],
+  "limitations": [
+    "No cross-source identity adjudication.",
+    "COS/network byte fetching not connected.",
+    "No knowledge extraction or evidence approval.",
+    "Bounded source scans do not prove absence."
+  ],
+  "phase": "materials_prepared",
+  "schema": "curation-v4-materials/1",
+  "sources": [
+    {
+      "scan": {
+        "complete": false,
+        "invalid_rows": [],
+        "rows_scanned": 50000
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188331551348,
+        "kind": "wiki_pages",
+        "mtime_ns": 1789272858593156000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part1.jsonl.gz",
+        "size": 4066683407
+      },
+      "status": "budget_limited"
+    },
+    {
+      "scan": {
+        "complete": false,
+        "invalid_rows": [],
+        "rows_scanned": 50000,
+        "total_rows": 385292
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188323572486,
+        "kind": "legacy_concepts",
+        "mtime_ns": 1788833082430420000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/concepts.json",
+        "size": 85347611
+      },
+      "status": "budget_limited"
+    },
+    {
+      "scan": {
+        "complete": true,
+        "invalid_rows": [],
+        "rows_scanned": 10023
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188331180145,
+        "kind": "legacy_docs",
+        "mtime_ns": 1789051067040126000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/docs.jsonl",
+        "size": 4368748
+      },
+      "status": "scanned"
+    },
+    {
+      "scan": {
+        "complete": false,
+        "invalid_rows": [],
+        "rows_scanned": 50000
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188323754377,
+        "kind": "legacy_images",
+        "mtime_ns": 1788889217518892000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/images.jsonl",
+        "size": 2661828149
+      },
+      "status": "budget_limited"
+    },
+    {
+      "scan": {
+        "complete": false,
+        "invalid_rows": [],
+        "rows_scanned": 50000
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188331473255,
+        "kind": "qid_concepts",
+        "mtime_ns": 1789076000373469000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_concepts.fat.jsonl.gz",
+        "size": 251716336
+      },
+      "status": "budget_limited"
+    },
+    {
+      "scan": {
+        "complete": true,
+        "invalid_rows": [],
+        "rows_scanned": 4326
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188324671435,
+        "kind": "clean_docs",
+        "mtime_ns": 1788886519105190000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/collect/docs_clean/pages_clean.jsonl",
+        "size": 43850055
+      },
+      "status": "scanned"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "eval_id": "T20260808-093735",
+  "created_at": "2026-08-08T09:37:35.642159+08:00",
+  "datasets": {
+    "MME-RealWorld-CN": {
+      "status": "done",
+      "prediction_file": "BAGEL-7B-MoT_MME-RealWorld-CN.xlsx",
+      "updated_at": "2026-08-08T10:38:36.545875+08:00",
+      "error_message": "(Request ID: 01KZFKS4BRS40PW15MW9R1ASC0)\n\n403 Forbidden: None.\nCannot access content at: https://us.aws.cdn.hf.co/xet-bridge-us/66cd2f9364a8631d731e512b/9675254e640ae19827fcb53c6ebabeead953bc06a8e1dfe3cc1cdd29e6e2e596?response-content-type=application%2Fjson&user_id=public&response-content-disposition=inline%3B+filename*%3DUTF-8%27%27MME_RealWorld_base64_0.json%3B+filename%3D%22MME_RealWorld_base64_0.json%22%3B&X-Xet-Cas-Uid=public&Expires=1786156660&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly91cy5hd3MuY2RuLmhmLmNvL3hldC1icmlkZ2UtdXMvNjZjZDJmOTM2NGE4NjMxZDczMWU1MTJiLzk2NzUyNTRlNjQwYWUxOTgyN2ZjYjUzYzZlYmFiZWVhZDk1M2JjMDZhOGUxZGZlM2NjMWNkZDI5ZTZlMmU1OTZcXD9yZXNwb25zZS1jb250ZW50LXR5cGU9YXBwbGljYXRpb24lMkZqc29uJnVzZXJfaWQ9cHVibGljJnJlc3BvbnNlLWNvbnRlbnQtZGlzcG9zaXRpb249aW5saW5lJTNCK2ZpbGVuYW1lJTJBJTNEVVRGLTglMjclMjdNTUVfUmVhbFdvcmxkX2Jhc2U2NF8wLmpzb24lM0IrZmlsZW5hbWUlM0QlMjJNTUVfUmVhbFdvcmxkX2Jhc2U2NF8wLmpzb24lMjIlM0ImWC1YZXQtQ2FzLVVpZD1wdWJsaWMiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkVwb2NoVGltZSI6MTc4NjE1NjY2MH19fV19&Signature=MEUCIDehzgl28957KTjzzepsKG4tqsqMpZBeK6jhQgM3~V75AiEAzhloxg~O5TwkCk2n7G45ROCpqo3GssrD~No7h5GtHz4_&Key-Pair-Id=01KXEF4KZ1B6FV465MAWR4M21F.\nMake sure your token has the correct permissions.\nAuth failed: credentials expired"
+    }
+  },
+  "model_name": "BAGEL-7B-MoT",
+  "commit": "2b3f32d5",
+  "argv": [
+    "/root/data/VLMEvalKit/run.py",
+    "--data",
+    "MME-RealWorld-CN",
+    "--model",
+    "BAGEL-7B-MoT",
+    "--work-dir",
+    "/root/data/eval_outputs/base"
+  ],
+  "api_mode": false,
+  "world_size": 1,
+  "pred_format": "xlsx",
+  "eval_format": "csv",
+  "mode": "all",
+  "reuse": false,
+  "reuse_aux": "all",
+  "updated_at": "2026-08-08T10:38:36.545664+08:00"
+}

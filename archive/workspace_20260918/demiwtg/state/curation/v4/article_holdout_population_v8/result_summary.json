@@ -1,0 +1,20 @@
+{
+  "concepts": {
+    "人口分布图": {
+      "topics": 5,
+      "paragraphs": 12,
+      "characters": 2663,
+      "images": 6
+    }
+  },
+  "calls": 2,
+  "stages": {
+    "joint_paragraphs": 1,
+    "final_review": 1
+  },
+  "usage": {
+    "completion_tokens": 24291,
+    "prompt_tokens": 36380,
+    "total_tokens": 60671
+  }
+}

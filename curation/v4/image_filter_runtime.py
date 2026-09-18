@@ -48,3 +48,32 @@ def validate_material_reuse(parent, config):
                   'review_model': config['image_review_model'], 'batch_size': config.get('image_batch_size', 4),
                   'identity_definitions': config['image_identity_definitions'], 'neutral_input': True}:
         raise ValueError('Image selection policy/identity scope differs; cannot reuse selected materials')
+    validate_text_selection_reuse(parent,config)
+    validate_image_selection_reuse(parent,config)
+
+
+def validate_image_selection_reuse(parent,config):
+    """A new image prompt must not inherit decisions from the previous prompt."""
+    import yaml
+    path=Path(parent)/'knowledge/prompt_config.json'
+    if not path.exists():
+        raise ValueError('Parent image selection prompt snapshot is missing')
+    saved=json.loads(path.read_text())
+    prior=yaml.safe_load(saved['yaml'])['prompts']['select_images']
+    _,text=knowledge_prompt_pack(config)
+    active=yaml.safe_load(text)['prompts']['select_images']
+    if any(prior[k]!=active[k] for k in ['version','template','model','response_schema']):
+        raise ValueError('Image selection prompt/model differs; reuse from before image filtering instead')
+
+
+def validate_text_selection_reuse(parent,config):
+    """Image policy alone cannot authorize reuse after changing text relevance."""
+    import yaml
+    prompt_path=Path(parent)/'knowledge/prompt_config.json'
+    if not prompt_path.exists():raise ValueError('Parent text selection prompt snapshot is missing')
+    saved=json.loads(prompt_path.read_text())
+    prior=yaml.safe_load(saved['yaml'])['prompts']['select_blocks']
+    _,current=knowledge_prompt_pack(config)
+    active=yaml.safe_load(current)['prompts']['select_blocks']
+    if any(prior[k]!=active[k] for k in ['template','model','response_schema']):
+        raise ValueError('Text selection prompt/model differs; reuse from before filtering instead')

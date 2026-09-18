@@ -1,0 +1,152 @@
+[
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_before_adjacent_image.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_before_adjacent_image.yaml",
+    "sha256": "0c24a1ebe9aa2720718722ced2749864f480ac43d2013ac25aa4ee5815c5edc2"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_before_optional_caption.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_before_optional_caption.yaml",
+    "sha256": "2bb068c9f523a00946a8f1463d2bdb7a71c554ea034da362ba2aea590af4b45e"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_before_per_paragraph.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_before_per_paragraph.yaml",
+    "sha256": "3fa35586ed785009775eedb456a38cb9fa2b8c48207365a43f04f91ae6d44724"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_v2.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_v2.yaml",
+    "sha256": "170eb064ae6efc19f9caa6f141bfac2ba8415275c4f3b24fec0bd8aeeff1cbdb"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_v5.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_v5.yaml",
+    "sha256": "a2d7bb95fdc34013132eb90788bdfb0e93755f3bf4b70722ea6902dabc9ae360"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_v6.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_v6.yaml",
+    "sha256": "c0864f743f9a0d401b293b47e0f0a67fddea7a31c8be3fcbe9012e50dfdfacef"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_v7.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_v7.yaml",
+    "sha256": "a2c24b428ed1821461829e19298bd0cd52129794f249417f8d60ad27bf0b6477"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_v8.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_v8.yaml",
+    "sha256": "ea8165711902af2c69b3ec0546c74013390db3cba2e298d35554f3f67df2cce7"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/article_joint_v9.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/article_joint_v9.yaml",
+    "sha256": "79692b3d365f01d648794b84fc6feffd8f960e7200099b2be1bff16e20c7fb4a"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_before_adjacent_image.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_before_adjacent_image.yaml",
+    "sha256": "f750202d55e9f140f1658f5ba455c367be643e08a4dcfd05f8f7095a8f14951f"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_before_optional_caption.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_before_optional_caption.yaml",
+    "sha256": "2f078bce6fdd40ed2bb89133c24e44ad5f42dd4b8dbfb194c0778350fd7b37c7"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_before_per_paragraph.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_before_per_paragraph.yaml",
+    "sha256": "58c5a98fe44942a433f36dcba1e0f4e14ac855c11105567acb82bd47795b77eb"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v10.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v10.yaml",
+    "sha256": "2b47f4d3b51dc53fd0fdf245d9af897b3f3c273f0aa936420ccf71a2fbf742a6"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v11.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v11.yaml",
+    "sha256": "b876fd0278e0951de173b795b5615b04bfe3a11350e82f36071e7f475e6527cf"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v12.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v12.yaml",
+    "sha256": "d0b24e5bc83e130b6e9e03f5e1564bf5af6f81a9ccf78cd6941b38c49ff600d1"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v13.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v13.yaml",
+    "sha256": "8f8632007938955c314ea5eb57175af9ccbcd46c8e4ed963037990ba5f26ec3c"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v14.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v14.yaml",
+    "sha256": "9d707d5e29c7af0a6d09059ea08ed6e3a518cbb27fe4eaea8375ccb42c5ce7fc"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v15.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v15.yaml",
+    "sha256": "89d154e3e6973dda3c1fda323d9eb533c6a1f1da667a3ec2c96a5c3a20560043"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v16.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v16.yaml",
+    "sha256": "efbc34659c3b378d1e2554b03a4164972bf54908c4db58b0ac11677feffa22ea"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v17.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v17.yaml",
+    "sha256": "8887cc73535bbbb3a29bf117af375e3275f1753f15989eab2af901ab3ed9b57f"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v18.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v18.yaml",
+    "sha256": "ad84cfc7d86dbe6953cb5f12cb287cd1045ce41a9e4d29f37bced58d866c570f"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v19.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v19.yaml",
+    "sha256": "5cdd822e467440320afe882d479c3cbc3ccabe8aab7105b1d2ad34c683edebb8"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v2.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v2.yaml",
+    "sha256": "c8a25432e7e35d030c2dc6e20be6826c76f1de59f8eabbae162fa67b42b0f4db"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v20.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v20.yaml",
+    "sha256": "bb0411f2216cc359d3fe78986976e737f66c46c91188cc079ef8bebd7dd5465d"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v21.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v21.yaml",
+    "sha256": "f565a1a0bb5300c598577745f418d63d99b354b52d2252f2b4e5ee53ebe25afe"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v3.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v3.yaml",
+    "sha256": "3a5a3cc4f56aecb3b1e9bf629e22b416dcd74e51b4ba1966c024063c891207d0"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v5.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v5.yaml",
+    "sha256": "58ebe5fed630dbfabf50f1a5cce97f5dcdc74729122df347697869957e24c1a0"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v8.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v8.yaml",
+    "sha256": "ac92a37c915c8a80c3a00a86cb9831b5b8a7ec66739587e9ece172ee199598fb"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/final_review_v9.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/final_review_v9.yaml",
+    "sha256": "53245c474b14de9943efb35b37bfda5d2e5245e40c144cc21d3024e47eb8c1d4"
+  },
+  {
+    "original": "curation/v4/ops/prompts/experiments/select_images_v3.yaml",
+    "archive": "state/curation/v4/article_pipeline_upgrade/prompt_candidate_archive/select_images_v3.yaml",
+    "sha256": "f74b09dda775d7a3b35c4caf84d7188a038a642068c3f23bb565f138e7ffc669"
+  }
+]

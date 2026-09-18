@@ -1,0 +1,373 @@
+===== 2026-09-11 00:32:26 =====
+props.jsonl bytes: 216807260
+bzcat: 1
+phase2b procs: 2
+fleet_launch procs: 2
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 19G
+===== 2026-09-11 00:42:45 =====
+props.jsonl bytes: 228789017
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 19G
+[watch] 00:45 接手。基线:过滤健康但慢(bzcat 单核瓶颈 ~114MB/分, 剩35.3GB, ETA ~05:55)。fleet_launch 原实例已死(疑SIGHUP), 00:31 已用 setsid 重挂(PID 1747182)。预检通过: Commons UA 200 / r1+pipeline-a 代码 md5 一致 / r1 COS 直写探针 OK / lake 可达。决策: 过滤慢但不干预(改并行=改架构)。转 30-45 分钟巡检, ~05:30 起加密盯增肥->发运->fleet 起跑。
+===== 2026-09-11 01:05:19 =====
+props.jsonl bytes: 244347133
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 19G
+===== 2026-09-11 01:25:20 =====
+props.jsonl bytes: 352197712
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 19G
+===== 2026-09-11 01:45:30 =====
+props.jsonl bytes: 364446658
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 19G
+===== 2026-09-11 02:05:35 =====
+props.jsonl bytes: 474764397
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+===== 2026-09-11 02:25:34 =====
+props.jsonl bytes: 483856440
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+===== 2026-09-11 02:45:44 =====
+props.jsonl bytes: 596934526
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+===== 2026-09-11 03:05:42 =====
+props.jsonl bytes: 605528792
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+===== 2026-09-11 03:25:47 =====
+props.jsonl bytes: 710121586
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+===== 2026-09-11 03:45:46 =====
+props.jsonl bytes: 727933343
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+===== 2026-09-11 04:05:43 =====
+props.jsonl bytes: 817418502
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+===== 2026-09-11 04:25:43 =====
+props.jsonl bytes: 848930818
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+===== 2026-09-11 04:45:52 =====
+props.jsonl bytes: 876908747
+bzcat: 1
+phase2b procs: 1
+fleet_launch procs: 1
+-- relay log tail:
+[relay2] 过滤启动 23:35:20
+[wikidata] 概念成员集 7,826,266
+-- fleet log tail:
+fat.gz size: none
+graph.gz size: none
+blobs count: 0
+local images.log tail: none
+local manifest lines: 0
+disk avail G: 18G
+[watch] 05:35 竞态事故+处置: fleet 抢在 gzip 写完前分发, r1-r12 拿到半截 fat.gz(md5 不符), r13-r20/a-d OK。已 kill launcher(未起跑任何下载)。处置=重跑 fleet_launch.sh 覆盖分发+正常起跑。
+[watch] 05:50 重大故障+根因: 25 分片全部空转0产出。两层原因: (1)fat 的 p18 值是 <http://...Special:FilePath/X.jpg> URI 形态, 代码当纯文件名拼 File:<http://...> 查询, API 全部无效; (2)无效标题连坐触发 Wikimedia 边缘对本 IP 429(curl 实测'Your bot is making too many requests')。处置: 25 机全部停机; operators/commons.py 增加 _norm_file 归一化(单测通过); 等边缘解封后端到端验证再重部署重起跑。
+== 2026-09-11 05:58:23 ==
+blobs: 242
+disk avail G: 17G
+localhost 3 2
+pipeline-a 7 2
+pipeline-b 49 2
+pipeline-c 8 2
+pipeline-d 31 2
+r10 57 2
+r1 10 2
+r11 42 2
+r12 30 2
+r13 43 2
+r14 55 2
+r15 83 2
+r16 11 2
+r17 13 2
+r18 46 2
+r19 18 2
+r20 39 2
+r2 8 2
+r3 45 2
+r4 23 2
+r5 22 2
+r6 63 2
+r7 24 2
+r8 8 2
+r9 63 2
+[watch] 05:58 恢复完成: 修复版 commons.py 已部署 24 台(md5 全对), 25 分片全部重启且全部有产出。6 分钟 fleet 共收 ~854 张, blobs 242。观察到吞吐 ~2.4 张/秒(远低于计划预估 25-50/s, 疑似引擎流水线未打满礼貌限额, 留明早调优; 今夜不动架构)。后续 30 分钟一轮监控增速斜率。
+256
+r2 10 2
+r19 163 2
+r7 163 2
+r13 166 2
+pipeline-b 173 2
+== 2026-09-11 06:29:01 ==
+r1 23 2
+r20 266 2
+r4 27 2
+r14 272 2
+r3 285 2
+r11 286 2
+localhost 3 2
+r12 39 2
+r6 448 2
+r9 467 2
+r16 51 2
+r15 529 2
+r17 54 2
+r5 61 2
+r10 65 2
+pipeline-a 7 2
+pipeline-c 8 2
+pipeline-d 85 2
+r8 9 2
+disk avail G: 17G
+blobs: r18 319 2
+[watch] 06:4x 平台层停摆根因处置: demiflow net.py 下载池 keepalive 复用导致半读连接毒池(CLOSE-WAIT+Recv-Q), 平台文档自述'三次夜跑同一签名'。按其回退条款 max_keepalive_connections 64->0, 已部署24台(md5全对)+全fleet重启。此前停滞机: localhost/pipeline-a/pipeline-c 完全冻结, r1/r2/r4/r8/r12/r16/r17 接近停滞。
+[watch] 06:53 二次重大事件: 全fleet被Wikimedia边缘429(含健康机r15, 惩罚随持续请求渐进扩大)。根因链: 垃圾标题阶段(05:35-05:50, 25IP约4.5万坏请求)触发惩罚箱; 机器不知情继续2rps重试->惩罚续期加深。注意: 此前怀疑的'死锁'实为全量429认缺空转(trace实锤: 闸门正常放行, 每请求TransientExhaustedError)。keepalive回退保留(无害且防另一类停摆)。处置: 全停冷却30分钟->07:25错峰重启(5台/3分钟)->观察是否复产; 若再被429则降规模等用户醒。
+[watch] 08:1x 全面复产: 冷却30分钟后惩罚过期(双UA探针均200)。net.py v2(429长退避30/120/300s)已部署24台。错峰重启5批x5台, 全部复产且速度为昨夜4倍(单机~0.5-0.9张/秒)。原'冻结'机器(r1/r8/pa/pc/localhost)确认复产, 佐证冻结=429认缺空转。基建: launch_shard.sh(单机起跑)+stallheal.sh(停滞自动救活)。转入48小时护航循环(30分钟一轮)。
+2026-09-11 08:37:34 total=18908 healed:none
+2026-09-11 09:07:47 total=24752 healed:none
+2026-09-11 09:38:02 total=30884 healed:none
+2026-09-11 10:08:49 total=37030 healed:none
+2026-09-11 10:39:05 total=43129 healed:none
+2026-09-11 11:09:54 total=49409 healed:none
+2026-09-11 11:40:28 total=55507 healed:none
+2026-09-11 12:10:58 total=61640 healed:none
+2026-09-11 12:41:13 total=67813 healed:none
+2026-09-11 13:11:30 total=73962 healed:none
+2026-09-11 13:41:41 total=79979 healed:none
+2026-09-11 14:12:01 total=86228 healed:none
+2026-09-11 14:42:19 total=92501 healed:none
+2026-09-11 15:12:43 total=98757 healed:none
+2026-09-11 15:42:59 total=104965 healed:none
+2026-09-11 16:13:13 total=111469 healed:none
+2026-09-11 16:43:27 total=117966 healed:none
+2026-09-11 17:13:43 total=124425 healed:none
+[watch] 17:1x 中期状态: 复产后已稳定运行~9小时, fleet ~3.4-3.6张/秒, 零救活零429复发。累计 11.8万+。按此速率48h约可收~58万张(目标215万的~27%)。
+2026-09-11 17:43:56 total=131049 healed:none
+2026-09-11 18:14:08 total=137592 healed:none
+2026-09-11 18:44:19 total=143958 healed:none
+2026-09-11 19:14:33 total=150506 healed:none
+2026-09-11 19:44:55 total=156940 healed:none
+2026-09-11 20:15:11 total=163277 healed:none
+2026-09-11 20:47:28 total=169965 healed:none
+2026-09-11 21:17:43 total=176221 healed:none
+2026-09-11 21:47:59 total=182527 healed:none
+2026-09-11 22:18:28 total=188977 healed:none
+2026-09-11 22:49:02 total=195450 healed:none
+2026-09-11 23:19:19 total=202036 healed:none
+2026-09-11 23:49:39 total=208524 healed:none
+2026-09-12 00:20:06 total=214917 healed:none
+2026-09-12 00:50:17 total=220980 healed:none
+2026-09-12 01:20:33 total=227390 healed:none
+2026-09-12 01:50:45 total=233578 healed:none
+2026-09-12 02:21:00 total=239952 healed:none
+2026-09-12 02:51:17 total=246364 healed:none
+2026-09-12 03:21:32 total=252558 healed:none
+2026-09-12 03:51:43 total=258887 healed:none
+2026-09-12 04:21:57 total=265165 healed:none
+2026-09-12 04:52:06 total=271540 healed:none
+2026-09-12 05:22:18 total=277952 healed:none
+2026-09-12 05:52:29 total=284538 healed:none
+2026-09-12 06:22:41 total=291225 healed:none
+2026-09-12 06:52:50 total=297839 healed:none
+2026-09-12 07:23:02 total=304135 healed:none
+2026-09-12 07:53:13 total=310442 healed:none
+2026-09-12 08:23:28 total=316742 healed:none
+[watch] 09-12 08:2x 24小时节点: 护航满24h, 累计~31.7万张(24h内新增~29.8万, 平均~3.44张/秒), 25机全程在线, 零自动救活触发, 零429复发, 边缘探针持续200。剩余24h预计再收~29-30万, 48h收官约61万张(215万目标的~28%)。
+2026-09-12 08:53:40 total=322952 healed:none
+2026-09-12 09:23:52 total=329358 healed:none
+2026-09-12 09:54:06 total=335732 healed:none
+2026-09-12 10:24:20 total=342297 healed:none
+2026-09-12 10:54:34 total=348449 healed:none
+2026-09-12 11:24:52 total=354842 healed:none
+2026-09-12 11:55:06 total=361113 healed:none
+2026-09-12 12:25:31 total=367550 healed:none
+2026-09-12 12:55:53 total=374008 healed:none
+2026-09-12 13:26:07 total=380578 healed:none
+2026-09-12 13:56:19 total=387083 healed:none
+2026-09-12 14:26:48 total=393654 healed:none
+2026-09-12 14:57:06 total=400141 healed:none
+2026-09-12 15:27:28 total=406534 healed:none
+2026-09-12 15:57:42 total=412883 healed:none
+2026-09-12 17:05:54 total=512117 healed:none
+2026-09-12 17:15:09 total=567065 healed:none
+[watch] 09-12 17:15 提速战报: batch_fetch 批式下载器全 fleet 上线(25/25), 速率 3.5->99张/秒(28倍)。单机稳定 3.93/s(=下载限额4/s顶格), miss_meta=0, 边缘探针200, 零429。剩余~158万张, ETA ~21:40。方案: 弃用流引擎(冻结bug), MediaWiki 50题批量查询+两级流水线+令牌桶, 礼貌限额不变(2 API/s+4 DL/s每IP)。账本/分片语义与旧版完全兼容。
+2026-09-12 17:45:59 total=751201 healed:none
+2026-09-12 18:16:29 total=933405 healed:none
+2026-09-12 18:46:51 total=1114916 healed:none
+2026-09-12 19:17:22 total=1297256 healed:none
+2026-09-12 19:47:43 total=1478616 healed:none
+2026-09-12 20:18:24 total=1661987 healed:none
+2026-09-12 20:41:23 total=1799293 healed:none
+2026-09-12 21:19:35 total=2027538 healed:none
+[watch] 09-13 00:5x localhost磁盘写满事故: tier1提取器启动命令丢括号导致管道只绑末段, 前35GB压缩字节直写/tmp/tier1.log(17GB), 磁盘100%满->本机embed sink Errno28×76张+cosfs句柄楔死进程冻结。处置: 杀错进程(注: 又两次pkill自匹配踩坑#1, 已入教训清单)、清17GB、带括号重启提取器、重启本机embed(2分钟恢复3.7/s)。丢失的~100-200张待收尾时补跑shard24。其他24机全程无恙。
+2026-09-13 01:44:42 total=3386539 healed:none
+2026-09-13 02:15:08 total=3568343 healed:none
+2026-09-13 02:45:32 total=3749849 healed:none
+2026-09-13 03:15:55 total=3931494 healed:none
+2026-09-13 03:46:19 total=4113087 healed:none
+2026-09-13 04:16:40 total=4294415 healed:none
+2026-09-13 04:47:01 total=4475820 healed:none
+2026-09-13 05:17:22 total=4657202 healed:none
+2026-09-13 05:47:43 total=4838566 healed:none
+2026-09-13 06:18:07 total=5020176 healed:none
+2026-09-13 06:48:29 total=5201715 healed:none
+2026-09-13 07:28:19 total=5384264 healed: r6(delta=5405,p=0) r8(delta=5608,p=0) r9(delta=5835,p=0) r11(delta=5828,p=0) r13(delta=6082,p=0) r14(delta=6401,p=0) r15(delta=6610,p=0) r18(delta=6659,p=0) r19(delta=7000,p=0) r20(delta=7167,p=0) pipeline-b(delta=7452,p=0) pipeline-d(delta=7742,p=0)
+2026-09-13 08:17:38 total=5612602 healed: r1(delta=1801,p=0) r2(delta=2095,p=0) r3(delta=2197,p=0) r4(delta=2453,p=0)
+[watch] 09-13 08:3x 档1两波任务就绪: wave1非P18属性图 62.5万张(12+机已在跑,零miss); wave2 P935图库 79.4万张(68436页展开146.5万引用, 去重做差后)。发射器已切wave2, wave1收完自动接力。P935图注账本保留 /tmp/tier1/p935-expanded.tsv.gz 待入库。
+2026-09-13 09:31:47 total=5959456 healed: r5(delta=6116,p=0) r7(delta=6138,p=0) r10(delta=6553,p=0) r12(delta=6678,p=0) r16(delta=6950,p=0) r17(delta=7174,p=0) r18(delta=13615,p=0) r19(delta=13605,p=0) r20(delta=13604,p=0) pipeline-a(delta=7462,p=0) pipeline-b(delta=13601,p=0) pipeline-c(delta=7601,p=0) pipeline-d(delta=13599,p=0)
+2026-09-13 10:10:54 total=6144234 healed: r1(delta=8995,p=0) r2(delta=9177,p=0) r3(delta=9364,p=0) r4(delta=9562,p=0) r6(delta=910,p=0) r8(delta=721,p=0) r9(delta=722,p=0) r11(delta=521,p=0) r13(delta=344,p=0) r14(delta=336,p=0) r15(delta=326,p=0)
+2026-09-13 10:41:17 total=6341617 healed:none
+[watch] 09-13 13:50 档2启动(用户拍板: 补非概念P18, 条件=实体有任一语言维基页面): 13:46 truthy重放提取候选(~6h) -> 坐sitelink分布式过滤(25机x2rps, ~30min) -> 做差 -> 下载(~7-10h)。filter_sitelinks.py 已备。
+[watch] 19:5x 事故链复盘: 图片传输遇阻三因叠加——(1)桶级匿名限频(我的取证LIST/GET风暴触发, 单请求可过批量挂) (2)COS边缘对//双斜杠行为不一 (3)localhost cosfs劣化(已重挂)。桶数据完好(LIST对账4前缀全吻合)。传输改2路温和流, 冷却后启动。
+[watch] 19:57 传输策略改串行: 无认证凭据, 匿名通道限频只能温和用。顺序= sitelink过滤(ETA 21:00) -> tier2下载(416万候选x97%保留, ~200-350万张, 8DL/s, ETA ~24:00) -> 图片传输lake(温和流, 明晨完成)。传输槽已停。
+[watch] 23:1x 传输再次被匿名限频击落(7路stat风暴, ~12万失败/槽)。停手冷却。结论: 桶级匿名读取在批量场景不可用, 唯一快车道=认证API(需SecretId/Key, 已向用户求要)。6条新反向隧道(22023-28)保留, 有凭据后可全速。
+[watch] 09-14 02:0x 档2全量任务上线: 过滤完成(267万实体有语料/416万候选=64%), 去重做差后 182.5万张待下。wave1(53万)部分并入全量文件(幂等续跑)。传输滴灌25机持续。
+[watch] 09-14 09:2x 终账: 886.1万行/882.3万唯一图/0.772TB。档2全量收官(sitelink过滤64%保留, 182.5万张全下)。账本已双落位。图片传输lake进行中(~35%, 下载停后独占匿名带宽应提速)。

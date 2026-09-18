@@ -1,0 +1,18 @@
+{
+  "automatic_retries": 0,
+  "endpoint": "http://127.0.0.1:4001/v1/chat/completions",
+  "image_config": {
+    "aspect_ratio": "1:1"
+  },
+  "limit": 4,
+  "model": "openrouter/google/gemini-3.1-flash-image",
+  "questions_path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/knowledge_harder_probe_v1/gemini_raw_questions.jsonl",
+  "questions_sha256": "b076c898acab207d0770c475fa8df2c8d0df486969c0015a9525d7debafbce0d",
+  "schema": "curation-gemini-t2i-probe-v1",
+  "selected_qids": [
+    "nasa_oxygen_gas_raw_g1",
+    "nasa_oxygen_liquid_raw_g1",
+    "sensor_cys_raw_g1",
+    "sensor_blank_raw_g1"
+  ]
+}

@@ -1,0 +1,4779 @@
+{
+  "scope": {
+    "run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/demiflow_pilot_v9",
+    "operator_run": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/demiflow_pilot_v9/quality_review_v8",
+    "documents": 130,
+    "reviewed_document_rows": 45,
+    "sampling_rounds": {
+      "round1": [
+        "c592a998dbd6260c72317836a0935701d29f68734d25b50760f2c57bf0df059e",
+        "cf2361216ab9f5b2eb4bd2690dd049a58a861219488a8b46a976932fc4af52af",
+        "08eecf6166bf306e0c7a14ebbb40fb9953cb80e0abc9e1fbc3bac861e52ee35f",
+        "c21733a6b40c22fe8948a53c584bc977fd6204ca2349100e53c10cb70bb8dcc3",
+        "54f4c4f997238d32429a8e8accad24a92b2b23160649ade5f414585e9a84349e",
+        "583f4b4dfef791d41d3f17cf2ed027af39ca962426f3034f2255af4bb89daafa",
+        "7692bae18f1ec88cdfe001f9c295a028cd89b7265a1a0552d899075400f715d8",
+        "b7ed5e5701bfff01c43a45192c2fc449868f6c159e277b863c83cba975026e60"
+      ],
+      "round2": [
+        "6e9ebdb697ca70658fa001e6f9dae774a599af99c5ad26c2fe9271a8daafcee2",
+        "e1c4552fcf14d65a944755e4edc317d422984c376664a79e19fbb1375bc37151",
+        "fde2968372fa9eea1b4ab2e852d6ec73baeabdf27ed1d31204242a9d5fcc5995",
+        "fbee4ba907325bf7e022bdd8c0232c6a720ad1e73d6c8597d3bb75cb237a6075",
+        "74d19b6fa8b723457cecbc87868728b91a7cf625a86ee7aad8b04d02e827be9a",
+        "1c296ab545f354f4eddc891ab3368e71a0c82e684a164b9092afef8c2c5da6c7",
+        "d9ad8d272d99b6e4a12bbec307e0a7d397132d8e734a58957b2f45e7ff499e9f",
+        "425311cae3fc54a5e597cacdfb1b69ece39d44ba645a4b91c98d361fd1bd1142"
+      ],
+      "round3": [
+        "db171ccc01620b1a1a2fb6668937ebbf67708c61829180ce2636cbf3a50878b8",
+        "aa11db5dd75f62339b0d95dd95113a9e3877a9eda9f33bff9c07c60796e86feb",
+        "bcd0263394998b528cbc21569bce77aae332de92c51afc0c0c933fad22b17602",
+        "59310ce7a26fd174daae24c17a8ea0fd898132a8d1a289cca2268be39f48b3da",
+        "c4e1a4fb7e34ba3d79914916e67082a78d7edfa510a1d9dbc4534519d3c18620",
+        "dc49893026b0a2d841b82afadbb1babe4f25194895184038443fd284dba6be14",
+        "e4068a639a5089d63b8db77bb605585c6f6b4077c5728b975bbca1ec81a658b1",
+        "4956a9b0740b08ab47e8c3e6954244ac9520d63931743ad884ed484d83f8ce94"
+      ]
+    },
+    "sampling_note": "前三轮抽查发现问题后用于修改，均属校准；同文去重自round2起实行。随后查看小批准入页的首尾，不能称独立盲测或估计全库错误率。",
+    "raw_inputs": "Same five datasets files, 50000-row engineering budget each; no legacy clean_docs."
+  },
+  "structural_checks": {
+    "blocks": 25517,
+    "failures": [],
+    "eligibility_counts": {
+      "eligible_for_identity": 80,
+      "pending": 50
+    },
+    "next_action_counts": {
+      "fetch_full_document": 29,
+      "separate_article_body": 5,
+      "review_language_and_readability": 13,
+      "check_access_or_reacquire": 4,
+      "reacquire_source": 1,
+      "parse_source_markup": 1
+    },
+    "pipeline_function_unchanged": true,
+    "upstream_processing_code_unchanged": true,
+    "input_checkpoint_sha256": "1c5915db1a9197d3754fe6deb175306712fc0aad0ad94ffb164bec713c998a12",
+    "deferred_semantic_blocks": 119
+  },
+  "document_reviews": [
+    {
+      "doc_id": "212268a82fde3e5e0fabbd572d9ccdef07ab875787d34ac183868e581faba3f0",
+      "title": "Mulan (1998 film)",
+      "clean_chars": 34238,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "ec926869f3d003bbf6936d0460722587ac5673aa19dfce999cde930a4cf0c53e",
+      "title": "木兰故里说木兰--文史--中国作家网",
+      "clean_chars": 2122,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "ca0bc23bc5dc1325002367a3b07bbd5560c9f96a44bf2791d1bf1053afc6f759",
+      "title": "16种木兰科的植物，在我国栽培欣赏2000多年的树种",
+      "clean_chars": 2096,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "4b543faa75d5ec4ab7677b9fb627b11d23df3cdbf6e99fad236ba58754934e38",
+      "title": "Magnolia - Wikipedia",
+      "clean_chars": 45494,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "a69e8561119f8ade12f226c790a69b5e6669c734cdcf54971cf6eae37e6ee272",
+      "title": "侗族芦笙",
+      "clean_chars": 93,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "2b526151d0b76165df645a4b32c92645140b0bd6c7d1c49958cf394d52bc350d",
+      "title": "The Lusheng: China’s 3,000-Year-Old Bamboo Music – Cultural ...",
+      "clean_chars": 3609,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "a27840c0bf80f84384d0c6d80ba251652584db723b0a41230c049c2501416258",
+      "title": "Lusheng Liang - Search Results - PubMed",
+      "clean_chars": 0,
+      "disposition": {
+        "next_actions": [
+          "check_access_or_reacquire",
+          "reacquire_source"
+        ],
+        "reasons": [
+          "no_usable_body",
+          "access_restriction_or_challenge_marker"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "d960da3fa8ffaf1efbda587d693ea650ef702fb48006ee7db130ef05b53f08b2",
+      "title": "Universe",
+      "clean_chars": 37342,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 60
+    },
+    {
+      "doc_id": "b545a2d53cec045fe5153358f83835316b50338ba973af4201315997f7854672",
+      "title": "Rim dijhodo bezopukes mujonot egmutzek 木兰将军 Fodedpa.",
+      "clean_chars": 354,
+      "disposition": {
+        "next_actions": [
+          "review_language_and_readability"
+        ],
+        "reasons": [
+          "mixed_script_language_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "4f5e1fbd7cb49b990e29e77e355fa1496c49e46fed195c616d614f1f7066606e",
+      "title": "Mulan | Watch on Disney+",
+      "clean_chars": 154,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "c0236c80fe435b4173525e6496b8100c776806bc20142580e4a84574f2727fa9",
+      "title": "Magnolia (film) - Wikipedia",
+      "clean_chars": 59068,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "fd049ddb70cfdf6032cc46b8406cfe35d35931407baf84ef193f81e51167ac51",
+      "title": "木兰诗 - 维基文库，自由的图书馆",
+      "clean_chars": 1198,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 2
+    },
+    {
+      "doc_id": "c186334cf74a03ef00c62641cbfb0734cae111f56881f26f187ce902cc09695b",
+      "title": "Lusheng",
+      "clean_chars": 7908,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "6104c06b63b77d142bf900aa04c2a8ba04e0a8d858f1df3e1ad90891103442fa",
+      "title": "芦笙 in English - 芦笙 meaning in English - 芦笙 English meaning",
+      "clean_chars": 214,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "f43797cdb8ec22d836500771bd29bf9b7169288952b41afbbc8f48c7752cd376",
+      "title": "《花木兰》明斯克外访 - 香港舞蹈團",
+      "clean_chars": 601,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "09850f7b8c97cc95774ed4f70a5e30d62532984dbd81b8e4c7ee25c034d7e9b6",
+      "title": "Yulan Magnolia Flower Amazing — Steemit",
+      "clean_chars": 3684,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "adc47aa2cf19675661c84bfde6508a27904af67a6c15e32b874ac7a94fa82bbc",
+      "title": "木兰辞全文_百度知道",
+      "clean_chars": 98,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "61229ef15138fa67a4177b8d5e327da385aa2942d625cdec992f276a515b0ed7",
+      "title": "木兰辞 definition and meaning | sensagent editor",
+      "clean_chars": 201,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "750062cd9865f405ef2b1a499a37f54f55f2a311c205908baaaf859b2eb079e6",
+      "title": "芦笙 - 维基百科，自由的百科全书",
+      "clean_chars": 7417,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "835f0013911ebaa75234b1c9930b470ad436f7d293d6ccb331e44b3bf7e652d5",
+      "title": "Huang Lusheng",
+      "clean_chars": 1158,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "103c382068880e532c38d483e37a70e3707573f39cc6059436e32bb9c8f5b973",
+      "title": "芦笙_视频在线观看- 56.com",
+      "clean_chars": 118,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "c592a998dbd6260c72317836a0935701d29f68734d25b50760f2c57bf0df059e",
+      "title": "花木兰 (1998年电影)",
+      "clean_chars": 11494,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "cf2361216ab9f5b2eb4bd2690dd049a58a861219488a8b46a976932fc4af52af",
+      "title": "Mulan (Disney character) - Wikipedia",
+      "clean_chars": 68750,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "08eecf6166bf306e0c7a14ebbb40fb9953cb80e0abc9e1fbc3bac861e52ee35f",
+      "title": "Mulan | Watch on Disney+",
+      "clean_chars": 893,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "c21733a6b40c22fe8948a53c584bc977fd6204ca2349100e53c10cb70bb8dcc3",
+      "title": "Mulan | Watch on Disney+",
+      "clean_chars": 893,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "54f4c4f997238d32429a8e8accad24a92b2b23160649ade5f414585e9a84349e",
+      "title": "Hua Mulan",
+      "clean_chars": 19500,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "583f4b4dfef791d41d3f17cf2ed027af39ca962426f3034f2255af4bb89daafa",
+      "title": "Mulan | Watch on Disney+",
+      "clean_chars": 893,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "7692bae18f1ec88cdfe001f9c295a028cd89b7265a1a0552d899075400f715d8",
+      "title": "Ha mu zihag 木兰将军 Uwaarsen jidhakze pi.",
+      "clean_chars": 339,
+      "disposition": {
+        "next_actions": [
+          "review_language_and_readability"
+        ],
+        "reasons": [
+          "mixed_script_language_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "b7ed5e5701bfff01c43a45192c2fc449868f6c159e277b863c83cba975026e60",
+      "title": "Mulan | Watch on Disney+",
+      "clean_chars": 893,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "6e9ebdb697ca70658fa001e6f9dae774a599af99c5ad26c2fe9271a8daafcee2",
+      "title": "Otjul onkakas mobda usiko gukkik 花木兰 Beegter.",
+      "clean_chars": 347,
+      "disposition": {
+        "next_actions": [
+          "review_language_and_readability"
+        ],
+        "reasons": [
+          "mixed_script_language_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "e1c4552fcf14d65a944755e4edc317d422984c376664a79e19fbb1375bc37151",
+      "title": "花木兰 - 维基百科，自由的百科全书",
+      "clean_chars": 11645,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "fde2968372fa9eea1b4ab2e852d6ec73baeabdf27ed1d31204242a9d5fcc5995",
+      "title": "Magnolia grandiflora - Wikipedia",
+      "clean_chars": 32845,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "fbee4ba907325bf7e022bdd8c0232c6a720ad1e73d6c8597d3bb75cb237a6075",
+      "title": "Rej wa ba bah jukvennib 木兰将军 Gefu.",
+      "clean_chars": 336,
+      "disposition": {
+        "next_actions": [
+          "review_language_and_readability"
+        ],
+        "reasons": [
+          "mixed_script_language_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "74d19b6fa8b723457cecbc87868728b91a7cf625a86ee7aad8b04d02e827be9a",
+      "title": "Mulan II",
+      "clean_chars": 8160,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "1c296ab545f354f4eddc891ab3368e71a0c82e684a164b9092afef8c2c5da6c7",
+      "title": "List of Disney's Mulan characters",
+      "clean_chars": 24837,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "d9ad8d272d99b6e4a12bbec307e0a7d397132d8e734a58957b2f45e7ff499e9f",
+      "title": "Weagenec vap 木兰诗 Oto rucuvauwa gobdudop maduleteh.",
+      "clean_chars": 352,
+      "disposition": {
+        "next_actions": [
+          "review_language_and_readability"
+        ],
+        "reasons": [
+          "mixed_script_language_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "425311cae3fc54a5e597cacdfb1b69ece39d44ba645a4b91c98d361fd1bd1142",
+      "title": "木兰天池",
+      "clean_chars": 4264,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 1
+    },
+    {
+      "doc_id": "db171ccc01620b1a1a2fb6668937ebbf67708c61829180ce2636cbf3a50878b8",
+      "title": "COS：霸气的少女猎龙者 花木兰 | 自由微信 | FreeWeChat",
+      "clean_chars": 43,
+      "disposition": {
+        "next_actions": [
+          "parse_source_markup"
+        ],
+        "reasons": [
+          "partial_body_context_requires_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "aa11db5dd75f62339b0d95dd95113a9e3877a9eda9f33bff9c07c60796e86feb",
+      "title": "木兰（木兰目木兰科植物的统称）_百度百科",
+      "clean_chars": 22870,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "bcd0263394998b528cbc21569bce77aae332de92c51afc0c0c933fad22b17602",
+      "title": "哈尔滨市木兰县人民政府",
+      "clean_chars": 105,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "59310ce7a26fd174daae24c17a8ea0fd898132a8d1a289cca2268be39f48b3da",
+      "title": "木兰诗 - 维基语录，自由的名人名言录",
+      "clean_chars": 1208,
+      "disposition": {
+        "next_actions": [
+          "separate_article_body"
+        ],
+        "reasons": [
+          "residual_navigation_requires_review"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 1
+    },
+    {
+      "doc_id": "c4e1a4fb7e34ba3d79914916e67082a78d7edfa510a1d9dbc4534519d3c18620",
+      "title": "Fa Mulan Sushi & More",
+      "clean_chars": 185,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "dc49893026b0a2d841b82afadbb1babe4f25194895184038443fd284dba6be14",
+      "title": "《花木兰(国语版)》电影正片免费高清在线观看 - 动作片 - 电影天堂",
+      "clean_chars": 127,
+      "disposition": {
+        "next_actions": [
+          "fetch_full_document"
+        ],
+        "reasons": [
+          "possible_truncated_snippet"
+        ],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "pending"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "e4068a639a5089d63b8db77bb605585c6f6b4077c5728b975bbca1ec81a658b1",
+      "title": "花木兰 - 吴语维基百科",
+      "clean_chars": 45,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    },
+    {
+      "doc_id": "4956a9b0740b08ab47e8c3e6954244ac9520d63931743ad884ed484d83f8ce94",
+      "title": "《木兰诗 / 木兰辞》原文、赏析及翻译_古诗集",
+      "clean_chars": 117,
+      "disposition": {
+        "next_actions": [],
+        "reasons": [],
+        "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+        "status": "eligible_for_identity"
+      },
+      "deferred_blocks": 0
+    }
+  ],
+  "holdout_reviews": [],
+  "image_reviews": [
+    {
+      "sha256": "0a4038949babddc0f260677b1bfc10db416232cc42b0f43157f8f016b93821f4",
+      "reviewer": "Codex",
+      "pixels_viewed": true,
+      "observation": "绘画中的单人持管状乐器演奏姿态；不能证明真实结构、声学参数或婚恋习俗。",
+      "support_for_final_facts": "none"
+    },
+    {
+      "sha256": "c8d7d6290679bd36a798daf41ad68c87c55d95a5406297ff65b6e921684026c2",
+      "reviewer": "Codex",
+      "pixels_viewed": true,
+      "observation": "长短不一的深色管状物、下方银色反光部件及侧面开口；材料成分、内部簧片及确切乐器身份未独立确认。",
+      "support_for_final_facts": "none"
+    }
+  ],
+  "identity_smoke": [
+    {
+      "concept_ref": "legacy:木兰",
+      "blocked": {
+        "detail": "概念记录明确混合了“木兰花”（植物）和“花木兰”（文学/影视角色）两个互不等同的身份。输入材料中同时包含关于木兰花的植物学描述（M2a95e357f290）和关于花木兰的文学、电影及传说资料（M0612b266a8ce, M179976dddecc, M2b1b9fdda81a, M68bd19390469, M6ee218f74371, M71ad51d622be, M793e5754ea6d, M81bf7a60cb0b, M9b0d9feeb69f, Ma087d5e8e0bd）。由于请求未指定具体指代植物还是人物，且两者在语义上完全独立，无法唯一确定范围，故判定为ambiguous。",
+        "reason": "ambiguous",
+        "stage": "identity"
+      },
+      "identity": {
+        "accepted_material_ids": [],
+        "call": {
+          "model": "qwen3.8-27b",
+          "request_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v2/knowledge_smoke/calls/fc615200a8954a051556eeeed4e366025aa23c2f94800c25d57d00773ed7557a.request.json",
+          "response_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v2/knowledge_smoke/calls/fc615200a8954a051556eeeed4e366025aa23c2f94800c25d57d00773ed7557a.response.json",
+          "reused": true,
+          "usage": {
+            "completion_tokens": 2300,
+            "completion_tokens_details": null,
+            "prompt_tokens": 12695,
+            "prompt_tokens_details": null,
+            "total_tokens": 14995
+          }
+        },
+        "identity_groups": [
+          "木兰花 (植物)",
+          "花木兰 (文学/影视角色)"
+        ],
+        "material_reviews": [
+          {
+            "basis": "text",
+            "material_id": "M0612b266a8ce",
+            "quote": "Clever Mulan proves her worth outside of her tradition-bound society when, disguised as male soldier \"Ping,\" she bravely takes her father's place in China's Imperial Army.",
+            "reason": "文本明确描述迪士尼动画电影中的角色Mulan，属于人物身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M179976dddecc",
+            "quote": "《花木兰》（英語：Mulan）是一部2020年美國奇幻動作劇情片，由妮基·卡罗執導",
+            "reason": "文本明确描述2020年真人电影《花木兰》，属于影视角色/作品身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M2a95e357f290",
+            "quote": "The Yulan magnolia, scientifically known as Magnolia denudata, is a captivating flowering tree that has graced gardens and landscapes for centuries.",
+            "reason": "文本明确描述木兰花（Yulan magnolia）的植物学特征，属于植物身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M2b1b9fdda81a",
+            "quote": "This article is about the original character from the1998 film \"Mulan \\(1998 film\\)\").",
+            "reason": "文本明确指代迪士尼角色Fa Mulan，属于人物身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M68bd19390469",
+            "quote": "花木兰（英語：Mulan）是改编自虚构传奇人物的角色，亮相于华特迪士尼影业第36部动画长片《花木兰》（1998）",
+            "reason": "文本明确描述迪士尼动画角色花木兰，属于人物身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M6ee218f74371",
+            "quote": "花木兰的故事主要来源于北朝民歌《木兰辞》，其中描述了花木兰替父从军、英勇善战的事迹。",
+            "reason": "文本讨论历史/传说人物花木兰，属于人物身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M71ad51d622be",
+            "quote": "Mulan is a 1998 American animated musical coming-of-age action-adventure film based on the Chinese legend of Hua Mulan",
+            "reason": "文本明确描述1998年动画电影《花木兰》，属于影视角色/作品身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M793e5754ea6d",
+            "quote": "作者不明，为中国自南北朝时代开始流传的一首叙事诗，诉说女英雄木兰代父从军的传奇故事。",
+            "reason": "文本为《木兰辞》原文及介绍，核心指向文学人物花木兰，属于文学/人物身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M81bf7a60cb0b",
+            "quote": "《木兰诗 / 木兰辞》 唧唧复唧唧，木兰当户织。",
+            "reason": "文本为《木兰诗》原文，核心指向文学人物花木兰，属于文学/人物身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M8d5111c9d064",
+            "quote": "相传木兰出生于古西陵县双龙镇（即今武汉市黄陂区姚集镇大城潭村）。",
+            "reason": "文本主体为木兰天池景区，但包含与花木兰传说相关的地理背景，属于人物身份的关联语境，但与植物身份无关。",
+            "relation": "related_context"
+          },
+          {
+            "basis": "text",
+            "material_id": "M9b0d9feeb69f",
+            "quote": "Clever Mulan proves her worth outside of her tradition-bound society when, disguised as male soldier \"Ping,\" she bravely takes her father's place in China's Imperial Army.",
+            "reason": "文本明确描述迪士尼动画电影中的角色Mulan，属于人物身份。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "Ma087d5e8e0bd",
+            "quote": "Clever Mulan proves her worth outside of her tradition-bound society when, disguised as male soldier \"Ping,\" she bravely takes her father's place in China's Imperial Army.",
+            "reason": "文本明确描述迪士尼动画电影中的角色Mulan，属于人物身份。",
+            "relation": "same_identity"
+          }
+        ],
+        "protocol_issues": [],
+        "reason": "概念记录明确混合了“木兰花”（植物）和“花木兰”（文学/影视角色）两个互不等同的身份。输入材料中同时包含关于木兰花的植物学描述（M2a95e357f290）和关于花木兰的文学、电影及传说资料（M0612b266a8ce, M179976dddecc, M2b1b9fdda81a, M68bd19390469, M6ee218f74371, M71ad51d622be, M793e5754ea6d, M81bf7a60cb0b, M9b0d9feeb69f, Ma087d5e8e0bd）。由于请求未指定具体指代植物还是人物，且两者在语义上完全独立，无法唯一确定范围，故判定为ambiguous。",
+        "rejected_materials": [
+          {
+            "material_id": "M0612b266a8ce",
+            "reason": "指代迪士尼动画电影《花木兰》中的角色，属于人物身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M179976dddecc",
+            "reason": "指代2020年真人电影《花木兰》，属于影视角色/作品身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M2a95e357f290",
+            "reason": "指代木兰花（Magnolia denudata），属于植物身份，与人物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M2b1b9fdda81a",
+            "reason": "指代迪士尼角色Fa Mulan，属于人物身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M68bd19390469",
+            "reason": "指代迪士尼动画角色花木兰，属于人物身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M6ee218f74371",
+            "reason": "讨论历史/传说人物花木兰，属于人物身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M71ad51d622be",
+            "reason": "指代1998年动画电影《花木兰》，属于影视角色/作品身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M793e5754ea6d",
+            "reason": "指代诗歌《木兰辞》及其主角花木兰，属于文学/人物身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M81bf7a60cb0b",
+            "reason": "指代诗歌《木兰诗/木兰辞》，属于文学/人物身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M8d5111c9d064",
+            "reason": "指代武汉木兰天池景区，虽关联人物传说，但主体为地理景观，且与植物身份无直接等同关系，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "M9b0d9feeb69f",
+            "reason": "指代迪士尼动画电影《花木兰》，属于人物身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          },
+          {
+            "material_id": "Ma087d5e8e0bd",
+            "reason": "指代迪士尼动画电影《花木兰》，属于人物身份，与植物身份冲突，因整体概念歧义而暂缓接受。"
+          }
+        ],
+        "reviewer": "local_model; not human identity adjudication",
+        "status": "ambiguous",
+        "target_label": "木兰"
+      },
+      "ineligible": [
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M8b96383e83b0",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "separate_article_body"
+            ],
+            "reasons": [
+              "residual_navigation_requires_review"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M06c4ae20155d",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "residual_navigation_requires_review"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "review_language_and_readability"
+            ],
+            "reasons": [
+              "mixed_script_language_review"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M9c9af82d6968",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "mixed_script_language_review"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M2c58faeaddf9",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "Ma70a4ba647ba",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "separate_article_body"
+            ],
+            "reasons": [
+              "residual_navigation_requires_review"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "Meb4666421f5c",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "partial_markup_deferred",
+            "residual_navigation_requires_review"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "check_access_or_reacquire",
+              "separate_article_body"
+            ],
+            "reasons": [
+              "access_restriction_or_challenge_marker",
+              "residual_navigation_requires_review"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "Mda37b8ab1ebb",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "access_restriction_or_challenge_marker",
+            "residual_navigation_requires_review"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M1bed880b7828",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M8e2b2da14c4d",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "Mf1d619490df8",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M0b8a97883ee7",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M118ae93b25ba",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "check_access_or_reacquire",
+              "separate_article_body"
+            ],
+            "reasons": [
+              "access_restriction_or_challenge_marker",
+              "residual_navigation_requires_review"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "Mf0fd1894c6f5",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "access_restriction_or_challenge_marker",
+            "residual_navigation_requires_review"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M8c8443993b7b",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        }
+      ],
+      "unexamined": [
+        "Mdefce0a08dc9",
+        "Mbcfcaffd6f79",
+        "Medeca8ae4645",
+        "Mffe10638195a",
+        "Mbf2c93a15c36",
+        "Md095e514552a"
+      ],
+      "input_scope": {
+        "concept_id_contract": "source-bound trial ID; no authority migration",
+        "cross_group_integration": "not_implemented",
+        "group_index": 0,
+        "group_last": false
+      }
+    },
+    {
+      "concept_ref": "legacy:芦笙",
+      "blocked": null,
+      "identity": {
+        "accepted_material_ids": [
+          "M449e85e6de31",
+          "M580e95a53959",
+          "Mab864b120658",
+          "Mc0ddc21f16de",
+          "M57abbe0b028d",
+          "M32029eef86fa",
+          "M52f98d0564d6",
+          "M63366e6f8633",
+          "M88b5682a45f6",
+          "Md80b8437c2ec",
+          "Md99a809e8b3b",
+          "M08ba840843da",
+          "M47105761b4ba",
+          "Mc92181529ade"
+        ],
+        "call": {
+          "model": "qwen3.8-27b",
+          "request_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v4/knowledge_smoke/calls/8663e7d9dfe5acaecf7cc645f0f70585671f448e045ac599ce82d7ab20189e43.request.json",
+          "response_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v4/knowledge_smoke/calls/8663e7d9dfe5acaecf7cc645f0f70585671f448e045ac599ce82d7ab20189e43.response.json",
+          "reused": true,
+          "usage": {
+            "completion_tokens": 3072,
+            "completion_tokens_details": null,
+            "prompt_tokens": 12932,
+            "prompt_tokens_details": null,
+            "total_tokens": 16004
+          }
+        },
+        "identity_groups": [
+          "芦笙（乐器）",
+          "郭路生（诗人）",
+          "黄路生（学者）",
+          "Lusheng（律师事务所）",
+          "芦笙怨歌（电影）"
+        ],
+        "material_reviews": [
+          {
+            "basis": "text",
+            "material_id": "M0fab46237395",
+            "quote": "Guo Lusheng (Chinese: 郭路生, born 1948 Shandong), pen name Shi Zhi (食指, index finger), was an influential Chinese poet of the 1960s",
+            "reason": "明确指代诗人郭路生，非乐器。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M449e85e6de31",
+            "quote": "芦笙（苗族蒙語：qeej）由葫芦笙沿袭而来，属自由簧气鸣乐器。",
+            "reason": "直接定义芦笙为乐器，包含构造、历史等详细信息。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M580e95a53959",
+            "quote": "芦笙，为西南地区苗、瑶、侗等民族的簧管乐器。",
+            "reason": "百度百科条目，明确定义芦笙为簧管乐器。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M9cc5dcda1d24",
+            "quote": "Huang Lusheng (Chinese: 黄路生; born 1964) is a Chinese animal geneticist and professor of Jiangxi Agricultural University.",
+            "reason": "明确指代学者黄路生，非乐器。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "Mab864b120658",
+            "quote": "The lusheng (simplified Chinese: 芦笙; traditional Chinese: 蘆笙; pinyin: lú shēng, pronounced [lǔʂə́ŋ]; Vietnamese: Khèn Mông; also spelled lu sheng; spelled ghengx in standard Hmong and qeej in Laotian RPA Hmong) is a Hmong musical instrument.",
+            "reason": "英文维基百科条目，明确定义Lusheng为乐器。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "Mc0ddc21f16de",
+            "quote": "This is the voice of the Lusheng, the soul-stirring bamboo wind instrument of China’s ethnic groups.",
+            "reason": "文化介绍文章，明确描述Lusheng为竹制风鸣乐器。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "Mc92181529ade",
+            "quote": "芦笙舞又被称为踩芦笙、踩歌堂，是一种中国民间传统舞蹈。表演男子一边吹芦笙，一边以下肢（包括胯、膝、踝）的灵活舞动表演舞蹈。",
+            "reason": "主体是芦笙舞，但文中详细描述了芦笙在舞蹈中的使用方式和历史，属于直接包含目标概念（乐器）知识的相关背景。",
+            "relation": "related_context"
+          },
+          {
+            "basis": "text",
+            "material_id": "Meaf6fa3451c3",
+            "quote": "From Concept to lP Asset: We Protect What You Build",
+            "reason": "律师事务所网站，Lusheng为公司名，非乐器。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M57abbe0b028d",
+            "quote": "芦苼音乐\n\n（侗族蘆笙、苗族芒筒蘆笙）  |\n\n| --- |\n\n|  國家級非物質文化遺產",
+            "reason": "维基百科条目，包含芦笙音乐非遗信息及演奏技法，主体为芦笙。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M000d3836eab3",
+            "quote": "海报下方印有醒目的白色大字“芦笙怨歌”，并标注了编剧陈希平、导演于彦夫等制作信息",
+            "reason": "电影海报，主体为影视作品，非乐器本体。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M32029eef86fa",
+            "quote": "他正全神贯注地吹奏一支金色的芦笙，身体前倾，单腿抬起，呈现出动态的舞蹈姿态。",
+            "reason": "图注明确描述人物吹奏芦笙，展示乐器使用场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M3884ec286952",
+            "quote": "这是一张3D动画风格的人物面部特写截图。画面主体是一个年轻男孩，他有着夸张的大眼睛和惊讶、紧张的表情",
+            "reason": "动漫角色截图，与芦笙无关。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M52f98d0564d6",
+            "quote": "画面中央展示了一件芦笙乐器，背景为纯白色。该乐器由多根长短不一的深褐色竹管组成",
+            "reason": "图注明确展示芦笙乐器实物。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M63366e6f8633",
+            "quote": "画面展示了多名身着民族服饰的男子在户外蓝天背景下吹奏芦笙。",
+            "reason": "图注明确描述吹奏芦笙的场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M747118b18bc9",
+            "quote": "这是一张动漫风格的男性角色半身特写。人物留着黑色短发，刘海整齐，发丝间带有绿色的高光线条。",
+            "reason": "动漫角色截图，与芦笙无关。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M88b5682a45f6",
+            "quote": "画面中，一群身着精美民族服饰（疑似苗族或侗族）的男子排成一列，正在演奏巨大的传统乐器——芦笙。",
+            "reason": "图注明确描述演奏芦笙的场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "Mb10309ff7178",
+            "quote": "画面主体为几位背对镜头的女性，她们身着色彩浓烈的传统服饰，以深红、翠绿和黑色为主调",
+            "reason": "服饰特写，未提及或展示芦笙乐器。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "Md80b8437c2ec",
+            "quote": "画面中央展示了一件芦笙乐器，背景为纯净的浅灰白色。该乐器由多根长短不一的深色竹管组成",
+            "reason": "图注明确展示芦笙乐器实物。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "Md99a809e8b3b",
+            "quote": "这是一幅黑色背景下的数字插画，描绘了一男一女两位身着民族服饰的人物正在吹奏芦笙。",
+            "reason": "图注明确描述吹奏芦笙的场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M08ba840843da",
+            "quote": "他们手中持握着巨大的木制芦笙，乐器由多根长短不一的竹管组成，呈扇形向上延伸",
+            "reason": "图注明确描述持握和吹奏芦笙的场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M47105761b4ba",
+            "quote": "左侧男子头戴黑色头饰，身穿黑色刺绣服装，正吹奏着一支由多根竹管组成的芦笙。",
+            "reason": "图注明确描述吹奏芦笙的场景。",
+            "relation": "same_identity"
+          }
+        ],
+        "protocol_issues": [
+          {
+            "decision": "accept",
+            "material_id": "Mc92181529ade",
+            "original_review": {
+              "basis": "text",
+              "material_id": "Mc92181529ade",
+              "quote": "芦笙舞又被称为踩芦笙、踩歌堂，是一种中国民间传统舞蹈。表演男子一边吹芦笙，一边以下肢（包括胯、膝、踝）的灵活舞动表演舞蹈。",
+              "reason": "主体是芦笙舞，但文中详细描述了芦笙在舞蹈中的使用方式和历史，属于直接包含目标概念（乐器）知识的相关背景。",
+              "relation": "related_context"
+            },
+            "reason": "list_membership_completed_from_explicit_material_review"
+          }
+        ],
+        "reason": "目标概念明确为乐器“芦笙”。材料M449e85e6de31、M580e95a53959、Mab864b120658、Mc0ddc21f16de、M57abbe0b028d及多张图片（M32029eef86fa, M52f98d0564d6, M63366e6f8633, M88b5682a45f6, Md80b8437c2ec, Md99a809e8b3b, M08ba840843da, M47105761b4ba）均直接描述或展示该乐器，身份一致。M0fab46237395（诗人郭路生）、M9cc5dcda1d24（学者黄路生）、Meaf6fa3451c3（律师事务所Lusheng）虽名字相同或音译相同，但身份完全不同，予以排除。M000d3836eab3为电影海报，M3884ec286952和M747118b18bc9为动漫角色，Mb10309ff7178为服饰特写，均非乐器本体，予以排除。",
+        "rejected_materials": [
+          {
+            "material_id": "M0fab46237395",
+            "reason": "主体为诗人郭路生（Guo Lusheng），与乐器芦笙无关。"
+          },
+          {
+            "material_id": "M9cc5dcda1d24",
+            "reason": "主体为动物遗传学家黄路生（Huang Lusheng），与乐器芦笙无关。"
+          },
+          {
+            "material_id": "Meaf6fa3451c3",
+            "reason": "主体为律师事务所Lusheng，与乐器芦笙无关。"
+          },
+          {
+            "material_id": "M000d3836eab3",
+            "reason": "主体为电影《芦笙怨歌》海报，虽片名含芦笙，但材料本身是影视文化产品，非乐器本体知识。"
+          },
+          {
+            "material_id": "M3884ec286952",
+            "reason": "主体为动漫角色，与乐器芦笙无关。"
+          },
+          {
+            "material_id": "M747118b18bc9",
+            "reason": "主体为动漫角色，与乐器芦笙无关。"
+          },
+          {
+            "material_id": "Mb10309ff7178",
+            "reason": "主体为少数民族服饰特写，未展示芦笙乐器。"
+          }
+        ],
+        "reviewer": "local_model; not human identity adjudication",
+        "status": "resolved",
+        "target_label": "芦笙"
+      },
+      "ineligible": [
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M5597dcaddc2c",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M83fc915d24a3",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M7c609f066010",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "check_access_or_reacquire",
+              "reacquire_source"
+            ],
+            "reasons": [
+              "no_usable_body",
+              "access_restriction_or_challenge_marker"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M8183cbeb3e41",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "access_error_page_no_body",
+            "access_restriction_or_challenge_marker",
+            "no_body_blocks"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "fetch_full_document"
+            ],
+            "reasons": [
+              "possible_truncated_snippet"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "M0f2a3c640f2c",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "possible_truncated_snippet"
+          ]
+        },
+        {
+          "disposition": {
+            "next_actions": [
+              "review_language_and_readability"
+            ],
+            "reasons": [
+              "mixed_script_language_review"
+            ],
+            "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+            "status": "pending"
+          },
+          "material_id": "Mcc7f7bed3910",
+          "reason": "pending_material_quality",
+          "warnings": [
+            "mixed_script_language_review"
+          ]
+        }
+      ],
+      "unexamined": [
+        "Mb7771e8c8319",
+        "M8424291c79b3",
+        "Mdcdd77fd5035",
+        "Mab6e9258591b",
+        "M936b854bdce1"
+      ],
+      "input_scope": {
+        "concept_id_contract": "source-bound trial ID; no authority migration",
+        "cross_group_integration": "not_implemented",
+        "group_index": 0,
+        "group_last": true
+      }
+    },
+    {
+      "concept_ref": "qid:Q1",
+      "blocked": null,
+      "identity": {
+        "accepted_material_ids": [
+          "M32c302d471c8"
+        ],
+        "call": {
+          "model": "qwen3.8-27b",
+          "request_path": "state/curation/v4/demiflow_pilot_v8/quality_review_v1/knowledge_smoke/calls/e301a5b24d20f449fcdab371924a413ef12d798cc2d2ca20721fa910219b3fec.request.json",
+          "response_path": "state/curation/v4/demiflow_pilot_v8/quality_review_v1/knowledge_smoke/calls/e301a5b24d20f449fcdab371924a413ef12d798cc2d2ca20721fa910219b3fec.response.json",
+          "reused": true,
+          "usage": {
+            "completion_tokens": 260,
+            "completion_tokens_details": null,
+            "prompt_tokens": 1526,
+            "prompt_tokens_details": null,
+            "total_tokens": 1786
+          }
+        },
+        "identity_groups": [
+          "宇宙 (Universe)"
+        ],
+        "material_reviews": [
+          {
+            "basis": "text",
+            "material_id": "M32c302d471c8",
+            "quote": "Everything in space and time",
+            "reason": "材料标题为Universe，正文定义其为时空中的万物，并包含宇宙学参数和理论，与目标概念“宇宙”身份完全一致。",
+            "relation": "same_identity"
+          }
+        ],
+        "protocol_issues": [],
+        "reason": "来源身份记录明确将Q1对应为英文Universe和中文宇宙。材料M32c302d471c8标题为Universe，内容描述时空、年龄、密度、广义相对论及宇宙学，与“宇宙”这一概念身份一致，无混合其他互不等同身份（如人物、植物）的迹象。",
+        "rejected_materials": [],
+        "reviewer": "local_model; not human identity adjudication",
+        "status": "resolved",
+        "target_label": "宇宙"
+      },
+      "ineligible": [],
+      "unexamined": [],
+      "input_scope": {
+        "concept_id_contract": "source-bound trial ID; no authority migration",
+        "cross_group_integration": "not_implemented",
+        "group_index": 0,
+        "group_last": true
+      }
+    }
+  ],
+  "knowledge_smoke": [
+    {
+      "concept_ref": "legacy:芦笙",
+      "blocked": null,
+      "identity": {
+        "accepted_material_ids": [
+          "M449e85e6de31",
+          "M580e95a53959",
+          "Mab864b120658",
+          "Mc0ddc21f16de",
+          "M57abbe0b028d",
+          "M32029eef86fa",
+          "M52f98d0564d6",
+          "M63366e6f8633",
+          "M88b5682a45f6",
+          "Md80b8437c2ec",
+          "Md99a809e8b3b",
+          "M08ba840843da",
+          "M47105761b4ba",
+          "Mc92181529ade"
+        ],
+        "call": {
+          "model": "qwen3.8-27b",
+          "request_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v4/knowledge_smoke/calls/8663e7d9dfe5acaecf7cc645f0f70585671f448e045ac599ce82d7ab20189e43.request.json",
+          "response_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v4/knowledge_smoke/calls/8663e7d9dfe5acaecf7cc645f0f70585671f448e045ac599ce82d7ab20189e43.response.json",
+          "reused": true,
+          "usage": {
+            "completion_tokens": 3072,
+            "completion_tokens_details": null,
+            "prompt_tokens": 12932,
+            "prompt_tokens_details": null,
+            "total_tokens": 16004
+          }
+        },
+        "identity_groups": [
+          "芦笙（乐器）",
+          "郭路生（诗人）",
+          "黄路生（学者）",
+          "Lusheng（律师事务所）",
+          "芦笙怨歌（电影）"
+        ],
+        "material_reviews": [
+          {
+            "basis": "text",
+            "material_id": "M0fab46237395",
+            "quote": "Guo Lusheng (Chinese: 郭路生, born 1948 Shandong), pen name Shi Zhi (食指, index finger), was an influential Chinese poet of the 1960s",
+            "reason": "明确指代诗人郭路生，非乐器。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M449e85e6de31",
+            "quote": "芦笙（苗族蒙語：qeej）由葫芦笙沿袭而来，属自由簧气鸣乐器。",
+            "reason": "直接定义芦笙为乐器，包含构造、历史等详细信息。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M580e95a53959",
+            "quote": "芦笙，为西南地区苗、瑶、侗等民族的簧管乐器。",
+            "reason": "百度百科条目，明确定义芦笙为簧管乐器。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M9cc5dcda1d24",
+            "quote": "Huang Lusheng (Chinese: 黄路生; born 1964) is a Chinese animal geneticist and professor of Jiangxi Agricultural University.",
+            "reason": "明确指代学者黄路生，非乐器。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "Mab864b120658",
+            "quote": "The lusheng (simplified Chinese: 芦笙; traditional Chinese: 蘆笙; pinyin: lú shēng, pronounced [lǔʂə́ŋ]; Vietnamese: Khèn Mông; also spelled lu sheng; spelled ghengx in standard Hmong and qeej in Laotian RPA Hmong) is a Hmong musical instrument.",
+            "reason": "英文维基百科条目，明确定义Lusheng为乐器。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "Mc0ddc21f16de",
+            "quote": "This is the voice of the Lusheng, the soul-stirring bamboo wind instrument of China’s ethnic groups.",
+            "reason": "文化介绍文章，明确描述Lusheng为竹制风鸣乐器。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "Mc92181529ade",
+            "quote": "芦笙舞又被称为踩芦笙、踩歌堂，是一种中国民间传统舞蹈。表演男子一边吹芦笙，一边以下肢（包括胯、膝、踝）的灵活舞动表演舞蹈。",
+            "reason": "主体是芦笙舞，但文中详细描述了芦笙在舞蹈中的使用方式和历史，属于直接包含目标概念（乐器）知识的相关背景。",
+            "relation": "related_context"
+          },
+          {
+            "basis": "text",
+            "material_id": "Meaf6fa3451c3",
+            "quote": "From Concept to lP Asset: We Protect What You Build",
+            "reason": "律师事务所网站，Lusheng为公司名，非乐器。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "text",
+            "material_id": "M57abbe0b028d",
+            "quote": "芦苼音乐\n\n（侗族蘆笙、苗族芒筒蘆笙）  |\n\n| --- |\n\n|  國家級非物質文化遺產",
+            "reason": "维基百科条目，包含芦笙音乐非遗信息及演奏技法，主体为芦笙。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M000d3836eab3",
+            "quote": "海报下方印有醒目的白色大字“芦笙怨歌”，并标注了编剧陈希平、导演于彦夫等制作信息",
+            "reason": "电影海报，主体为影视作品，非乐器本体。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M32029eef86fa",
+            "quote": "他正全神贯注地吹奏一支金色的芦笙，身体前倾，单腿抬起，呈现出动态的舞蹈姿态。",
+            "reason": "图注明确描述人物吹奏芦笙，展示乐器使用场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M3884ec286952",
+            "quote": "这是一张3D动画风格的人物面部特写截图。画面主体是一个年轻男孩，他有着夸张的大眼睛和惊讶、紧张的表情",
+            "reason": "动漫角色截图，与芦笙无关。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M52f98d0564d6",
+            "quote": "画面中央展示了一件芦笙乐器，背景为纯白色。该乐器由多根长短不一的深褐色竹管组成",
+            "reason": "图注明确展示芦笙乐器实物。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M63366e6f8633",
+            "quote": "画面展示了多名身着民族服饰的男子在户外蓝天背景下吹奏芦笙。",
+            "reason": "图注明确描述吹奏芦笙的场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M747118b18bc9",
+            "quote": "这是一张动漫风格的男性角色半身特写。人物留着黑色短发，刘海整齐，发丝间带有绿色的高光线条。",
+            "reason": "动漫角色截图，与芦笙无关。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M88b5682a45f6",
+            "quote": "画面中，一群身着精美民族服饰（疑似苗族或侗族）的男子排成一列，正在演奏巨大的传统乐器——芦笙。",
+            "reason": "图注明确描述演奏芦笙的场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "Mb10309ff7178",
+            "quote": "画面主体为几位背对镜头的女性，她们身着色彩浓烈的传统服饰，以深红、翠绿和黑色为主调",
+            "reason": "服饰特写，未提及或展示芦笙乐器。",
+            "relation": "different_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "Md80b8437c2ec",
+            "quote": "画面中央展示了一件芦笙乐器，背景为纯净的浅灰白色。该乐器由多根长短不一的深色竹管组成",
+            "reason": "图注明确展示芦笙乐器实物。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "Md99a809e8b3b",
+            "quote": "这是一幅黑色背景下的数字插画，描绘了一男一女两位身着民族服饰的人物正在吹奏芦笙。",
+            "reason": "图注明确描述吹奏芦笙的场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M08ba840843da",
+            "quote": "他们手中持握着巨大的木制芦笙，乐器由多根长短不一的竹管组成，呈扇形向上延伸",
+            "reason": "图注明确描述持握和吹奏芦笙的场景。",
+            "relation": "same_identity"
+          },
+          {
+            "basis": "metadata",
+            "material_id": "M47105761b4ba",
+            "quote": "左侧男子头戴黑色头饰，身穿黑色刺绣服装，正吹奏着一支由多根竹管组成的芦笙。",
+            "reason": "图注明确描述吹奏芦笙的场景。",
+            "relation": "same_identity"
+          }
+        ],
+        "protocol_issues": [
+          {
+            "decision": "accept",
+            "material_id": "Mc92181529ade",
+            "original_review": {
+              "basis": "text",
+              "material_id": "Mc92181529ade",
+              "quote": "芦笙舞又被称为踩芦笙、踩歌堂，是一种中国民间传统舞蹈。表演男子一边吹芦笙，一边以下肢（包括胯、膝、踝）的灵活舞动表演舞蹈。",
+              "reason": "主体是芦笙舞，但文中详细描述了芦笙在舞蹈中的使用方式和历史，属于直接包含目标概念（乐器）知识的相关背景。",
+              "relation": "related_context"
+            },
+            "reason": "list_membership_completed_from_explicit_material_review"
+          }
+        ],
+        "reason": "目标概念明确为乐器“芦笙”。材料M449e85e6de31、M580e95a53959、Mab864b120658、Mc0ddc21f16de、M57abbe0b028d及多张图片（M32029eef86fa, M52f98d0564d6, M63366e6f8633, M88b5682a45f6, Md80b8437c2ec, Md99a809e8b3b, M08ba840843da, M47105761b4ba）均直接描述或展示该乐器，身份一致。M0fab46237395（诗人郭路生）、M9cc5dcda1d24（学者黄路生）、Meaf6fa3451c3（律师事务所Lusheng）虽名字相同或音译相同，但身份完全不同，予以排除。M000d3836eab3为电影海报，M3884ec286952和M747118b18bc9为动漫角色，Mb10309ff7178为服饰特写，均非乐器本体，予以排除。",
+        "rejected_materials": [
+          {
+            "material_id": "M0fab46237395",
+            "reason": "主体为诗人郭路生（Guo Lusheng），与乐器芦笙无关。"
+          },
+          {
+            "material_id": "M9cc5dcda1d24",
+            "reason": "主体为动物遗传学家黄路生（Huang Lusheng），与乐器芦笙无关。"
+          },
+          {
+            "material_id": "Meaf6fa3451c3",
+            "reason": "主体为律师事务所Lusheng，与乐器芦笙无关。"
+          },
+          {
+            "material_id": "M000d3836eab3",
+            "reason": "主体为电影《芦笙怨歌》海报，虽片名含芦笙，但材料本身是影视文化产品，非乐器本体知识。"
+          },
+          {
+            "material_id": "M3884ec286952",
+            "reason": "主体为动漫角色，与乐器芦笙无关。"
+          },
+          {
+            "material_id": "M747118b18bc9",
+            "reason": "主体为动漫角色，与乐器芦笙无关。"
+          },
+          {
+            "material_id": "Mb10309ff7178",
+            "reason": "主体为少数民族服饰特写，未展示芦笙乐器。"
+          }
+        ],
+        "reviewer": "local_model; not human identity adjudication",
+        "status": "resolved",
+        "target_label": "芦笙"
+      },
+      "material_omissions": [
+        {
+          "end": 4,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 0
+        },
+        {
+          "end": 190,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 182
+        },
+        {
+          "end": 2505,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 218
+        },
+        {
+          "end": 4819,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 2525
+        },
+        {
+          "end": 7311,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 4841
+        },
+        {
+          "end": 21424,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 7319
+        },
+        {
+          "end": 21573,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 21533
+        },
+        {
+          "end": 21787,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 21776
+        },
+        {
+          "end": 22406,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 22400
+        },
+        {
+          "end": 22588,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 22576
+        },
+        {
+          "end": 23079,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 23071
+        },
+        {
+          "end": 24199,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 24043
+        },
+        {
+          "end": 24704,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 24697
+        },
+        {
+          "end": 25087,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 25078
+        },
+        {
+          "end": 25270,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 25261
+        },
+        {
+          "end": 25511,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 25503
+        },
+        {
+          "end": 25649,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 25643
+        },
+        {
+          "end": 26990,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 26984
+        },
+        {
+          "end": 28318,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 27872
+        },
+        {
+          "end": 28420,
+          "material_id": "M580e95a53959",
+          "reason": "complete blocks outside character budget",
+          "start": 28350
+        },
+        {
+          "material_id": "Mc0ddc21f16de",
+          "reason": "document/family budget; retained for later exploration"
+        },
+        {
+          "end": 1526,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 764
+        },
+        {
+          "end": 2713,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 2014
+        },
+        {
+          "end": 3117,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 3101
+        },
+        {
+          "end": 3583,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 3570
+        },
+        {
+          "end": 4237,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 4223
+        },
+        {
+          "end": 4706,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 4698
+        },
+        {
+          "end": 5045,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 5027
+        },
+        {
+          "end": 5422,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 5384
+        },
+        {
+          "end": 6090,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 6075
+        },
+        {
+          "end": 6922,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 6894
+        },
+        {
+          "end": 7605,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 7593
+        },
+        {
+          "end": 7760,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 7730
+        },
+        {
+          "end": 7809,
+          "material_id": "Mab864b120658",
+          "reason": "complete blocks outside character budget",
+          "start": 7800
+        },
+        {
+          "material_id": "M57abbe0b028d",
+          "reason": "document/family budget; retained for later exploration"
+        },
+        {
+          "material_id": "M449e85e6de31",
+          "reason": "document/family budget; retained for later exploration"
+        },
+        {
+          "material_id": "Mc92181529ade",
+          "reason": "document/family budget; retained for later exploration"
+        },
+        {
+          "image_id": "I5c346a31c30e",
+          "material_id": "M63366e6f8633",
+          "next_action": "check_remaining_image_support",
+          "reason": "image_support_budget"
+        },
+        {
+          "image_id": "I7b933bcf9542",
+          "material_id": "M88b5682a45f6",
+          "next_action": "check_remaining_image_support",
+          "reason": "image_support_budget"
+        },
+        {
+          "image_id": "Ic2017e018450",
+          "material_id": "Md80b8437c2ec",
+          "next_action": "check_remaining_image_support",
+          "reason": "image_support_budget"
+        },
+        {
+          "image_id": "Ib967124bcd06",
+          "material_id": "Md99a809e8b3b",
+          "next_action": "check_remaining_image_support",
+          "reason": "image_support_budget"
+        },
+        {
+          "image_id": "Icd2e6d1d3388",
+          "material_id": "M08ba840843da",
+          "next_action": "check_remaining_image_support",
+          "reason": "image_support_budget"
+        },
+        {
+          "image_id": "Iff903d5244ae",
+          "material_id": "M47105761b4ba",
+          "next_action": "check_remaining_image_support",
+          "reason": "image_support_budget"
+        }
+      ],
+      "export": {
+        "blocked": null,
+        "case_id": "d96e5834f2c17c9f4a90",
+        "concept_id": "trial-c0af376a705c8bed2ea0fe14",
+        "coverage_note": "本次最多6条机器候选，不表示已穷尽提供片段。地域、民族、词源、方法等有条件知识继续保留探索机会；模型范围意见未经审核，不作为排除依据。",
+        "deferred_facts": [
+          {
+            "fact": {
+              "conditions": [
+                "传统芦笙结构"
+              ],
+              "evidence": [
+                {
+                  "quote": "〔苗族芦笙〕由笙斗、笙管、簧片和共鸣管构成。笙斗又称气箱，多用杉木、松木或梧桐木制作...笙管多用白竹制作",
+                  "source_id": "Sc1c54bc54130"
+                }
+              ],
+              "exceptions": [],
+              "fact_id": "F2",
+              "statement": "传统芦笙由笙斗、笙管、簧片和共鸣管构成，笙斗多用杉木、松木或梧桐木制作，笙管多用白竹制作。"
+            },
+            "next_action": "verify_citation_and_quantity_against_source",
+            "reasons": [
+              "quote_not_in_supplied_source"
+            ]
+          },
+          {
+            "fact": {
+              "conditions": [
+                "苗族宗教/万物有灵信仰",
+                "春季开始到秋季收获期间"
+              ],
+              "evidence": [
+                {
+                  "quote": "In the Miao religion, they believe lusheng is a spiritual instrument (an animism belief) and has a certain effect on the gods. Between the beginning of spring and autumn harvest, lusheng playing is prohibited.",
+                  "source_id": "S301ff3314c63"
+                }
+              ],
+              "exceptions": [],
+              "fact_id": "F4",
+              "statement": "在苗族宗教观念中，芦笙被视为具有灵性的乐器，在春季开始到秋季收获期间禁止吹奏，否则被认为会冒犯神灵。"
+            },
+            "next_action": "verify_citation_and_quantity_against_source",
+            "reasons": [
+              "conditional_consequence_not_in_quoted_evidence"
+            ]
+          },
+          {
+            "fact": {
+              "conditions": [
+                "基于百度百科词条S8535dbd47b17的描述"
+              ],
+              "evidence": [
+                {
+                  "quote": "芦笙，为西南地区苗、瑶、侗等民族的簧管乐器。 发源于中原，后来在少数民族地区发扬光大，其前身为竽。",
+                  "source_id": "S8535dbd47b17"
+                }
+              ],
+              "exceptions": [
+                "其他来源（如Sc651776c6a32）提出不同起源观点，见unresolved_conflicts"
+              ],
+              "fact_id": "F1",
+              "statement": "根据百度百科词条，芦笙是西南地区苗、瑶、侗等民族的簧管乐器，发源于中原，前身为竽。"
+            },
+            "next_action": "resolve_conflict_with_source_evidence",
+            "reasons": [
+              {
+                "basis": "explicit_fact_correspondence",
+                "conflict_id": "7ac82c546a3c28d9e72aa578e258c199192e4ece79add646ea4dcfdebe558755"
+              }
+            ]
+          }
+        ],
+        "facts": [
+          {
+            "conditions": [
+              "特指“整套苗族六管芦笙”这一集合，而非单支芦笙"
+            ],
+            "evidence": [
+              {
+                "quote": "整套苗族六管芦笙，从倍低音到最高音共有大小五种规格，音列按五声音阶排列，发音每种规格为一个八度，音域A1—a3，共有五个八度。",
+                "source_id": "Se6e92cf97853"
+              }
+            ],
+            "exceptions": [],
+            "fact_id": "F3",
+            "statement": "整套苗族六管芦笙从倍低音到最高音共有大小五种规格，音列按五声音阶排列，每种规格发音为一个八度，总音域为A1—a3，共五个八度。"
+          },
+          {
+            "conditions": [
+              "特指“苗族芦笙制作技艺”"
+            ],
+            "evidence": [
+              {
+                "quote": "On May 20, 2006, the production techniques on lusheng of the Miao nationality group was approved by China State Council and listed in the State-Level Non-Material Cultural Heritage List.",
+                "source_id": "S6c4f1693f937"
+              }
+            ],
+            "exceptions": [],
+            "fact_id": "F5",
+            "statement": "2006年5月20日，苗族芦笙制作技艺被中国国务院批准列入国家级非物质文化遗产名录。"
+          },
+          {
+            "conditions": [
+              "基于维基百科描述的苗族（Hmong）传统习俗"
+            ],
+            "evidence": [
+              {
+                "quote": "When a Miao man picks his mate, he will play lusheng songs like \"asking for a flower belt\" and ask for a love token from the woman.",
+                "source_id": "S59dadf1d630c"
+              }
+            ],
+            "exceptions": [
+              "中文来源Sfdaea55d8af2称芦笙是成婚媒介，但Sc87c2592026b称“芦笙不是爱情信物”，存在文化解释上的细微差异，此处仅保留英文来源的具体行为描述"
+            ],
+            "fact_id": "F6",
+            "statement": "在苗族传统婚恋习俗中，男子在挑选伴侣时会吹奏如“求花带”等芦笙歌曲，并向女子索取信物。"
+          }
+        ],
+        "identity": {
+          "accepted_material_ids": [
+            "M449e85e6de31",
+            "M580e95a53959",
+            "Mab864b120658",
+            "Mc0ddc21f16de",
+            "M57abbe0b028d",
+            "M32029eef86fa",
+            "M52f98d0564d6",
+            "M63366e6f8633",
+            "M88b5682a45f6",
+            "Md80b8437c2ec",
+            "Md99a809e8b3b",
+            "M08ba840843da",
+            "M47105761b4ba",
+            "Mc92181529ade"
+          ],
+          "call": {
+            "model": "qwen3.8-27b",
+            "request_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v4/knowledge_smoke/calls/8663e7d9dfe5acaecf7cc645f0f70585671f448e045ac599ce82d7ab20189e43.request.json",
+            "response_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v4/knowledge_smoke/calls/8663e7d9dfe5acaecf7cc645f0f70585671f448e045ac599ce82d7ab20189e43.response.json",
+            "reused": true,
+            "usage": {
+              "completion_tokens": 3072,
+              "completion_tokens_details": null,
+              "prompt_tokens": 12932,
+              "prompt_tokens_details": null,
+              "total_tokens": 16004
+            }
+          },
+          "identity_groups": [
+            "芦笙（乐器）",
+            "郭路生（诗人）",
+            "黄路生（学者）",
+            "Lusheng（律师事务所）",
+            "芦笙怨歌（电影）"
+          ],
+          "material_reviews": [
+            {
+              "basis": "text",
+              "material_id": "M0fab46237395",
+              "quote": "Guo Lusheng (Chinese: 郭路生, born 1948 Shandong), pen name Shi Zhi (食指, index finger), was an influential Chinese poet of the 1960s",
+              "reason": "明确指代诗人郭路生，非乐器。",
+              "relation": "different_identity"
+            },
+            {
+              "basis": "text",
+              "material_id": "M449e85e6de31",
+              "quote": "芦笙（苗族蒙語：qeej）由葫芦笙沿袭而来，属自由簧气鸣乐器。",
+              "reason": "直接定义芦笙为乐器，包含构造、历史等详细信息。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "text",
+              "material_id": "M580e95a53959",
+              "quote": "芦笙，为西南地区苗、瑶、侗等民族的簧管乐器。",
+              "reason": "百度百科条目，明确定义芦笙为簧管乐器。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "text",
+              "material_id": "M9cc5dcda1d24",
+              "quote": "Huang Lusheng (Chinese: 黄路生; born 1964) is a Chinese animal geneticist and professor of Jiangxi Agricultural University.",
+              "reason": "明确指代学者黄路生，非乐器。",
+              "relation": "different_identity"
+            },
+            {
+              "basis": "text",
+              "material_id": "Mab864b120658",
+              "quote": "The lusheng (simplified Chinese: 芦笙; traditional Chinese: 蘆笙; pinyin: lú shēng, pronounced [lǔʂə́ŋ]; Vietnamese: Khèn Mông; also spelled lu sheng; spelled ghengx in standard Hmong and qeej in Laotian RPA Hmong) is a Hmong musical instrument.",
+              "reason": "英文维基百科条目，明确定义Lusheng为乐器。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "text",
+              "material_id": "Mc0ddc21f16de",
+              "quote": "This is the voice of the Lusheng, the soul-stirring bamboo wind instrument of China’s ethnic groups.",
+              "reason": "文化介绍文章，明确描述Lusheng为竹制风鸣乐器。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "text",
+              "material_id": "Mc92181529ade",
+              "quote": "芦笙舞又被称为踩芦笙、踩歌堂，是一种中国民间传统舞蹈。表演男子一边吹芦笙，一边以下肢（包括胯、膝、踝）的灵活舞动表演舞蹈。",
+              "reason": "主体是芦笙舞，但文中详细描述了芦笙在舞蹈中的使用方式和历史，属于直接包含目标概念（乐器）知识的相关背景。",
+              "relation": "related_context"
+            },
+            {
+              "basis": "text",
+              "material_id": "Meaf6fa3451c3",
+              "quote": "From Concept to lP Asset: We Protect What You Build",
+              "reason": "律师事务所网站，Lusheng为公司名，非乐器。",
+              "relation": "different_identity"
+            },
+            {
+              "basis": "text",
+              "material_id": "M57abbe0b028d",
+              "quote": "芦苼音乐\n\n（侗族蘆笙、苗族芒筒蘆笙）  |\n\n| --- |\n\n|  國家級非物質文化遺產",
+              "reason": "维基百科条目，包含芦笙音乐非遗信息及演奏技法，主体为芦笙。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M000d3836eab3",
+              "quote": "海报下方印有醒目的白色大字“芦笙怨歌”，并标注了编剧陈希平、导演于彦夫等制作信息",
+              "reason": "电影海报，主体为影视作品，非乐器本体。",
+              "relation": "different_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M32029eef86fa",
+              "quote": "他正全神贯注地吹奏一支金色的芦笙，身体前倾，单腿抬起，呈现出动态的舞蹈姿态。",
+              "reason": "图注明确描述人物吹奏芦笙，展示乐器使用场景。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M3884ec286952",
+              "quote": "这是一张3D动画风格的人物面部特写截图。画面主体是一个年轻男孩，他有着夸张的大眼睛和惊讶、紧张的表情",
+              "reason": "动漫角色截图，与芦笙无关。",
+              "relation": "different_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M52f98d0564d6",
+              "quote": "画面中央展示了一件芦笙乐器，背景为纯白色。该乐器由多根长短不一的深褐色竹管组成",
+              "reason": "图注明确展示芦笙乐器实物。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M63366e6f8633",
+              "quote": "画面展示了多名身着民族服饰的男子在户外蓝天背景下吹奏芦笙。",
+              "reason": "图注明确描述吹奏芦笙的场景。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M747118b18bc9",
+              "quote": "这是一张动漫风格的男性角色半身特写。人物留着黑色短发，刘海整齐，发丝间带有绿色的高光线条。",
+              "reason": "动漫角色截图，与芦笙无关。",
+              "relation": "different_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M88b5682a45f6",
+              "quote": "画面中，一群身着精美民族服饰（疑似苗族或侗族）的男子排成一列，正在演奏巨大的传统乐器——芦笙。",
+              "reason": "图注明确描述演奏芦笙的场景。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "Mb10309ff7178",
+              "quote": "画面主体为几位背对镜头的女性，她们身着色彩浓烈的传统服饰，以深红、翠绿和黑色为主调",
+              "reason": "服饰特写，未提及或展示芦笙乐器。",
+              "relation": "different_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "Md80b8437c2ec",
+              "quote": "画面中央展示了一件芦笙乐器，背景为纯净的浅灰白色。该乐器由多根长短不一的深色竹管组成",
+              "reason": "图注明确展示芦笙乐器实物。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "Md99a809e8b3b",
+              "quote": "这是一幅黑色背景下的数字插画，描绘了一男一女两位身着民族服饰的人物正在吹奏芦笙。",
+              "reason": "图注明确描述吹奏芦笙的场景。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M08ba840843da",
+              "quote": "他们手中持握着巨大的木制芦笙，乐器由多根长短不一的竹管组成，呈扇形向上延伸",
+              "reason": "图注明确描述持握和吹奏芦笙的场景。",
+              "relation": "same_identity"
+            },
+            {
+              "basis": "metadata",
+              "material_id": "M47105761b4ba",
+              "quote": "左侧男子头戴黑色头饰，身穿黑色刺绣服装，正吹奏着一支由多根竹管组成的芦笙。",
+              "reason": "图注明确描述吹奏芦笙的场景。",
+              "relation": "same_identity"
+            }
+          ],
+          "protocol_issues": [
+            {
+              "decision": "accept",
+              "material_id": "Mc92181529ade",
+              "original_review": {
+                "basis": "text",
+                "material_id": "Mc92181529ade",
+                "quote": "芦笙舞又被称为踩芦笙、踩歌堂，是一种中国民间传统舞蹈。表演男子一边吹芦笙，一边以下肢（包括胯、膝、踝）的灵活舞动表演舞蹈。",
+                "reason": "主体是芦笙舞，但文中详细描述了芦笙在舞蹈中的使用方式和历史，属于直接包含目标概念（乐器）知识的相关背景。",
+                "relation": "related_context"
+              },
+              "reason": "list_membership_completed_from_explicit_material_review"
+            }
+          ],
+          "reason": "目标概念明确为乐器“芦笙”。材料M449e85e6de31、M580e95a53959、Mab864b120658、Mc0ddc21f16de、M57abbe0b028d及多张图片（M32029eef86fa, M52f98d0564d6, M63366e6f8633, M88b5682a45f6, Md80b8437c2ec, Md99a809e8b3b, M08ba840843da, M47105761b4ba）均直接描述或展示该乐器，身份一致。M0fab46237395（诗人郭路生）、M9cc5dcda1d24（学者黄路生）、Meaf6fa3451c3（律师事务所Lusheng）虽名字相同或音译相同，但身份完全不同，予以排除。M000d3836eab3为电影海报，M3884ec286952和M747118b18bc9为动漫角色，Mb10309ff7178为服饰特写，均非乐器本体，予以排除。",
+          "rejected_materials": [
+            {
+              "material_id": "M0fab46237395",
+              "reason": "主体为诗人郭路生（Guo Lusheng），与乐器芦笙无关。"
+            },
+            {
+              "material_id": "M9cc5dcda1d24",
+              "reason": "主体为动物遗传学家黄路生（Huang Lusheng），与乐器芦笙无关。"
+            },
+            {
+              "material_id": "Meaf6fa3451c3",
+              "reason": "主体为律师事务所Lusheng，与乐器芦笙无关。"
+            },
+            {
+              "material_id": "M000d3836eab3",
+              "reason": "主体为电影《芦笙怨歌》海报，虽片名含芦笙，但材料本身是影视文化产品，非乐器本体知识。"
+            },
+            {
+              "material_id": "M3884ec286952",
+              "reason": "主体为动漫角色，与乐器芦笙无关。"
+            },
+            {
+              "material_id": "M747118b18bc9",
+              "reason": "主体为动漫角色，与乐器芦笙无关。"
+            },
+            {
+              "material_id": "Mb10309ff7178",
+              "reason": "主体为少数民族服饰特写，未展示芦笙乐器。"
+            }
+          ],
+          "reviewer": "local_model; not human identity adjudication",
+          "status": "resolved",
+          "target_label": "芦笙"
+        },
+        "image_evidence": {
+          "call": {
+            "model": "qwen3.8-27b",
+            "request_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v7/knowledge_smoke/calls/3c26f0b94f486543a38071c82b58402e511d116abad1b0dcd8cf8bd6ba418326.request.json",
+            "response_path": "state/curation/v4/demiflow_pilot_v9/quality_review_v7/knowledge_smoke/calls/3c26f0b94f486543a38071c82b58402e511d116abad1b0dcd8cf8bd6ba418326.response.json",
+            "reused": true,
+            "usage": {
+              "completion_tokens": 728,
+              "completion_tokens_details": null,
+              "prompt_tokens": 2413,
+              "prompt_tokens_details": null,
+              "total_tokens": 3141
+            }
+          },
+          "image_roles": [
+            {
+              "image_id": "I0a4038949bab",
+              "input_sha256": "6e98cdc63c905752631b9c52db1e69580452778116981efefdf4a23ee5247a96",
+              "original_sha256": "0a4038949babddc0f260677b1bfc10db416232cc42b0f43157f8f016b93821f4",
+              "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/blobs/0a/0a4038949babddc0f260677b1bfc10db416232cc42b0f43157f8f016b93821f4.jpg",
+              "role": "knowledge_evidence_candidate"
+            },
+            {
+              "image_id": "Ic8d7d6290679",
+              "input_sha256": "31f5d731d17ba133522f074543e848ee4631ee3c2ebfbe5569a80d4e044310a4",
+              "original_sha256": "c8d7d6290679bd36a798daf41ad68c87c55d95a5406297ff65b6e921684026c2",
+              "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/blobs/c8/c8d7d6290679bd36a798daf41ad68c87c55d95a5406297ff65b6e921684026c2.jpg",
+              "role": "knowledge_evidence_candidate"
+            }
+          ],
+          "note": "Captions are model observations, not source captions or human approval.",
+          "result": {
+            "images": [
+              {
+                "caption": "一幅水墨画，描绘一名头戴蓝色头饰、身穿蓝黑相间服饰的人物，正吹奏一件带有金色管身的乐器，右侧有竖排书法题字和红色印章。",
+                "image_id": "I0a4038949bab"
+              },
+              {
+                "caption": "一件乐器实物照片，由多根长短不一的深色竹管组成，底部连接一个银色金属共鸣器，背景为纯白色。",
+                "image_id": "Ic8d7d6290679"
+              }
+            ],
+            "support": [
+              {
+                "fact_id": "F3",
+                "image_id": "I0a4038949bab",
+                "limitations": "图片为单支乐器的绘画，无法展示“整套”五种规格，且无法通过视觉验证音列、音域或八度数量。",
+                "region": "不可定位",
+                "status": "none",
+                "supports": ""
+              },
+              {
+                "fact_id": "F5",
+                "image_id": "I0a4038949bab",
+                "limitations": "图片为艺术画作，不包含任何关于2006年5月20日或国家级非物质文化遗产名录的行政记录信息。",
+                "region": "不可定位",
+                "status": "none",
+                "supports": ""
+              },
+              {
+                "fact_id": "F6",
+                "image_id": "I0a4038949bab",
+                "limitations": "图片仅展示单人吹奏场景，无法证明“挑选伴侣”的特定情境，也无法看到“求花带”或“索取信物”的具体行为。",
+                "region": "不可定位",
+                "status": "none",
+                "supports": ""
+              },
+              {
+                "fact_id": "F3",
+                "image_id": "Ic8d7d6290679",
+                "limitations": "图片仅展示单支乐器，无法证明“整套”五种规格的存在，且无法通过外观观察音列排列、音域范围或八度数量。",
+                "region": "不可定位",
+                "status": "none",
+                "supports": ""
+              },
+              {
+                "fact_id": "F5",
+                "image_id": "Ic8d7d6290679",
+                "limitations": "图片为乐器实物照，不包含任何关于2006年5月20日或国家级非物质文化遗产名录的行政记录信息。",
+                "region": "不可定位",
+                "status": "none",
+                "supports": ""
+              },
+              {
+                "fact_id": "F6",
+                "image_id": "Ic8d7d6290679",
+                "limitations": "图片为静物照，未展示人物、婚恋场景或“求花带”等具体习俗行为。",
+                "region": "不可定位",
+                "status": "none",
+                "supports": ""
+              }
+            ]
+          },
+          "status": "machine_reviewed"
+        },
+        "image_followups": [
+          {
+            "fact_id": "F3",
+            "next_action": "find_or_verify_image_support",
+            "reason": "no_full_image_support_in_checked_inputs",
+            "scope": "Does not reject text knowledge or claim that supporting images do not exist."
+          },
+          {
+            "fact_id": "F5",
+            "next_action": "find_or_verify_image_support",
+            "reason": "no_full_image_support_in_checked_inputs",
+            "scope": "Does not reject text knowledge or claim that supporting images do not exist."
+          },
+          {
+            "fact_id": "F6",
+            "next_action": "find_or_verify_image_support",
+            "reason": "no_full_image_support_in_checked_inputs",
+            "scope": "Does not reject text knowledge or claim that supporting images do not exist."
+          }
+        ],
+        "material_followups": [
+          {
+            "disposition": {
+              "next_actions": [
+                "fetch_full_document"
+              ],
+              "reasons": [
+                "possible_truncated_snippet"
+              ],
+              "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+              "status": "pending"
+            },
+            "material_id": "M5597dcaddc2c",
+            "reason": "pending_material_quality",
+            "warnings": [
+              "possible_truncated_snippet"
+            ]
+          },
+          {
+            "disposition": {
+              "next_actions": [
+                "fetch_full_document"
+              ],
+              "reasons": [
+                "possible_truncated_snippet"
+              ],
+              "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+              "status": "pending"
+            },
+            "material_id": "M83fc915d24a3",
+            "reason": "pending_material_quality",
+            "warnings": [
+              "possible_truncated_snippet"
+            ]
+          },
+          {
+            "disposition": {
+              "next_actions": [
+                "fetch_full_document"
+              ],
+              "reasons": [
+                "possible_truncated_snippet"
+              ],
+              "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+              "status": "pending"
+            },
+            "material_id": "M7c609f066010",
+            "reason": "pending_material_quality",
+            "warnings": [
+              "possible_truncated_snippet"
+            ]
+          },
+          {
+            "disposition": {
+              "next_actions": [
+                "check_access_or_reacquire",
+                "reacquire_source"
+              ],
+              "reasons": [
+                "no_usable_body",
+                "access_restriction_or_challenge_marker"
+              ],
+              "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+              "status": "pending"
+            },
+            "material_id": "M8183cbeb3e41",
+            "reason": "pending_material_quality",
+            "warnings": [
+              "access_error_page_no_body",
+              "access_restriction_or_challenge_marker",
+              "no_body_blocks"
+            ]
+          },
+          {
+            "disposition": {
+              "next_actions": [
+                "fetch_full_document"
+              ],
+              "reasons": [
+                "possible_truncated_snippet"
+              ],
+              "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+              "status": "pending"
+            },
+            "material_id": "M0f2a3c640f2c",
+            "reason": "pending_material_quality",
+            "warnings": [
+              "possible_truncated_snippet"
+            ]
+          },
+          {
+            "disposition": {
+              "next_actions": [
+                "review_language_and_readability"
+              ],
+              "reasons": [
+                "mixed_script_language_review"
+              ],
+              "scope": "Processing eligibility only; identity and factual reliability are not certified.",
+              "status": "pending"
+            },
+            "material_id": "Mcc7f7bed3910",
+            "reason": "pending_material_quality",
+            "warnings": [
+              "mixed_script_language_review"
+            ]
+          },
+          {
+            "material_id": "M0fab46237395",
+            "next_actions": [
+              "reassociate_material"
+            ],
+            "reason": "明确指代诗人郭路生，非乐器。"
+          },
+          {
+            "material_id": "M9cc5dcda1d24",
+            "next_actions": [
+              "reassociate_material"
+            ],
+            "reason": "明确指代学者黄路生，非乐器。"
+          },
+          {
+            "material_id": "Meaf6fa3451c3",
+            "next_actions": [
+              "reassociate_material"
+            ],
+            "reason": "律师事务所网站，Lusheng为公司名，非乐器。"
+          },
+          {
+            "material_id": "M000d3836eab3",
+            "next_actions": [
+              "reassociate_material"
+            ],
+            "reason": "电影海报，主体为影视作品，非乐器本体。"
+          },
+          {
+            "material_id": "M3884ec286952",
+            "next_actions": [
+              "reassociate_material"
+            ],
+            "reason": "动漫角色截图，与芦笙无关。"
+          },
+          {
+            "material_id": "M747118b18bc9",
+            "next_actions": [
+              "reassociate_material"
+            ],
+            "reason": "动漫角色截图，与芦笙无关。"
+          },
+          {
+            "material_id": "Mb10309ff7178",
+            "next_actions": [
+              "reassociate_material"
+            ],
+            "reason": "服饰特写，未提及或展示芦笙乐器。"
+          },
+          {
+            "end": 4,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 0
+          },
+          {
+            "end": 190,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 182
+          },
+          {
+            "end": 2505,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 218
+          },
+          {
+            "end": 4819,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 2525
+          },
+          {
+            "end": 7311,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 4841
+          },
+          {
+            "end": 21424,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 7319
+          },
+          {
+            "end": 21573,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 21533
+          },
+          {
+            "end": 21787,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 21776
+          },
+          {
+            "end": 22406,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 22400
+          },
+          {
+            "end": 22588,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 22576
+          },
+          {
+            "end": 23079,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 23071
+          },
+          {
+            "end": 24199,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 24043
+          },
+          {
+            "end": 24704,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 24697
+          },
+          {
+            "end": 25087,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 25078
+          },
+          {
+            "end": 25270,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 25261
+          },
+          {
+            "end": 25511,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 25503
+          },
+          {
+            "end": 25649,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 25643
+          },
+          {
+            "end": 26990,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 26984
+          },
+          {
+            "end": 28318,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 27872
+          },
+          {
+            "end": 28420,
+            "material_id": "M580e95a53959",
+            "reason": "complete blocks outside character budget",
+            "start": 28350
+          },
+          {
+            "material_id": "Mc0ddc21f16de",
+            "reason": "document/family budget; retained for later exploration"
+          },
+          {
+            "end": 1526,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 764
+          },
+          {
+            "end": 2713,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 2014
+          },
+          {
+            "end": 3117,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 3101
+          },
+          {
+            "end": 3583,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 3570
+          },
+          {
+            "end": 4237,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 4223
+          },
+          {
+            "end": 4706,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 4698
+          },
+          {
+            "end": 5045,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 5027
+          },
+          {
+            "end": 5422,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 5384
+          },
+          {
+            "end": 6090,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 6075
+          },
+          {
+            "end": 6922,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 6894
+          },
+          {
+            "end": 7605,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 7593
+          },
+          {
+            "end": 7760,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 7730
+          },
+          {
+            "end": 7809,
+            "material_id": "Mab864b120658",
+            "reason": "complete blocks outside character budget",
+            "start": 7800
+          },
+          {
+            "material_id": "M57abbe0b028d",
+            "reason": "document/family budget; retained for later exploration"
+          },
+          {
+            "material_id": "M449e85e6de31",
+            "reason": "document/family budget; retained for later exploration"
+          },
+          {
+            "material_id": "Mc92181529ade",
+            "reason": "document/family budget; retained for later exploration"
+          },
+          {
+            "image_id": "I5c346a31c30e",
+            "material_id": "M63366e6f8633",
+            "next_action": "check_remaining_image_support",
+            "reason": "image_support_budget"
+          },
+          {
+            "image_id": "I7b933bcf9542",
+            "material_id": "M88b5682a45f6",
+            "next_action": "check_remaining_image_support",
+            "reason": "image_support_budget"
+          },
+          {
+            "image_id": "Ic2017e018450",
+            "material_id": "Md80b8437c2ec",
+            "next_action": "check_remaining_image_support",
+            "reason": "image_support_budget"
+          },
+          {
+            "image_id": "Ib967124bcd06",
+            "material_id": "Md99a809e8b3b",
+            "next_action": "check_remaining_image_support",
+            "reason": "image_support_budget"
+          },
+          {
+            "image_id": "Icd2e6d1d3388",
+            "material_id": "M08ba840843da",
+            "next_action": "check_remaining_image_support",
+            "reason": "image_support_budget"
+          },
+          {
+            "image_id": "Iff903d5244ae",
+            "material_id": "M47105761b4ba",
+            "next_action": "check_remaining_image_support",
+            "reason": "image_support_budget"
+          },
+          {
+            "end": 182,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S8535dbd47b17",
+            "start": 4
+          },
+          {
+            "end": 218,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sc130b713e88c",
+            "start": 190
+          },
+          {
+            "end": 2525,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S62a733666c9b",
+            "start": 2505
+          },
+          {
+            "end": 4841,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S9cd63af4d967",
+            "start": 4819
+          },
+          {
+            "end": 7319,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sd4767947baad",
+            "start": 7311
+          },
+          {
+            "end": 21533,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S8e6ca777c665",
+            "start": 21424
+          },
+          {
+            "end": 21776,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sc651776c6a32",
+            "start": 21573
+          },
+          {
+            "end": 22400,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sc87c2592026b",
+            "start": 21787
+          },
+          {
+            "end": 22576,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S9d70da226dc4",
+            "start": 22406
+          },
+          {
+            "end": 23071,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S4debc2163195",
+            "start": 22588
+          },
+          {
+            "end": 24043,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sfdaea55d8af2",
+            "start": 23079
+          },
+          {
+            "end": 24697,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S4907256fa79b",
+            "start": 24199
+          },
+          {
+            "end": 25078,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sf10a191dea4e",
+            "start": 24704
+          },
+          {
+            "end": 25261,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sc553cd3eaf37",
+            "start": 25087
+          },
+          {
+            "end": 25503,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sed11448ebf08",
+            "start": 25270
+          },
+          {
+            "end": 25643,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S6469772f76f6",
+            "start": 25511
+          },
+          {
+            "end": 26984,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sc1c54bc54130",
+            "start": 25649
+          },
+          {
+            "end": 27872,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Se6e92cf97853",
+            "start": 26990
+          },
+          {
+            "end": 28350,
+            "material_id": "M580e95a53959",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S5d3acb6b5949",
+            "start": 28318
+          },
+          {
+            "end": 764,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S55abfae463a9",
+            "start": 0
+          },
+          {
+            "end": 2014,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S634174a008cf",
+            "start": 1526
+          },
+          {
+            "end": 3101,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S6c4f1693f937",
+            "start": 2713
+          },
+          {
+            "end": 3570,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S5b15341a0dc4",
+            "start": 3117
+          },
+          {
+            "end": 4223,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sb179c1423e35",
+            "start": 3583
+          },
+          {
+            "end": 4698,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S8f1002d611a6",
+            "start": 4237
+          },
+          {
+            "end": 5027,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sd1fa0367a92b",
+            "start": 4706
+          },
+          {
+            "end": 5384,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S65395f6957bd",
+            "start": 5045
+          },
+          {
+            "end": 6075,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S59dadf1d630c",
+            "start": 5422
+          },
+          {
+            "end": 6894,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S301ff3314c63",
+            "start": 6090
+          },
+          {
+            "end": 7593,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sf5267bf5a613",
+            "start": 6922
+          },
+          {
+            "end": 7730,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S7fa3fc6faea7",
+            "start": 7605
+          },
+          {
+            "end": 7800,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sfa49c7b094d1",
+            "start": 7760
+          },
+          {
+            "end": 7908,
+            "material_id": "Mab864b120658",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sbce3c63edba2",
+            "start": 7809
+          }
+        ],
+        "model_coverage_note_unverified": "本次复核保留了4条事实，移除了2条存在引用或逻辑问题的候选（F2, F4）。F1因起源争议保留但标注冲突；F3修正了量词范围以符合“整套”描述；F5和F6依据充分。未解决冲突已保留并关联至F1。",
+        "request": {
+          "kind": "legacy",
+          "value": "芦笙"
+        },
+        "scope": "Not a human-approved core, benchmark question or complete concept KB.",
+        "status": "machine_candidates_ready_for_review",
+        "unresolved_conflicts": [
+          {
+            "affected_fact_ids": [
+              "F1"
+            ],
+            "conflict_id": "7ac82c546a3c28d9e72aa578e258c199192e4ece79add646ea4dcfdebe558755",
+            "issue": "关于芦笙起源的归属存在不同表述：S8535dbd47b17称“发源于中原...前身为竽”，而Sc651776c6a32引用郭沫若观点称“起源于苗族...芦笙源于古代苗族先民”。",
+            "needed_evidence": "需要更权威的历史考古或民族学证据来厘清“中原/竽”与“苗族先民”在芦笙起源论中的具体关系及学术共识。",
+            "source_ids": [
+              "S8535dbd47b17",
+              "Sc651776c6a32"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "concept_ref": "qid:Q1",
+      "blocked": null,
+      "identity": {
+        "accepted_material_ids": [
+          "M32c302d471c8"
+        ],
+        "call": {
+          "model": "qwen3.8-27b",
+          "request_path": "state/curation/v4/demiflow_pilot_v8/quality_review_v1/knowledge_smoke/calls/e301a5b24d20f449fcdab371924a413ef12d798cc2d2ca20721fa910219b3fec.request.json",
+          "response_path": "state/curation/v4/demiflow_pilot_v8/quality_review_v1/knowledge_smoke/calls/e301a5b24d20f449fcdab371924a413ef12d798cc2d2ca20721fa910219b3fec.response.json",
+          "reused": true,
+          "usage": {
+            "completion_tokens": 260,
+            "completion_tokens_details": null,
+            "prompt_tokens": 1526,
+            "prompt_tokens_details": null,
+            "total_tokens": 1786
+          }
+        },
+        "identity_groups": [
+          "宇宙 (Universe)"
+        ],
+        "material_reviews": [
+          {
+            "basis": "text",
+            "material_id": "M32c302d471c8",
+            "quote": "Everything in space and time",
+            "reason": "材料标题为Universe，正文定义其为时空中的万物，并包含宇宙学参数和理论，与目标概念“宇宙”身份完全一致。",
+            "relation": "same_identity"
+          }
+        ],
+        "protocol_issues": [],
+        "reason": "来源身份记录明确将Q1对应为英文Universe和中文宇宙。材料M32c302d471c8标题为Universe，内容描述时空、年龄、密度、广义相对论及宇宙学，与“宇宙”这一概念身份一致，无混合其他互不等同身份（如人物、植物）的迹象。",
+        "rejected_materials": [],
+        "reviewer": "local_model; not human identity adjudication",
+        "status": "resolved",
+        "target_label": "宇宙"
+      },
+      "material_omissions": [
+        {
+          "end": 3264,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 28
+        },
+        {
+          "end": 3591,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 3578
+        },
+        {
+          "end": 3993,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 3895
+        },
+        {
+          "end": 5794,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 4900
+        },
+        {
+          "end": 6077,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 6030
+        },
+        {
+          "end": 6740,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 6217
+        },
+        {
+          "end": 8920,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 6981
+        },
+        {
+          "end": 10021,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 8976
+        },
+        {
+          "end": 18249,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 10437
+        },
+        {
+          "end": 32879,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 18699
+        },
+        {
+          "end": 37139,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 32911
+        },
+        {
+          "end": 37203,
+          "material_id": "M32c302d471c8",
+          "reason": "complete blocks outside character budget",
+          "start": 37171
+        },
+        {
+          "block_id": "B4cded999c452",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 8565,
+          "raw_start": 8366,
+          "reason": "unparsed_markup_fragment"
+        },
+        {
+          "block_id": "B38160c3ce45e",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 12158,
+          "raw_start": 10048,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bfd59b81048a1",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 15503,
+          "raw_start": 12825,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B6f36fb5ec8a1",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 17394,
+          "raw_start": 16870,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B9012ed56e971",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 17969,
+          "raw_start": 17395,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Baf1ed794fe03",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 19843,
+          "raw_start": 18795,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bef56a7b00403",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 20582,
+          "raw_start": 19844,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bdf61d8f2ac7d",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 21871,
+          "raw_start": 20583,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bb331eea76d8d",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 23446,
+          "raw_start": 23139,
+          "reason": "unparsed_markup_fragment"
+        },
+        {
+          "block_id": "B1365e3c2bd60",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 25183,
+          "raw_start": 23600,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bb026017d9520",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 35594,
+          "raw_start": 33620,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B6cc122839cf2",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 38401,
+          "raw_start": 35595,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bf140437c394c",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 39455,
+          "raw_start": 38402,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B0b70a324fd7e",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 47227,
+          "raw_start": 46696,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bc827f58029c6",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 48465,
+          "raw_start": 47227,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Ba70da858a0c9",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 49001,
+          "raw_start": 48466,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bd2774b1bcfbd",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 52571,
+          "raw_start": 52187,
+          "reason": "unparsed_markup_fragment"
+        },
+        {
+          "block_id": "B54bcae32271e",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 52684,
+          "raw_start": 52571,
+          "reason": "unparsed_markup_fragment"
+        },
+        {
+          "block_id": "B9dae8b6870e6",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 62380,
+          "raw_start": 61833,
+          "reason": "unparsed_markup_fragment"
+        },
+        {
+          "block_id": "Bfcb14013e1bb",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 68585,
+          "raw_start": 68170,
+          "reason": "unparsed_markup_fragment"
+        },
+        {
+          "block_id": "Ba5db0197c444",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 75040,
+          "raw_start": 72047,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B2e324b93faa7",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 97507,
+          "raw_start": 97287,
+          "reason": "unparsed_markup_fragment"
+        },
+        {
+          "block_id": "B27bd925f4392",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 105750,
+          "raw_start": 104177,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B67ef7537b62c",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 109898,
+          "raw_start": 109631,
+          "reason": "unparsed_markup_fragment"
+        },
+        {
+          "block_id": "B9ad2900cdbac",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 110986,
+          "raw_start": 110699,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B06eaf091afad",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 112059,
+          "raw_start": 110987,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B920f2d43ef21",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 118893,
+          "raw_start": 118551,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bf5c3add95f46",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120438,
+          "raw_start": 118893,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B7efc6df6938f",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120475,
+          "raw_start": 120449,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B5d045f9bc546",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120520,
+          "raw_start": 120475,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bae75528513d3",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120539,
+          "raw_start": 120520,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B41f8051f0c30",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120578,
+          "raw_start": 120539,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bc45e5c077692",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120597,
+          "raw_start": 120578,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B477e7c38f782",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120635,
+          "raw_start": 120597,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B52f42bcafc6f",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120673,
+          "raw_start": 120635,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B35e2ff03204f",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120706,
+          "raw_start": 120673,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B77c37b1613ac",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120735,
+          "raw_start": 120706,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B2fdfa19741d6",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120759,
+          "raw_start": 120735,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bec4987f0ee2e",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120783,
+          "raw_start": 120759,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B9776be1e27dc",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120812,
+          "raw_start": 120783,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B9cfb2ae19c87",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120840,
+          "raw_start": 120812,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B6a7c4ec70350",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120874,
+          "raw_start": 120840,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B276d983552be",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120902,
+          "raw_start": 120874,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B568da091f55d",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120927,
+          "raw_start": 120902,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B12e07ac38705",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120955,
+          "raw_start": 120927,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B8626ebcefc1e",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 120992,
+          "raw_start": 120955,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B89538ed74567",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 121025,
+          "raw_start": 120992,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B61a0adad8169",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 121059,
+          "raw_start": 121025,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Ba5e7b9e67bef",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 121086,
+          "raw_start": 121059,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bc15654222088",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 121102,
+          "raw_start": 121086,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B201a41303a7c",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 121321,
+          "raw_start": 121115,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bac64e9ab4c70",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 121782,
+          "raw_start": 121395,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B9b91436fb372",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 122203,
+          "raw_start": 121782,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B8d7e6360dbf6",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 122411,
+          "raw_start": 122203,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B7d2ba6bfec5b",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 122823,
+          "raw_start": 122411,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B2a8ea1d3dc0d",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 123083,
+          "raw_start": 122823,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "Bb7aa234fff84",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 123363,
+          "raw_start": 123083,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B3938bfdc5c24",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 123610,
+          "raw_start": 123363,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B4cb0221310c7",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 124166,
+          "raw_start": 124003,
+          "reason": "unsupported_semantic_markup"
+        },
+        {
+          "block_id": "B5ac99aa9daed",
+          "material_id": "M32c302d471c8",
+          "next_action": "parse_source_markup",
+          "raw_end": 124381,
+          "raw_start": 124166,
+          "reason": "unsupported_semantic_markup"
+        }
+      ],
+      "export": {
+        "blocked": null,
+        "case_id": "3cfedc61b222c21bc03b",
+        "concept_id": "trial-174babe29fd03c2f47fa12bf",
+        "coverage_note": "本次最多6条机器候选，不表示已穷尽提供片段。地域、民族、词源、方法等有条件知识继续保留探索机会；模型范围意见未经审核，不作为排除依据。",
+        "deferred_facts": [
+          {
+            "fact": {
+              "conditions": [],
+              "evidence": [
+                {
+                  "quote": "The universe contains all energy and matter, including therefore planets, moons, stars, galaxies, and the contents of intergalactic space.",
+                  "source_id": "Sc681f7004ae1"
+                }
+              ],
+              "exceptions": [],
+              "fact_id": "F2",
+              "statement": "宇宙包含所有能量和物质，因此包括行星、卫星、恒星、星系以及星系间空间的内容。"
+            },
+            "next_action": "verify_citation_and_quantity_against_source",
+            "reasons": [
+              "quote_not_in_supplied_source",
+              "previous_deferred_fact_requires_review"
+            ]
+          }
+        ],
+        "facts": [
+          {
+            "conditions": [
+              "指物理宇宙（physical universe）"
+            ],
+            "evidence": [
+              {
+                "quote": "The physical universe has been defined as \"The totality of all space and time; all that is, has been, and will be.\"",
+                "source_id": "Sc681f7004ae1"
+              }
+            ],
+            "exceptions": [],
+            "fact_id": "F1",
+            "statement": "物理宇宙被定义为“所有时空的总和；所有存在、曾经存在和将要存在的事物”。"
+          },
+          {
+            "conditions": [
+              "针对英语单词 universe 的词源"
+            ],
+            "evidence": [
+              {
+                "quote": "The word universe derives from the Old French word univers, which in turn derives from the Latin word universus, meaning 'combined into one'.",
+                "source_id": "S31fa08e275a9"
+              }
+            ],
+            "exceptions": [],
+            "fact_id": "F3",
+            "statement": "英语单词 universe 源自古法语单词 univers，后者又源自拉丁语单词 universus，意为“结合为一”。"
+          },
+          {
+            "conditions": [
+              "指宇宙演化模型"
+            ],
+            "evidence": [
+              {
+                "quote": "The prevailing model for the evolution of the universe is the Big Bang theory.",
+                "source_id": "S5fb15845e299"
+              },
+              {
+                "quote": "In the Big Bang model, the earliest state of the universe was extremely hot and dense but the universe cooled during subsequent expansion.",
+                "source_id": "S5fb15845e299"
+              }
+            ],
+            "exceptions": [],
+            "fact_id": "F4",
+            "statement": "宇宙演化的主流模型是大爆炸理论；在该模型中，宇宙最早的状态极其炎热和致密，随后在膨胀过程中冷却。"
+          },
+          {
+            "conditions": [
+              "假设 Lambda-CDM 模型正确",
+              "数据截至 2015 年"
+            ],
+            "evidence": [
+              {
+                "quote": "Assuming that the Lambda-CDM model is correct, the measurements of the parameters using a variety of techniques by numerous experiments yield a best value of the age of the universe at 13.799 ± 0.021 billion years, as of 2015.",
+                "source_id": "S57a0021a7aec"
+              }
+            ],
+            "exceptions": [],
+            "fact_id": "F5",
+            "statement": "假设 Lambda-CDM 模型正确，截至 2015 年，多种技术测量得出的宇宙年龄最佳值为 13.799 ± 0.021 billion years。"
+          },
+          {
+            "conditions": [
+              "基于光速有限这一物理事实"
+            ],
+            "evidence": [
+              {
+                "quote": "Due to the finite speed of light, there is a limit (known as the particle horizon) to how far light can travel over the age of the universe.",
+                "source_id": "Sda03f0fdd3d8"
+              }
+            ],
+            "exceptions": [],
+            "fact_id": "F6",
+            "statement": "由于光速有限，光在宇宙年龄期间能传播的距离存在极限，这一极限被称为粒子视界（particle horizon）。"
+          }
+        ],
+        "identity": {
+          "accepted_material_ids": [
+            "M32c302d471c8"
+          ],
+          "call": {
+            "model": "qwen3.8-27b",
+            "request_path": "state/curation/v4/demiflow_pilot_v8/quality_review_v1/knowledge_smoke/calls/e301a5b24d20f449fcdab371924a413ef12d798cc2d2ca20721fa910219b3fec.request.json",
+            "response_path": "state/curation/v4/demiflow_pilot_v8/quality_review_v1/knowledge_smoke/calls/e301a5b24d20f449fcdab371924a413ef12d798cc2d2ca20721fa910219b3fec.response.json",
+            "reused": true,
+            "usage": {
+              "completion_tokens": 260,
+              "completion_tokens_details": null,
+              "prompt_tokens": 1526,
+              "prompt_tokens_details": null,
+              "total_tokens": 1786
+            }
+          },
+          "identity_groups": [
+            "宇宙 (Universe)"
+          ],
+          "material_reviews": [
+            {
+              "basis": "text",
+              "material_id": "M32c302d471c8",
+              "quote": "Everything in space and time",
+              "reason": "材料标题为Universe，正文定义其为时空中的万物，并包含宇宙学参数和理论，与目标概念“宇宙”身份完全一致。",
+              "relation": "same_identity"
+            }
+          ],
+          "protocol_issues": [],
+          "reason": "来源身份记录明确将Q1对应为英文Universe和中文宇宙。材料M32c302d471c8标题为Universe，内容描述时空、年龄、密度、广义相对论及宇宙学，与“宇宙”这一概念身份一致，无混合其他互不等同身份（如人物、植物）的迹象。",
+          "rejected_materials": [],
+          "reviewer": "local_model; not human identity adjudication",
+          "status": "resolved",
+          "target_label": "宇宙"
+        },
+        "image_evidence": {
+          "images": [],
+          "reason": "no_available_images",
+          "status": "not_run",
+          "support": []
+        },
+        "image_followups": [
+          {
+            "fact_id": "F1",
+            "next_action": "find_or_verify_image_support",
+            "reason": "no_full_image_support_in_checked_inputs",
+            "scope": "Does not reject text knowledge or claim that supporting images do not exist."
+          },
+          {
+            "fact_id": "F3",
+            "next_action": "find_or_verify_image_support",
+            "reason": "no_full_image_support_in_checked_inputs",
+            "scope": "Does not reject text knowledge or claim that supporting images do not exist."
+          },
+          {
+            "fact_id": "F4",
+            "next_action": "find_or_verify_image_support",
+            "reason": "no_full_image_support_in_checked_inputs",
+            "scope": "Does not reject text knowledge or claim that supporting images do not exist."
+          },
+          {
+            "fact_id": "F5",
+            "next_action": "find_or_verify_image_support",
+            "reason": "no_full_image_support_in_checked_inputs",
+            "scope": "Does not reject text knowledge or claim that supporting images do not exist."
+          },
+          {
+            "fact_id": "F6",
+            "next_action": "find_or_verify_image_support",
+            "reason": "no_full_image_support_in_checked_inputs",
+            "scope": "Does not reject text knowledge or claim that supporting images do not exist."
+          }
+        ],
+        "material_followups": [
+          {
+            "end": 3264,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 28
+          },
+          {
+            "end": 3591,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 3578
+          },
+          {
+            "end": 3993,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 3895
+          },
+          {
+            "end": 5794,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 4900
+          },
+          {
+            "end": 6077,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 6030
+          },
+          {
+            "end": 6740,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 6217
+          },
+          {
+            "end": 8920,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 6981
+          },
+          {
+            "end": 10021,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 8976
+          },
+          {
+            "end": 18249,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 10437
+          },
+          {
+            "end": 32879,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 18699
+          },
+          {
+            "end": 37139,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 32911
+          },
+          {
+            "end": 37203,
+            "material_id": "M32c302d471c8",
+            "reason": "complete blocks outside character budget",
+            "start": 37171
+          },
+          {
+            "block_id": "B4cded999c452",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 8565,
+            "raw_start": 8366,
+            "reason": "unparsed_markup_fragment"
+          },
+          {
+            "block_id": "B38160c3ce45e",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 12158,
+            "raw_start": 10048,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bfd59b81048a1",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 15503,
+            "raw_start": 12825,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B6f36fb5ec8a1",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 17394,
+            "raw_start": 16870,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B9012ed56e971",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 17969,
+            "raw_start": 17395,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Baf1ed794fe03",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 19843,
+            "raw_start": 18795,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bef56a7b00403",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 20582,
+            "raw_start": 19844,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bdf61d8f2ac7d",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 21871,
+            "raw_start": 20583,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bb331eea76d8d",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 23446,
+            "raw_start": 23139,
+            "reason": "unparsed_markup_fragment"
+          },
+          {
+            "block_id": "B1365e3c2bd60",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 25183,
+            "raw_start": 23600,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bb026017d9520",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 35594,
+            "raw_start": 33620,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B6cc122839cf2",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 38401,
+            "raw_start": 35595,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bf140437c394c",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 39455,
+            "raw_start": 38402,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B0b70a324fd7e",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 47227,
+            "raw_start": 46696,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bc827f58029c6",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 48465,
+            "raw_start": 47227,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Ba70da858a0c9",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 49001,
+            "raw_start": 48466,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bd2774b1bcfbd",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 52571,
+            "raw_start": 52187,
+            "reason": "unparsed_markup_fragment"
+          },
+          {
+            "block_id": "B54bcae32271e",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 52684,
+            "raw_start": 52571,
+            "reason": "unparsed_markup_fragment"
+          },
+          {
+            "block_id": "B9dae8b6870e6",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 62380,
+            "raw_start": 61833,
+            "reason": "unparsed_markup_fragment"
+          },
+          {
+            "block_id": "Bfcb14013e1bb",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 68585,
+            "raw_start": 68170,
+            "reason": "unparsed_markup_fragment"
+          },
+          {
+            "block_id": "Ba5db0197c444",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 75040,
+            "raw_start": 72047,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B2e324b93faa7",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 97507,
+            "raw_start": 97287,
+            "reason": "unparsed_markup_fragment"
+          },
+          {
+            "block_id": "B27bd925f4392",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 105750,
+            "raw_start": 104177,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B67ef7537b62c",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 109898,
+            "raw_start": 109631,
+            "reason": "unparsed_markup_fragment"
+          },
+          {
+            "block_id": "B9ad2900cdbac",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 110986,
+            "raw_start": 110699,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B06eaf091afad",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 112059,
+            "raw_start": 110987,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B920f2d43ef21",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 118893,
+            "raw_start": 118551,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bf5c3add95f46",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120438,
+            "raw_start": 118893,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B7efc6df6938f",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120475,
+            "raw_start": 120449,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B5d045f9bc546",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120520,
+            "raw_start": 120475,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bae75528513d3",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120539,
+            "raw_start": 120520,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B41f8051f0c30",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120578,
+            "raw_start": 120539,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bc45e5c077692",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120597,
+            "raw_start": 120578,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B477e7c38f782",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120635,
+            "raw_start": 120597,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B52f42bcafc6f",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120673,
+            "raw_start": 120635,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B35e2ff03204f",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120706,
+            "raw_start": 120673,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B77c37b1613ac",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120735,
+            "raw_start": 120706,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B2fdfa19741d6",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120759,
+            "raw_start": 120735,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bec4987f0ee2e",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120783,
+            "raw_start": 120759,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B9776be1e27dc",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120812,
+            "raw_start": 120783,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B9cfb2ae19c87",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120840,
+            "raw_start": 120812,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B6a7c4ec70350",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120874,
+            "raw_start": 120840,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B276d983552be",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120902,
+            "raw_start": 120874,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B568da091f55d",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120927,
+            "raw_start": 120902,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B12e07ac38705",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120955,
+            "raw_start": 120927,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B8626ebcefc1e",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 120992,
+            "raw_start": 120955,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B89538ed74567",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 121025,
+            "raw_start": 120992,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B61a0adad8169",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 121059,
+            "raw_start": 121025,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Ba5e7b9e67bef",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 121086,
+            "raw_start": 121059,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bc15654222088",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 121102,
+            "raw_start": 121086,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B201a41303a7c",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 121321,
+            "raw_start": 121115,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bac64e9ab4c70",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 121782,
+            "raw_start": 121395,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B9b91436fb372",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 122203,
+            "raw_start": 121782,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B8d7e6360dbf6",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 122411,
+            "raw_start": 122203,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B7d2ba6bfec5b",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 122823,
+            "raw_start": 122411,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B2a8ea1d3dc0d",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 123083,
+            "raw_start": 122823,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "Bb7aa234fff84",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 123363,
+            "raw_start": 123083,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B3938bfdc5c24",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 123610,
+            "raw_start": 123363,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B4cb0221310c7",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 124166,
+            "raw_start": 124003,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "block_id": "B5ac99aa9daed",
+            "material_id": "M32c302d471c8",
+            "next_action": "parse_source_markup",
+            "raw_end": 124381,
+            "raw_start": 124166,
+            "reason": "unsupported_semantic_markup"
+          },
+          {
+            "end": 28,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S6283a794eceb",
+            "start": 0
+          },
+          {
+            "end": 3578,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sc681f7004ae1",
+            "start": 3264
+          },
+          {
+            "end": 3895,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S31fa08e275a9",
+            "start": 3591
+          },
+          {
+            "end": 4900,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S5fb15845e299",
+            "start": 3993
+          },
+          {
+            "end": 6030,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S0c2679c5b032",
+            "start": 5794
+          },
+          {
+            "end": 6217,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sda03f0fdd3d8",
+            "start": 6077
+          },
+          {
+            "end": 6981,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S57a0021a7aec",
+            "start": 6740
+          },
+          {
+            "end": 8976,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S53fdec01212d",
+            "start": 8920
+          },
+          {
+            "end": 10437,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S6cfc493416c2",
+            "start": 10021
+          },
+          {
+            "end": 18699,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S31c9b7bd268e",
+            "start": 18249
+          },
+          {
+            "end": 32911,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S5064478a88bc",
+            "start": 32879
+          },
+          {
+            "end": 37171,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "Sca51674b1391",
+            "start": 37139
+          },
+          {
+            "end": 37342,
+            "material_id": "M32c302d471c8",
+            "next_action": "continue_knowledge_review_in_supplied_passage",
+            "reason": "bounded_extraction_does_not_certify_complete_coverage",
+            "source_id": "S39216bf93739",
+            "start": 37203
+          }
+        ],
+        "model_coverage_note_unverified": "本次最多6条机器候选，不表示已穷尽提供片段。地域、民族、词源、方法等有条件知识继续保留探索机会；模型范围意见未经审核，不作为排除依据。",
+        "request": {
+          "kind": "qid",
+          "value": "Q1"
+        },
+        "scope": "Not a human-approved core, benchmark question or complete concept KB.",
+        "status": "machine_candidates_ready_for_review",
+        "unresolved_conflicts": []
+      }
+    }
+  ],
+  "calls": [],
+  "reused_calls": [
+    {
+      "basis": "Exact endpoint, stage and request payload; no new model call.",
+      "parent_request": "state/curation/v4/demiflow_pilot_v8/quality_review_v1/knowledge_smoke/calls/e301a5b24d20f449fcdab371924a413ef12d798cc2d2ca20721fa910219b3fec.request.json",
+      "parent_response": "state/curation/v4/demiflow_pilot_v8/quality_review_v1/knowledge_smoke/calls/e301a5b24d20f449fcdab371924a413ef12d798cc2d2ca20721fa910219b3fec.response.json",
+      "response_sha256": "856f4ce0d35e894af8d4858556ef27f69865381828abec01f87b74613dd2ad15"
+    },
+    {
+      "basis": "Exact endpoint, stage and request payload; no new model call.",
+      "parent_request": "state/curation/v4/demiflow_pilot_v9/quality_review_v2/knowledge_smoke/calls/fc615200a8954a051556eeeed4e366025aa23c2f94800c25d57d00773ed7557a.request.json",
+      "parent_response": "state/curation/v4/demiflow_pilot_v9/quality_review_v2/knowledge_smoke/calls/fc615200a8954a051556eeeed4e366025aa23c2f94800c25d57d00773ed7557a.response.json",
+      "response_sha256": "03496644ddac193c2f67491f16bf223e78421991037d6ef2f6caa74468515de5"
+    },
+    {
+      "basis": "Exact endpoint, stage and request payload; no new model call.",
+      "parent_request": "state/curation/v4/demiflow_pilot_v9/quality_review_v3/knowledge_smoke/calls/798f0cd6e7b54cfbd90f4b97cb4c0da2ad7e2fe998a25379fb59f44129bc167e.request.json",
+      "parent_response": "state/curation/v4/demiflow_pilot_v9/quality_review_v3/knowledge_smoke/calls/798f0cd6e7b54cfbd90f4b97cb4c0da2ad7e2fe998a25379fb59f44129bc167e.response.json",
+      "response_sha256": "fdb62ea2def0fdb294c08c9d4d0b6dd8cebd9066689f54af776503971ada050b"
+    },
+    {
+      "basis": "Exact endpoint, stage and request payload; no new model call.",
+      "parent_request": "state/curation/v4/demiflow_pilot_v9/quality_review_v7/knowledge_smoke/calls/77c6a5f85798a4a4836fbb801c71536f78e994d3ecf964fe4916fbbc44beeb48.request.json",
+      "parent_response": "state/curation/v4/demiflow_pilot_v9/quality_review_v7/knowledge_smoke/calls/77c6a5f85798a4a4836fbb801c71536f78e994d3ecf964fe4916fbbc44beeb48.response.json",
+      "response_sha256": "61d576c6f65ea4c828ad01586e770f0e29f1e780871a802407206d0e55ef35fe"
+    },
+    {
+      "basis": "Exact endpoint, stage and request payload; no new model call.",
+      "parent_request": "state/curation/v4/demiflow_pilot_v9/quality_review_v6/knowledge_smoke/calls/87a1c1b2dd23c417d5245e86585cc9849792eebbf051ebc05b7321d5d06eddd8.request.json",
+      "parent_response": "state/curation/v4/demiflow_pilot_v9/quality_review_v6/knowledge_smoke/calls/87a1c1b2dd23c417d5245e86585cc9849792eebbf051ebc05b7321d5d06eddd8.response.json",
+      "response_sha256": "879bef0a1bd81e3406a755c891d705ec10b361c4811e5aa2c1c63b7954630048"
+    },
+    {
+      "basis": "Exact endpoint, stage and request payload; no new model call.",
+      "parent_request": "state/curation/v4/demiflow_pilot_v9/quality_review_v5/knowledge_smoke/calls/a60be468141bb984b6c0226903f39a9fe8d9fb23d387d8f7e3dfe44763568977.request.json",
+      "parent_response": "state/curation/v4/demiflow_pilot_v9/quality_review_v5/knowledge_smoke/calls/a60be468141bb984b6c0226903f39a9fe8d9fb23d387d8f7e3dfe44763568977.response.json",
+      "response_sha256": "9491a282af3fee3ba874b3a5968d9e5b6b64485353d63b441446829194a585d6"
+    },
+    {
+      "basis": "Exact endpoint, stage and request payload; no new model call.",
+      "parent_request": "state/curation/v4/demiflow_pilot_v9/quality_review_v7/knowledge_smoke/calls/3c26f0b94f486543a38071c82b58402e511d116abad1b0dcd8cf8bd6ba418326.request.json",
+      "parent_response": "state/curation/v4/demiflow_pilot_v9/quality_review_v7/knowledge_smoke/calls/3c26f0b94f486543a38071c82b58402e511d116abad1b0dcd8cf8bd6ba418326.response.json",
+      "response_sha256": "b4f01946f3febbe80e8bc395fe39aa93ad61ade90efcc4155bdf9a8e097d826a"
+    },
+    {
+      "basis": "Exact endpoint, stage and request payload; no new model call.",
+      "parent_request": "state/curation/v4/demiflow_pilot_v9/quality_review_v4/knowledge_smoke/calls/8663e7d9dfe5acaecf7cc645f0f70585671f448e045ac599ce82d7ab20189e43.request.json",
+      "parent_response": "state/curation/v4/demiflow_pilot_v9/quality_review_v4/knowledge_smoke/calls/8663e7d9dfe5acaecf7cc645f0f70585671f448e045ac599ce82d7ab20189e43.response.json",
+      "response_sha256": "71108a2a8fd626d77a85a9bb690a942fbd314b0c4a7e57a1eb109d8f2507c5b4"
+    }
+  ],
+  "total_tokens": 0,
+  "limits": [
+    "机器候选不是已核验事实。",
+    "未知源模板和不明正文边界保留并暂缓，未实现自动补采集。",
+    "每批选择完整块但仍未覆盖全文章节或跨批整合。",
+    "COS远程获取未验证。"
+  ],
+  "validation": {
+    "curation_tests_passed": 78,
+    "call_history": [
+      {
+        "run": "state/curation/v4/demiflow_pilot_v8/quality_review_v1",
+        "actual_requests": 7,
+        "tokens": 76072,
+        "exact_replays": 0
+      },
+      {
+        "run": "state/curation/v4/demiflow_pilot_v9/quality_review_v2",
+        "actual_requests": 7,
+        "tokens": 65770,
+        "exact_replays": 1
+      },
+      {
+        "run": "state/curation/v4/demiflow_pilot_v9/quality_review_v3",
+        "actual_requests": 5,
+        "tokens": 39992,
+        "exact_replays": 3
+      },
+      {
+        "run": "state/curation/v4/demiflow_pilot_v9/quality_review_v4",
+        "actual_requests": 1,
+        "tokens": 16004,
+        "exact_replays": 4
+      },
+      {
+        "run": "state/curation/v4/demiflow_pilot_v9/quality_review_v5",
+        "actual_requests": 3,
+        "tokens": 28304,
+        "exact_replays": 5
+      },
+      {
+        "run": "state/curation/v4/demiflow_pilot_v9/quality_review_v6",
+        "actual_requests": 3,
+        "tokens": 26604,
+        "exact_replays": 5
+      },
+      {
+        "run": "state/curation/v4/demiflow_pilot_v9/quality_review_v7",
+        "actual_requests": 2,
+        "tokens": 17919,
+        "exact_replays": 6
+      },
+      {
+        "run": "state/curation/v4/demiflow_pilot_v9/quality_review_v8",
+        "actual_requests": 0,
+        "tokens": 0,
+        "exact_replays": 8
+      }
+    ],
+    "actual_requests": 28,
+    "actual_tokens": 270665,
+    "latest_run_new_calls": 0,
+    "latest_run_exact_replays": 8
+  },
+  "semantic_review": {
+    "reviewer": "Codex; source-fidelity review of this bounded calibration, not independent truth certification",
+    "verdict": "小批可追溯机器候选处理通过；完整知识库质量未验收",
+    "scope": "查看本批保留的8条陈述、条件、引文及暂缓原因；图片实际查看2张。此前文档样本均用于校准，非盲测。木兰只审第0资料批，其余批未完成身份核验。",
+    "facts": [
+      {
+        "concept": "芦笙",
+        "fact_id": "F3",
+        "result": "已修复集合范围，statement明确整套五种规格；逐字引文支持。来源音域标记自身仍需音乐学权威核验，不能凭引文匹配确认事实正确。"
+      },
+      {
+        "concept": "芦笙",
+        "fact_id": "F5",
+        "result": "日期完整对应May 20, 2006；月份翻译不再误判。技艺名录事实来自百科正文，未对国务院原始名录独立核验。"
+      },
+      {
+        "concept": "芦笙",
+        "fact_id": "F6",
+        "result": "具体婚恋行为有英文引文；不证明全部苗族地区通用。exceptions中模型关于文化解释差异的意见未获独立验证；乐器不是信物与用乐器索取其他信物并不必然矛盾，不能当已确认冲突。"
+      },
+      {
+        "concept": "Q1",
+        "fact_ids": [
+          "F1",
+          "F3",
+          "F4",
+          "F5",
+          "F6"
+        ],
+        "result": "5条与提供引文对应；词源保留英语universe；年龄保留Lambda-CDM及2015时间条件和原数值/单位。没有核验全页其他版本数值或原始研究。"
+      }
+    ],
+    "deferred": "芦笙F1起源争议、F2引文失配、F4无引文依据的否则解释；Q1 F2引文失配。相同候选反复暂缓合并原因，原响应不变。",
+    "known_limits": [
+      "来源类型和引文数量只是选页线索，未完成来源可信度认证。",
+      "机器caption中的竹管、金属、共鸣器等材质/功能推断不能当像素已证明；当前图片支持矩阵为全none。",
+      "没有完成补材料、全文章节提取和跨批整合；每条遗漏和剩余探索任务保留。",
+      "少量字符或关键词检查无法证明任意语义蕴含，实际用于下游的知识仍需深入核验。"
+    ]
+  }
+}

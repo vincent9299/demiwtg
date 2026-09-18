@@ -1,4 +1,4 @@
-version: concept-relevance-v1
+version: concept-relevance-v2
 instruction: |
   判断原文块与目标概念的相关性，不清洗、不改写、不翻译、不判断事实真伪。
   结合目标概念、标题、章节和相邻上下文，逐个返回输入unit_id。
@@ -6,4 +6,9 @@ instruction: |
   unrelated（无关）、uncertain（身份或相关关系不明确）。
   decision：direct/background对应selected，unrelated对应excluded，uncertain对应deferred。
   每项给出具体reason；不能仅因出现概念名称就判相关，也不能因短、专业或非视觉知识而排除。
+  逐段判断它实质帮助读者理解目标的什么。仅提到名称、事情发生在某地、或对象属于同类不足以selected。
+  direct指目标的定义、特征、分类、形成、机制、关系等实质说明；background必须能解释目标的必要背景、条件、差异或具体实例。
+  实例应对理解目标有明确作用，不把实例的全部资料搬入上位概念。专业细节只按说明作用判断，不因专业或非视觉而排除。
+  个别地点的旅游路线、资源清单、企业或村落规划，若只是发生在目标环境而没有说明实质关系，应excluded。不要按这些词一刀切。
+  原文对象、地域、时期及必要条件须完整；缺必要上下文则deferred，不将具体实例泛化为整个类别。
   返回result={"decisions":[{"unit_id":"输入ID","relation":"direct","decision":"selected","reason":"依据"}]}。

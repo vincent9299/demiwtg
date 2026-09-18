@@ -48,16 +48,41 @@ def test_checkpoint_and_policy_cannot_silently_reuse_old_selection(tmp_path):
     with pytest.raises(ValueError):review_needed(Rows(),p,'new')
     p.with_suffix('.jsonl.meta.json').write_text(json.dumps({'version':'new'}))
     assert not review_needed(Rows(),p,'new')
-    cfg={**IMAGE_FILTER_DEFAULTS,'model':'qwen3.8-27b'}
+    from .ops.prompt_config import knowledge_prompt_pack
+    cfg={**IMAGE_FILTER_DEFAULTS,'model':'qwen3.8-27b','base_url':'http://127.0.0.1:8000/v1'}
     with pytest.raises(ValueError):validate_material_reuse(tmp_path,cfg)
-    save_image_filter_policy(tmp_path,cfg);validate_material_reuse(tmp_path,cfg)
+    save_image_filter_policy(tmp_path,cfg)
+    with pytest.raises(ValueError,match='text selection'):validate_material_reuse(tmp_path,cfg)
+    _,text=knowledge_prompt_pack(cfg)
+    (tmp_path/'knowledge').mkdir()
+    (tmp_path/'knowledge/prompt_config.json').write_text(json.dumps({'yaml':text}))
+    validate_material_reuse(tmp_path,cfg)
     with pytest.raises(ValueError):validate_material_reuse(tmp_path,{**cfg,'image_identity_definitions':{'x':'new'}})
+    with pytest.raises(ValueError,match='Text selection'):validate_material_reuse(tmp_path,{**cfg,'relevance_only':False})
 
 
 def test_service_is_untouched_when_checkpoint_complete(monkeypatch,tmp_path):
     from . import local_review_service as service
     monkeypatch.setattr(service,'ready',lambda *args:pytest.fail('No service check on cached stage'))
     with service.image_review_service(tmp_path,{},needed=False):pass
+
+
+def test_changed_image_prompt_rejects_selected_materials_but_allows_text_reuse(tmp_path):
+    import yaml
+    from .image_filter_runtime import validate_text_selection_reuse
+    from .ops.prompt_config import knowledge_prompt_pack
+    cfg={**IMAGE_FILTER_DEFAULTS,'model':'qwen3.8-27b','base_url':'http://127.0.0.1:8000/v1'}
+    save_image_filter_policy(tmp_path,cfg)
+    _,text=knowledge_prompt_pack(cfg)
+    snapshot=tmp_path/'knowledge/prompt_config.json';snapshot.parent.mkdir()
+    snapshot.write_text(json.dumps({'yaml':text}))
+    validate_material_reuse(tmp_path,cfg)
+    old=yaml.safe_load(text)
+    old['prompts']['select_images']['template']='Previous, less strict image identity policy'
+    snapshot.write_text(json.dumps({'yaml':yaml.safe_dump(old)}))
+    validate_text_selection_reuse(tmp_path,cfg)
+    with pytest.raises(ValueError,match='Image selection prompt'):
+        validate_material_reuse(tmp_path,cfg)
 
 
 def test_external_review_service_not_stopped_on_failure(monkeypatch,tmp_path):

@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+state/
+logs/
+webgate/.venv/
+webgate/log/
+webgate/run/
+webgate/settings.yml
+.qoder/
+cn_key/
+.cos_creds
+
+# Runtime credentials, local environments and caches
+.env*
+!.env.example
+*.secret
+*.pem
+*.key
+*.log
+*.pid
+.pytest_cache/
+*.egg-info/

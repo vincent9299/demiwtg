@@ -11,6 +11,14 @@ def test_local_comparison_is_opt_in(tmp_path):
     assert options['request_options']['temperature']==0
 
 
+def test_thinking_template_options_follow_the_actual_model(tmp_path):
+    config={**DEFAULT,'local_model_comparison':True,'enable_thinking':True,'reasoning_effort':'xhigh'}
+    gemma=prompt_execution_options(tmp_path,{**config,'model':'gemma-4-31b-it','base_url':'http://127.0.0.1:8001/v1'})
+    qwen=prompt_execution_options(tmp_path,{**config,'model':'qwen3.8-27b','base_url':'http://127.0.0.1:8000/v1'})
+    assert gemma['request_options']['chat_template_kwargs']=={'enable_thinking':True}
+    assert qwen['request_options']['chat_template_kwargs']=={'enable_thinking':True,'reasoning_effort':'xhigh'}
+
+
 @pytest.mark.parametrize('url,model',[
  ('http://127.0.0.1:4001/v1','gemma-4-31b-it'),
  ('https://example.com/v1','gemma-4-31b-it'),

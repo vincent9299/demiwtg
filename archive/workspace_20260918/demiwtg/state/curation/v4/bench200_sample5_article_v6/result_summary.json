@@ -1,0 +1,43 @@
+{
+  "concepts": {
+    "OK手势": {
+      "topics": 16,
+      "paragraphs": 30,
+      "characters": 5739,
+      "images": 5
+    },
+    "瓶式台球": {
+      "topics": 0,
+      "paragraphs": 0,
+      "characters": 0,
+      "images": 0
+    },
+    "白花芍药": {
+      "topics": 5,
+      "paragraphs": 5,
+      "characters": 308,
+      "images": 0
+    },
+    "高原": {
+      "topics": 4,
+      "paragraphs": 18,
+      "characters": 2113,
+      "images": 1
+    },
+    "高锰酸钾": {
+      "topics": 18,
+      "paragraphs": 55,
+      "characters": 6351,
+      "images": 11
+    }
+  },
+  "calls": 4,
+  "stages": {
+    "final_review": 4
+  },
+  "usage": {
+    "completion_tokens": 44948,
+    "prompt_tokens": 61387,
+    "total_tokens": 106335
+  }
+}

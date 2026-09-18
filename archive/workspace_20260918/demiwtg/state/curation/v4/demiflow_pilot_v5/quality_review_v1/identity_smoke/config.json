@@ -1,0 +1,15 @@
+{
+  "base_url": "http://127.0.0.1:8000/v1",
+  "cos_base_url": null,
+  "identity_docs": 12,
+  "max_calls": 1,
+  "max_cases": 4,
+  "max_chars_per_doc": 6500,
+  "max_docs": 2,
+  "max_image_bytes": 8388608,
+  "max_images": 2,
+  "max_input_chars": 13000,
+  "max_output_tokens": 3500,
+  "model": "qwen3.8-27b",
+  "timeout_s": 240
+}

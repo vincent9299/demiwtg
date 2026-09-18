@@ -403,3 +403,14 @@ export no_proxy="localhost,127.0.0.1,192.168.10.0/24,modelscope.cn,modelscope.or
 理由：用户要求试用本地四个模型，覆盖此前知识整理只准调用Qwen3.8的模型范围限制，限定为本次小批对照。候选为Qwen3.8-27B、Qwen3.6-35B-A3B、gemma-4-26B-A4B-it、gemma-4-31B-it；通过prompt_config.py中显式local_model_comparison选项，仍只允许本机8000/8001直连，禁止付费网关。该选项不改变公共预标注的原Qwen协议与默认模型。
 
 比较仍使用demiflow PrepareFidelity → map_prompt_async → ApplyFidelity，不重跑提取或开始出题；已有错误回归与基于未参与调参原始文章的受控对照分别记录。每模型两次调用，输入、提示词、参数和全部响应先冻结后比较，不按结果调参重试。按已有GPU让位授权等待标注落盘、暂停其服务、顺序加载模型，结束后恢复原Qwen命令与标注断点。细节与实测结果写入DESIGN第46节及state/curation/v4/fidelity_four_models_v1，不把模型同意或格式合格视为人工事实核验。
+
+
+### 工作区保全与 collect 合并（2026-09-18，用户明确要求）
+
+理由：用户要求尽量保留未入库代码，并将 demiwtg-data、kb_audit 统一纳入主仓 collect，旧 data/collect_v2 归档。此条覆盖上文关于采集独立仓库、禁止历史文档归档及新增顶层模块的旧限制。
+
+- `collect/` 是原 demiwtg-data 的现役采集模块，`collect/kb_audit/` 保存原工作区审计工具，`collect/archive/collect_v2/` 保存旧兼容层。其源码、配置模板、交接文档纳入主仓；凭据、环境、数据与运行状态不入库。
+- 工作区原 `demiwtg-data`、`kb_audit` 及本仓 `data/collect_v2` 保留相对符号链接，以兼容运行中的脚本；后者只是兼容入口，不放新代码。远端集群路径和 COS 对象键不因本地整合改名。
+- `archive/workspace_20260918/` 与 `archive/ignored_sources_20260918/` 保存 state、_staging 和工作区根目录遗漏的源码、文档、配置及有限的小型结果，按原路径保留来源。MANIFEST.json 记录纳入／排除及内容哈希；这是历史快照，不作为新业务入口。notebook 快照去执行输出与内嵌附件；原始文件保留不变。
+- `tools/` 是仓库保全工具；恢复或备份相关文档允许保留。原始 datasets/state、模型、Python 环境和依赖缓存继续不入 Git；归档源代码不等于备份完整实验数据。
+- collect 不保留嵌套 .git；原采集仓库 Git 历史保存在主仓 archive/demiwtg-data-20260918 分支和本地 backup_audit Git bundle。

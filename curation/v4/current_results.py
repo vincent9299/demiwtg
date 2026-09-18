@@ -1,25 +1,32 @@
-"""Read only the selected formal run; never fall back to experiment outputs."""
+"""Display all fields of the selected formal result without rewriting its data."""
 import html
 import json
 from pathlib import Path
 
 
-def show_current_results(run, *, concepts=None, limit=10, images=True):
+def _fields(value):
+    """Keep every field, including empty values and unfamiliar future fields."""
+    return '<pre style="white-space:pre-wrap;overflow-wrap:anywhere">' + html.escape(
+        json.dumps(value, ensure_ascii=False, indent=2)
+    ) + '</pre>'
+
+
+def show_current_results(run, *, concepts=None, limit=None, images=True, audit=False):
     from IPython.display import display, HTML, Markdown
     run = Path(run)
     path = run / 'knowledge_base.jsonl'
     if not path.exists():
         display(Markdown(f'当前运行尚无最终知识文件：`{path}`。执行正式 pipeline 后再运行本格。'))
         return
-    if limit < 1:
-        raise ValueError('limit must be positive')
+    if limit is not None and limit < 1:
+        raise ValueError('limit must be positive or None')
     records = []
     with path.open() as stream:
         for line in stream:
             row = json.loads(line)
             if concepts is None or row['concept'] in concepts:
                 records.append(row)
-                if len(records) >= limit:
+                if limit is not None and len(records) >= limit:
                     break
     wanted = {im['image_id'] for row in records for t in row['knowledge'] for im in t['content']['images']}
     pixels = {}
@@ -33,24 +40,58 @@ def show_current_results(run, *, concepts=None, limit=10, images=True):
                         if iid in wanted:
                             pixels[iid] = pixel
     esc = html.escape
-    output = []
+    display(Markdown(f'结果文件：`{path}`；展示 {len(records)} 个概念。'
+                     f'概念筛选：`{concepts}`；数量上限：`{limit}`；图片预览：`{images}`。'
+                     '展示 pipeline 最终知识的全部字段；audit=True 可另看材料和审核过程。'))
     for row in records:
-        output.append('<h2>' + esc(row['concept']) + '</h2>')
+        output = ['<h2>' + esc(row['concept']) + '</h2>']
+        if 'status' in row:
+            labels={'reviewed':'已完成最终 review（模型结果）','failed':'处理失败，本版本未发布知识',
+                    'insufficient_materials':'没有足够的入选材料','no_supported_knowledge':'review 后无可保留知识'}
+            output.append('<p><b>'+esc(labels.get(row['status'],row['status']))+'</b></p>')
+            if row.get('status_reason'):output.append('<p>'+esc(row['status_reason'])+'</p>')
+            if row['status']=='failed':output.append(_fields(row.get('audit',{}).get('validation_issues',[])))
         if not row['knowledge']:
             output.append('<p>没有保留的知识内容。</p>')
+        def show_image(im):
+            if images:
+                pixel=pixels.get(im['image_id'],'')
+                if pixel.startswith('data:image/'):
+                    output.append('<figure><img style="max-width:100%;height:auto" src="'+esc(pixel,quote=True)+'"></figure>')
+                else:output.append('<p>图片预览不可用：'+esc(im['image_id'])+'</p>')
+            if im.get('figure_number'):output.append('<p><b>图 '+str(im['figure_number'])+'</b></p>')
+            output.append(_fields(im))
         for topic in row['knowledge']:
             output.append('<h3>' + esc(topic['title']) + '</h3>')
-            output.extend('<p style="white-space:pre-wrap">' + esc(p) + '</p>' for p in topic['content']['paragraphs'])
-            if images:
+            for pi,p in enumerate(topic['content']['paragraphs']):
+                output.append('<p style="white-space:pre-wrap">'+esc(p)+'</p>')
                 for im in topic['content']['images']:
-                    pixel = pixels.get(im['image_id'], '')
-                    if pixel.startswith('data:image/'):
-                        output.append('<figure><img style="max-width:100%;max-height:350px" src="' + esc(pixel, quote=True) + '"><figcaption>' + esc(im['caption']) + '</figcaption></figure>')
-                    else:
-                        output.append('<p>图片预览不可用：' + esc(im['image_id']) + '</p>')
-            refs = []
+                    if im.get('paragraph_index')==pi:show_image(im)
+            for im in topic['content']['images']:
+                if im.get('paragraph_index') not in range(len(topic['content']['paragraphs'])):show_image(im)
+            output.append('<p><b>参考来源（完整字段）：</b></p>')
             for ref in topic['references']:
-                title, url = esc(ref['title']), ref.get('url', '')
-                refs.append('<a href="' + esc(url, quote=True) + '" target="_blank" rel="noopener noreferrer">' + title + '</a>' if url.startswith(('http://', 'https://')) else title)
-            output.append('<p><b>参考来源：</b>' + '；'.join(dict.fromkeys(refs)) + '</p>')
-    display(HTML(''.join(output) or '<p>没有匹配的概念。</p>'))
+                url = ref.get('url', '')
+                if url.startswith(('http://', 'https://')):
+                    output.append('<a href="' + esc(url, quote=True) + '" target="_blank" rel="noopener noreferrer">' + esc(ref['title']) + '</a>')
+                output.append(_fields(ref))
+            extra_content = {k: v for k, v in topic['content'].items() if k not in {'paragraphs', 'images'}}
+            extra_topic = {k: v for k, v in topic.items() if k not in {'title', 'content', 'references'}}
+            if extra_content:
+                output.append(_fields({'content': extra_content}))
+            if extra_topic:
+                output.append(_fields(extra_topic))
+        if row.get('audit', {}).get('review_notes'):
+            output.append('<h3>final_review 审查记录（非知识正文，编号对应待审材料）</h3>')
+            output.append('<p style="white-space:pre-wrap">'+esc(row['audit']['review_notes'])+'</p>')
+            for ref in row['audit'].get('review_references', []):
+                output.append(_fields(ref))
+        if audit:
+            output.append('<h3>概念、材料及审核完整记录（非最终正文）</h3>')
+            for key, value in row.items():
+                if key in {'concept', 'knowledge'}:
+                    continue
+                output.append('<details open><summary>' + esc(key) + '</summary>' + _fields(value) + '</details>')
+        display(HTML(''.join(output)))
+    if not records:
+        display(Markdown('没有匹配的概念。'))

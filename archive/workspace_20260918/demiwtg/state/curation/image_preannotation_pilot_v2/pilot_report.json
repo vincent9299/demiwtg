@@ -1,0 +1,41 @@
+{
+  "author_type": "assistant",
+  "scope": "200 calibration images; not a random estimate of entire lake accuracy",
+  "images": 200,
+  "concepts": 38,
+  "completed": 200,
+  "first_attempt_valid": 199,
+  "retry_recovered": 1,
+  "api_calls": 401,
+  "representation_counts": {
+    "screenshot": 2,
+    "photo": 146,
+    "illustration": 31,
+    "document": 5,
+    "mixed": 7,
+    "flowchart": 2,
+    "map": 3,
+    "chart": 1,
+    "diagram": 2,
+    "unknown": 1
+  },
+  "match_suggestions": {
+    "suspected_mismatch": 60,
+    "consistent": 94,
+    "uncertain": 46
+  },
+  "decision": "Proceed as unreviewed retrieval metadata, not factual or OCR gold labels",
+  "known_limitations": [
+    "OCR may change punctuation in small text",
+    "underside views sometimes called interior or inverted",
+    "fine-grained object identities and materials may be inferred too confidently"
+  ],
+  "visually_checked_examples": [
+    "02e8d0e8fe8acb2c4f6c95e4bef13d842f40483cc38ade8ba7af5220ee1028fc",
+    "00b490547712b9e6d85c821db0d3a04d66ee038cf63c266a854b829ded55645b",
+    "1f6fe8ba8cbcc376478c892aa45ebecf93b1100c1718ded8be36db4d1ccf8993",
+    "2af45ea2d7aacfb077a67409215a37d54de2558837e3ee23a3468030a7eed114",
+    "5a0c948b8658086c5bd12245b498f53745034b6a19acf320cfb7afa9a93ad9fc",
+    "1d81f1d9dae9be0e7d2d6dc87b4cc5e2944820a7084e0615760d910065342b0e"
+  ]
+}

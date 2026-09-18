@@ -1,0 +1,245 @@
+{
+  "scope": {
+    "output": "knowledge_inputs; materials awaiting identity and knowledge review",
+    "documents_processed": 130,
+    "regression_sample": 8,
+    "holdout_sample": 6,
+    "image_sample": 4,
+    "pixels_viewed": 2,
+    "sampling": "按概念×旧clean_status分层，SHA256(seed:doc_id)排序每层最多2条；回归seed=20260914，额外样本seed=20260915且排除回归样本；图按byte_status分层同法。",
+    "limits": "定向三概念中的分层抽查；样本首尾和问题块审核，非全库随机校准、非全文事实核验；没有真实知识候选输出。"
+  },
+  "structural_checks": {
+    "documents": 130,
+    "blocks": 25652,
+    "failures": [],
+    "clean_status_counts": {
+      "cleaned_candidate": 89,
+      "needs_review": 40,
+      "unavailable": 1
+    },
+    "final_pipeline_cell_reuse_seconds": 1.04,
+    "sqlite_disabled": true,
+    "repeated_source_clean_image_work_disabled": true,
+    "final_batches": 6,
+    "model_requests": 0
+  },
+  "document_reviews": [
+    {
+      "doc_id": "212268a82fde3e5e0fabbd572d9ccdef07ab875787d34ac183868e581faba3f0",
+      "concept_refs": [
+        "legacy:木兰"
+      ],
+      "title": "Mulan (1998 film)",
+      "before_chars": 34238,
+      "after_chars": 34238,
+      "before_status": "cleaned_candidate",
+      "after_status": "cleaned_candidate",
+      "warnings": [],
+      "review": "正文保留，但主题是1998年电影；不能与木兰人物、植物直接合并。未核验影片事实。",
+      "review_scope": "标题、开头/结尾与问题块；非逐字全文事实核验"
+    },
+    {
+      "doc_id": "ec926869f3d003bbf6936d0460722587ac5673aa19dfce999cde930a4cf0c53e",
+      "concept_refs": [
+        "legacy:木兰"
+      ],
+      "title": "木兰故里说木兰--文史--中国作家网",
+      "before_chars": 4251,
+      "after_chars": 2122,
+      "before_status": "cleaned_candidate",
+      "after_status": "cleaned_candidate",
+      "warnings": [],
+      "review": "首部导航和尾部推荐区已移出清洗正文；来源作者、日期及文章保留。文章关于木兰身世的说法尚未事实核验。",
+      "review_scope": "标题、开头/结尾与问题块；非逐字全文事实核验"
+    },
+    {
+      "doc_id": "ca0bc23bc5dc1325002367a3b07bbd5560c9f96a44bf2791d1bf1053afc6f759",
+      "concept_refs": [
+        "legacy:木兰"
+      ],
+      "title": "16种木兰科的植物，在我国栽培欣赏2000多年的树种",
+      "before_chars": 3832,
+      "after_chars": 3251,
+      "before_status": "needs_review",
+      "after_status": "needs_review",
+      "warnings": [
+        "access_restriction_or_challenge_marker",
+        "residual_navigation_requires_review"
+      ],
+      "review": "植物内容保留；知乎登录栏、评论等残留，仍待进一步清理。不能混作人物资料。",
+      "review_scope": "标题、开头/结尾与问题块；非逐字全文事实核验"
+    },
+    {
+      "doc_id": "4b543faa75d5ec4ab7677b9fb627b11d23df3cdbf6e99fad236ba58754934e38",
+      "concept_refs": [
+        "legacy:木兰"
+      ],
+      "title": "Magnolia - Wikipedia",
+      "before_chars": 53275,
+      "after_chars": 51949,
+      "before_status": "needs_review",
+      "after_status": "needs_review",
+      "warnings": [
+        "residual_navigation_requires_review",
+        "unexpanded_wiki_template_retained"
+      ],
+      "review": "清掉部分开头菜单，但语言列表、页尾等仍残留；保持待审核。",
+      "review_scope": "标题、开头/结尾与问题块；非逐字全文事实核验"
+    },
+    {
+      "doc_id": "a69e8561119f8ade12f226c790a69b5e6669c734cdcf54971cf6eae37e6ee272",
+      "concept_refs": [
+        "legacy:芦笙"
+      ],
+      "title": "侗族芦笙",
+      "before_chars": 93,
+      "after_chars": 93,
+      "before_status": "cleaned_candidate",
+      "after_status": "needs_review",
+      "warnings": [
+        "possible_truncated_snippet"
+      ],
+      "review": "93字末尾省略的材料标为疑似截断，身份算子暂不采用，需补全文。",
+      "review_scope": "标题、开头/结尾与问题块；非逐字全文事实核验"
+    },
+    {
+      "doc_id": "2b526151d0b76165df645a4b32c92645140b0bd6c7d1c49958cf394d52bc350d",
+      "concept_refs": [
+        "legacy:芦笙"
+      ],
+      "title": "The Lusheng: China’s 3,000-Year-Old Bamboo Music – Cultural ...",
+      "before_chars": 6873,
+      "after_chars": 3609,
+      "before_status": "cleaned_candidate",
+      "after_status": "cleaned_candidate",
+      "warnings": [],
+      "review": "Cookie、前部导航和尾部推荐区已移除；文章中的起源和族属等说法尚未核验，网站页尾仍需检查。",
+      "review_scope": "标题、开头/结尾与问题块；非逐字全文事实核验"
+    },
+    {
+      "doc_id": "a27840c0bf80f84384d0c6d80ba251652584db723b0a41230c049c2501416258",
+      "concept_refs": [
+        "legacy:芦笙"
+      ],
+      "title": "Lusheng Liang - Search Results - PubMed",
+      "before_chars": 858,
+      "after_chars": 0,
+      "before_status": "needs_review",
+      "after_status": "unavailable",
+      "warnings": [
+        "access_error_page_no_body",
+        "access_restriction_or_challenge_marker",
+        "no_body_blocks"
+      ],
+      "review": "拒绝访问页不再输出正文，状态unavailable，保留原文和逐块排除依据。标题另提示这是人名检索关联错位。",
+      "review_scope": "标题、开头/结尾与问题块；非逐字全文事实核验"
+    },
+    {
+      "doc_id": "d960da3fa8ffaf1efbda587d693ea650ef702fb48006ee7db130ef05b53f08b2",
+      "concept_refs": [
+        "qid:Q1"
+      ],
+      "title": "Universe",
+      "before_chars": 118442,
+      "after_chars": 118442,
+      "before_status": "needs_review",
+      "after_status": "needs_review",
+      "warnings": [
+        "unexpanded_wiki_template_retained"
+      ],
+      "review": "Universe有正文，但未展开的模板、引文标记和信息框仍在；保持待审核，不删除其中数值条件来伪装干净。",
+      "review_scope": "标题、开头/结尾与问题块；非逐字全文事实核验"
+    }
+  ],
+  "image_reviews": [
+    {
+      "image_id": "9a8319ac7f6e986817b5e4d36c59a2e8295484f058e6cd90025cb62078063940",
+      "byte_status": "not_local",
+      "pixels_viewed": false,
+      "path": "blobs/75/757ae7b3c2968471c83a2a6403d7afa1d75ed6953215a0618f0a576aa234e63d.webp",
+      "review": "本地缺失，未看像素；caption不能替代看图，不能判断其支持范围。"
+    },
+    {
+      "image_id": "f82468732d2eb485264ae16cc6e9044f69cbf6b7e2c15a76f01477bdcae2891a",
+      "byte_status": "not_local",
+      "pixels_viewed": false,
+      "path": "blobs/82/82d470cc355da683a785ecf8798217064c82bbba6c27d9cfa396f3d47c399856.png",
+      "review": "本地缺失，未看像素；caption不能替代看图，不能判断其支持范围。"
+    },
+    {
+      "image_id": "eff8766b07131d3dbfe369a052da5c96bde356cccbab4f37494c18ff332c71d1",
+      "byte_status": "verified_bytes",
+      "pixels_viewed": true,
+      "path": "blobs/0a/0a4038949babddc0f260677b1bfc10db416232cc42b0f43157f8f016b93821f4.jpg",
+      "review": "已实际看图：演奏姿态绘画。可作为题材线索；绘画不能直接证明真实乐器内部结构、尺寸或制作细节。"
+    },
+    {
+      "image_id": "db48afc158e5763a1a153a5a680ed5dfdb14ee7c3217a785fe03e2775efac621",
+      "byte_status": "verified_bytes",
+      "pixels_viewed": true,
+      "path": "blobs/30/300dd9b9a23ef862440dc3e9d3e5b096c48a955b05fedffcfaf7930cac034ab9.jpg",
+      "review": "已实际看图：主体是背向镜头的服饰场景，未见清晰可辨乐器；不支持乐器结构知识。"
+    }
+  ],
+  "holdout_reviews": [
+    {
+      "doc_id": "b545a2d53cec045fe5153358f83835316b50338ba973af4201315997f7854672",
+      "title": "Rim dijhodo bezopukes mujonot egmutzek 木兰将军 Fodedpa.",
+      "status": "cleaned_candidate",
+      "warnings": [],
+      "review": "正文为不明含义拉丁词串，疑似垃圾/占位文本，仍标cleaned_candidate；规则清洗未解决语义质量，应暂缓使用。",
+      "review_scope": "首600字、尾450字和标题；非全文事实核验"
+    },
+    {
+      "doc_id": "4f5e1fbd7cb49b990e29e77e355fa1496c49e46fed195c616d614f1f7066606e",
+      "title": "Mulan | Watch on Disney+",
+      "status": "needs_review",
+      "warnings": [
+        "possible_truncated_snippet"
+      ],
+      "review": "Disney电影简介为省略截断文本，已标记possible_truncated_snippet；还需区分电影与人物。",
+      "review_scope": "首600字、尾450字和标题；非全文事实核验"
+    },
+    {
+      "doc_id": "c0236c80fe435b4173525e6496b8100c776806bc20142580e4a84574f2727fa9",
+      "title": "Magnolia (film) - Wikipedia",
+      "status": "needs_review",
+      "warnings": [
+        "residual_navigation_requires_review",
+        "unexpanded_wiki_template_retained"
+      ],
+      "review": "Magnolia电影与木兰来源关联需消歧；维基语言菜单和页尾仍残留。",
+      "review_scope": "首600字、尾450字和标题；非全文事实核验"
+    },
+    {
+      "doc_id": "fd049ddb70cfdf6032cc46b8406cfe35d35931407baf84ef193f81e51167ac51",
+      "title": "木兰诗 - 维基文库，自由的图书馆",
+      "status": "needs_review",
+      "warnings": [
+        "unexpanded_wiki_template_retained"
+      ],
+      "review": "木兰诗来源有文学文本，但维基文库界面残留明显，清洗尚未合格。",
+      "review_scope": "首600字、尾450字和标题；非全文事实核验"
+    },
+    {
+      "doc_id": "c186334cf74a03ef00c62641cbfb0734cae111f56881f26f187ce902cc09695b",
+      "title": "Lusheng",
+      "status": "cleaned_candidate",
+      "warnings": [],
+      "review": "首段同时写3000年历史和追溯唐代，存在需核实的时间表述问题；清洗器不会解决事实矛盾。",
+      "review_scope": "首600字、尾450字和标题；非全文事实核验"
+    },
+    {
+      "doc_id": "6104c06b63b77d142bf900aa04c2a8ba04e0a8d858f1df3e1ad90891103442fa",
+      "title": "芦笙 in English - 芦笙 meaning in English - 芦笙 English meaning",
+      "status": "needs_review",
+      "warnings": [
+        "possible_truncated_snippet"
+      ],
+      "review": "词典示例句被截断，已标记待补全文，不可当完整乐器知识来源。",
+      "review_scope": "首600字、尾450字和标题；非全文事实核验"
+    }
+  ],
+  "conclusion": "流程可执行、部分清洗问题已改善；身份、语义质量、维基正文清理及图片支持仍未达到知识库验收要求。"
+}

@@ -1,0 +1,2541 @@
+{
+  "by_model_condition": {
+    "bagel/baseline": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 16,
+      "knowledge_items_observable": 14,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 1,
+      "observable": 10,
+      "total": 12
+    },
+    "bagel/image": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 16,
+      "knowledge_items_observable": 14,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 1,
+      "observable": 10,
+      "total": 12
+    },
+    "bagel/multimodal": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 16,
+      "knowledge_items_observable": 13,
+      "knowledge_items_pass": 7,
+      "knowledge_pass": 5,
+      "observable": 9,
+      "total": 12
+    },
+    "bagel/text": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 16,
+      "knowledge_items_observable": 14,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 3,
+      "observable": 10,
+      "total": 12
+    },
+    "gemini/baseline": {
+      "execution_pass": 9,
+      "generation_error": 0,
+      "joint_pass": 7,
+      "knowledge_items": 16,
+      "knowledge_items_observable": 16,
+      "knowledge_items_pass": 12,
+      "knowledge_pass": 8,
+      "observable": 12,
+      "total": 12
+    },
+    "gemini/image": {
+      "execution_pass": 10,
+      "generation_error": 0,
+      "joint_pass": 10,
+      "knowledge_items": 16,
+      "knowledge_items_observable": 16,
+      "knowledge_items_pass": 16,
+      "knowledge_pass": 12,
+      "observable": 12,
+      "total": 12
+    },
+    "gemini/multimodal": {
+      "execution_pass": 9,
+      "generation_error": 1,
+      "joint_pass": 9,
+      "knowledge_items": 16,
+      "knowledge_items_observable": 14,
+      "knowledge_items_pass": 14,
+      "knowledge_pass": 11,
+      "observable": 11,
+      "total": 12
+    },
+    "gemini/text": {
+      "execution_pass": 8,
+      "generation_error": 0,
+      "joint_pass": 8,
+      "knowledge_items": 16,
+      "knowledge_items_observable": 16,
+      "knowledge_items_pass": 16,
+      "knowledge_pass": 12,
+      "observable": 12,
+      "total": 12
+    }
+  },
+  "by_stratum": {
+    "bagel/baseline/application_level/compositional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 0,
+      "total": 1
+    },
+    "bagel/baseline/application_level/conditional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 7,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 1,
+      "observable": 5,
+      "total": 5
+    },
+    "bagel/baseline/application_level/direct": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 3,
+      "total": 3
+    },
+    "bagel/baseline/application_level/relational": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 3
+    },
+    "bagel/baseline/domain/动物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_observable": 9,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 5,
+      "total": 7
+    },
+    "bagel/baseline/domain/建筑与基础设施": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/baseline/domain/植物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/baseline/domain/知识与学科": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/baseline/domain/食物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/baseline/task/edit": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 5,
+      "total": 6
+    },
+    "bagel/baseline/task/t2i": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 5,
+      "total": 6
+    },
+    "bagel/image/application_level/compositional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 0,
+      "total": 1
+    },
+    "bagel/image/application_level/conditional": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 7,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 5,
+      "total": 5
+    },
+    "bagel/image/application_level/direct": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 1,
+      "observable": 3,
+      "total": 3
+    },
+    "bagel/image/application_level/relational": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 3
+    },
+    "bagel/image/domain/动物": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_observable": 9,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 0,
+      "observable": 5,
+      "total": 7
+    },
+    "bagel/image/domain/建筑与基础设施": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/image/domain/植物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/image/domain/知识与学科": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/image/domain/食物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/image/task/edit": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 5,
+      "total": 6
+    },
+    "bagel/image/task/t2i": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 1,
+      "observable": 5,
+      "total": 6
+    },
+    "bagel/multimodal/application_level/compositional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 0,
+      "total": 1
+    },
+    "bagel/multimodal/application_level/conditional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 7,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 3,
+      "observable": 5,
+      "total": 5
+    },
+    "bagel/multimodal/application_level/direct": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 1,
+      "observable": 3,
+      "total": 3
+    },
+    "bagel/multimodal/application_level/relational": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 3
+    },
+    "bagel/multimodal/domain/动物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 5,
+      "knowledge_pass": 3,
+      "observable": 4,
+      "total": 7
+    },
+    "bagel/multimodal/domain/建筑与基础设施": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/multimodal/domain/植物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/multimodal/domain/知识与学科": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/multimodal/domain/食物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/multimodal/task/edit": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 6,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 3,
+      "observable": 4,
+      "total": 6
+    },
+    "bagel/multimodal/task/t2i": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 2,
+      "observable": 5,
+      "total": 6
+    },
+    "bagel/text/application_level/compositional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 0,
+      "total": 1
+    },
+    "bagel/text/application_level/conditional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 7,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 3,
+      "observable": 5,
+      "total": 5
+    },
+    "bagel/text/application_level/direct": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 3,
+      "total": 3
+    },
+    "bagel/text/application_level/relational": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 2,
+      "total": 3
+    },
+    "bagel/text/domain/动物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_observable": 9,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 2,
+      "observable": 5,
+      "total": 7
+    },
+    "bagel/text/domain/建筑与基础设施": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/text/domain/植物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/text/domain/知识与学科": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 2,
+      "total": 2
+    },
+    "bagel/text/domain/食物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "bagel/text/task/edit": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 2,
+      "observable": 5,
+      "total": 6
+    },
+    "bagel/text/task/t2i": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 5,
+      "total": 6
+    },
+    "gemini/baseline/application_level/compositional": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/baseline/application_level/conditional": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 3,
+      "knowledge_items": 7,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 6,
+      "knowledge_pass": 4,
+      "observable": 5,
+      "total": 5
+    },
+    "gemini/baseline/application_level/direct": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 1,
+      "observable": 3,
+      "total": 3
+    },
+    "gemini/baseline/application_level/relational": {
+      "execution_pass": 3,
+      "generation_error": 0,
+      "joint_pass": 3,
+      "knowledge_items": 3,
+      "knowledge_items_observable": 3,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 3,
+      "observable": 3,
+      "total": 3
+    },
+    "gemini/baseline/domain/动物": {
+      "execution_pass": 6,
+      "generation_error": 0,
+      "joint_pass": 5,
+      "knowledge_items": 11,
+      "knowledge_items_observable": 11,
+      "knowledge_items_pass": 9,
+      "knowledge_pass": 5,
+      "observable": 7,
+      "total": 7
+    },
+    "gemini/baseline/domain/建筑与基础设施": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/baseline/domain/植物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/baseline/domain/知识与学科": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/baseline/domain/食物": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/baseline/task/edit": {
+      "execution_pass": 6,
+      "generation_error": 0,
+      "joint_pass": 6,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 8,
+      "knowledge_pass": 6,
+      "observable": 6,
+      "total": 6
+    },
+    "gemini/baseline/task/t2i": {
+      "execution_pass": 3,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 2,
+      "observable": 6,
+      "total": 6
+    },
+    "gemini/image/application_level/compositional": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/image/application_level/conditional": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 4,
+      "knowledge_items": 7,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 7,
+      "knowledge_pass": 5,
+      "observable": 5,
+      "total": 5
+    },
+    "gemini/image/application_level/direct": {
+      "execution_pass": 3,
+      "generation_error": 0,
+      "joint_pass": 3,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 3,
+      "observable": 3,
+      "total": 3
+    },
+    "gemini/image/application_level/relational": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 3,
+      "knowledge_items_observable": 3,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 3,
+      "observable": 3,
+      "total": 3
+    },
+    "gemini/image/domain/动物": {
+      "execution_pass": 6,
+      "generation_error": 0,
+      "joint_pass": 6,
+      "knowledge_items": 11,
+      "knowledge_items_observable": 11,
+      "knowledge_items_pass": 11,
+      "knowledge_pass": 7,
+      "observable": 7,
+      "total": 7
+    },
+    "gemini/image/domain/建筑与基础设施": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/image/domain/植物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/image/domain/知识与学科": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/image/domain/食物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/image/task/edit": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 4,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 8,
+      "knowledge_pass": 6,
+      "observable": 6,
+      "total": 6
+    },
+    "gemini/image/task/t2i": {
+      "execution_pass": 6,
+      "generation_error": 0,
+      "joint_pass": 6,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 8,
+      "knowledge_pass": 6,
+      "observable": 6,
+      "total": 6
+    },
+    "gemini/multimodal/application_level/compositional": {
+      "execution_pass": 0,
+      "generation_error": 1,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 0,
+      "knowledge_items_pass": 0,
+      "knowledge_pass": 0,
+      "observable": 0,
+      "total": 1
+    },
+    "gemini/multimodal/application_level/conditional": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 4,
+      "knowledge_items": 7,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 7,
+      "knowledge_pass": 5,
+      "observable": 5,
+      "total": 5
+    },
+    "gemini/multimodal/application_level/direct": {
+      "execution_pass": 3,
+      "generation_error": 0,
+      "joint_pass": 3,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 3,
+      "observable": 3,
+      "total": 3
+    },
+    "gemini/multimodal/application_level/relational": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 3,
+      "knowledge_items_observable": 3,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 3,
+      "observable": 3,
+      "total": 3
+    },
+    "gemini/multimodal/domain/动物": {
+      "execution_pass": 5,
+      "generation_error": 1,
+      "joint_pass": 5,
+      "knowledge_items": 11,
+      "knowledge_items_observable": 9,
+      "knowledge_items_pass": 9,
+      "knowledge_pass": 6,
+      "observable": 6,
+      "total": 7
+    },
+    "gemini/multimodal/domain/建筑与基础设施": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/multimodal/domain/植物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/multimodal/domain/知识与学科": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/multimodal/domain/食物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/multimodal/task/edit": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 4,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 8,
+      "knowledge_pass": 6,
+      "observable": 6,
+      "total": 6
+    },
+    "gemini/multimodal/task/t2i": {
+      "execution_pass": 5,
+      "generation_error": 1,
+      "joint_pass": 5,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 6,
+      "knowledge_items_pass": 6,
+      "knowledge_pass": 5,
+      "observable": 5,
+      "total": 6
+    },
+    "gemini/text/application_level/compositional": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/text/application_level/conditional": {
+      "execution_pass": 3,
+      "generation_error": 0,
+      "joint_pass": 3,
+      "knowledge_items": 7,
+      "knowledge_items_observable": 7,
+      "knowledge_items_pass": 7,
+      "knowledge_pass": 5,
+      "observable": 5,
+      "total": 5
+    },
+    "gemini/text/application_level/direct": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 4,
+      "knowledge_items_observable": 4,
+      "knowledge_items_pass": 4,
+      "knowledge_pass": 3,
+      "observable": 3,
+      "total": 3
+    },
+    "gemini/text/application_level/relational": {
+      "execution_pass": 2,
+      "generation_error": 0,
+      "joint_pass": 2,
+      "knowledge_items": 3,
+      "knowledge_items_observable": 3,
+      "knowledge_items_pass": 3,
+      "knowledge_pass": 3,
+      "observable": 3,
+      "total": 3
+    },
+    "gemini/text/domain/动物": {
+      "execution_pass": 5,
+      "generation_error": 0,
+      "joint_pass": 5,
+      "knowledge_items": 11,
+      "knowledge_items_observable": 11,
+      "knowledge_items_pass": 11,
+      "knowledge_pass": 7,
+      "observable": 7,
+      "total": 7
+    },
+    "gemini/text/domain/建筑与基础设施": {
+      "execution_pass": 0,
+      "generation_error": 0,
+      "joint_pass": 0,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/text/domain/植物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/text/domain/知识与学科": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_observable": 2,
+      "knowledge_items_pass": 2,
+      "knowledge_pass": 2,
+      "observable": 2,
+      "total": 2
+    },
+    "gemini/text/domain/食物": {
+      "execution_pass": 1,
+      "generation_error": 0,
+      "joint_pass": 1,
+      "knowledge_items": 1,
+      "knowledge_items_observable": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_pass": 1,
+      "observable": 1,
+      "total": 1
+    },
+    "gemini/text/task/edit": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 4,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 8,
+      "knowledge_pass": 6,
+      "observable": 6,
+      "total": 6
+    },
+    "gemini/text/task/t2i": {
+      "execution_pass": 4,
+      "generation_error": 0,
+      "joint_pass": 4,
+      "knowledge_items": 8,
+      "knowledge_items_observable": 8,
+      "knowledge_items_pass": 8,
+      "knowledge_pass": 6,
+      "observable": 6,
+      "total": 6
+    }
+  },
+  "expected": 96,
+  "missing": [],
+  "per_output": [
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "穿山甲携幼",
+      "job_id": "dev_relational_pangolin__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 3,
+      "question_id": "dev_relational_pangolin"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "马来貘",
+      "job_id": "dev_conditional_tapir__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_tapir"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "穿山甲携幼",
+      "job_id": "dev_relational_pangolin__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_relational_pangolin"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_21__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_nasa_argon_oxygen_21"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "功能性滴水嘴兽",
+      "job_id": "dev_relational_gargoyle__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_relational_gargoyle"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_compositional_pignose_sexes__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 4,
+      "question_id": "dev_compositional_pignose_sexes"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "莜面栲栳栳",
+      "job_id": "dev_direct_youmiank__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_direct_youmiank"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "马来貘",
+      "job_id": "dev_conditional_tapir__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_tapir"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_relational_lady_food__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 4,
+      "question_id": "dev_relational_lady_food"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "腰果",
+      "job_id": "dev_direct_cashew__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_cashew"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "腰果",
+      "job_id": "dev_direct_cashew__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_direct_cashew"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "莜面栲栳栳",
+      "job_id": "dev_direct_youmiank__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_direct_youmiank"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_compositional_pignose_sexes__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 4,
+      "question_id": "dev_compositional_pignose_sexes"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "马来貘",
+      "job_id": "dev_conditional_tapir__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_tapir"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "大西洋海鹦",
+      "job_id": "dev_conditional_puffin__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_puffin"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_21__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_nasa_argon_oxygen_21"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_18__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_nasa_argon_oxygen_18"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_relational_lady_food__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_relational_lady_food"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_18__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_18"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_18__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_18"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "大西洋海鹦",
+      "job_id": "dev_conditional_puffin__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_puffin"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "马来貘",
+      "job_id": "dev_conditional_tapir__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_tapir"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_21__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_21"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "大西洋海鹦",
+      "job_id": "dev_conditional_puffin__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_puffin"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "大西洋海鹦",
+      "job_id": "dev_conditional_puffin__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_puffin"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "马来貘",
+      "job_id": "dev_conditional_tapir__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_tapir"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "莜面栲栳栳",
+      "job_id": "dev_direct_youmiank__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_direct_youmiank"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "穿山甲携幼",
+      "job_id": "dev_relational_pangolin__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 2,
+      "question_id": "dev_relational_pangolin"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "大西洋海鹦",
+      "job_id": "dev_conditional_puffin__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_puffin"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_relational_lady_food__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 3,
+      "question_id": "dev_relational_lady_food"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "穿山甲携幼",
+      "job_id": "dev_relational_pangolin__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_relational_pangolin"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_compositional_pignose_sexes__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_compositional_pignose_sexes"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_21__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_21"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 2,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "莜面栲栳栳",
+      "job_id": "dev_direct_youmiank__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_youmiank"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "功能性滴水嘴兽",
+      "job_id": "dev_relational_gargoyle__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_relational_gargoyle"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_compositional_pignose_sexes__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 3,
+      "question_id": "dev_compositional_pignose_sexes"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "穿山甲携幼",
+      "job_id": "dev_relational_pangolin__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_relational_pangolin"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "腰果",
+      "job_id": "dev_direct_cashew__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_cashew"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_21__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_nasa_argon_oxygen_21"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_21__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_21"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_21__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_21"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "大西洋海鹦",
+      "job_id": "dev_conditional_puffin__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_puffin"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_compositional_pignose_sexes__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_compositional_pignose_sexes"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "腰果",
+      "job_id": "dev_direct_cashew__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_cashew"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "功能性滴水嘴兽",
+      "job_id": "dev_relational_gargoyle__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_relational_gargoyle"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_18__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_18"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_18__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_18"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "穿山甲携幼",
+      "job_id": "dev_relational_pangolin__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_relational_pangolin"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "腰果",
+      "job_id": "dev_direct_cashew__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_cashew"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "腰果",
+      "job_id": "dev_direct_cashew__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_direct_cashew"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_18__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_nasa_argon_oxygen_18"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "莜面栲栳栳",
+      "job_id": "dev_direct_youmiank__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_direct_youmiank"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "马来貘",
+      "job_id": "dev_conditional_tapir__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_conditional_tapir"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "马来貘",
+      "job_id": "dev_conditional_tapir__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_tapir"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_compositional_pignose_sexes__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable",
+        "K2": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "observable": false,
+      "quality": null,
+      "question_id": "dev_compositional_pignose_sexes"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "功能性滴水嘴兽",
+      "job_id": "dev_relational_gargoyle__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_relational_gargoyle"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "功能性滴水嘴兽",
+      "job_id": "dev_relational_gargoyle__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_relational_gargoyle"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "大西洋海鹦",
+      "job_id": "dev_conditional_puffin__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_puffin"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_relational_lady_food__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_relational_lady_food"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "莜面栲栳栳",
+      "job_id": "dev_direct_youmiank__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_youmiank"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_relational_lady_food__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 3,
+      "question_id": "dev_relational_lady_food"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_18__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_nasa_argon_oxygen_18"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "莜面栲栳栳",
+      "job_id": "dev_direct_youmiank__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_youmiank"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_18__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_nasa_argon_oxygen_18"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "莜面栲栳栳",
+      "job_id": "dev_direct_youmiank__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_direct_youmiank"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "功能性滴水嘴兽",
+      "job_id": "dev_relational_gargoyle__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_relational_gargoyle"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_compositional_pignose_sexes__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 3,
+      "question_id": "dev_compositional_pignose_sexes"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "腰果",
+      "job_id": "dev_direct_cashew__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_direct_cashew"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "功能性滴水嘴兽",
+      "job_id": "dev_relational_gargoyle__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_relational_gargoyle"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "family": "马来貘",
+      "job_id": "dev_conditional_tapir__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_tapir"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "穿山甲携幼",
+      "job_id": "dev_relational_pangolin__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_relational_pangolin"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_conditional_lady_larva__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_lady_larva"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "穿山甲携幼",
+      "job_id": "dev_relational_pangolin__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_relational_pangolin"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "family": "大西洋海鹦",
+      "job_id": "dev_conditional_puffin__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_conditional_puffin"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_relational_lady_food__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_relational_lady_food"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "腰果",
+      "job_id": "dev_direct_cashew__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_direct_cashew"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_direct_pignose__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 3,
+      "question_id": "dev_direct_pignose"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_relational_lady_food__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": false,
+      "quality": 3,
+      "question_id": "dev_relational_lady_food"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "family": "功能性滴水嘴兽",
+      "job_id": "dev_relational_gargoyle__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_relational_gargoyle"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "NASA_GSFC_8006A",
+      "job_id": "dev_conditional_nasa_argon_oxygen_21__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_conditional_nasa_argon_oxygen_21"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "family": "Carettochelys_insculpta",
+      "job_id": "dev_compositional_pignose_sexes__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 4,
+      "question_id": "dev_compositional_pignose_sexes"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "family": "Coccinella_septempunctata",
+      "job_id": "dev_relational_lady_food__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "observable": true,
+      "quality": 5,
+      "question_id": "dev_relational_lady_food"
+    }
+  ],
+  "reviewed": 96,
+  "reviewer_type": "assistant_not_human_gold",
+  "scope": "Development results, not formal test accuracy. Quality remains per-output; unobservable is not a pass."
+}

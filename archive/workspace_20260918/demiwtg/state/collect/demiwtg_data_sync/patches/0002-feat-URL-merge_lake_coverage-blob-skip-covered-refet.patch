@@ -1,0 +1,323 @@
+From f2aa3ce36eae14082db59e3995629be2f63c1d4f Mon Sep 17 00:00:00 2001
+From: vincent9299 <vincent9299@users.noreply.github.com>
+Date: Tue, 8 Sep 2026 04:38:47 +0000
+Subject: [PATCH 2/3] =?UTF-8?q?feat:=20=E6=B9=96=E4=BE=A7=E8=A6=86?=
+ =?UTF-8?q?=E7=9B=96=E5=90=88=E5=B9=B6=20+=20=E7=BC=BA=E5=9B=BE=20URL=20?=
+ =?UTF-8?q?=E8=A1=A5=E9=87=87=E5=B7=A5=E5=85=B7=E2=80=94=E2=80=94merge=5Fl?=
+ =?UTF-8?q?ake=5Fcoverage=EF=BC=88blob=20=E5=AE=9E=E5=AD=98=E8=A1=8C?=
+ =?UTF-8?q?=E5=B9=B6=E5=85=A5=E6=9C=AC=E5=9C=B0=E6=B8=85=E5=8D=95=EF=BC=8C?=
+ =?UTF-8?q?--skip-covered/=E9=85=8D=E9=A2=9D/=E5=8E=BB=E9=87=8D=E6=8C=89?=
+ =?UTF-8?q?=E6=B9=96=E5=86=85=E8=A6=86=E7=9B=96=E5=B7=A5=E4=BD=9C=EF=BC=89?=
+ =?UTF-8?q?+=20refetch=5Fmissing=EF=BC=88worklist=20=E6=8C=89=20URL=20?=
+ =?UTF-8?q?=E9=87=8D=E4=B8=8B=E3=80=81=E6=8C=89=E6=BA=90=E9=98=B2=E7=9B=97?=
+ =?UTF-8?q?=E9=93=BE=E5=A4=B4=E3=80=81sha256=20=E5=A4=8D=E9=AA=8C=E3=80=81?=
+ =?UTF-8?q?=E5=8E=9F=E5=AD=90=E8=90=BD=20blob=E3=80=81=E6=96=AD=E7=82=B9?=
+ =?UTF-8?q?=E7=BB=AD=E8=B7=91/=E6=AD=BB=E4=BF=A1=E8=BD=AE=EF=BC=89?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ merge_lake_coverage.py |  83 +++++++++++++++++
+ refetch_missing.py     | 199 +++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 282 insertions(+)
+ create mode 100644 merge_lake_coverage.py
+ create mode 100644 refetch_missing.py
+
+diff --git a/merge_lake_coverage.py b/merge_lake_coverage.py
+new file mode 100644
+index 0000000..d369b2b
+--- /dev/null
++++ b/merge_lake_coverage.py
+@@ -0,0 +1,83 @@
++#!/usr/bin/env python3
++# -*- coding: utf-8 -*-
++"""merge_lake_coverage.py — 湖侧覆盖清单合并进本地 image.jsonl（集群侧，2026-09-08）。
++
++背景：湖机器图片部分还原（Sep 5 备份抽取 + 本地收割），导出
++lake_coverage_for_cluster.jsonl（本仓 schema：concepts 字段）。合并进本地
++清单后，flow 的三处机制立即按湖内覆盖工作，补采不重下：
++  ① load_coverage + --skip-covered N：概念已有 ≥N 张合格图即跳过；
++  ② 配额循环 concept_coverage：bench 批任务概念配额按合并后计数收敛；
++  ③ sink load_index 的 (sha256, concept) 去重：湖内已有内容直接跳过落盘。
++
++幂等：按 (sha256, concept) 键去重合并，重复执行不产生重复行。
++
++用法：
++  python3 merge_lake_coverage.py lake_coverage_for_cluster.jsonl            # 默认清单
++  python3 merge_lake_coverage.py <file> --dataset ~/datasets/demiwtg        # 指定数据集根
++  python3 merge_lake_coverage.py <file> --dry-run                           # 只看会并入多少
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import os
++import sys
++import tempfile
++
++REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
++DEFAULT_DATASET = os.path.join(REPO_ROOT, "datasets", "demiwtg")
++
++
++def main() -> None:
++    ap = argparse.ArgumentParser(description="湖侧覆盖清单合并（幂等，(sha,concept) 去重）")
++    ap.add_argument("src", help="lake_coverage_for_cluster.jsonl 路径")
++    ap.add_argument("--dataset", default=DEFAULT_DATASET,
++                    help="清单/状态根（默认本仓 datasets/demiwtg）")
++    ap.add_argument("--dry-run", action="store_true", help="只统计不写盘")
++    args = ap.parse_args()
++
++    manifest = os.path.join(args.dataset, "meta", "image.jsonl")
++
++    have = set()
++    if os.path.exists(manifest):
++        with open(manifest, encoding="utf-8") as f:
++            for line in f:
++                line = line.strip()
++                if not line:
++                    continue
++                try:
++                    rec = json.loads(line)
++                except json.JSONDecodeError:
++                    continue
++                for c in rec.get("concepts") or [""]:
++                    have.add((rec.get("sha256"), c))
++    base = len(have)
++
++    merged = 0
++    tmp = manifest + ".tmp"
++    with open(args.src, encoding="utf-8") as f, \
++            open(tmp, "a", encoding="utf-8") if not args.dry_run else open(os.devnull, "w") as out:
++        for line in f:
++            line = line.strip()
++            if not line:
++                continue
++            rec = json.loads(line)
++            keys = [(rec.get("sha256"), c) for c in rec.get("concepts") or [""]]
++            if all(k in have for k in keys):
++                continue                      # 完全已知（幂等重跑）
++            merged += 1
++            if not args.dry_run:
++                out.write(json.dumps(rec, ensure_ascii=False) + "\n")
++            have.update(keys)
++    if args.dry_run:
++        if os.path.exists(tmp):
++            os.remove(tmp)
++        print(f"[dry-run] 清单 {manifest}：既有 {base:,} 键，将并入 {merged:,} 行")
++        return
++    os.replace(tmp, manifest)
++    print(f"[merge] {manifest}：既有 {base:,} 键，并入 {merged:,} 行（幂等可重跑）")
++    print("[next] flow 照常跑：--skip-covered N / 配额循环 / sink 去重已按合并后覆盖工作")
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/refetch_missing.py b/refetch_missing.py
+new file mode 100644
+index 0000000..5cf80b0
+--- /dev/null
++++ b/refetch_missing.py
+@@ -0,0 +1,199 @@
++#!/usr/bin/env python3
++# -*- coding: utf-8 -*-
++"""refetch_missing.py — 湖侧缺图行按 URL 补采（demiwtg-data 集群侧，2026-09-08）。
++
++背景：湖机器图片丢失后恢复全量 preloss 清单（meta/images.jsonl 285 万行），
++其中 ~196.6 万 sha 的 blob 缺失。湖侧导出 refetch_worklist.jsonl（缺 blob 且
++带 content_url 的行，本仓 schema：concepts 字段）。本工具按 URL 重下：
++
++    下载 content_url（按源防盗链头，复用 operators/download.download_headers_for）
++    → sha256 复验（内容寻址：哈希不符即丢弃，错内容进不了湖）
++    → 落 blob（blobs/<aa>/<sha>.<ext>，原子写）
++    → 追加 image.jsonl 行（原行元数据随行，fetched_at 刷新；flock 串行追加）
++
++断点续跑：state 文件记 done/dead sha；重跑跳过已完成与死链（--retry-dead
++重试死链）。产出统计与死信清单（refetch_dead.jsonl）供巡检。
++
++用法（集群 VM，本仓根）：
++  python3 refetch_missing.py refetch_worklist.jsonl                    # 全量补采
++  python3 refetch_missing.py refetch_worklist.jsonl --limit 1000       # 试跑
++  python3 refetch_missing.py refetch_worklist.jsonl --workers 64
++  python3 refetch_missing.py refetch_worklist.jsonl --retry-dead       # 死链重试轮
++"""
++from __future__ import annotations
++
++import argparse
++import asyncio
++import fcntl
++import hashlib
++import json
++import os
++import sys
++import time
++from pathlib import Path
++
++import httpx
++
++from operators.download import download_headers_for
++
++MAX_BYTES = 20 * 1024 * 1024        # 对齐 operators.download.MAX_DOWNLOAD_BYTES
++HARD_TIMEOUT = 60.0
++UA_FALLBACK = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
++                             "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"}
++
++
++def load_state(state_path: Path) -> tuple[set, set]:
++    done, dead = set(), set()
++    if state_path.exists():
++        for line in state_path.open(encoding="utf-8"):
++            line = line.strip()
++            if not line:
++                continue
++            try:
++                r = json.loads(line)
++            except json.JSONDecodeError:
++                continue
++            (done if r.get("ok") else dead).add(r["sha256"])
++    return done, dead
++
++
++async def fetch_one(client, sem, rec, blobs_root, dead_path, dead_lock, stats):
++    sha = rec["sha256"]
++    url = rec.get("content_url")
++    ext = rec.get("ext") or "jpg"
++    dst = Path(blobs_root) / sha[:2] / f"{sha}.{ext}"
++    if dst.exists():
++        async with dead_lock:
++            stats["skip_blob"] += 1
++        return rec, "blob_exists"
++    headers = download_headers_for(rec.get("source") or "") or UA_FALLBACK
++    try:
++        async with sem:
++            r = await client.get(url, headers=headers,
++                                 timeout=httpx.Timeout(30, read=30),
++                                 follow_redirects=True)
++        if r.status_code != 200:
++            raise RuntimeError(f"HTTP {r.status_code}")
++        data = r.content
++        if len(data) > MAX_BYTES:
++            raise RuntimeError(f"size {len(data)} > {MAX_BYTES}")
++        if hashlib.sha256(data).hexdigest() != sha:
++            raise RuntimeError("sha256 mismatch（内容已变）")
++        dst.parent.mkdir(parents=True, exist_ok=True)
++        tmp = dst.with_suffix(f".{os.getpid()}.tmp")
++        tmp.write_bytes(data)
++        os.replace(tmp, dst)
++        async with dead_lock:
++            stats["ok"] += 1
++        return rec, "ok"
++    except Exception as e:                      # noqa: BLE001
++        async with dead_lock:
++            stats["dead"] += 1
++            with dead_path.open("a", encoding="utf-8") as f:
++                f.write(json.dumps({"sha256": sha, "url": url,
++                                    "error": str(e)[:200]}, ensure_ascii=False) + "\n")
++        return rec, "dead"
++
++
++async def main_async(args) -> None:
++    dataset = Path(args.dataset)
++    blobs_root = Path(args.blob_root) if args.blob_root else dataset
++    manifest = dataset / "meta" / "image.jsonl"
++    state_path = Path(args.state)
++    dead_path = state_path.with_suffix(".dead.jsonl")
++
++    # 既有清单 sha（已采内容不重下）
++    have = set()
++    if manifest.exists():
++        with manifest.open(encoding="utf-8") as f:
++            for line in f:
++                line = line.strip()
++                if line:
++                    try:
++                        have.add(json.loads(line)["sha256"])
++                    except (json.JSONDecodeError, KeyError):
++                        continue
++    done, dead = load_state(state_path)
++    if not args.retry_dead:
++        done |= dead
++    print(f"[state] 清单既有 {len(have):,} sha；断点 done {len(done):,}"
++          f" / dead {len(dead):,}", flush=True)
++
++    work = []
++    with open(args.worklist, encoding="utf-8") as f:
++        for line in f:
++            line = line.strip()
++            if not line:
++                continue
++            rec = json.loads(line)
++            sha = rec["sha256"]
++            if sha in have or sha in done:
++                continue
++            work.append(rec)
++            if args.limit and len(work) >= args.limit:
++                break
++    print(f"[work] 待补采 {len(work):,} 行（workers={args.workers}）", flush=True)
++    if not work:
++        return
++
++    sem = asyncio.Semaphore(args.workers)
++    dead_lock = asyncio.Lock()
++    state_lock = asyncio.Lock()
++    stats = {"ok": 0, "dead": 0, "skip_blob": 0}
++    t0 = time.time()
++    manifest_f = manifest.open("a", encoding="utf-8")
++    lock_f = (dataset / "meta" / ".meta.lock").open("a")
++    fcntl.flock(lock_f, fcntl.LOCK_EX)
++    try:
++        async with httpx.AsyncClient() as client:
++            async def run_one(rec):
++                out_rec, status = await fetch_one(
++                    client, sem, rec, blobs_root, dead_path, dead_lock, stats)
++                if status in ("ok", "blob_exists"):
++                    out_rec = dict(out_rec)
++                    out_rec["fetched_at"] = time.time()
++                    out_rec["path"] = (f"blobs/{out_rec['sha256'][:2]}/"
++                                       f"{out_rec['sha256']}.{out_rec.get('ext') or 'jpg'}")
++                    async with state_lock:
++                        manifest_f.write(json.dumps(out_rec, ensure_ascii=False) + "\n")
++                        manifest_f.flush()
++                        state_path.parent.mkdir(parents=True, exist_ok=True)
++                        with state_path.open("a", encoding="utf-8") as sf:
++                            sf.write(json.dumps({"sha256": out_rec["sha256"],
++                                                 "ok": True}) + "\n")
++            n = 0
++            for fut in asyncio.as_completed([run_one(r) for r in work]):
++                await fut
++                n += 1
++                if n % 500 == 0:
++                    rate = n / (time.time() - t0)
++                    print(f"[进度] {n}/{len(work)}（{rate:.1f}/s）"
++                          f" ok={stats['ok']:,} dead={stats['dead']:,}", flush=True)
++    finally:
++        fcntl.flock(lock_f, fcntl.LOCK_UN)
++        lock_f.close()
++        manifest_f.close()
++    print(f"[done] ok={stats['ok']:,} dead={stats['dead']:,} "
++          f"skip={stats['skip_blob']:,}，耗时 {time.time()-t0:.0f}s；"
++          f"死信 {dead_path}", flush=True)
++
++
++def main() -> None:
++    ap = argparse.ArgumentParser(description="湖侧缺图行按 URL 补采（sha256 复验）")
++    ap.add_argument("worklist", help="refetch_worklist.jsonl 路径")
++    ap.add_argument("--dataset", default=os.path.join(
++        os.path.dirname(os.path.abspath(__file__)), "datasets", "demiwtg"),
++        help="清单/状态根（默认本仓 datasets/demiwtg）")
++    ap.add_argument("--blob-root", default="",
++                    help="blob 落盘根（缺省=--dataset）")
++    ap.add_argument("--workers", type=int, default=32)
++    ap.add_argument("--limit", type=int, default=0, help="试跑上限（0=全量）")
++    ap.add_argument("--state", default="state/refetch_done.jsonl",
++                    help="断点状态文件（done sha 逐行追加）")
++    ap.add_argument("--retry-dead", action="store_true", help="重试死信轮")
++    args = ap.parse_args()
++    asyncio.run(main_async(args))
++
++
++if __name__ == "__main__":
++    main()
+-- 
+2.34.1
+

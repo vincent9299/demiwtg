@@ -1,0 +1,5 @@
+{
+  "status": "calibration_superseded",
+  "reason": "校准运行完成；发现原生sections未进入章节选择，未做模型调用，不作为最终验收。",
+  "preserve": "Inputs, source snapshots, outputs and failures retained."
+}

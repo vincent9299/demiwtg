@@ -11,6 +11,12 @@ from curation.v4.ops.knowledge_prompts import SYSTEM, IDENTITY, EXTRACT, CONSOLI
 from curation.v4.ops.source_blocks import SELECT_BLOCKS, SELECT_BLOCKS_STRICT, COMPARE_BLOCKS
 
 
+def article_prompt_template(spec):
+    image_template = '{{ images | numbered_image }}' if spec.get('numbered_images', False) else '{{ images | image }}'
+    return (spec['instruction'] + '\n本次材料：\n{{ payload }}\n真实图片：\n' + image_template
+            + ('\n' + spec['closing_instruction'] if spec.get('closing_instruction') else ''))
+
+
 def knowledge_prompt_pack(config):
     # Typed outer schema; detailed source/quote/conflict checks stay in business ops.
     shapes={
@@ -57,6 +63,18 @@ def knowledge_prompt_pack(config):
             'template':template}
     for name in ['joint_paragraphs', 'select_images']:
         prompts[name]['version']=yaml.safe_load((Path(__file__).parent/'prompts'/f'{name}.yaml').read_text())['version']
+    if config.get('relevance_only', True):
+        prompts['select_blocks']['version']=yaml.safe_load((Path(__file__).parent/'prompts/relevance.yaml').read_text())['version']
+    if config.get('article_mode', False):
+        for name, filename in [('joint_paragraphs', 'article_joint'), ('final_review', 'final_review')]:
+            spec = yaml.safe_load((Path(__file__).parent/'prompts'/f'{filename}.yaml').read_text())
+            prompts[name] = {
+                'version': spec['version'], 'response_format': 'text',
+                'model': {'name': config['model'], 'transport': 'openai_compatible', 'base_url': config['base_url'], 'api_key_env': 'CURATION_LOCAL_MODEL_KEY'},
+                'schema_retries': 0,
+                'response_schema': {'type': 'object', 'required': ['result'], 'additionalProperties': False, 'properties': {'result': {'type': 'string', 'minLength': 1}}},
+                'template': article_prompt_template(spec)}
+        prompts={name:prompts[name] for name in ['identity','select_blocks','select_images','joint_paragraphs','final_review']}
     text=yaml.safe_dump({'schema_version':'demiflow_prompt_pack_v2','prompts':prompts},allow_unicode=True,sort_keys=False)
     return parse_prompt_pack(text),text
 
@@ -84,7 +102,7 @@ def prompt_execution_options(run,config):
     return {'journal_dir':str(Path(run)/'knowledge/calls'),'timeout_s':config['timeout_s'],
             'trust_env':False,'verify_model':True,'require_finish_reason_stop':True,
             'request_options':{'max_tokens':config['max_output_tokens'],'response_format':{'type':'json_object'},
-                               'chat_template_kwargs':{'enable_thinking':False},
+                               'chat_template_kwargs':{'enable_thinking':config.get('enable_thinking',False), **({'reasoning_effort':config.get('reasoning_effort','low')} if config.get('enable_thinking') and config['model'].startswith('qwen') else {})},
                                **({'temperature':config['temperature']} if 'temperature' in config else {})}}
 
 

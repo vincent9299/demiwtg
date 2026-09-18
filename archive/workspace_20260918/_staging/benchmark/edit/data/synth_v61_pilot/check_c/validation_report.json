@@ -1,0 +1,39 @@
+{
+ "reject": [],
+ "warn": {},
+ "xcheck": [
+  {
+   "qid": "e015",
+   "jaccard": 0.17
+  },
+  {
+   "qid": "e016",
+   "jaccard": 0.22
+  },
+  {
+   "qid": "e017",
+   "jaccard": 0.18
+  }
+ ],
+ "coverage": {
+  "plan": 20,
+  "terminal": 6,
+  "missing": [
+   "e001",
+   "e002",
+   "e003",
+   "e004",
+   "e005",
+   "e006",
+   "e007",
+   "e008",
+   "e009",
+   "e010",
+   "e011",
+   "e012",
+   "e013",
+   "e014"
+  ],
+  "duplicates_or_invalid": 0
+ }
+}

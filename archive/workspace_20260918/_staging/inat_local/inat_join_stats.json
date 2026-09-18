@@ -1,0 +1,16 @@
+{
+ "obs_pairs": 244576320,
+ "obs_map": 244576320,
+ "photos_scanned": 488562900,
+ "emitted_raw": 69083805,
+ "lic_skipped": 408655054,
+ "final_rows": 3584741,
+ "distinct_qids": 186817,
+ "quota": 30,
+ "license_hist": {
+  "CC0": 505999,
+  "CC-BY": 2579790,
+  "CC-BY-SA": 498952
+ },
+ "elapsed_sec": 818
+}

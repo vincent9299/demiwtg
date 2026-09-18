@@ -1,0 +1,65 @@
+{
+  "code_hash": "a58642e6e50704d4c346525a200e3e59deeba2c87fb8ba6b25a62dc35b744ffd",
+  "config": {
+    "group_size": 32,
+    "ids": [
+      "legacy:木兰",
+      "legacy:芦笙",
+      "qid:Q1"
+    ],
+    "max_records_per_source": 50000,
+    "sample_rate": 1.0,
+    "seed": 42
+  },
+  "dataset": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg",
+  "ijson": "3.5.1",
+  "project": "/yzp/zhaozy/yangzepeng/0905/demiwtg",
+  "runtime": {
+    "demiflow": "0.1.0",
+    "demiflow_python_sha256": "979d94e11d10fa40780d739478f0b22386d4ec92e1e1e2415ebb620cb4d874f4"
+  },
+  "schema": "record-flow/1",
+  "scope": "Record-first processing. Source associations and machine knowledge remain unreviewed.",
+  "sources": [
+    {
+      "exists": true,
+      "inode": 144115188323572486,
+      "kind": "legacy_concepts",
+      "mtime_ns": 1788833082430420000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/concepts.json",
+      "size": 85347611
+    },
+    {
+      "exists": true,
+      "inode": 144115188331473255,
+      "kind": "qid_concepts",
+      "mtime_ns": 1789076000373469000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_concepts.fat.jsonl.gz",
+      "size": 251716336
+    },
+    {
+      "exists": true,
+      "inode": 144115188331551348,
+      "kind": "wiki_pages",
+      "mtime_ns": 1789272858593156000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part1.jsonl.gz",
+      "size": 4066683407
+    },
+    {
+      "exists": true,
+      "inode": 144115188331180145,
+      "kind": "legacy_docs",
+      "mtime_ns": 1789051067040126000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/docs.jsonl",
+      "size": 4368748
+    },
+    {
+      "exists": true,
+      "inode": 144115188323754377,
+      "kind": "legacy_images",
+      "mtime_ns": 1788889217518892000,
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/images.jsonl",
+      "size": 2661828149
+    }
+  ]
+}

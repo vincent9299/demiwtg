@@ -1,0 +1,26 @@
+{
+  "automatic_retries": 0,
+  "endpoint": "http://127.0.0.1:4001/v1/chat/completions",
+  "image_config": {
+    "aspect_ratio": "1:1"
+  },
+  "limit": 12,
+  "model": "openrouter/google/gemini-3.1-flash-image",
+  "questions_path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/knowledge_color_probe_v1/gemini_questions.jsonl",
+  "questions_sha256": "7792a9920bed21fca543eb411176dffba773b4e708a6a89cc9c7e367702ad8e4",
+  "schema": "curation-gemini-t2i-probe-v1",
+  "selected_qids": [
+    "araucana_egg_g1",
+    "araucana_egg_g2",
+    "araucana_egg_g3",
+    "marans_egg_g1",
+    "marans_egg_g2",
+    "marans_egg_g3",
+    "lithium_flame_g1",
+    "lithium_flame_g2",
+    "lithium_flame_g3",
+    "sodium_flame_g1",
+    "sodium_flame_g2",
+    "sodium_flame_g3"
+  ]
+}

@@ -9,7 +9,7 @@ IMAGE_FILTER_DEFAULTS = {
     'image_filter_output_tokens': 4096,
     'image_review_concurrency': 2,
 }
-IMAGE_FILTER_POLICY = 'qwen38-gemma31-confirm-keep-v1'
+IMAGE_FILTER_POLICY = 'qwen38-gemma31-confirm-keep-v3-exact-derivatives'
 
 
 class RecordPrimaryImageSelection:

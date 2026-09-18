@@ -1,0 +1,46 @@
+{
+  "branches": {
+    "baseline": {
+      "characters": 15972,
+      "retained_documents": 14
+    },
+    "block_quality": {
+      "characters": 5836,
+      "retained_documents": 7
+    },
+    "c4_terminal_punctuation": {
+      "characters": 6347,
+      "retained_documents": 10
+    },
+    "document_dedup": {
+      "characters": 5836,
+      "retained_documents": 7
+    },
+    "gopher_english_thresholds": {
+      "characters": 3187,
+      "retained_documents": 2
+    },
+    "gopher_multilingual_signals": {
+      "characters": 5399,
+      "retained_documents": 5
+    },
+    "paragraph_dedup": {
+      "characters": 5836,
+      "retained_documents": 7
+    }
+  },
+  "documents": 14,
+  "model_calls": 0,
+  "near_duplicate_pairs": [
+    {
+      "action": "review_unique_passages_before_collapsing",
+      "containment": 0.7907488986784141,
+      "jaccard": 0.580906148867314,
+      "left": "3595dbcd3aac22428493b7f856f80b7023803691b6faecf42c439798876d19bd",
+      "lsh_candidate": false,
+      "near_duplicate": false,
+      "right": "6eeb1f9cd931a6bdce24daaeee1732017698c9e6518f30b951268f532ddca044"
+    }
+  ],
+  "repeated_paragraphs": 0
+}

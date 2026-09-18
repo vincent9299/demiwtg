@@ -1,0 +1,10 @@
+{
+  "mode": "t2i",
+  "n": 20,
+  "overall": 59.2,
+  "knowledge": 57.4,
+  "general": 83.17,
+  "gate_capped": 0,
+  "knowledge_fused": 5,
+  "judge_fail": 0
+}

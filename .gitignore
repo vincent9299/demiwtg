@@ -105,3 +105,14 @@ _reference/
 /sync/
 /sync_daemon.log
 /lake_sync.py.qwen.bak
+
+# Workspace preservation (2026-09-18): source snapshots are tracked, secrets are not.
+.cos_creds
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+.pytest_cache/
+*.egg-info/

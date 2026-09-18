@@ -1,0 +1,84 @@
+{
+  "schema": "edit-codex-score-report-v1",
+  "n": 20,
+  "n_valid": 20,
+  "n_invalid": 0,
+  "overall": 3.167,
+  "by_level": {
+    "L1": {
+      "n": 2,
+      "official_total": 2.5
+    },
+    "L2": {
+      "n": 12,
+      "official_total": 2.806
+    },
+    "L3": {
+      "n": 6,
+      "official_total": 4.111
+    }
+  },
+  "by_edit_type": {
+    "action": {
+      "n": 2,
+      "official_total": 2.5
+    },
+    "add": {
+      "n": 1,
+      "official_total": 4.0
+    },
+    "adjust": {
+      "n": 2,
+      "official_total": 3.0
+    },
+    "background": {
+      "n": 4,
+      "official_total": 2.5
+    },
+    "compose": {
+      "n": 2,
+      "official_total": 3.5
+    },
+    "extract": {
+      "n": 2,
+      "official_total": 2.0
+    },
+    "remove": {
+      "n": 2,
+      "official_total": 3.0
+    },
+    "replace": {
+      "n": 3,
+      "official_total": 4.0
+    },
+    "style": {
+      "n": 2,
+      "official_total": 4.667
+    }
+  },
+  "by_suite": {
+    "basic": {
+      "n": 16,
+      "official_total": 3.208
+    },
+    "knowledge": {
+      "n": 4,
+      "official_total": 3.0
+    }
+  },
+  "by_source_batch": {
+    "dual_carrier_supplement": {
+      "n": 3,
+      "official_total": 4.333
+    },
+    "main": {
+      "n": 14,
+      "official_total": 2.762
+    },
+    "quality_regen_v1": {
+      "n": 3,
+      "official_total": 3.889
+    }
+  },
+  "invalid_qids": []
+}

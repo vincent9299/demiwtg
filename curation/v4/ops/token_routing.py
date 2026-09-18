@@ -5,10 +5,9 @@ from types import SimpleNamespace
 
 
 def joint_payload(row):
-    return {'concept':row['concept'],
-        'passages':[{k:p.get(k) for k in ['source_id','text','sections','source_family','reference_notes','context_before','context_after']} for p in row['passages']],
+    return {'concept':row['concept'], 'scope_context':row.get('scope_context', {}),
+        'passages':[{k:p.get(k) for k in ['source_id','title','text','sections','source_family','reference_notes','context_before','context_after']} for p in row['passages']],
         'image_ids':[m['image_id'] for m in row['images']],
-        'image_selection':[m['selection_review'] for m in row['images']],
         'scope':'Capacity-first concept materials; associations are not identity or support certification'}
 
 
@@ -22,7 +21,7 @@ class JointTokenBudget:
         self.pre=json.loads((Path(model_path)/'preprocessor_config.json').read_text())
         if self.pre.get('processor_class')!='Qwen3VLProcessor':
             raise ValueError('Token accounting currently requires Qwen3VLProcessor')
-        _,text=knowledge_prompt_pack({'model':'qwen3.8-27b','base_url':'http://127.0.0.1:8000/v1'})
+        _,text=knowledge_prompt_pack({'model':'qwen3.8-27b','base_url':'http://127.0.0.1:8000/v1','article_mode':False})
         prompt=yaml.safe_load(text)['prompts']['joint_paragraphs']
         self.template=prompt['template']
         self.system=_response_contract_instruction(SimpleNamespace(response_schema=prompt['response_schema'],validation_feedback=None))
@@ -53,18 +52,23 @@ class JointTokenBudget:
 
 class RouteByTokenBudget:
     """Try the whole concept first. Never truncate an oversized indivisible unit."""
-    def __init__(self,model_path,max_input_tokens=32768,counter=None):
+    def __init__(self,model_path,max_input_tokens=32768,counter=None,max_images=None):
+        if max_images is not None and (not isinstance(max_images,int) or max_images<1):
+            raise ValueError('max_images must be a positive request target or None')
         self.model_path=model_path;self.limit=max_input_tokens;self.counter=counter if counter is not None else JointTokenBudget(model_path)
+        self.max_images=max_images
 
     def __call__(self,row):
         import numpy as np
         if self.counter is None:self.counter=JointTokenBudget(self.model_path)
         def request(passages,images):
-            return {'case_id':row['case_id'],'concept':row['concept'],'passages':passages,'images':images,'routing_edges':[],
+            return {'case_id':row['case_id'],'concept':row['concept'],'scope_context':row.get('scope_context', {}),'passages':passages,'images':images,'routing_edges':[],
                     'kind':'joint' if passages and images else 'text_only' if passages else 'image_only'}
         whole=request(row['passages'],row['images'])
         groups=[]
-        if self.counter(whole)<=self.limit:groups=[whole] if row['passages'] or row['images'] else []
+        def image_capacity(images):
+            return self.max_images is None or len(images)<=self.max_images
+        if image_capacity(whole['images']) and self.counter(whole)<=self.limit:groups=[whole] if row['passages'] or row['images'] else []
         else:
             byimage={m['image_id']:m for m in row['images']}
             native={p['source_id']:{e['image_id'] for e in row['native_links'] if e['source_id']==p['source_id']} for p in row['passages']}
@@ -82,7 +86,12 @@ class RouteByTokenBudget:
                 for p in ordered:
                     ids={m['image_id'] for m in g['images']}|native[p['source_id']]
                     candidate=request(g['passages']+[p],[byimage[i] for i in sorted(ids)])
-                    if self.counter(candidate)<=self.limit:chosen=(p,candidate);break
+                    # Keep one source passage's exact native links together. A
+                    # required group may exceed the image target, never the token
+                    # limit; do not append unrelated images to such a group.
+                    required_overflow=(not g['passages'] and ids==native[p['source_id']]) or ids=={m['image_id'] for m in g['images']}
+                    if (image_capacity(candidate['images']) or required_overflow) and self.counter(candidate)<=self.limit:
+                        chosen=(p,candidate);break
                 if chosen:
                     p,g=chosen;groups[-1]=g;remaining.remove(p);covered.update(m['image_id'] for m in g['images'])
                 elif g['passages']:groups.append(request([],[]))
@@ -96,7 +105,7 @@ class RouteByTokenBudget:
                     return max((float(np.dot(v,w['embedding'])) for w in windows if w['source_id'] in ids and v is not None),default=-2.)
                 for g in sorted(groups,key=score,reverse=True):
                     candidate=request(g['passages'],g['images']+[m])
-                    if self.counter(candidate)<=self.limit:g['images'].append(m);break
+                    if image_capacity(candidate['images']) and self.counter(candidate)<=self.limit:g['images'].append(m);break
                 else:
                     candidate=request([],[m])
                     if self.counter(candidate)>self.limit:raise ValueError('Single image exceeds joint_input_tokens')
@@ -104,7 +113,10 @@ class RouteByTokenBudget:
         for i,g in enumerate(groups):
             g['batch_id']=row['case_id']+f':token_routed:{i}'
             g['input_token_budget']=self.counter(g);g['input_token_limit']=self.limit
+            g['image_request_target']=self.max_images
+            g['native_image_target_exceeded']=not image_capacity(g['images'])
             if g['input_token_budget']>self.limit:raise ValueError('Joint input capacity exceeded')
         return {'case_id':row['case_id'],'concept':row['concept'],'requests':groups,'edges':row['native_links'],'overflow_edges':[],
                 'metrics':{'calls':len(groups),'input_token_limit':self.limit,'input_tokens':[g['input_token_budget'] for g in groups],
+                           'image_request_target':self.max_images,'native_image_target_exceeded':sum(g['native_image_target_exceeded'] for g in groups),
                            'image_presentations':sum(len(g['images']) for g in groups)}}

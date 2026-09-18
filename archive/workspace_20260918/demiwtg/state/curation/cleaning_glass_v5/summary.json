@@ -1,0 +1,13 @@
+{
+  "after_chars": 6232,
+  "before_chars": 5810,
+  "content_anchors_preserved": 14,
+  "documents": 14,
+  "dom_pairs": 18,
+  "model_calls": 0,
+  "repair_actions": 17,
+  "restored_blocks": 9,
+  "retained_documents": 5,
+  "source_offsets_verified": true,
+  "unresolved_fields": 7
+}

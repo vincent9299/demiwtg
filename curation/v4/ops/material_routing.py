@@ -9,6 +9,12 @@ from .knowledge_stages import material_id
 class PrepareRoutingMaterials:
     def __call__(self,row):
         pack=row['material_pack'];passages=pack['passages'];images=pack['images']
+        background={r['material_id'] for r in row['identity'].get('material_reviews', [])
+                    if r.get('basis') == 'text' and r.get('relation') == 'related_context'}
+        aliases={a for m in row.get('bundle', {}).get('materials', []) if m.get('kind') == 'legacy_concepts'
+                 for a in m.get('record', {}).get('aliases', []) if isinstance(a, str) and a}
+        context={'aliases':sorted(aliases), 'background_titles':sorted({p['title'] for p in passages
+                 if p.get('material_id') in background and p.get('title')})}
         image_urls={m['record'].get(k):m['image_id'] for m in images for k in ['content_url','url'] if m['record'].get(k)}
         by_material=defaultdict(list)
         for p in passages:by_material[p['material_id']].append(p)
@@ -28,7 +34,7 @@ class PrepareRoutingMaterials:
                     if im.get('target') in image_urls and nearby:
                         native.append({**edge,'source_id':min(nearby)[1],'image_id':image_urls[im['target']],'association':'exact_image_url_and_nearby_source_block; not semantic support certification'})
                     else:unmatched.append({**edge,'reason':'no_selected_image_url_match' if im.get('target') not in image_urls else 'no_nearby_selected_passage'})
-        return {'case_id':row['case_id'],'concept':row['identity']['target_label'],'passages':passages,'images':images,'native_links':native,'unmatched_native_references':unmatched,
+        return {'case_id':row['case_id'],'concept':row['identity']['target_label'],'scope_context':context,'passages':passages,'images':images,'native_links':native,'unmatched_native_references':unmatched,
                 'input_scope':{'selected_passages':len(passages),'selected_images':len(images),'other_images_not_added':True}}
 
 

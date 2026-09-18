@@ -1,0 +1,14 @@
+{
+  "automatic_retries": 0,
+  "endpoint": "http://127.0.0.1:4001/v1/chat/completions",
+  "helper_sha256": "d70f1c8ae41d76a4dbacdc4a852b0c2380e412c6132d8f87c481de6048ada124",
+  "image_config": {
+    "aspect_ratio": "1:1"
+  },
+  "jobs_sha256": "7e503a33bd80f6166de7c961a4d0f271147ea6185c8aacdf2b737ce8c6f2577c",
+  "max_attempts": 60,
+  "model": "openrouter/google/gemini-3.1-flash-image",
+  "runner_sha256": "0bde5879d91227d4777734ee6ad7a439b7fb7d9479fe0b594c1fa0e6009eb55e",
+  "seed_supported": false,
+  "timeout_seconds": 240
+}

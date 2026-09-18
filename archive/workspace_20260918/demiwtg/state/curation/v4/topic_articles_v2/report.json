@@ -1,0 +1,21 @@
+{
+  "counts": {
+    "玻璃棒": {
+      "articles": 4,
+      "images": 2
+    },
+    "白花芍药": {
+      "articles": 3,
+      "images": 3
+    },
+    "OK手势": {
+      "articles": 9,
+      "images": 6
+    }
+  },
+  "text_unchanged": true,
+  "max_images_per_article": 5,
+  "references_deduplicated_per_article": true,
+  "new_generative_calls": 0,
+  "image_vectors_reused": true
+}

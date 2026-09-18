@@ -1,0 +1,79 @@
+{
+  "code_hash": "441bd9e4ef9b98ca67c2e7c48dcdeb80d2686739a6cd38aa899304bf7094b579",
+  "config": {
+    "image_budget": 2,
+    "model": {
+      "base_url": "http://127.0.0.1:8000/v1",
+      "cos_base_url": null,
+      "identity_docs": 12,
+      "max_calls": 12,
+      "max_cases": 3,
+      "max_chars_per_doc": 6500,
+      "max_docs": 2,
+      "max_image_bytes": 8388608,
+      "max_images": 2,
+      "max_input_chars": 13000,
+      "max_output_tokens": 3500,
+      "model": "qwen3.8-27b",
+      "timeout_s": 240
+    },
+    "requests": [
+      {
+        "kind": "legacy",
+        "value": "木兰"
+      },
+      {
+        "kind": "legacy",
+        "value": "芦笙"
+      },
+      {
+        "kind": "qid",
+        "value": "Q1"
+      }
+    ],
+    "scan_rows": 50000,
+    "sources": [
+      "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/concepts.json",
+      "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/qid_concepts.fat.jsonl.gz",
+      "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/docs.jsonl",
+      "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/images.jsonl",
+      "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/corpus/pages-en-part1.jsonl.gz"
+    ]
+  },
+  "dataset": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg",
+  "notebook_code": [
+    "from pathlib import Path\nimport sys\nPROJECT = Path('/yzp/zhaozy/yangzepeng/0905/demiwtg')\nif str(PROJECT) not in sys.path: sys.path.insert(0, str(PROJECT))\nfrom curation.v4.notebook_debug import DebugSession, show, detail, materials\nfrom curation.v4.sources import discover\nfrom curation.v4.operators import InspectSource, ScanSource, AssembleMaterial, SaveBundle\nfrom curation.v4.contracts import IdentityRegistry, digest, run_lock\nfrom curation.v4.pipeline import DEFAULT\nfrom curation.v4.knowledge_stages import (\n    CleanMaterials, ResolveIdentity, OrganizeMaterials, ExtractKnowledge,\n    ConsolidateKnowledge, CheckImageSupport, ExportCandidates)\nDATASET = PROJECT / 'datasets/demiwtg'\nRUN_NAME = 'operator_debug_clean_v2'\nRUN = PROJECT / 'state/curation/v4' / RUN_NAME\nREQUESTS = [{'kind':'legacy','value':'木兰'}, {'kind':'legacy','value':'芦笙'}, {'kind':'qid','value':'Q1'}]\nSCAN_ROWS = 50_000  # 每源实际扫描上限；不等于显示条数\nIMAGE_BUDGET = 2\nMODEL_CONFIG = {**DEFAULT, 'max_cases':3, 'max_calls':12}\n# 打开后，执行后半段 cell 会调用本地 Qwen；累计请求上限见 MODEL_CONFIG。\nRUN_MODEL_CELLS = False\nSOURCE_PATHS = [DATASET / x for x in [\n    'meta/concepts.json', 'meta/qid_concepts.fat.jsonl.gz',\n    'meta/docs.jsonl', 'meta/images.jsonl', 'corpus/pages-en-part1.jsonl.gz']]\nCONFIG = {'requests':REQUESTS, 'scan_rows':SCAN_ROWS, 'image_budget':IMAGE_BUDGET,\n          'sources':[str(p) for p in SOURCE_PATHS], 'model':MODEL_CONFIG}\nsession = DebugSession(RUN, PROJECT, DATASET, CONFIG, PROJECT/'curation/v4/knowledge_debug.ipynb')\nprint('运行目录:', RUN)\nprint('实际解释器:', sys.executable)",
+    "sources = [s for s in discover(DATASET, PROJECT) if Path(s['path']) in SOURCE_PATHS]\nassert len(sources) == len(SOURCE_PATHS)\ninventory_rows = await session.step('inspect_sources', sources, InspectSource)",
+    "show(inventory_rows, limit=100, columns=['kind','path','status','sample_fields'])",
+    "identity_kinds = {'legacy_concepts','qid_concepts','qid_concepts_base'}\nidentity_scans = await session.step('scan_identity_records',\n    [s for s in sources if s['kind'] in identity_kinds],\n    lambda: ScanSource(RUN, REQUESTS, {}, SCAN_ROWS, session.code))",
+    "show([{'source':s['source']['kind'], 'status':s['status'], 'scan':s['scan'], 'matches':s['matches']} for s in identity_scans])",
+    "links = {}\nfor scan in identity_scans:\n    if scan['source']['kind'] not in {'qid_concepts','qid_concepts_base'}: continue\n    for match in scan['matches']:\n        record = match['record']\n        for lang in ['en','zh']:\n            site = record.get(lang) or {}\n            if site.get('page_id') is not None:\n                links.setdefault(record['qid'], []).append((lang,site['page_id']))\nlinks = {k:sorted(set(v)) for k,v in links.items()}\nmaterial_scans = await session.step('scan_materials',\n    [s for s in sources if s['kind'] not in identity_kinds],\n    lambda: ScanSource(RUN, REQUESTS, links, SCAN_ROWS, session.code))",
+    "show([{'source':s['source']['kind'], 'status':s['status'], 'matched':len(s['matches']), 'scan':s['scan']} for s in material_scans])\nshow([m for s in material_scans for m in s['matches']], limit=100, sample=True, seed=42)",
+    "scans = sorted(identity_scans + material_scans, key=lambda s:s['source']['path'])\nwith run_lock(PROJECT/'state/curation/v4'):\n    registry = IdentityRegistry(PROJECT/'state/curation/v4/identities.sqlite')\n    try:\n        tasks = [{'request':r, 'concept_id':registry.get(r),\n                  'task_id':digest({'config':CONFIG,'request':r,'scans':scans})} for r in REQUESTS]\n    finally: registry.close()\nbundles = await session.step('assemble_material_bundle', tasks,\n    lambda: AssembleMaterial(scans, DATASET, [], IMAGE_BUDGET))",
+    "raw_materials = materials(bundles)\nshow(raw_materials, limit=100, sample=False, columns=['case','kind','title','text','bytes'])",
+    "CASE = 'legacy:芦笙'\ncase_materials = [m for m in raw_materials if m['case']==CASE]\nshow(case_materials, limit=100, sample=True, seed=42, columns=['kind','title','text','bytes'])\nif case_materials: detail(case_materials[0]['record'])\n# 查看另一条完整输入：detail(case_materials[3]['record'])\n# 看已经核验字节的本地图（按需执行）：\n# from IPython.display import Image, display\n# display(Image(filename=case_materials[索引]['record']['bytes']['path']))",
+    "saved_bundles = await session.step('save_material_bundle', bundles, lambda: SaveBundle(RUN))\nshow([{'request':b['request'],'materials':len(b['materials']),'coverage':b['coverage']} for b in saved_bundles])",
+    "knowledge_input = [{'case_id':digest({'concept_id':b['concept_id'],'bundle':b})[:20],\n                    'bundle':b} for b in saved_bundles]\ncleaned_rows = await session.knowledge(CleanMaterials, knowledge_input)\nidentity_rows = organized_rows = extracted_rows = consolidated_rows = evidence_rows = exported_rows = []",
+    "show([{'case':r['bundle']['request'], **s} for r in cleaned_rows for s in r['cleaning_summary']], limit=100)\nclean_material_rows = [{'case':r['bundle']['request']['value'], 'material':m}\n    for r in cleaned_rows for m in r['cleaned_materials'] if 'cleaning' in m]\nshow([{'index':i,'case':r['case'],'title':r['material']['record'].get('title'),\n       'status':r['material']['cleaning']['status'], 'counts':r['material']['cleaning']['counts']}\n      for i,r in enumerate(clean_material_rows)], limit=100)",
+    "# 可交互修改 CLEAN_INDEX；这里只查看，不重跑清洗。\nCLEAN_INDEX = next((i for i,r in enumerate(clean_material_rows)\n    if r['material']['record'].get('title') == '《花木兰》明斯克外访 - 香港舞蹈團'), 0)\nif clean_material_rows:\n    chosen = clean_material_rows[CLEAN_INDEX]['material']\n    from curation.v4.cleaning import raw_text\n    detail({'title':chosen['record'].get('title'), 'original':raw_text(chosen),\n            'cleaned':chosen['cleaning']['text'], 'warnings':chosen['cleaning']['warnings']})\n    show(chosen['cleaning']['blocks'], limit=100, sample=False,\n         columns=['block_id','kind','raw_start','raw_end','raw_text','text','decision','reason'])\n    # 可单独检查排除块：\n    # show([b for b in chosen['cleaning']['blocks'] if b['decision']=='exclude'], limit=100)",
+    "identity_rows = []\nif RUN_MODEL_CELLS and cleaned_rows:\n    identity_rows = await session.knowledge(ResolveIdentity, cleaned_rows)\nelse:\n    print('未执行：模型调试开关关闭，或前一步没有输出。')",
+    "show([{'case':r['bundle']['request'],'blocked':r.get('blocked'),'result':r.get('identity')} for r in identity_rows], limit=100)\nif identity_rows: detail(identity_rows[0].get('identity', identity_rows[0].get('blocked')))",
+    "organized_rows = []\nif RUN_MODEL_CELLS and identity_rows:\n    organized_rows = await session.knowledge(OrganizeMaterials, identity_rows)\nelse:\n    print('未执行：模型调试开关关闭，或前一步没有输出。')",
+    "show([{'case':r['bundle']['request'],'blocked':r.get('blocked'),'result':r.get('material_pack')} for r in organized_rows], limit=100)\nif organized_rows: detail(organized_rows[0].get('material_pack', organized_rows[0].get('blocked')))",
+    "extracted_rows = []\nif RUN_MODEL_CELLS and organized_rows:\n    extracted_rows = await session.knowledge(ExtractKnowledge, organized_rows)\nelse:\n    print('未执行：模型调试开关关闭，或前一步没有输出。')",
+    "show([{'case':r['bundle']['request'],'blocked':r.get('blocked'),'result':r.get('extraction')} for r in extracted_rows], limit=100)\nif extracted_rows: detail(extracted_rows[0].get('extraction', extracted_rows[0].get('blocked')))",
+    "consolidated_rows = []\nif RUN_MODEL_CELLS and extracted_rows:\n    consolidated_rows = await session.knowledge(ConsolidateKnowledge, extracted_rows)\nelse:\n    print('未执行：模型调试开关关闭，或前一步没有输出。')",
+    "show([{'case':r['bundle']['request'],'blocked':r.get('blocked'),'result':r.get('knowledge')} for r in consolidated_rows], limit=100)\nif consolidated_rows: detail(consolidated_rows[0].get('knowledge', consolidated_rows[0].get('blocked')))",
+    "evidence_rows = []\nif RUN_MODEL_CELLS and consolidated_rows:\n    evidence_rows = await session.knowledge(CheckImageSupport, consolidated_rows)\nelse:\n    print('未执行：模型调试开关关闭，或前一步没有输出。')",
+    "show([{'case':r['bundle']['request'],'blocked':r.get('blocked'),'result':r.get('image_evidence')} for r in evidence_rows], limit=100)\nif evidence_rows: detail(evidence_rows[0].get('image_evidence', evidence_rows[0].get('blocked')))",
+    "exported_rows = []\nif RUN_MODEL_CELLS and evidence_rows:\n    exported_rows = await session.knowledge(ExportCandidates, evidence_rows)\nelse:\n    print('未执行：模型调试开关关闭，或前一步没有输出。')",
+    "show([{'case':r['bundle']['request'],'blocked':r.get('blocked'),'result':r.get('export')} for r in exported_rows], limit=100)\nif exported_rows: detail(exported_rows[0].get('export', exported_rows[0].get('blocked')))",
+    "show([{'step':p.stem,'path':str(p),'bytes':p.stat().st_size} for p in sorted((RUN/'debug_steps').glob('*.json'))])\nprint('已保存模型请求数:', len(list((RUN/'calls').glob('*.request.json'))))\n# from curation.v4.contracts import read\n# detail(read(RUN/'debug_steps/identity.json')['rows'][0])\n# detail(read(next((RUN/'calls').glob('*.request.json'))))"
+  ],
+  "project": "/yzp/zhaozy/yangzepeng/0905/demiwtg",
+  "runtime": {
+    "demiflow": "0.1.0",
+    "demiflow_python_sha256": "979d94e11d10fa40780d739478f0b22386d4ec92e1e1e2415ebb620cb4d874f4"
+  },
+  "scope": "Operator debugging; not approved knowledge or end-to-end acceptance."
+}

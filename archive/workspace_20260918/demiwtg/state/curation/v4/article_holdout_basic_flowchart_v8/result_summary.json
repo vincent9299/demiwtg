@@ -1,0 +1,19 @@
+{
+  "concepts": {
+    "基本流程图": {
+      "topics": 4,
+      "paragraphs": 4,
+      "characters": 797,
+      "images": 6
+    }
+  },
+  "calls": 1,
+  "stages": {
+    "final_review": 1
+  },
+  "usage": {
+    "completion_tokens": 6416,
+    "prompt_tokens": 14244,
+    "total_tokens": 20660
+  }
+}

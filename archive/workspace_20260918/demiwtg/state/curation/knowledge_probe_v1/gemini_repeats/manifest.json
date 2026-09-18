@@ -1,0 +1,26 @@
+{
+  "automatic_retries": 0,
+  "endpoint": "http://127.0.0.1:4001/v1/chat/completions",
+  "image_config": {
+    "aspect_ratio": "1:1"
+  },
+  "limit": 12,
+  "model": "openrouter/google/gemini-3.1-flash-image",
+  "questions_path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/knowledge_probe_v1/gemini_repeats_questions.jsonl",
+  "questions_sha256": "0fb61a7c2a981b59e664047f394a456a0bcc47b1defb8d9930f4314972dd0e56",
+  "schema": "curation-gemini-t2i-probe-v1",
+  "selected_qids": [
+    "tapir_calf_g2",
+    "tapir_calf_g3",
+    "puffin_winter_g2",
+    "puffin_winter_g3",
+    "cashew_whole_g2",
+    "cashew_whole_g3",
+    "cardinal_east_g2",
+    "cardinal_east_g3",
+    "cardinal_west_g2",
+    "cardinal_west_g3",
+    "wombat_scat_g2",
+    "wombat_scat_g3"
+  ]
+}

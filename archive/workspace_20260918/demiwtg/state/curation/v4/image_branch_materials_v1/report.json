@@ -1,0 +1,88 @@
+{
+  "bundles": [
+    {
+      "concept_id": "concept:b0a2eb78-8347-4560-89b7-23d0ce2946b3",
+      "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/image_branch_materials_v1/bundles/c90147e3f12471255d0635f875129505097df735a153772b8395475cd97ac216.json",
+      "request": {
+        "kind": "legacy",
+        "value": "芦笙"
+      },
+      "task_id": "c90147e3f12471255d0635f875129505097df735a153772b8395475cd97ac216"
+    }
+  ],
+  "limitations": [
+    "No cross-source identity adjudication.",
+    "COS/network byte fetching not connected.",
+    "No knowledge extraction or evidence approval.",
+    "Bounded source scans do not prove absence."
+  ],
+  "phase": "materials_prepared",
+  "schema": "curation-v4-materials/1",
+  "sources": [
+    {
+      "scan": {
+        "complete": false,
+        "invalid_rows": [],
+        "rows_scanned": 50000,
+        "total_rows": 385292
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188323572486,
+        "kind": "legacy_concepts",
+        "mtime_ns": 1788833082430420000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/concepts.json",
+        "size": 85347611
+      },
+      "status": "budget_limited"
+    },
+    {
+      "scan": {
+        "complete": true,
+        "invalid_rows": [],
+        "rows_scanned": 10023
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188331180145,
+        "kind": "legacy_docs",
+        "mtime_ns": 1789051067040126000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/docs.jsonl",
+        "size": 4368748
+      },
+      "status": "scanned"
+    },
+    {
+      "scan": {
+        "complete": false,
+        "invalid_rows": [],
+        "rows_scanned": 50000
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188323754377,
+        "kind": "legacy_images",
+        "mtime_ns": 1788889217518892000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg/meta/images.jsonl",
+        "size": 2661828149
+      },
+      "status": "budget_limited"
+    },
+    {
+      "scan": {
+        "complete": true,
+        "invalid_rows": [],
+        "rows_scanned": 4326
+      },
+      "source": {
+        "exists": true,
+        "inode": 144115188324671435,
+        "kind": "clean_docs",
+        "mtime_ns": 1788886519105190000,
+        "path": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/collect/docs_clean/pages_clean.jsonl",
+        "size": 43850055
+      },
+      "status": "scanned"
+    }
+  ]
+}

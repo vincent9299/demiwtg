@@ -1,0 +1,9 @@
+{
+  "run": "article_holdout_basic_flowchart_v21",
+  "quality_accepted": null,
+  "status": "stopped_configuration_invalid",
+  "reason": "high not supported by local template; stopped owned clients; no semantic evaluation",
+  "requests": 1,
+  "responses": 0,
+  "pipeline_export_complete": false
+}

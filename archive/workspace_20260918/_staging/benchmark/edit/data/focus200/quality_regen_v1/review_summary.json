@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "planned": 100,
+  "accepted": 89,
+  "rejected": 11,
+  "acceptance_rate": 0.89,
+  "by_shard": {
+    "a": {
+      "planned": 34,
+      "accepted": 31
+    },
+    "b": {
+      "planned": 33,
+      "accepted": 27
+    },
+    "c": {
+      "planned": 33,
+      "accepted": 31
+    }
+  },
+  "rejection_reason_counts": {
+    "CARRIER_COUNT_LT_2": 3,
+    "CARRIER_EVIDENCE_UNREADABLE": 1,
+    "CARRIER_FALSE_POSITIVE": 2,
+    "FORBIDDEN_TEXT_OR_MARK": 2,
+    "INSTANCE_AMBIGUOUS_OR_ABSTRACT": 4,
+    "PERSON_COUNT_MISMATCH": 1,
+    "REFERENT_AMBIGUOUS": 2,
+    "SUBJECT_CROPPED": 1,
+    "TARGET_GROUP_COUNT_MISMATCH": 1
+  },
+  "review_files": [
+    "agent_a/review_r2.jsonl",
+    "agent_b/review_r2.jsonl",
+    "agent_c/review_r2.jsonl"
+  ]
+}

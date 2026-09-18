@@ -1,0 +1,105 @@
+{
+  "run": "state/curation/v4/image_filter_e2e_v2",
+  "scope": "Directed engineering trial; machine candidates, not independent factual certification",
+  "concepts": {
+    "legacy:OK手势": {
+      "identity_status": "resolved",
+      "blocked": null,
+      "identity_unexamined": 134,
+      "case_ids": [
+        "f2e015ceac4356498cc7"
+      ],
+      "documents": {
+        "cleaned_candidate": 2,
+        "needs_review": 3
+      },
+      "images": {
+        "not_local": 129,
+        "verified_bytes": 17
+      },
+      "text_filter": {
+        "selected": 28,
+        "excluded": 4
+      },
+      "image_filter": {
+        "exclude": 3,
+        "keep": 14
+      },
+      "selected_text_chars": 26708
+    },
+    "legacy:玻璃棒": {
+      "identity_status": "resolved",
+      "blocked": null,
+      "identity_unexamined": 61,
+      "case_ids": [
+        "4adee7fb885d0eaab655"
+      ],
+      "documents": {
+        "cleaned_candidate": 10,
+        "needs_review": 4
+      },
+      "images": {
+        "not_local": 67,
+        "verified_bytes": 6
+      },
+      "text_filter": {
+        "selected": 24,
+        "excluded": 58
+      },
+      "image_filter": {
+        "keep": 4,
+        "exclude": 2
+      },
+      "selected_text_chars": 6751
+    },
+    "legacy:白花芍药": {
+      "identity_status": "resolved",
+      "blocked": null,
+      "identity_unexamined": 91,
+      "case_ids": [
+        "66d0f85f4a96ebd98630"
+      ],
+      "documents": {
+        "needs_review": 3,
+        "cleaned_candidate": 4
+      },
+      "images": {
+        "verified_bytes": 18,
+        "not_local": 85
+      },
+      "text_filter": {
+        "selected": 4
+      },
+      "image_filter": {
+        "pending": 4,
+        "exclude": 9,
+        "keep": 5
+      },
+      "selected_text_chars": 1456
+    }
+  },
+  "final_file_complete": false,
+  "calls": {
+    "requests": 39,
+    "responses": 38,
+    "incomplete_requests": [
+      "0bcc0996f2ff64a689784d7697d2bf17965c3b96922445ff8bdfbd7664101dbb.request.json"
+    ],
+    "complete_response_stages": {
+      "text_filter": 7,
+      "image_filter": 12,
+      "extract": 16,
+      "identity": 3
+    },
+    "finish_reasons": {
+      "stop": 38
+    },
+    "usage": {
+      "prompt_tokens": 161572,
+      "completion_tokens": 61132,
+      "total_tokens": 222704
+    },
+    "sum_request_elapsed_s": 1246.128,
+    "parse_errors": []
+  }
+}

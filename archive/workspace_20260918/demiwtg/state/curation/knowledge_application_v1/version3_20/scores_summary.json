@@ -1,0 +1,4819 @@
+{
+  "by_model_condition": {
+    "bagel/baseline": {
+      "all_knowledge_observable": 13,
+      "execution_items": 94,
+      "execution_items_pass": 58,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 69,
+      "knowledge_items_conflict": 39,
+      "knowledge_items_pass": 11,
+      "knowledge_items_unobservable": 19,
+      "knowledge_pass": 0,
+      "total": 20
+    },
+    "bagel/explicit_target": {
+      "all_knowledge_observable": 3,
+      "execution_items": 30,
+      "execution_items_pass": 18,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 20,
+      "knowledge_items_conflict": 11,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 6,
+      "knowledge_pass": 0,
+      "total": 6
+    },
+    "bagel/image": {
+      "all_knowledge_observable": 10,
+      "execution_items": 81,
+      "execution_items_pass": 58,
+      "execution_pass": 6,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 34,
+      "knowledge_items_pass": 10,
+      "knowledge_items_unobservable": 9,
+      "knowledge_pass": 0,
+      "total": 16
+    },
+    "bagel/multimodal": {
+      "all_knowledge_observable": 10,
+      "execution_items": 81,
+      "execution_items_pass": 56,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 29,
+      "knowledge_items_pass": 14,
+      "knowledge_items_unobservable": 10,
+      "knowledge_pass": 0,
+      "total": 16
+    },
+    "bagel/text": {
+      "all_knowledge_observable": 9,
+      "execution_items": 94,
+      "execution_items_pass": 52,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 69,
+      "knowledge_items_conflict": 31,
+      "knowledge_items_pass": 12,
+      "knowledge_items_unobservable": 26,
+      "knowledge_pass": 1,
+      "total": 20
+    },
+    "gemini/baseline": {
+      "all_knowledge_observable": 20,
+      "execution_items": 94,
+      "execution_items_pass": 89,
+      "execution_pass": 17,
+      "generation_failed": 0,
+      "joint_pass": 13,
+      "knowledge_items": 69,
+      "knowledge_items_conflict": 9,
+      "knowledge_items_pass": 60,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 15,
+      "total": 20
+    },
+    "gemini/explicit_target": {
+      "all_knowledge_observable": 5,
+      "execution_items": 30,
+      "execution_items_pass": 30,
+      "execution_pass": 6,
+      "generation_failed": 0,
+      "joint_pass": 4,
+      "knowledge_items": 20,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 18,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 4,
+      "total": 6
+    },
+    "gemini/image": {
+      "all_knowledge_observable": 15,
+      "execution_items": 81,
+      "execution_items_pass": 74,
+      "execution_pass": 10,
+      "generation_failed": 0,
+      "joint_pass": 7,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 4,
+      "knowledge_items_pass": 48,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 11,
+      "total": 16
+    },
+    "gemini/multimodal": {
+      "all_knowledge_observable": 15,
+      "execution_items": 81,
+      "execution_items_pass": 80,
+      "execution_pass": 15,
+      "generation_failed": 0,
+      "joint_pass": 12,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 7,
+      "knowledge_items_pass": 45,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 12,
+      "total": 16
+    },
+    "gemini/text": {
+      "all_knowledge_observable": 20,
+      "execution_items": 94,
+      "execution_items_pass": 90,
+      "execution_pass": 18,
+      "generation_failed": 0,
+      "joint_pass": 15,
+      "knowledge_items": 69,
+      "knowledge_items_conflict": 6,
+      "knowledge_items_pass": 63,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 17,
+      "total": 20
+    }
+  },
+  "by_stratum": {
+    "bagel/baseline/application_level/compositional": {
+      "all_knowledge_observable": 3,
+      "execution_items": 24,
+      "execution_items_pass": 12,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 13,
+      "knowledge_items_pass": 5,
+      "knowledge_items_unobservable": 7,
+      "knowledge_pass": 0,
+      "total": 6
+    },
+    "bagel/baseline/application_level/conditional": {
+      "all_knowledge_observable": 5,
+      "execution_items": 32,
+      "execution_items_pass": 18,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 18,
+      "knowledge_items_conflict": 12,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 4,
+      "knowledge_pass": 0,
+      "total": 6
+    },
+    "bagel/baseline/application_level/direct": {
+      "all_knowledge_observable": 4,
+      "execution_items": 26,
+      "execution_items_pass": 20,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 15,
+      "knowledge_items_conflict": 9,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 5
+    },
+    "bagel/baseline/application_level/relational": {
+      "all_knowledge_observable": 1,
+      "execution_items": 12,
+      "execution_items_pass": 8,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 5,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 6,
+      "knowledge_pass": 0,
+      "total": 3
+    },
+    "bagel/baseline/domain/交通工具": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/baseline/domain/人造物体": {
+      "all_knowledge_observable": 2,
+      "execution_items": 8,
+      "execution_items_pass": 8,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 4,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 2
+    },
+    "bagel/baseline/domain/动物": {
+      "all_knowledge_observable": 2,
+      "execution_items": 21,
+      "execution_items_pass": 15,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 10,
+      "knowledge_items_conflict": 7,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 3
+    },
+    "bagel/baseline/domain/声音": {
+      "all_knowledge_observable": 0,
+      "execution_items": 5,
+      "execution_items_pass": 3,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/baseline/domain/建筑与基础设施": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/baseline/domain/文化艺术与媒介": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/baseline/domain/文字与信息图形": {
+      "all_knowledge_observable": 0,
+      "execution_items": 3,
+      "execution_items_pass": 1,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/baseline/domain/植物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 6,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/baseline/domain/真菌与微生物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 8,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/baseline/domain/知识与学科": {
+      "all_knowledge_observable": 2,
+      "execution_items": 16,
+      "execution_items_pass": 5,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 23,
+      "knowledge_items_conflict": 9,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 10,
+      "knowledge_pass": 0,
+      "total": 5
+    },
+    "bagel/baseline/domain/自然景观": {
+      "all_knowledge_observable": 2,
+      "execution_items": 13,
+      "execution_items_pass": 6,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 9,
+      "knowledge_items_conflict": 5,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 4,
+      "knowledge_pass": 0,
+      "total": 3
+    },
+    "bagel/baseline/reference_subset/with_image": {
+      "all_knowledge_observable": 12,
+      "execution_items": 81,
+      "execution_items_pass": 54,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 33,
+      "knowledge_items_pass": 11,
+      "knowledge_items_unobservable": 9,
+      "knowledge_pass": 0,
+      "total": 16
+    },
+    "bagel/baseline/task/edit": {
+      "all_knowledge_observable": 9,
+      "execution_items": 52,
+      "execution_items_pass": 33,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 32,
+      "knowledge_items_conflict": 22,
+      "knowledge_items_pass": 8,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 10
+    },
+    "bagel/baseline/task/t2i": {
+      "all_knowledge_observable": 4,
+      "execution_items": 42,
+      "execution_items_pass": 25,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 37,
+      "knowledge_items_conflict": 17,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 17,
+      "knowledge_pass": 0,
+      "total": 10
+    },
+    "bagel/explicit_target/application_level/compositional": {
+      "all_knowledge_observable": 3,
+      "execution_items": 17,
+      "execution_items_pass": 12,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 15,
+      "knowledge_items_conflict": 9,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 4
+    },
+    "bagel/explicit_target/application_level/conditional": {
+      "all_knowledge_observable": 0,
+      "execution_items": 9,
+      "execution_items_pass": 3,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/explicit_target/application_level/direct": {
+      "all_knowledge_observable": 0,
+      "execution_items": 4,
+      "execution_items_pass": 3,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/explicit_target/domain/人造物体": {
+      "all_knowledge_observable": 0,
+      "execution_items": 4,
+      "execution_items_pass": 3,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/explicit_target/domain/动物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 6,
+      "execution_items_pass": 6,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/explicit_target/domain/声音": {
+      "all_knowledge_observable": 0,
+      "execution_items": 5,
+      "execution_items_pass": 4,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/explicit_target/domain/植物": {
+      "all_knowledge_observable": 0,
+      "execution_items": 9,
+      "execution_items_pass": 3,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/explicit_target/domain/知识与学科": {
+      "all_knowledge_observable": 2,
+      "execution_items": 6,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 8,
+      "knowledge_items_conflict": 7,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 2
+    },
+    "bagel/explicit_target/reference_subset/with_image": {
+      "all_knowledge_observable": 3,
+      "execution_items": 30,
+      "execution_items_pass": 18,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 20,
+      "knowledge_items_conflict": 11,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 6,
+      "knowledge_pass": 0,
+      "total": 6
+    },
+    "bagel/explicit_target/task/edit": {
+      "all_knowledge_observable": 2,
+      "execution_items": 19,
+      "execution_items_pass": 8,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 13,
+      "knowledge_items_conflict": 9,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 4
+    },
+    "bagel/explicit_target/task/t2i": {
+      "all_knowledge_observable": 1,
+      "execution_items": 11,
+      "execution_items_pass": 10,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 7,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 2
+    },
+    "bagel/image/application_level/compositional": {
+      "all_knowledge_observable": 3,
+      "execution_items": 24,
+      "execution_items_pass": 12,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 16,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 5,
+      "knowledge_pass": 0,
+      "total": 6
+    },
+    "bagel/image/application_level/conditional": {
+      "all_knowledge_observable": 4,
+      "execution_items": 25,
+      "execution_items_pass": 21,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 9,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 4
+    },
+    "bagel/image/application_level/direct": {
+      "all_knowledge_observable": 3,
+      "execution_items": 23,
+      "execution_items_pass": 20,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 6,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 4
+    },
+    "bagel/image/application_level/relational": {
+      "all_knowledge_observable": 0,
+      "execution_items": 9,
+      "execution_items_pass": 5,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 2
+    },
+    "bagel/image/domain/交通工具": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 4,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/image/domain/人造物体": {
+      "all_knowledge_observable": 1,
+      "execution_items": 8,
+      "execution_items_pass": 6,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 2
+    },
+    "bagel/image/domain/动物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 21,
+      "execution_items_pass": 14,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 10,
+      "knowledge_items_conflict": 5,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 3
+    },
+    "bagel/image/domain/声音": {
+      "all_knowledge_observable": 0,
+      "execution_items": 5,
+      "execution_items_pass": 4,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/image/domain/建筑与基础设施": {
+      "all_knowledge_observable": 0,
+      "execution_items": 3,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/image/domain/文化艺术与媒介": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/image/domain/植物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/image/domain/真菌与微生物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 8,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/image/domain/知识与学科": {
+      "all_knowledge_observable": 3,
+      "execution_items": 13,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 18,
+      "knowledge_items_conflict": 14,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 4
+    },
+    "bagel/image/domain/自然景观": {
+      "all_knowledge_observable": 1,
+      "execution_items": 6,
+      "execution_items_pass": 6,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/image/reference_subset/with_image": {
+      "all_knowledge_observable": 10,
+      "execution_items": 81,
+      "execution_items_pass": 58,
+      "execution_pass": 6,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 34,
+      "knowledge_items_pass": 10,
+      "knowledge_items_unobservable": 9,
+      "knowledge_pass": 0,
+      "total": 16
+    },
+    "bagel/image/task/edit": {
+      "all_knowledge_observable": 7,
+      "execution_items": 45,
+      "execution_items_pass": 33,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 18,
+      "knowledge_items_pass": 6,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 8
+    },
+    "bagel/image/task/t2i": {
+      "all_knowledge_observable": 3,
+      "execution_items": 36,
+      "execution_items_pass": 25,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 28,
+      "knowledge_items_conflict": 16,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 8,
+      "knowledge_pass": 0,
+      "total": 8
+    },
+    "bagel/multimodal/application_level/compositional": {
+      "all_knowledge_observable": 2,
+      "execution_items": 24,
+      "execution_items_pass": 11,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 13,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 8,
+      "knowledge_pass": 0,
+      "total": 6
+    },
+    "bagel/multimodal/application_level/conditional": {
+      "all_knowledge_observable": 4,
+      "execution_items": 25,
+      "execution_items_pass": 21,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 7,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 4
+    },
+    "bagel/multimodal/application_level/direct": {
+      "all_knowledge_observable": 3,
+      "execution_items": 23,
+      "execution_items_pass": 16,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 6,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 4
+    },
+    "bagel/multimodal/application_level/relational": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 8,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 2
+    },
+    "bagel/multimodal/domain/交通工具": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 1,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/multimodal/domain/人造物体": {
+      "all_knowledge_observable": 1,
+      "execution_items": 8,
+      "execution_items_pass": 6,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 2
+    },
+    "bagel/multimodal/domain/动物": {
+      "all_knowledge_observable": 3,
+      "execution_items": 21,
+      "execution_items_pass": 18,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 10,
+      "knowledge_items_conflict": 4,
+      "knowledge_items_pass": 6,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 3
+    },
+    "bagel/multimodal/domain/声音": {
+      "all_knowledge_observable": 0,
+      "execution_items": 5,
+      "execution_items_pass": 4,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/multimodal/domain/建筑与基础设施": {
+      "all_knowledge_observable": 0,
+      "execution_items": 3,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/multimodal/domain/文化艺术与媒介": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/multimodal/domain/植物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/multimodal/domain/真菌与微生物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 8,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/multimodal/domain/知识与学科": {
+      "all_knowledge_observable": 1,
+      "execution_items": 13,
+      "execution_items_pass": 1,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 18,
+      "knowledge_items_conflict": 11,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 6,
+      "knowledge_pass": 0,
+      "total": 4
+    },
+    "bagel/multimodal/domain/自然景观": {
+      "all_knowledge_observable": 1,
+      "execution_items": 6,
+      "execution_items_pass": 5,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/multimodal/reference_subset/with_image": {
+      "all_knowledge_observable": 10,
+      "execution_items": 81,
+      "execution_items_pass": 56,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 29,
+      "knowledge_items_pass": 14,
+      "knowledge_items_unobservable": 10,
+      "knowledge_pass": 0,
+      "total": 16
+    },
+    "bagel/multimodal/task/edit": {
+      "all_knowledge_observable": 6,
+      "execution_items": 45,
+      "execution_items_pass": 30,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 14,
+      "knowledge_items_pass": 8,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 8
+    },
+    "bagel/multimodal/task/t2i": {
+      "all_knowledge_observable": 4,
+      "execution_items": 36,
+      "execution_items_pass": 26,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 28,
+      "knowledge_items_conflict": 15,
+      "knowledge_items_pass": 6,
+      "knowledge_items_unobservable": 7,
+      "knowledge_pass": 0,
+      "total": 8
+    },
+    "bagel/text/application_level/compositional": {
+      "all_knowledge_observable": 2,
+      "execution_items": 24,
+      "execution_items_pass": 11,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 11,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 11,
+      "knowledge_pass": 0,
+      "total": 6
+    },
+    "bagel/text/application_level/conditional": {
+      "all_knowledge_observable": 3,
+      "execution_items": 32,
+      "execution_items_pass": 15,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 18,
+      "knowledge_items_conflict": 8,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 7,
+      "knowledge_pass": 1,
+      "total": 6
+    },
+    "bagel/text/application_level/direct": {
+      "all_knowledge_observable": 4,
+      "execution_items": 26,
+      "execution_items_pass": 19,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 15,
+      "knowledge_items_conflict": 8,
+      "knowledge_items_pass": 6,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 5
+    },
+    "bagel/text/application_level/relational": {
+      "all_knowledge_observable": 0,
+      "execution_items": 12,
+      "execution_items_pass": 7,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 4,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 7,
+      "knowledge_pass": 0,
+      "total": 3
+    },
+    "bagel/text/domain/交通工具": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 1,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/text/domain/人造物体": {
+      "all_knowledge_observable": 0,
+      "execution_items": 8,
+      "execution_items_pass": 6,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 0,
+      "total": 2
+    },
+    "bagel/text/domain/动物": {
+      "all_knowledge_observable": 2,
+      "execution_items": 21,
+      "execution_items_pass": 15,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 10,
+      "knowledge_items_conflict": 7,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 3
+    },
+    "bagel/text/domain/声音": {
+      "all_knowledge_observable": 0,
+      "execution_items": 5,
+      "execution_items_pass": 4,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/text/domain/建筑与基础设施": {
+      "all_knowledge_observable": 0,
+      "execution_items": 3,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/text/domain/文化艺术与媒介": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/text/domain/文字与信息图形": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 0,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 4,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/text/domain/植物": {
+      "all_knowledge_observable": 0,
+      "execution_items": 9,
+      "execution_items_pass": 3,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 0,
+      "knowledge_items_unobservable": 2,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/text/domain/真菌与微生物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "bagel/text/domain/知识与学科": {
+      "all_knowledge_observable": 1,
+      "execution_items": 16,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 23,
+      "knowledge_items_conflict": 8,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 13,
+      "knowledge_pass": 0,
+      "total": 5
+    },
+    "bagel/text/domain/自然景观": {
+      "all_knowledge_observable": 2,
+      "execution_items": 13,
+      "execution_items_pass": 8,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 9,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 3,
+      "knowledge_pass": 1,
+      "total": 3
+    },
+    "bagel/text/reference_subset/with_image": {
+      "all_knowledge_observable": 7,
+      "execution_items": 81,
+      "execution_items_pass": 49,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 26,
+      "knowledge_items_pass": 8,
+      "knowledge_items_unobservable": 19,
+      "knowledge_pass": 0,
+      "total": 16
+    },
+    "bagel/text/task/edit": {
+      "all_knowledge_observable": 6,
+      "execution_items": 52,
+      "execution_items_pass": 25,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 32,
+      "knowledge_items_conflict": 15,
+      "knowledge_items_pass": 9,
+      "knowledge_items_unobservable": 8,
+      "knowledge_pass": 1,
+      "total": 10
+    },
+    "bagel/text/task/t2i": {
+      "all_knowledge_observable": 3,
+      "execution_items": 42,
+      "execution_items_pass": 27,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 37,
+      "knowledge_items_conflict": 16,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 18,
+      "knowledge_pass": 0,
+      "total": 10
+    },
+    "gemini/baseline/application_level/compositional": {
+      "all_knowledge_observable": 6,
+      "execution_items": 24,
+      "execution_items_pass": 23,
+      "execution_pass": 5,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 6,
+      "knowledge_items_pass": 19,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 6
+    },
+    "gemini/baseline/application_level/conditional": {
+      "all_knowledge_observable": 6,
+      "execution_items": 32,
+      "execution_items_pass": 28,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 18,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 16,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 5,
+      "total": 6
+    },
+    "gemini/baseline/application_level/direct": {
+      "all_knowledge_observable": 5,
+      "execution_items": 26,
+      "execution_items_pass": 26,
+      "execution_pass": 5,
+      "generation_failed": 0,
+      "joint_pass": 4,
+      "knowledge_items": 15,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 14,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 4,
+      "total": 5
+    },
+    "gemini/baseline/application_level/relational": {
+      "all_knowledge_observable": 3,
+      "execution_items": 12,
+      "execution_items_pass": 12,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 11,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 3
+    },
+    "gemini/baseline/domain/交通工具": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 4,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/baseline/domain/人造物体": {
+      "all_knowledge_observable": 2,
+      "execution_items": 8,
+      "execution_items_pass": 8,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 5,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 2
+    },
+    "gemini/baseline/domain/动物": {
+      "all_knowledge_observable": 3,
+      "execution_items": 21,
+      "execution_items_pass": 19,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 10,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 10,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 3
+    },
+    "gemini/baseline/domain/声音": {
+      "all_knowledge_observable": 1,
+      "execution_items": 5,
+      "execution_items_pass": 5,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/baseline/domain/建筑与基础设施": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/baseline/domain/文化艺术与媒介": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "gemini/baseline/domain/文字与信息图形": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 4,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/baseline/domain/植物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/baseline/domain/真菌与微生物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/baseline/domain/知识与学科": {
+      "all_knowledge_observable": 5,
+      "execution_items": 16,
+      "execution_items_pass": 15,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 23,
+      "knowledge_items_conflict": 6,
+      "knowledge_items_pass": 17,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 2,
+      "total": 5
+    },
+    "gemini/baseline/domain/自然景观": {
+      "all_knowledge_observable": 3,
+      "execution_items": 13,
+      "execution_items_pass": 11,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 9,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 9,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 3
+    },
+    "gemini/baseline/reference_subset/with_image": {
+      "all_knowledge_observable": 16,
+      "execution_items": 81,
+      "execution_items_pass": 78,
+      "execution_pass": 14,
+      "generation_failed": 0,
+      "joint_pass": 10,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 9,
+      "knowledge_items_pass": 44,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 11,
+      "total": 16
+    },
+    "gemini/baseline/task/edit": {
+      "all_knowledge_observable": 10,
+      "execution_items": 52,
+      "execution_items_pass": 48,
+      "execution_pass": 8,
+      "generation_failed": 0,
+      "joint_pass": 5,
+      "knowledge_items": 32,
+      "knowledge_items_conflict": 5,
+      "knowledge_items_pass": 27,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 7,
+      "total": 10
+    },
+    "gemini/baseline/task/t2i": {
+      "all_knowledge_observable": 10,
+      "execution_items": 42,
+      "execution_items_pass": 41,
+      "execution_pass": 9,
+      "generation_failed": 0,
+      "joint_pass": 8,
+      "knowledge_items": 37,
+      "knowledge_items_conflict": 4,
+      "knowledge_items_pass": 33,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 8,
+      "total": 10
+    },
+    "gemini/explicit_target/application_level/compositional": {
+      "all_knowledge_observable": 3,
+      "execution_items": 17,
+      "execution_items_pass": 17,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 15,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 14,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 3,
+      "total": 4
+    },
+    "gemini/explicit_target/application_level/conditional": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/explicit_target/application_level/direct": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 4,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "gemini/explicit_target/domain/人造物体": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 4,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "gemini/explicit_target/domain/动物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 6,
+      "execution_items_pass": 6,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 4,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/explicit_target/domain/声音": {
+      "all_knowledge_observable": 0,
+      "execution_items": 5,
+      "execution_items_pass": 5,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "gemini/explicit_target/domain/植物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/explicit_target/domain/知识与学科": {
+      "all_knowledge_observable": 2,
+      "execution_items": 6,
+      "execution_items_pass": 6,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 8,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 8,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 2,
+      "total": 2
+    },
+    "gemini/explicit_target/reference_subset/with_image": {
+      "all_knowledge_observable": 5,
+      "execution_items": 30,
+      "execution_items_pass": 30,
+      "execution_pass": 6,
+      "generation_failed": 0,
+      "joint_pass": 4,
+      "knowledge_items": 20,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 18,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 4,
+      "total": 6
+    },
+    "gemini/explicit_target/task/edit": {
+      "all_knowledge_observable": 4,
+      "execution_items": 19,
+      "execution_items_pass": 19,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 13,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 12,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 4
+    },
+    "gemini/explicit_target/task/t2i": {
+      "all_knowledge_observable": 1,
+      "execution_items": 11,
+      "execution_items_pass": 11,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 7,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 6,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 1,
+      "total": 2
+    },
+    "gemini/image/application_level/compositional": {
+      "all_knowledge_observable": 5,
+      "execution_items": 24,
+      "execution_items_pass": 21,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 21,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 2,
+      "total": 6
+    },
+    "gemini/image/application_level/conditional": {
+      "all_knowledge_observable": 4,
+      "execution_items": 25,
+      "execution_items_pass": 23,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 11,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 4,
+      "total": 4
+    },
+    "gemini/image/application_level/direct": {
+      "all_knowledge_observable": 4,
+      "execution_items": 23,
+      "execution_items_pass": 23,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 10,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 4
+    },
+    "gemini/image/application_level/relational": {
+      "all_knowledge_observable": 2,
+      "execution_items": 9,
+      "execution_items_pass": 7,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 6,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 2,
+      "total": 2
+    },
+    "gemini/image/domain/交通工具": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 4,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/image/domain/人造物体": {
+      "all_knowledge_observable": 2,
+      "execution_items": 8,
+      "execution_items_pass": 7,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 5,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 2
+    },
+    "gemini/image/domain/动物": {
+      "all_knowledge_observable": 3,
+      "execution_items": 21,
+      "execution_items_pass": 21,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 10,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 10,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 3
+    },
+    "gemini/image/domain/声音": {
+      "all_knowledge_observable": 0,
+      "execution_items": 5,
+      "execution_items_pass": 4,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "gemini/image/domain/建筑与基础设施": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 1,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/image/domain/文化艺术与媒介": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 2,
+      "execution_pass": 0,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/image/domain/植物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/image/domain/真菌与微生物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/image/domain/知识与学科": {
+      "all_knowledge_observable": 4,
+      "execution_items": 13,
+      "execution_items_pass": 11,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 18,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 15,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 4
+    },
+    "gemini/image/domain/自然景观": {
+      "all_knowledge_observable": 1,
+      "execution_items": 6,
+      "execution_items_pass": 6,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/image/reference_subset/with_image": {
+      "all_knowledge_observable": 15,
+      "execution_items": 81,
+      "execution_items_pass": 74,
+      "execution_pass": 10,
+      "generation_failed": 0,
+      "joint_pass": 7,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 4,
+      "knowledge_items_pass": 48,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 11,
+      "total": 16
+    },
+    "gemini/image/task/edit": {
+      "all_knowledge_observable": 8,
+      "execution_items": 45,
+      "execution_items_pass": 43,
+      "execution_pass": 6,
+      "generation_failed": 0,
+      "joint_pass": 4,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 23,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 6,
+      "total": 8
+    },
+    "gemini/image/task/t2i": {
+      "all_knowledge_observable": 7,
+      "execution_items": 36,
+      "execution_items_pass": 31,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 28,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 25,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 5,
+      "total": 8
+    },
+    "gemini/multimodal/application_level/compositional": {
+      "all_knowledge_observable": 6,
+      "execution_items": 24,
+      "execution_items_pass": 23,
+      "execution_pass": 5,
+      "generation_failed": 0,
+      "joint_pass": 4,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 5,
+      "knowledge_items_pass": 20,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 4,
+      "total": 6
+    },
+    "gemini/multimodal/application_level/conditional": {
+      "all_knowledge_observable": 3,
+      "execution_items": 25,
+      "execution_items_pass": 25,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 9,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 3,
+      "total": 4
+    },
+    "gemini/multimodal/application_level/direct": {
+      "all_knowledge_observable": 4,
+      "execution_items": 23,
+      "execution_items_pass": 23,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 10,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 4
+    },
+    "gemini/multimodal/application_level/relational": {
+      "all_knowledge_observable": 2,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 6,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 2,
+      "total": 2
+    },
+    "gemini/multimodal/domain/交通工具": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 4,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/multimodal/domain/人造物体": {
+      "all_knowledge_observable": 2,
+      "execution_items": 8,
+      "execution_items_pass": 8,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 5,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 2
+    },
+    "gemini/multimodal/domain/动物": {
+      "all_knowledge_observable": 3,
+      "execution_items": 21,
+      "execution_items_pass": 21,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 10,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 10,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 3
+    },
+    "gemini/multimodal/domain/声音": {
+      "all_knowledge_observable": 1,
+      "execution_items": 5,
+      "execution_items_pass": 5,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/multimodal/domain/建筑与基础设施": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/multimodal/domain/文化艺术与媒介": {
+      "all_knowledge_observable": 0,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 0,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 1,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 0,
+      "total": 1
+    },
+    "gemini/multimodal/domain/植物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/multimodal/domain/真菌与微生物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/multimodal/domain/知识与学科": {
+      "all_knowledge_observable": 4,
+      "execution_items": 13,
+      "execution_items_pass": 12,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 18,
+      "knowledge_items_conflict": 5,
+      "knowledge_items_pass": 13,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 2,
+      "total": 4
+    },
+    "gemini/multimodal/domain/自然景观": {
+      "all_knowledge_observable": 1,
+      "execution_items": 6,
+      "execution_items_pass": 6,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/multimodal/reference_subset/with_image": {
+      "all_knowledge_observable": 15,
+      "execution_items": 81,
+      "execution_items_pass": 80,
+      "execution_pass": 15,
+      "generation_failed": 0,
+      "joint_pass": 12,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 7,
+      "knowledge_items_pass": 45,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 12,
+      "total": 16
+    },
+    "gemini/multimodal/task/edit": {
+      "all_knowledge_observable": 8,
+      "execution_items": 45,
+      "execution_items_pass": 45,
+      "execution_pass": 8,
+      "generation_failed": 0,
+      "joint_pass": 6,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 23,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 6,
+      "total": 8
+    },
+    "gemini/multimodal/task/t2i": {
+      "all_knowledge_observable": 7,
+      "execution_items": 36,
+      "execution_items_pass": 35,
+      "execution_pass": 7,
+      "generation_failed": 0,
+      "joint_pass": 6,
+      "knowledge_items": 28,
+      "knowledge_items_conflict": 5,
+      "knowledge_items_pass": 22,
+      "knowledge_items_unobservable": 1,
+      "knowledge_pass": 6,
+      "total": 8
+    },
+    "gemini/text/application_level/compositional": {
+      "all_knowledge_observable": 6,
+      "execution_items": 24,
+      "execution_items_pass": 24,
+      "execution_pass": 6,
+      "generation_failed": 0,
+      "joint_pass": 5,
+      "knowledge_items": 25,
+      "knowledge_items_conflict": 3,
+      "knowledge_items_pass": 22,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 5,
+      "total": 6
+    },
+    "gemini/text/application_level/conditional": {
+      "all_knowledge_observable": 6,
+      "execution_items": 32,
+      "execution_items_pass": 28,
+      "execution_pass": 4,
+      "generation_failed": 0,
+      "joint_pass": 4,
+      "knowledge_items": 18,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 18,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 6,
+      "total": 6
+    },
+    "gemini/text/application_level/direct": {
+      "all_knowledge_observable": 5,
+      "execution_items": 26,
+      "execution_items_pass": 26,
+      "execution_pass": 5,
+      "generation_failed": 0,
+      "joint_pass": 4,
+      "knowledge_items": 15,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 14,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 4,
+      "total": 5
+    },
+    "gemini/text/application_level/relational": {
+      "all_knowledge_observable": 3,
+      "execution_items": 12,
+      "execution_items_pass": 12,
+      "execution_pass": 3,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 11,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 9,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 2,
+      "total": 3
+    },
+    "gemini/text/domain/交通工具": {
+      "all_knowledge_observable": 1,
+      "execution_items": 4,
+      "execution_items_pass": 4,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/text/domain/人造物体": {
+      "all_knowledge_observable": 2,
+      "execution_items": 8,
+      "execution_items_pass": 8,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 6,
+      "knowledge_items_conflict": 1,
+      "knowledge_items_pass": 5,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 2
+    },
+    "gemini/text/domain/动物": {
+      "all_knowledge_observable": 3,
+      "execution_items": 21,
+      "execution_items_pass": 19,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 10,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 10,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 3
+    },
+    "gemini/text/domain/声音": {
+      "all_knowledge_observable": 1,
+      "execution_items": 5,
+      "execution_items_pass": 5,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/text/domain/建筑与基础设施": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/text/domain/文化艺术与媒介": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/text/domain/文字与信息图形": {
+      "all_knowledge_observable": 1,
+      "execution_items": 3,
+      "execution_items_pass": 3,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 4,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 4,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/text/domain/植物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 2,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 2,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/text/domain/真菌与微生物": {
+      "all_knowledge_observable": 1,
+      "execution_items": 9,
+      "execution_items_pass": 9,
+      "execution_pass": 1,
+      "generation_failed": 0,
+      "joint_pass": 1,
+      "knowledge_items": 3,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 3,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 1,
+      "total": 1
+    },
+    "gemini/text/domain/知识与学科": {
+      "all_knowledge_observable": 5,
+      "execution_items": 16,
+      "execution_items_pass": 16,
+      "execution_pass": 5,
+      "generation_failed": 0,
+      "joint_pass": 3,
+      "knowledge_items": 23,
+      "knowledge_items_conflict": 5,
+      "knowledge_items_pass": 18,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 5
+    },
+    "gemini/text/domain/自然景观": {
+      "all_knowledge_observable": 3,
+      "execution_items": 13,
+      "execution_items_pass": 11,
+      "execution_pass": 2,
+      "generation_failed": 0,
+      "joint_pass": 2,
+      "knowledge_items": 9,
+      "knowledge_items_conflict": 0,
+      "knowledge_items_pass": 9,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 3,
+      "total": 3
+    },
+    "gemini/text/reference_subset/with_image": {
+      "all_knowledge_observable": 16,
+      "execution_items": 81,
+      "execution_items_pass": 79,
+      "execution_pass": 15,
+      "generation_failed": 0,
+      "joint_pass": 13,
+      "knowledge_items": 53,
+      "knowledge_items_conflict": 4,
+      "knowledge_items_pass": 49,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 14,
+      "total": 16
+    },
+    "gemini/text/task/edit": {
+      "all_knowledge_observable": 10,
+      "execution_items": 52,
+      "execution_items_pass": 48,
+      "execution_pass": 8,
+      "generation_failed": 0,
+      "joint_pass": 6,
+      "knowledge_items": 32,
+      "knowledge_items_conflict": 4,
+      "knowledge_items_pass": 28,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 8,
+      "total": 10
+    },
+    "gemini/text/task/t2i": {
+      "all_knowledge_observable": 10,
+      "execution_items": 42,
+      "execution_items_pass": 42,
+      "execution_pass": 10,
+      "generation_failed": 0,
+      "joint_pass": 9,
+      "knowledge_items": 37,
+      "knowledge_items_conflict": 2,
+      "knowledge_items_pass": 35,
+      "knowledge_items_unobservable": 0,
+      "knowledge_pass": 9,
+      "total": 10
+    }
+  },
+  "caution": "Single-sample development judgments. Conditions have different denominators; use reference_subset for four-condition comparisons. No aggregate quality/knowledge blend. No finetuning or automatic retrieval.",
+  "expected": 156,
+  "per_output": [
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n04__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n04"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": false,
+      "job_id": "v3_n03__explicit_target__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable",
+        "K2": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": true,
+      "job_id": "v3_n03__explicit_target__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3_obj_04__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_04"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3r03__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass",
+        "K5": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r03"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_obj_05__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_obj_05__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n04__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n04"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3_obj_01__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3_n06__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n06"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3r01__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_obj_06__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_06"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3r01__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_n02__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n02"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_obj_06__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable",
+        "K2": "pass",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_obj_06"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_n03__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_n02__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3_n02"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n03__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r07__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r07"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_n02__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n02"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r05__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r05"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_n01__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n01"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3r02__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r08__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable",
+        "K5": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3r08"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n02__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_n02"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_obj_01__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_obj_04__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_04"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": true,
+      "job_id": "v3_n05__explicit_target__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": true,
+      "job_id": "v3r02__explicit_target__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_n04__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n04"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n03__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r05__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r05"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_n06__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3_n06"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_n02__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n02"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3_obj_02__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_02"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r04__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 2,
+      "question_id": "v3r04"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_obj_02__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_02"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3r06__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable",
+        "K5": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 2,
+      "question_id": "v3r06"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_n06__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n06"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_n04__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n04"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_obj_01__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_n05__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n05__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "conflict",
+        "K4": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r02__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 2,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_n04__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n04"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3r06__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass",
+        "K5": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r06"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_obj_05__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_obj_02__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_02"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_n03__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable",
+        "K2": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": false,
+      "job_id": "v3_obj_05__explicit_target__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable",
+        "K2": "unobservable",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_n01__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n01"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n05__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_n06__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n06"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_obj_05__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3r08__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "conflict",
+        "K5": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r08"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_n01__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_obj_05__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r05__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3r05"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_obj_06__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_06"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_obj_04__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_04"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3r01__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3r06__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable",
+        "K5": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 2,
+      "question_id": "v3r06"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3r07__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r07"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r02__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 1,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_obj_06__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_06"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_obj_04__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_04"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3_n01__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n01"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r07__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "unobservable",
+        "K4": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3r07"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": false,
+      "job_id": "v3r01__explicit_target__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3r06__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass",
+        "K5": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r06"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": false,
+      "job_id": "v3_obj_01__explicit_target__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": false,
+      "job_id": "v3r02__explicit_target__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 2,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_obj_03__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_obj_03"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n01__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n01"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3r01__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_obj_02__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_02"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_n01__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n01"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_obj_02__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_02"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_obj_05__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n03__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_obj_01__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_n05__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r04__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r04"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r05__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3r05"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_obj_06__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_06"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_obj_01__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n05__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3r03__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict",
+        "K5": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r03"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n01__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n01"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_obj_03__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_03"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3r02__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_obj_02__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_02"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3r02__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n02__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n02"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r03__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable",
+        "K5": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 2,
+      "question_id": "v3r03"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": true,
+      "job_id": "v3_obj_05__explicit_target__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "unobservable",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_obj_04__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_04"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n01__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_n01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_obj_04__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_04"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_n06__image__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n06"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r06__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable",
+        "K5": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r06"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3r02__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3r01__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3r08__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass",
+        "K5": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r08"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_n06__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n06"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_obj_06__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_06"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_obj_02__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_02"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n05__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "pass",
+        "K3": "conflict",
+        "K4": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3r06__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "conflict",
+        "K5": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r06"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n02__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n02"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_n05__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_obj_03__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_03"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_n06__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n06"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3r03__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "conflict",
+        "K4": "conflict",
+        "K5": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3r03"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_n03__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_obj_03__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_03"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_obj_06__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_06"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n06__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n06"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3r07__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r07"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_obj_03__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_03"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_obj_03__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_03"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3_obj_05__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "unobservable",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_obj_01__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3r02__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_n03__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3_obj_03__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "unobservable",
+        "K2": "conflict",
+        "K3": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_obj_03"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r03__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass",
+        "K5": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3r03"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3r04__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r04"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_n02__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n02"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3_obj_06__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_obj_06"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3_obj_01__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3r06__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass",
+        "K5": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3r06"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": true,
+      "job_id": "v3_n05__explicit_target__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_obj_02__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_02"
+    },
+    {
+      "condition": "text",
+      "execution_pass": false,
+      "job_id": "v3r01__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_obj_03__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_03"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": true,
+      "job_id": "v3r01__explicit_target__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_n04__text__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_n04"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r01__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "image",
+      "execution_pass": true,
+      "job_id": "v3r03__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass",
+        "K5": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r03"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": true,
+      "job_id": "v3_obj_05__multimodal__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_05"
+    },
+    {
+      "condition": "explicit_target",
+      "execution_pass": true,
+      "job_id": "v3_obj_01__explicit_target__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r08__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable",
+        "K5": "unobservable"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3r08"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3r03__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict",
+        "K5": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r03"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_n05__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 5,
+      "question_id": "v3_n05"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3r01__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "conflict",
+        "K3": "conflict",
+        "K4": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r01"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3r02__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r02"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r03__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable",
+        "K5": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r03"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_obj_04__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_04"
+    },
+    {
+      "condition": "text",
+      "execution_pass": true,
+      "job_id": "v3_n04__text__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3_n04"
+    },
+    {
+      "condition": "image",
+      "execution_pass": false,
+      "job_id": "v3_obj_04__image__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 4,
+      "question_id": "v3_obj_04"
+    },
+    {
+      "condition": "multimodal",
+      "execution_pass": false,
+      "job_id": "v3_n04__multimodal__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3_n04"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3_n03__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 4,
+      "question_id": "v3_n03"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3_obj_01__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "conflict",
+        "K3": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3_obj_01"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": false,
+      "job_id": "v3r06__baseline__r1",
+      "joint_pass": false,
+      "knowledge": {
+        "K1": "conflict",
+        "K2": "unobservable",
+        "K3": "unobservable",
+        "K4": "unobservable",
+        "K5": "pass"
+      },
+      "knowledge_pass": false,
+      "model": "bagel",
+      "quality": 3,
+      "question_id": "v3r06"
+    },
+    {
+      "condition": "baseline",
+      "execution_pass": true,
+      "job_id": "v3r04__baseline__r1",
+      "joint_pass": true,
+      "knowledge": {
+        "K1": "pass",
+        "K2": "pass",
+        "K3": "pass",
+        "K4": "pass"
+      },
+      "knowledge_pass": true,
+      "model": "gemini",
+      "quality": 5,
+      "question_id": "v3r04"
+    }
+  ],
+  "reviewed": 156
+}

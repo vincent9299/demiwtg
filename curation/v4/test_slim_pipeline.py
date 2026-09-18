@@ -55,8 +55,11 @@ def test_notebooks_have_one_pass_and_no_residual_model_calls():
     for name in ['knowledge_debug','glass_operator_debug']:
         n=json.loads(Path(__file__).with_name(name+'.ipynb').read_text())
         s='\n'.join(''.join(c['source']) for c in n['cells'] if c['cell_type']=='code')
-        assert "map_prompt_async('review_relationships'" in s
+        assert "map_prompt_async('final_review'" in s
+        assert "map_prompt_async('joint_paragraphs'" in s
+        assert "map_prompt_async('review_relationships'" not in s
         assert 'SelectSourceRecords(' in s
         assert 'round_2_' not in s
         assert "stage='residual'" not in s
-        assert 'verify_merged_paragraphs' in s
+        assert "map_prompt_async('verify_merged_paragraphs'" not in s
+        assert "map_prompt_async('merge_paragraphs'" not in s

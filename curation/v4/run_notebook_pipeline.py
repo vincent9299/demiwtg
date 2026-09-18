@@ -23,8 +23,11 @@ def main():
     p.add_argument('--run',type=Path,required=True);p.add_argument('--ids',nargs='+',required=True)
     p.add_argument('--dataset',type=Path,default=Path(__file__).resolve().parents[2]/'datasets/demiwtg')
     p.add_argument('--source-scope',choices=['all','collected'],default='all')
-    p.add_argument('--reuse-materials',type=Path);p.add_argument('--reuse-preprocessing',type=Path);p.add_argument('--through',default='export');p.add_argument('--group-size',type=int,default=256)
+    p.add_argument('--reuse-text-selection',action='store_true',help='With reuse-filter-inputs: adopt unchanged completed text selection too')
+    p.add_argument('--reuse-extraction',type=Path,help='Reuse unchanged completed joint drafts; run final review again')
+    p.add_argument('--reuse-filter-inputs',type=Path);p.add_argument('--reuse-materials',type=Path);p.add_argument('--reuse-preprocessing',type=Path);p.add_argument('--through',default='export');p.add_argument('--group-size',type=int,default=256)
     a=p.parse_args()
+    if a.reuse_text_selection and not a.reuse_filter_inputs:p.error('--reuse-text-selection requires --reuse-filter-inputs')
     config={'text_mode':'multimodal','body_only':True,'max_calls':None,'max_output_tokens':16384,
             'timeout_s':900,'temperature':0,'joint_batch_limit':None,
             'text_embedding_model':str(Path(__file__).resolve().parents[3]/'models/Qwen3-Embedding-0.6B'),
@@ -36,8 +39,9 @@ def main():
     started=time.time()
     pipeline=load_pipeline()
     config={**pipeline.__globals__.get('MODEL_CONFIG',{}),**config}
+    if a.reuse_text_selection:config['reuse_text_selection']=True
     result=pipeline(a.run,a.dataset,ids=a.ids,group_size=a.group_size,
-                          through=a.through,model_config=config,source_scope=a.source_scope,reuse_preprocessing=a.reuse_preprocessing,reuse_materials=a.reuse_materials)
+                          through=a.through,model_config=config,source_scope=a.source_scope,reuse_preprocessing=a.reuse_preprocessing,reuse_materials=a.reuse_materials,reuse_filter_inputs=a.reuse_filter_inputs,reuse_extraction=a.reuse_extraction)
     if a.through=='export':
         from .pipeline_comparison import summarize_run
         (a.run/'result_summary.json').write_text(json.dumps(summarize_run(a.run),ensure_ascii=False,indent=2))

@@ -1,0 +1,43 @@
+*** Begin Patch
+*** Update File: /yzp/zhaozy/yangzepeng/0905/demiwtg/curation/v4/image_filter_runtime.py
+@@
+     validate_text_selection_reuse(parent,config)
++    validate_image_selection_reuse(parent,config)
++
++
++def validate_image_selection_reuse(parent,config):
++    """A new image prompt must not inherit decisions from the previous prompt."""
++    import yaml
++    path=Path(parent)/'knowledge/prompt_config.json'
++    if not path.exists():
++        raise ValueError('Parent image selection prompt snapshot is missing')
++    saved=json.loads(path.read_text())
++    prior=yaml.safe_load(saved['yaml'])['prompts']['select_images']
++    _,text=knowledge_prompt_pack(config)
++    active=yaml.safe_load(text)['prompts']['select_images']
++    if any(prior[k]!=active[k] for k in ['version','template','model','response_schema']):
++        raise ValueError('Image selection prompt/model differs; reuse from before image filtering instead')
+*** Update File: /yzp/zhaozy/yangzepeng/0905/demiwtg/curation/v4/test_confirm_images.py
+@@
+ def test_service_is_untouched_when_checkpoint_complete(monkeypatch,tmp_path):
+@@
+     with service.image_review_service(tmp_path,{},needed=False):pass
++
++
++def test_changed_image_prompt_rejects_selected_materials_but_allows_text_reuse(tmp_path):
++    import yaml
++    from .image_filter_runtime import validate_text_selection_reuse
++    from .ops.prompt_config import knowledge_prompt_pack
++    cfg={**IMAGE_FILTER_DEFAULTS,'model':'qwen3.8-27b','base_url':'http://127.0.0.1:8000/v1'}
++    save_image_filter_policy(tmp_path,cfg)
++    _,text=knowledge_prompt_pack(cfg)
++    snapshot=tmp_path/'knowledge/prompt_config.json';snapshot.parent.mkdir()
++    snapshot.write_text(json.dumps({'yaml':text}))
++    validate_material_reuse(tmp_path,cfg)
++    old=yaml.safe_load(text)
++    old['prompts']['select_images']['template']='Previous, less strict image identity policy'
++    snapshot.write_text(json.dumps({'yaml':yaml.safe_dump(old)}))
++    validate_text_selection_reuse(tmp_path,cfg)
++    with pytest.raises(ValueError,match='Image selection prompt'):
++        validate_material_reuse(tmp_path,cfg)
+*** End Patch

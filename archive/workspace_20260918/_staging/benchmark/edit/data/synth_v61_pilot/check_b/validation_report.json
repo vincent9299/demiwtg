@@ -1,0 +1,61 @@
+{
+ "reject": [
+  {
+   "qid": "e010",
+   "kind": "questions",
+   "why": [
+    "level_reason.longest_hops=1 与逐行最大箭头数 2 不一致"
+   ]
+  },
+  {
+   "qid": "e012",
+   "kind": "questions",
+   "why": [
+    "level_reason.longest_hops=1 与逐行最大箭头数 2 不一致"
+   ]
+  }
+ ],
+ "warn": {},
+ "xcheck": [
+  {
+   "qid": "e008",
+   "jaccard": 0.18
+  },
+  {
+   "qid": "e009",
+   "jaccard": 0.18
+  },
+  {
+   "qid": "e011",
+   "jaccard": 0.2
+  },
+  {
+   "qid": "e013",
+   "jaccard": 0.18
+  },
+  {
+   "qid": "e014",
+   "jaccard": 0.2
+  }
+ ],
+ "coverage": {
+  "plan": 20,
+  "terminal": 7,
+  "missing": [
+   "e001",
+   "e002",
+   "e003",
+   "e004",
+   "e005",
+   "e006",
+   "e007",
+   "e015",
+   "e016",
+   "e017",
+   "e018",
+   "e019",
+   "e020"
+  ],
+  "duplicates_or_invalid": 2
+ }
+}
