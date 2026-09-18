@@ -12,13 +12,13 @@
 | 批次 | 内容 | 体量 | 状态（2026-09-17 晚） |
 |---|---|---|---|
 | **第 1 批** | kb 图池毒行重收 + 缩略图升级 + wm 中文补图续跑 | ~6-10TB + ~2TB | 毒行/缩略清单就绪**待放行**；wm 补图在途（20 机 fleet_curl，调度器已随 p5 退役，自然收尾） |
-| **第 2 批** | iNat / Smithsonian / OI / Met 四源（先挂载出清单再采图） | OI ~500GB；SI/iNat 待清单；Met 小 | 挂载进展见 §二：**Met ✅ OI ✅**，SI 8 机分片 🏃，iNat 抽取 🏃 |
+| **第 2 批** | iNat / Smithsonian / OI / Met 四源（先挂载出清单再采图） | OI ~500GB；SI/iNat 待实测均值；Met 小 | ✅ **四源清单全部交付并通过审计**（2026-09-17 20:1x 终版；iNat 湖机收官：358 万张/18.7 万概念）。细节与质量验证见 §二 |
 | **第 3 批** | SDC 新图（fetch_list 2026-09-17 03:24 终版） | ~21TB（原图口径） | 等**原图 vs 缩略**决策 + 放行（与第 1 批 WM 任务串行，fleet_curl 收尾后） |
 
-**决策队列（按阻塞面排序）**：
-1. 概念集放宽（影响第 2/3 批清单规模——建议在 SI/iNat 清单定稿前拍板）
+**决策队列（按阻塞面排序，2026-09-17 20:2x 刷新）**：
+1. 概念集放宽（第 2 批清单已定稿不受影响；放宽后可重跑挂载放大 SI/iNat/OI 覆盖 + 第 3 批 SDC +40% 边）
 2. Wikimedia 全局礼貌预算（第 1 批毒行重收 + wm 补图 + 第 3 批 SDC 同打 WM，须全局串行记账）
-3. 湖侧容量口径（湖 /yzp 仅 ~5T 空闲 vs 第 1 批 6-10TB + 第 3 批 21TB；桶 256T 无压力，需定"哪些回湖"）
+3. 湖侧容量口径（湖 /yzp 现 ~4T 空闲 vs 第 1 批 6-10TB + 第 3 批 21TB；桶 256T 无压力，需定"哪些回湖"）
 4. OI 500GB 采不采（命中率已出：89.4% 类挂载 / 289 万图）
 5. SDC 原图 vs 缩略（`hist_ledger_stats.py` 可出三档 TB 数）
 6. 桶根脏树 ~200GB 清理（`demiwtg-data/` 根级误传副本，实测仍在）
@@ -55,12 +55,24 @@
 
 | 源 | 桥 | 状态 | 产物（COS `kb/batch2/<源>/`） |
 |---|---|---|---|
-| Met | P245(ULAN) + Object Wikidata 直挂 | ✅ **完成** | fetch_list：484,956 对象→PD 248,472→**挂载 56,819(artist)+461(direct，与基准分毫不差)** 行；URL 由 met_fetch 两段式 API 取 |
-| OpenImages | P646 消歧（EN sitelink 优先；P279 不可得已记录） | ✅ **完成** | 19,994 类挂 17,855（89.4%）→扫 4,210 万标注→**2,889,193 图**；fetch_list 133MB + mid_map + disambig.json |
-| Smithsonian | scientific_name→P225 学名桥 + 名字→概念标题桥 | 🏃 8 机分片（r2/r3/r4/r6-r9/r13，两遍扫+全局建桥，~40 分钟） | 阶段1 记录表 1,733 万已入；media 直下 URL 在记录内（`ids.si.edu/ids/download`）+ 每 media 独立 license |
-| iNat | P3151(taxon_id) + P225 双桥 | 🏃 r5 流式抽取 | observations.csv ✅（**2.76 亿行/32GB**→13.6GB gz 入 COS，含 taxon_id）；photos/taxas 抽取中；join 待照片列头 |
+| Met | P245(ULAN) + Object Wikidata 直挂 | ✅ **完成+回源审计 500/500** | fetch_list：484,956 对象→PD 248,472→**挂载 56,819(artist)+461(direct，与基准分毫不差)** 行；URL 由 met_fetch 两段式 API 取（**key 前缀已修**，修版在 `batch2/met/met_fetch.py`） |
+| OpenImages | P646 消歧（EN sitelink 优先；P279 不可得已记录） | ✅ **完成+回源验证 200/200** | 19,994 类挂 17,855（89.4%）→扫 4,210 万标注→**2,889,193 图**；fetch_list 133MB + mid_map + disambig.json |
+| Smithsonian | scientific_name→P225 学名桥 + 名字→概念标题桥 | ✅ **完成+全量直方图核验** | **4,742,874 行 / 3,289,111 独立 media / 87,305 概念 / 100% CC0**；URL 98.7% 高清直下（ids.si.edu）；学名桥占 66% |
+| iNat | P3151(taxon_id)+P225 双桥 | ✅ **完成+端到端审计 150/150**（2026-09-17 20:1x 终版，湖机 192 核跑毕） | 漏斗：挂载 taxa 437,075 → **2.45 亿观察** → 4.89 亿照片全扫 → 开放 license 命中 6,908 万 → **配额≤30/概念后 3,584,741 张 / 186,817 概念**（CC-BY 258万/CC-BY-SA 50万/CC0 51万）；两次独立运行逐位一致；35GB 原料三 CSV 另拉湖 `_staging/inat_local/` 留档 |
 
 目录结构与机器纪律见 git 历史"批次 2 融合执行设计"节（本版并入上表）；内存纪律：概念集 220M 位图（27MB）防 r 机 OOM。
+
+### 第 2 批质量验证汇总（2026-09-17 收官，四源全过）
+
+| 源 | 验证方式 | 结果 |
+|---|---|---|
+| Met | 500 行回源（CSV 在位+PD 真+ULAN/Wikidata 挂载链重建比对） | **500/500** |
+| OpenImages | 200 行回标注源（ImageID→MID→QID 链逐条比对） | **200/200**（首轮"失败"系比对器 Q 前缀格式差，数字逐一吻合） |
+| Smithsonian | 474 万行全量直方图（license/URL/QID/去重数）+ 语义抽样 | **全过** |
+| iNat | 150 行全链回源（URL/license/photos→obs→taxa→QID）+ 配额全量复算 + 双次运行可复现 | **150/150、配额 0 超限、逐位一致** |
+
+产物 HEAD 校验：四源 fetch_list + iNat 三 CSV 原料，湖侧签名逐一核验尺寸全符。
+工具链归档：湖侧批次 2 全部脚本（23 件：join/pull/put/审计/worker）打包 `kb/batch2/tools-20260917.tgz`；湖本地留档 `_staging/inat_local/`（三 CSV + join 中间件）。
 
 ### 第 2 批执行历史坑（本轮新增，写代码前必读）
 
