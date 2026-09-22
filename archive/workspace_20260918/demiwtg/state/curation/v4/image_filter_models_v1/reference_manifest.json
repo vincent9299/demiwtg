@@ -1,6 +1,0 @@
-{
-  "sha256": "deecdcea8d1fd9e92c0db58bbb6278cd264c45ef10b8e874d510c4761330c786",
-  "frozen_at": 1789618002.6402655,
-  "scope": "All 114 contact sheet images reviewed before inspecting new model decisions. Provisional visual relevance, not expert identification. Flower species unconfirmed; disputed material/scope kept pending.",
-  "limitations": "Not a held-out set; no expert botanical labels; duplicate-looking images remain as in prefilter input."
-}

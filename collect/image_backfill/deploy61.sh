@@ -2,7 +2,7 @@
 # 61 出口代理池部署：48 个健康出口 × 每 worker 独立分片 + 自有项目 UA 轮换
 # 在本机调度中枢运行：bash deploy61.sh
 set -u
-HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub
+HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub
 PXS=$HUB/proxies
 SLICES=$HUB/pending_all
 FC=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/fleet_curl.py

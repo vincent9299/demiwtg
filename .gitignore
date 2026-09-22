@@ -1,7 +1,3 @@
-# 生成的 viewer 产物（由 viewer/build_viewer.py 重建，勿提交；build_en/ 为英文平行版 sidecar）
-viewer/build/
-viewer/build_en/
-
 # 系统 / 编译产物
 .DS_Store
 __pycache__/
@@ -27,8 +23,7 @@ datasets/demiwtg/meta/*
 state/
 logs/
 
-# data/ 退役残件（collect_v2 已迁 demiwtg-data 仓库，taxonomy/curation 已提升根目录；
-# 本地留档系迁移前旧副本，不入 git；见 AGENTS.md 架构决策 2026-09-05）
+# data/ 已移除（2026-09-20：collect_v2 兼容软链撤销，存量调用方改直连顶层包；见 AGENTS.md）；规则保留防复建
 /data/
 
 # 评测结果数据（各赛道子模块内闭环，大体积样本图与题库产物，勿提交）
@@ -100,11 +95,14 @@ _reference/
 .env*
 *.secret
 
-# Local image copies and collection synchronization state (code stays tracked).
-/blobs/
-/sync/
+# sync 冷备中继源码保留并跟踪；仅排除运行产物
+/sync/*.log
+/sync/*.sqlite*
+/sync/*.jsonl
+/sync/runtime/
 /sync_daemon.log
 /lake_sync.py.qwen.bak
+/blobs/
 
 # Workspace preservation (2026-09-18): source snapshots are tracked, secrets are not.
 .cos_creds
@@ -116,3 +114,31 @@ id_rsa*
 id_ed25519*
 .pytest_cache/
 *.egg-info/
+
+# Durable curated delivery and archived run payloads, moved out of state (2026-09-20).
+/knowledge_base/
+/archive/curation_runs/
+
+# User-requested owner-module layout (2026-09-20): durable data remains local.
+/collect/image_backfill/checkpoints/
+/collect/records/
+
+# Retired environment filesystem-held fragments (not source)
+tools/environment/retired_files/
+
+# Collector temporary payloads are data, not source.
+/_staging/
+
+/collect/batch2/lists/
+/collect/image_backfill/sample_review/*.jpg
+/collect/image_backfill/sample_review/*.json
+/collect/image_backfill/pan123_path_placeholder
+
+/collect/image_backfill/sample_review/fulltext/
+
+# Rebuildable validation process logs; authoritative proofs live in Lance.
+
+# Pipeline-owned disposable views, locks and runtime output. Business data stays in Lance.
+/curation/*/runs/
+/curation/*/reviews/
+/curation/*/runtime/

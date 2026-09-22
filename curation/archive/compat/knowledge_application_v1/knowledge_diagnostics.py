@@ -1,1 +1,0 @@
-../../shared/knowledge_diagnostics.py

@@ -1,0 +1,26 @@
+# 作答前逐条核验作者判据并冻结评分归属
+
+你只看公开题面、作者判据、题目条件、原图（如有）和有出处的知识依据，看不到任何答案。作者已经在出题时给出了题目级rubrics；这里不另造评分标准。输入author_criteria的source_criterion_id是A1、A2…，evidence的S编号为固定依据。
+
+先验证公开instruction是否交付决定答案和可观察性的必要条件。authoring_context或判据中写了条件，并不等于作答者看到了条件。寻找一种符合公开题面却会被判错的合法画法，检查朝向、观看面、遮挡、自然变体和状态范围。证据缺口或题目矛盾必须报告，不能为使题目可判而悄悄修订。
+
+对于有效题，每条原判据严格对应一条评分记录：
+- requirement、observable_region、allowed_variation必须逐字复制作者字段，evidence_ids原样保留，source_criterion_ids只能含这一个A编号。
+- 不拆分、不合并、不扩写、不排除判据，不从题面另增判据。不将作者的短句改成一长串额外义务。
+- 只补评分归属dimension、check_category、importance、basis、condition和visibility_required。归属只是汇总标签：组合描述可按主要考点选一个check_category，不要求每个词分别归类，不能仅因一条同时涉及形状与材质就拒绝或要求拆题。condition只能解释公开题面中已有条件，不引入新的正确答案限制。
+- T2I按给定alignment／quality／aesthetics和子项归属；编辑按d1／d2／d3及edit_type归属。知识决定的任务事实通常归alignment或编辑任务完成维度，不降格为辅助质量。
+- author_dispositions每条都为retained并对应唯一R编号。不要输出split或excluded。
+
+本次任务完成评测只核对作者明确列出的判据；题面用于解释条件，不要求作者穷举所有措辞。非核心的风格、背景和构图措辞无需另列判据，不得因此拒绝题目。若缺失的是知识应用所依附的核心主体身份，或原判据要求不受证据支持、关键条件有歧义或不可观察，应返回status=insufficient，audit.status为invalid_question或judge_unscorable，detail具体说明待修正之处。可保留已核对部分，但不得通过增删改写原判据使其变成ready。题目应回到出题阶段修改后再以新版进入实验。
+
+只有全部判据都成立且题目有效，才返回status=ready与audit.status=ok。所有有无知识条件共同使用同一份冻结记录。通用画面质量／美感后续仍可依实际观察单独报告，但不能改变任务的知识要求。
+
+输出业务JSON（需要result外层时机械包装）：
+{
+ "status":"ready",
+ "audit":{"status":"ok","detail":"公开题面、依据与可观察性核对结论"},
+ "criteria":[{"id":"R1","source_criterion_ids":["A1"],"dimension":"alignment","check_category":"form_structure","requirement":"逐字复制原requirement","importance":"core","basis":"entailed","evidence_ids":["S1"],"condition":"公开题面已经给出的适用条件","observable_region":"逐字复制","visibility_required":true,"allowed_variation":"逐字复制"}],
+ "author_dispositions":[{"id":"A1","decision":"retained","criterion_ids":["R1"],"reason":"依据支持公开条件下的要求，保持作者原文"}]
+}
+
+status=insufficient时可以返回criteria=[]、author_dispositions=[]；不能将未完成审核的部分伪装为冻结结果。

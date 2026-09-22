@@ -15,7 +15,7 @@ import sys
 
 
 def import_tree(staging_root: str, ledgers: list[str]) -> None:
-    dst_root = "/yzp/zhaozy/yangzepeng/0905/demiwtg/datasets/demiwtg"
+    dst_root = os.environ.get('DEMIWTG_DATASETS_ROOT', '/yzp/zhaozy/yangzepeng/0905/datasets') + "/demiwtg"
     src_root = os.path.join(staging_root, "blobs")
     moved = skipped = missing = badsha = conflict = 0
     seen = set()

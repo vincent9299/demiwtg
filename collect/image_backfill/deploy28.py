@@ -4,7 +4,7 @@ import os
 import subprocess
 import time
 
-HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub"
+HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub"
 FC = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/fleet_curl.py"
 UAS = [l.strip() for l in open(os.path.join(HUB, "ua_pool.txt")) if l.strip()]
 pool = [l.strip() for l in open(os.path.join(HUB, "proxies", "one_per_subnet.txt")) if l.strip()]

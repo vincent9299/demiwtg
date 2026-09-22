@@ -41,8 +41,8 @@ DATA_DIR = Path(__file__).resolve().parent / "data"
 IMGS_DIR = DATA_DIR / "gen_imgs"
 PROMPTS_F = DATA_DIR / "gen_prompts.jsonl"
 RESULTS_F = DATA_DIR / "gen_results.jsonl"
-FOCUS_F = REPO_ROOT / "state" / "collect" / "focus1000_instances.json"
-DOCS_DRAFT = REPO_ROOT / "state" / "collect" / "concepts_docs_draft.jsonl"
+FOCUS_F = REPO_ROOT / "collect" / "records" / "focus1000_instances.json"
+DOCS_DRAFT = REPO_ROOT / "collect" / "records" / "concepts_docs_draft.jsonl"
 TAXONOMY_F = REPO_ROOT / "datasets" / "demiwtg" / "meta" / "taxonomy.json"
 V60_PROMPT_F = Path("/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i/synthesize_prompt_gen_v6.0.md")
 ENV_F = REPO_ROOT / "modelhub" / ".env"
@@ -216,11 +216,7 @@ async def run_prompts(limit, conc):
                     docs[r["name"]] = r.get("body") or ""
     for i in instances:
         i["_docs"] = docs.get(i["name"], "")
-    mounts = {}
-    if TAXONOMY_F.exists():
-        sys.path.insert(0, str(REPO_ROOT))
-        from taxonomy.mount_map import load_mount_map  # noqa: PLC0415
-        mounts = load_mount_map(str(TAXONOMY_F))
+    mounts = {item["name"]: item.get("taxonomy", []) for item in instances}
     done = set()
     if PROMPTS_F.exists():
         for line in PROMPTS_F.read_text().splitlines():

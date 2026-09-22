@@ -1,1 +1,0 @@
-../../shared/AUTHORING.md

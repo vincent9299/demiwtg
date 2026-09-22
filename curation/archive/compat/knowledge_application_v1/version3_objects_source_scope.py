@@ -1,1 +1,0 @@
-../../v3/version3_objects_source_scope.py

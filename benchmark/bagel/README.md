@@ -7,11 +7,11 @@
 ## 整合方式（2026-09-05 已执行，物理移动）
 
 - **代码 + 数据全部物理移动**进本目录（脚本含规范重命名），无软链迷宫
-- 唯一保留的软链：`data/models → bagel/models → Bagel/models`（28G 底座权重，与模型包同体，不拷贝）
+- 唯一保留的软链：`data/models → bagel/models → Bagel/models`（底座权重入口，不拷贝；2026-09-21 起 BAGEL-7B-MoT 28G 物理迁至工作区 `/yzp/zhaozy/yangzepeng/0905/models/BAGEL-7B-MoT`，`Bagel/models/BAGEL-7B-MoT` 原址改相对软链 `../../../../models/BAGEL-7B-MoT`，链路照常解析）
 - 运行缓存（`modelscope` / `hf_home` / `LMUData`）统一指向 `data/` 下，避免再污染旧目录
 - 已删除非必要项：`fa_build/`（旧机 cp310 flash_attn 构建产物 925M，py311 wheel 已装入 env-bagel）、`logs/`、`gen_eval/` 残余与下载日志、ELLA 仓除 `dpg_bench` 外的部分（公开仓可再克隆）
 
-**旧目录现状（已极简）**：`bagel/` 下仅剩 `Bagel/`（官方模型包 modeling/ 等 + `models/BAGEL-7B-MoT` 权重，是 `eval_gen.py`/`eval_vlm.py` 的 sys.path 目标，必要）和 `models → Bagel/models` 兼容软链。
+**旧目录现状（已极简）**：`bagel/` 下仅剩 `Bagel/`（官方模型包 modeling/ 等，是 `eval_gen.py`/`eval_vlm.py` 的 sys.path 目标，必要）和 `models → Bagel/models` 兼容软链；`Bagel/models/BAGEL-7B-MoT` 权重 2026-09-21 迁至工作区 models/、原址改软链（bagel 降级为常规保留依赖，见主仓 AGENTS.md 架构决策 2026-09-21）。
 
 ## 目录布局
 
@@ -40,7 +40,7 @@ benchmark/bagel/
     ├── dpg_bench/                # DPG 题库 + 官方计分（源自 ELLA 仓）
     ├── outputs/                  # VLM 评测结果 base/lora/official_cfg（37M）
     ├── {modelscope,hf_home,LMUData}/   # 运行缓存（按需生成）
-    └── models -> ../../bagel/models    # → Bagel/models/BAGEL-7B-MoT（28G）
+    └── models -> ../../bagel/models    # → Bagel/models/BAGEL-7B-MoT（软链）→ 工作区 models/BAGEL-7B-MoT（28G，2026-09-21 迁出）
 ```
 
 ## 环境与运行
@@ -48,7 +48,7 @@ benchmark/bagel/
 统一用 **`env-bagel`**（torch 2.5.1+cu124, flash_attn 2.7.4, py3.11）：
 
 ```bash
-source /yzp/zhaozy/yangzepeng/0905/activate-bagel.sh    # 别名 myenv-bagel
+source /yzp/zhaozy/yangzepeng/0905/models/activate-bagel.sh    # 别名 myenv-bagel
 
 # 生成类冒烟（LIMIT=32 单卡）
 cd gen && LIMIT=32 GPUS="0" bash run_gen_eval.sh base dpg

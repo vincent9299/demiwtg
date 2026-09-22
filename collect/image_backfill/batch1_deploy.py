@@ -8,7 +8,7 @@ import sys
 import time
 
 STG = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill"
-HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub"
+HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub"
 COS_PREFIX = "lhcos-data/demiwtg-data/datasets/demiwtg/kb/blobs"
 
 
@@ -81,6 +81,7 @@ def main() -> None:
             continue
         # systemd-run 发射：进 systemd 自管 scope，免疫会话/cgroup 清杀（死亡根因）
         script = (f"sudo -n systemd-run --unit=kbw{w} --uid=1000 --gid=1000 "
+              f"--property=Restart=always --property=RestartSec=15 "
                   f"bash -c 'cd ~/wk_backfill && exec python3 -u kb_backfill.py "
                   f"--tasks tasks_{tag}.jsonl.gz --shard {w}/{nw} "
                   f"--manifest run_kb_{tag}_w{w}/manifest.jsonl"

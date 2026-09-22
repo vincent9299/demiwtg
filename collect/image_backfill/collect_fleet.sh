@@ -1,7 +1,7 @@
 #!/bin/bash
 # fleet 产出自动回收循环：完成的机器 → tar校验 → 拉回 → 解包导入 → 标记
 # 用法: setsid nohup bash collect_fleet.sh >> collect_fleet.log 2>&1 < /dev/null &
-BASE=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1
+BASE=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints
 IN=$BASE/fleet_in
 PY=/yzp/zhaozy/yangzepeng/0905/env/bin/python
 IMP=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/import_blobs.py

@@ -8,7 +8,7 @@ import subprocess
 import sys
 import time
 
-HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub"
+HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub"
 PENDING = os.path.join(HUB, "pending_all")
 FC = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/fleet_curl.py"
 UAS = [l.strip() for l in open(os.path.join(HUB, "ua_pool.txt")) if l.strip()]

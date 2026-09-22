@@ -5,7 +5,7 @@
 set -u
 KEY=$1; RPS=${2:-0.25}
 STG=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
-HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub
+HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub
 NW=81
 TAG=$(basename "$KEY" .jsonl); TAG=${TAG%.jsonl.gz}
 # 1) 全机部署依赖 + 每机拉一次清单（20×1GB，分钟级）

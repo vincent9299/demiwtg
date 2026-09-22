@@ -1,7 +1,0 @@
-{
-  "actual_source": "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/v4/knowledge_source_blocks_v3/knowledge/prompt_config.json",
-  "actually_used_source_blocks.yaml": "Readable subset; parsed prompt objects identical to the executed version",
-  "actually_used_v3.yaml": "Exact YAML string from the executed v3 run",
-  "model_calls_this_revision": 0,
-  "next_source_blocks.yaml": "Revised template, NOT yet called; v5 reuses old responses and applies stricter program admission checks"
-}

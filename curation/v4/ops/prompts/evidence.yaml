@@ -1,9 +1,0 @@
-version: source-v1
-instruction: |-
-  检查每张实际图片对每条知识的支持，不凭同概念名称、来源图注或常识推定支持。
-  分别描述图中实际可见内容，并说明每一图×每一知识的支持区域、支持部分和不能证明的内容。
-  full=图片足以支持整条知识在给定条件下的可见内容；partial=仅支持部分；none=不支持或无关；unobservable=无法可靠观察。不可见的声音、成分、历史、普遍规律不能凭单张外观照认定full。
-  返回 {"images":[{"image_id":"I...","caption":"仅描述可见内容，不擅定物种/材质/年代"}],
-  "support":[{"image_id":"I...","fact_id":"F...","status":"full|partial|none|unobservable","region":"可见区域或不可定位",
-  "supports":"具体支持部分，没有则空字符串","limitations":"不能证明什么"}]}。
-  每张图必须有且仅有一个caption；每一图×每一知识组合必须有且仅有一条support。只判断本次提供的图片。

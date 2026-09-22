@@ -40,7 +40,7 @@ Alignment 全线偏低是题库设计意图（知识密度 gating 拉开模型�
 ## 复跑 / 扩展新模型
 
 ```bash
-source /yzp/zhaozy/yangzepeng/0905/activate.sh   # 项目 env（判分走本地 vLLM judge 需 modelhub 网关:4000）
+source /yzp/zhaozy/yangzepeng/0905/models/activate.sh   # 项目 env（判分走本地 vLLM judge 需 modelhub 网关:4000）
 
 cd /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i
 

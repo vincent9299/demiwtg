@@ -1,5 +1,0 @@
-{
-  "status": "calibration_superseded",
-  "reason": "校准运行完成；后续抽查发现百度百科和不同语言Wiki界面，未做模型调用，不作为最终验收。",
-  "preserve": "Inputs, source snapshots, outputs and failures retained."
-}

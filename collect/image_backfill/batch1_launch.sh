@@ -7,7 +7,7 @@
 set -u
 KEY=$1; N=${2:-1}; RPS=${3:-0.25}
 STG=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
-HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub
+HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub
 TAG=$(basename "$KEY" .jsonl); TAG=${TAG%.jsonl.gz}
 for ((i=0; i<N; i++)); do
   h=r$((i+1))

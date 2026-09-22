@@ -4,7 +4,7 @@
 #       -> CRUISE(每10分钟巡检：进度/429/磁盘/质量抽检/占用机释放补投，自动冷却)
 # 启动：setsid nohup bash guardian.sh >> $HUB/guardian.log 2>&1 < /dev/null &
 set -u
-HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1
+HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints
 STG=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
 GDIR=$HUB/guardian
 mkdir -p $GDIR
@@ -135,7 +135,7 @@ while true; do
       ZERO_STREAK=$((ZERO_STREAK + 1))
       PEND=$(python3 - <<'PY'
 import glob
-n=sum(1 for f in glob.glob('/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub/pending_all/r_r*.jsonl') for _ in open(f))
+n=sum(1 for f in glob.glob('/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub/pending_all/r_r*.jsonl') for _ in open(f))
 print(n)
 PY
 )

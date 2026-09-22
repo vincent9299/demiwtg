@@ -23,18 +23,20 @@ import subprocess
 import time
 import zlib
 
+_PACE_LOCK = __import__('threading').Lock()
+
 API_UA = "demiflow-backfill/1.2 (image restoration; https://github.com/hollowreed42/demiflow-backfill)"
 BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
 # 诚实身份单一事实来源：hub/ua_pool.txt（80 条）；r 机由部署器随脚本同步同文件
 UA_POOL_FILES = (
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "ua_pool.txt"),
-    "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub/ua_pool.txt",
+    "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub/ua_pool.txt",
 )
 # 中央分配表（assign_uas.py 生成）：每出口一条唯一 UA，key=proxy:<ip>/host:<rN>
 UA_ASSIGN_FILES = (
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "ua_assign.tsv"),
-    "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub/ua_assign.tsv",
+    "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub/ua_assign.tsv",
 )
 
 
@@ -194,8 +196,16 @@ class RateGovernor:
             self.hist.clear()
             self.rps = self.lo
 
+    _next_ok = 0.0
+
     def pace(self):
-        time.sleep(1.0 / self.rps)
+        """到点放行：请求间隔 ≥1/rps，但不持锁空转 sleep（车道可重叠传输）。"""
+        with _PACE_LOCK:
+            now = time.monotonic()
+            wait = self._next_ok - now
+            self._next_ok = max(now, self._next_ok) + 1.0 / self.rps
+        if wait > 0:
+            time.sleep(wait)
 
 
 def parse_retry_after(hdr_path):
@@ -205,7 +215,11 @@ def parse_retry_after(hdr_path):
             for line in f:
                 k, _, v = line.partition(":")
                 if k.strip().lower() == "retry-after":
-                    return max(0.0, float(v.strip() or 0))
+                    try:
+                        return max(0.0, float(v.strip() or 0))
+                    except ValueError:
+                        from email.utils import parsedate_to_datetime
+                        return max(0.0, parsedate_to_datetime(v.strip()).timestamp() - time.time())
     except (OSError, ValueError):
         pass
     return 0.0

@@ -1,9 +1,0 @@
-{
-  "run": "bench200_sample5_article_v30",
-  "quality_accepted": null,
-  "status": "stopped_configuration_invalid",
-  "reason": "high not supported by local template; stopped owned clients; no semantic evaluation",
-  "requests": 0,
-  "responses": 0,
-  "pipeline_export_complete": false
-}

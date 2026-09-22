@@ -1,35 +1,18 @@
-"""data_pipeline 下载算子：候选行 → 图像行（引用化，2026-09-04·D1）。
-
-行契约：
-- 读键：source、tiers（档位大到小）
-- 追加键：content_url（获胜档）、sha256、mime、ext、
-  actual_width/actual_height（实测）、size_bytes、
-  **blob_path**（数据集内相对路径 blobs/<aa>/<sha>.<ext>）
-- **不追加 data**：字节在下载成功即原子写入 blob（内容寻址 + pid 唯一
-  临时名，跨节点并发同内容写安全），下游按 blob_path 读——分布式传输
-  缝的行引用化（行跨节点传输不携字节，只传引用）。
-
-机制：fetch_tiers（档位轮转/字节封顶/硬超时）+ verify_image（Pillow
-全量解码+mime/ext 规范表）+ atomic_write_bytes（引擎原子写）。
-本算子只持业务面：按源防盗链头表 + 行键追加。
-
-崩溃窗口：blob 已写、清单未记 → 孤儿 blob（重跑幂等覆盖；合并去重以
-清单为准），可由清理任务回收——单机强一致换分布式最终一致的代价，
-VLM/清单永不双写。
-"""
-
+"""Download verified pixels directly into the single raw image table."""
 from __future__ import annotations
 
 import asyncio
+import time
 import os
 
 import httpx
 
-from operators.search import API_UA
+from collect.operators.search import API_UA
 from demiflow.collect import net
 from demiflow.collect.fetch import fetch_tiers
 from demiflow.collect.images import verify_image
-from demiflow.collect.store import atomic_write_bytes
+from collect.material_writer import write_images
+from collect.ingestion import downloaded_image
 from demiflow.data.plan import StreamStage
 
 MAX_DOWNLOAD_BYTES = 20 * 1024 * 1024    # 单图字节上限（用户拍板 20MB）
@@ -94,10 +77,7 @@ class DownloadStage(StreamStage):
         )
         if got is None:
             return None
-        rel = f"blobs/{got.sha256[:2]}/{got.sha256}.{got.extra['ext']}"
-        # 即时落盘：内容寻址原子写（磁盘 IO 丢线程池）
-        await asyncio.to_thread(
-            atomic_write_bytes, os.path.join(self.dataset_dir, rel), got.data)
+        row["fetched_at"] = time.time()
         row["content_url"] = got.url
         row["sha256"] = got.sha256
         row["mime"] = got.extra["mime"]
@@ -105,5 +85,6 @@ class DownloadStage(StreamStage):
         row["actual_width"] = got.extra["width"]
         row["actual_height"] = got.extra["height"]
         row["size_bytes"] = got.size_bytes
-        row["blob_path"] = rel
+        entity = downloaded_image(row, got.data, system=row['source'])
+        await asyncio.to_thread(write_images, self.dataset_dir, [entity])
         return row

@@ -27,7 +27,7 @@ def _default_api_ua():
     """按主机名查中央分配表（host:<rN> → 该出口唯一诚实 UA），缺表回退。"""
     key = f"host:{socket.gethostname().split('.')[0]}"
     for p in (os.path.join(os.path.dirname(os.path.abspath(__file__)), "ua_assign.tsv"),
-              "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub/ua_assign.tsv"):
+              "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub/ua_assign.tsv"):
         try:
             for line in open(p, encoding="utf-8"):
                 k, _, v = line.rstrip("\n").partition("\t")

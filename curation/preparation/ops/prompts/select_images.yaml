@@ -1,0 +1,26 @@
+version: v2-visual-material-review-1
+instruction: "在知识提炼之前筛选目标概念的图片材料。查看每张实际图片，先描述画面，再判断概念关系。\n概念身份说明用于消歧；来源标题、图注和机器预标注只是线索，不能替代像素。\n\
+  每个输入image_id恰好返回一项images：\n{image_id, relation: direct|background|unrelated|uncertain,\n\
+  \ concept_relation: target|related_activity|text_only|namesake|unrelated|uncertain,\n\
+  \ decision: keep|exclude|pending,\n observability: usable|limited|unusable, reason,\
+  \ visible_information, limitations}。\nvisible_information只描述实际可见的对象、动作、图形或文字，不照抄预标注或猜测不可见内容。\n\
+  统计图和统计地图必须能从真实画面辨认所表示的变量/对象；在visible_information中如实写出能读到的变量名称或标题/图例关键词。熟悉的轮廓、分布、颜色、数值大小、M或百分号等单位不能单独证明变量是什么，不能用常识补认。例如目标为人口分布图，图内人口数量或人口密度名称可作为依据；若只有世界轮廓和若干M数值、没有可辨的变量名称，必须pending，不因看起来像人口图而keep。来源标题和机器描述不能替代此核对。本条仅针对需要明确统计对象的图，不要求普通流程图或几何形状也有统计变量。\n\
+  target：目标本体或表达目标的图解可辨；related_activity：可见与指定目标有关的操作、制作、使用、状态或关系。\n  对加工品、药材、零件和使用场景也必须核对到指定目标：只能知道来自同属、同类或通常用于相似对象，不足以证明与当前具体物种/型号/对象的关系。名称相近或共有的加工品名称不能作为这种对应的证据。\n\
+  \  例如，目标是一个明确植物物种，而画面仅展示通用药材切片及药材名称：如果无法确认切片来自该物种，必须pending，不能放宽为related_activity或用“同属植物”作为keep理由。\n\
+  text_only：只在标题/标签/图注中提及目标，画面没有目标相关信息；namesake：同名但不同概念，画面没有目标相关信息。\nnamesake/text_only/unrelated必须decision=exclude、relation=unrelated。不能将同名作品、商标或文字标签当作目标本体。\n\
+  target必须relation=direct，related_activity必须relation=background；身份和关系有明确依据且有可观察信息时才decision=keep。\n\
+  若只能确认上位类别、泛称或近似外观，不能认证输入要求的具体物种/对象，必须pending。理由或limitations承认目标身份未确认时，不能同时keep。\n\
+  介绍卡片、海报中的配图也要确认目标身份：卡片标题写了目标名称不证明照片正确，不能作为辅助图放行。\n画面清楚但无关仍可observability=usable；不要用unusable代替“不相关”。\n\
+  身份或关系无法确认时concept_relation=uncertain、relation=uncertain、decision=pending，说明缺少什么。\n\
+  清晰度不足以观察相关内容时decision=pending、observability=unusable，不作为无关排除。\n不能按海报、插画、照片等形式一刀切；图中确有目标信息仍可保留。概念本身是作品、文字或符号时，相关文字/图形也可能就是目标本体。\n\
+  不凭美观、水印或尺寸排除。未认出来不等于无关。不能仅凭相近外形认证细粒度身份。\n不要求支持现成知识，不提前提炼知识。保留有信息的相关背景；空泛背景或仅名称关联不能送入联合提炼。\n\
+  \n统计变量名称无法从真实图中辨认时，保留pending；不要把基于轮廓和数字的推测写成已确认身份。\nV2 独立视觉材料发布：本次同时完成图片索引补齐、概念关联和可见知识支持审核，不依赖文章是否选图。\n\
+  当 selection_protocol 为 concept-visual-publication/1 时，每项还必须输出 image_metadata 与 visual_support。\n\
+  image_metadata：若 image_id 在 metadata_required_ids 中，输出以下完整对象；否则填 null（已保存旧索引，不向你提供旧判断）。\n\
+  {caption:简洁客观画面描述, representation:photo|illustration|diagram|flowchart|map|chart|document|screenshot|mixed|unknown,\n\
+  view_tags:[front|side|top|oblique|closeup|interior|cross_section|exploded|multi_panel|stage_comparison|unknown],\n\
+  objects:[{name,location,visible_features}], text_regions:[{text,location,readability:readable|partial|unreadable}],\n\
+  observability_issues:[{type:blur|occlusion|cropping|small_text|watermark|glare|other,location,detail}],\
+  \ uncertainties:[字符串]}。\n标签只作索引，不能从照片形式认证真实来源。对象最多8项，文字最多12处，可观察问题最多20项，不确定项最多8项；视角至少一项。不要把底面误称剖面、视角误写成发生过的动作。\n\
+  visual_support：keep 时输出 {supports:本图对该概念实际支持的可见特征或关系, region:可观察位置, limitations:不能支持的内容及限制}；pending/exclude\
+  \ 时为 null。描述本图可见事实，不从单图概括普遍规律、不推断内部机制；一图无需覆盖全部知识。不确定关键身份或关键特征时保持 pending。\n你直接查看像素独立判断，不复述其他模型结论。不决定训练参考/目标角色，不判断未提供的任务，也不输出质量总分。\n"

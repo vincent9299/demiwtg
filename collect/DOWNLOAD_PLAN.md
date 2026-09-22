@@ -37,6 +37,12 @@
 | ② 缩略图 | `node-backup/2026-09-17/p5/demi/raw/state/thumb1200_rows.jsonl.gz` | 340,951 |
 | ③ 异常行 | `audit/2026-09-17/poison_other_rows.jsonl.gz` | 0（空） |
 
+执行（2026-09-18 二次升级：demiflow 编排化）：控制面 `collect/image_backfill/kb_orchestrate.py`
+（deploy/patrol/stop 三动作）消费框架新原语——demiflow/collect/exec_curl.py（短命 curl 传输 +
+AIMD 节拍 + 出口唯一身份，单测+mock 传输三场景过）与 demiflow/collect/fleet.py（systemd-run
+托管发射/幂等守卫/并行巡检；教训固化：setsid 逃不过 cgroup 清杀、bash 启动器 stdin/引号/pgrep
+自匹配三坑、直连 worker 必须与代理 worker 同等 systemd 化）。第 1 批 81 worker 已全部由
+该体系托管（unit=kbw0-80）。原工具 kb_backfill.py 保持独立可跑（r 机部署件）。
 执行（2026-09-18 用户裁定改用夜间验证链路，弃 backfill_orig/flow_images_batch 的 asyncio 路线）：`image_backfill/kb_backfill.py`——复用 fleet_curl 同款短命 curl + AIMD 动态节拍（0.25 起步/0.45 上限/429 减半+Retry-After/风暴熔断）+ COS 签名直传（ETag 复核）+ 出口唯一诚实 UA；URL 本地 MD5 直链构造（不打 API）；闸门=200+图片魔数+64MB 封顶（毒行根因 HTML 错误页按 not_image 拒收）；账本 kb schema 元数据继承、(qid,commons_file) 断点续跑。启动器 `batch1_launch.sh <tasks_key> <n台> [rps]`；金丝雀 1 万行已备 `audit → _staging_batch1/canary_poison_10k.jsonl`。礼貌红线 **≤8 机起步**（25 机 × 4rps 曾引发 429 连坐）；验收=miss_html=0（not_image 应≈0）+ 新 blob 抽样 sha/魔数回读；体量预估 2.4-6.3TB（毒行）+ ≥3.4TB（缩略升级）。
 收尾：重收 blob 复嗅探抽样（HTML 应=0）→ 并账（同 (qid,commons_file) 保 orig 新行）→ 按引用计数清理毒 blob 7,904,311 + 孤儿 43,015 + 0B 残骸 1。
 

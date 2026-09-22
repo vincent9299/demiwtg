@@ -1,6 +1,6 @@
 #!/bin/bash
 # IP 恢复监视+复投：每小时探测全部代理，恢复者(3/3 通)立即带节拍投产
-HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub
+HUB=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub
 FC=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/fleet_curl.py
 UAF=$HUB/ua_pool.txt
 while true; do

@@ -5,7 +5,7 @@
 - IMG_REGISTRY：图片源注册表（只收 op_search 已有连接器的源；新源=探针验证后
   在此登记一格）；规划器不裸发明源 id，清单外 id 一律剔除（防幻觉）；
 - BranchPlanner：分支 → 图源集合。LLM（glm-5.3-flash，Galaxy，key 只从
-  modelhub/.env 读不落盘）一次决策，落盘缓存 state/collect/branch_routes_
+  modelhub/.env 读不落盘）一次决策，落盘缓存 collect/records/branch_routes_
   <lang>.json（含 note 供人工审计），同分支后续实例全部查表零 LLM；
   失败/空结果不落缓存、回退默认路由 FALLBACK_SOURCES，下次重判；
 - 消费端：chain --source-plan（蕴含 --source-agent）。带 plan 时规划结果

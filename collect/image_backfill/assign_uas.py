@@ -10,8 +10,8 @@
 import os
 import sys
 
-HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1/hub"
-R_HOSTS = [f"r{i}" for i in range(1, 21)]  # p1-p5 即将释放，不参与
+HUB = "/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints/hub"
+R_HOSTS = [f"m{i}" for i in range(1, 6)]   # 第三批轻量机（2026-09-19，路由实测达标）
 
 
 def main() -> None:

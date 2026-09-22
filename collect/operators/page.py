@@ -1,18 +1,4 @@
-"""data_pipeline docs 线算子：页面抓取（图文一体）→ 内嵌图下载 → docs 落盘。
-
-行契约：
-- 页面候选行（读）：{name, page_url, title, authority, query}
-- 页面产物行（PageFetchStage 产）：+ {page_sha, passages[]（段落+绑定图）,
-  path, content_sha, page_bytes}；markdown 原文落 pages/<aa>/<sha256(url)>.md
-  （**URL 寻址**，同 URL 重抓覆盖——跨概念共享去重，抽取只做一次）；
-  content_sha/page_bytes = 所落字节的内容哈希与长度（2026-09-09 增：
-  页面按 URL 寻址而非内容寻址，湖侧回灌需要内容级闸门就得在源头记账——
-  旧行缺这两键，湖侧降级宽松门）
-- docs 清单行（DocsSinkStage）：{page_sha, url, concepts, authority,
-  title, path, content_sha, page_bytes, n_passages, n_images, fetched_at}
-  （分片单写者，与图像线同款幂等追加）
-"""
-
+"""Fetch and select web material; persist images and documents in Lance."""
 from __future__ import annotations
 
 import asyncio
@@ -28,8 +14,8 @@ from demiflow.collect import net
 from demiflow.collect.crawl import PageCrawler
 from demiflow.collect.fetch import fetch_tiers
 from demiflow.collect.images import verify_image
-from demiflow.collect.store import (AppendManifestStore,
-                                    atomic_write_bytes)
+from collect.material_writer import write_images, write_documents
+from collect.ingestion import downloaded_image, collected_document
 from demiflow.data.plan import StreamStage
 
 # 内嵌图下载闸（自声明：任意站点图，礼貌限速 + 代理归属与图像线同判——
@@ -154,7 +140,7 @@ async def _wiki_extract(url: str):
     from urllib.parse import unquote
     title = unquote(title)
     try:
-        from operators.search import API_UA
+        from collect.operators.search import API_UA
         resp = await net.request(
             "wiki_entity", "GET",
             f"https://{lang}.wikipedia.org/w/api.php",
@@ -209,17 +195,13 @@ class BaseIngestStage(StreamStage):
         import hashlib as _h
         url = row.get("url") or f"offline:{row.get('title', '')}"
         sha = _h.sha256(url.encode("utf-8")).hexdigest()
-        md_path = os.path.join(self.root, "pages", sha[:2], f"{sha}.md")
         data = row["text"].encode("utf-8")
-        if not os.path.exists(md_path):
-            await asyncio.to_thread(
-                atomic_write_bytes, md_path, data)
         passages = quality_gate(extract_passages(row["text"]))
         if passages is None:
             return None
         return {**row, "page_sha": sha,
                 "passages": passages,
-                "path": f"pages/{sha[:2]}/{sha}.md",
+
                 "content_sha": _h.sha256(data).hexdigest(),
                 "page_bytes": len(data),
                 "authority": row.get("authority", "offline-dump"),
@@ -229,10 +211,8 @@ class BaseIngestStage(StreamStage):
 class PageFetchStage(StreamStage):
     """页面抓取算子（图文一体）：候选行 → 页面产物行。
 
-    - 每概念页预算（默认 8，按权威度先到先得）；URL 内容寻址缓存：
-      已抓页面直接复用（跨概念/跨轮零重复抓取）；
-    - 页面正文 + 抽取段落缓存落共享存储（pages/ 与 pages-extract/），
-      行内不携 markdown 只携 page_sha 与段落集；
+    - 每概念页预算；正文与段落经有界队列传给 Lance 写端；
+    - 每个来源与内容版本分别保存，重抓不会覆盖旧正文；
     - 抓取失败认缺（None），单页失败不断链。
     """
 
@@ -257,33 +237,26 @@ class PageFetchStage(StreamStage):
             return None                   # 概念页预算用尽
         url = row["page_url"]
         sha = _sha(url)
-        md_path = os.path.join(self.root, "pages", sha[:2], f"{sha}.md")
         body_kind = "full"
-        if os.path.exists(md_path):
-            data = open(md_path, "rb").read()
-            markdown = data.decode("utf-8", errors="replace")
-        else:
-            if not _robots_allows(url):   # robots.txt 门（2026-09-07 合规）
-                # 合规兜底链：② Wayback 存档全文 → ① SERP snippet 定义级
-                wb_md = await self._wayback_fetch(url)
-                if wb_md is not None:
-                    markdown, body_kind = wb_md, "wayback"
-                else:
-                    return self._snippet_row(row, sha)   # None=snippet 也不够格
+        if not _robots_allows(url):   # robots.txt 门（2026-09-07 合规）
+            # 合规兜底链：② Wayback 存档全文 → ① SERP snippet 定义级
+            wb_md = await self._wayback_fetch(url)
+            if wb_md is not None:
+                markdown, body_kind = wb_md, "wayback"
             else:
-                wiki_md = await _wiki_extract(url)
-                if wiki_md is not None:
-                    markdown = wiki_md        # wiki 直取纯文本（无导航栏）
-                else:
-                    page = await self._crawler_fetch(url)
-                    if page is None:
-                        return self._snippet_row(row, sha)   # 抓取失败同兜底
-                    markdown = page["markdown"]
-                    if page.get("title") and not row.get("title"):
-                        row["title"] = page["title"]
-            await asyncio.to_thread(atomic_write_bytes, md_path,
-                                    markdown.encode("utf-8"))
-            self.pages += 1
+                return self._snippet_row(row, sha)   # None=snippet 也不够格
+        else:
+            wiki_md = await _wiki_extract(url)
+            if wiki_md is not None:
+                markdown = wiki_md        # wiki 直取纯文本（无导航栏）
+            else:
+                page = await self._crawler_fetch(url)
+                if page is None:
+                    return self._snippet_row(row, sha)   # 抓取失败同兜底
+                markdown = page["markdown"]
+                if page.get("title") and not row.get("title"):
+                    row["title"] = page["title"]
+        self.pages += 1
         data = markdown.encode("utf-8")   # 落盘/已读字节（content_sha 记账）
         passages = quality_gate(extract_passages(markdown))
         if passages is None:
@@ -291,9 +264,9 @@ class PageFetchStage(StreamStage):
                 # 壳页质量门：导航/空壳/登录墙拒收——snippet 兜底再给一次机会
         self._fetched[concept] = self._fetched.get(concept, 0) + 1
         n_imgs = sum(len(p["images"]) for p in passages)
-        return {**row, "page_sha": sha,
+        return {**row, "page_sha": sha, "text": markdown, "fetched_at": time.time(),
                 "passages": passages,
-                "path": f"pages/{sha[:2]}/{sha}.md",
+
                 "content_sha": hashlib.sha256(data).hexdigest(),
                 "page_bytes": len(data),
                 "n_images": n_imgs, "body": body_kind}
@@ -341,15 +314,10 @@ class PageFetchStage(StreamStage):
         content = (f"# {row.get('title') or row.get('name', '')}\n\n"
                    + snippet)
         data = content.encode("utf-8")
-        md_path = os.path.join(self.root, "pages", sha[:2], f"{sha}.md")
-        try:
-            atomic_write_bytes(md_path, data)
-        except OSError:
-            pass                            # 落盘失败不阻断（行仍有效）
         self.pages += 1
         self._fetched[row["name"]] = self._fetched.get(row["name"], 0) + 1
-        return {**row, "page_sha": sha, "passages": [],
-                "path": f"pages/{sha[:2]}/{sha}.md",
+        return {**row, "page_sha": sha, "text": content, "fetched_at": time.time(), "passages": [],
+
                 "content_sha": _sha(content),
                 "page_bytes": len(data),
                 "n_images": 0, "body": "snippet"}
@@ -398,10 +366,14 @@ class InlineImageStage(StreamStage):
                     continue
                 if got is None:
                     continue
-                rel = f"blobs/{got.sha256[:2]}/{got.sha256}.{got.extra['ext']}"
-                await asyncio.to_thread(
-                    atomic_write_bytes, os.path.join(self.root, rel), got.data)
-                keep.append({**img, "sha256": got.sha256, "blob_path": rel})
+                metadata = {**row, 'content_url':got.url, 'ext':got.extra['ext'],
+                    'actual_width':got.extra['width'], 'actual_height':got.extra['height'],
+                    'caption':img.get('alt')}
+                metadata.pop('text', None)
+                metadata.pop('passages', None)
+                entity = downloaded_image(metadata, got.data, system='inline_web_image')
+                await asyncio.to_thread(write_images, self.root, [entity])
+                keep.append({**img, 'sha256':got.sha256})
             p["images"] = keep
         return row
 
@@ -418,49 +390,17 @@ def _verify_min(data: bytes, min_side: int):
 
 
 class DocsSinkStage(StreamStage):
-    """docs 清单落盘算子：页面产物行 → docs 分片清单幂等追加。
+    """Commit one collected page version and its concept/source associations."""
+    label = 'docs_sink'
+    concurrency = 1
 
-    键 (page_sha, concept)；同页跨概念为合法多行（docs↔concepts 多对多，
-    与图像清单同款语义）。
-    """
-
-    label = "docs_sink"
-    concurrency = 4
-
-    def __init__(self, dataset_dir: str, manifest_name: str = "docs.jsonl"):
-        self.root_dir = dataset_dir       # pages/ 与清单同根（清单本地分片，
-        self.manifest = os.path.join(dataset_dir, "meta", manifest_name)  # 页面在共享根由调用方保证）
-        os.makedirs(os.path.dirname(self.manifest), exist_ok=True)
-        self._store = AppendManifestStore(
-            manifest=self.manifest,
-            lock_path=os.path.join(os.path.dirname(self.manifest),
-                                   f".{manifest_name}.lock"))
-        self._store.load_index(
-            key_of=lambda rec: [(rec.get("page_sha"), c)
-                                for c in rec.get("concepts") or [""]])
+    def __init__(self, dataset_dir: str):
+        self.root_dir = dataset_dir
         self.sunk = 0
 
-    async def __call__(self, row: dict):
-        sha = row.get("page_sha")
-        if not sha:
+    async def __call__(self, row):
+        if not row.get('text'):
             return None
-        record = {
-            "page_sha": sha, "url": row.get("page_url"),
-            "concepts": row.get("concepts") or [row["name"]],
-            "authority": row.get("authority"),
-            "title": row.get("title"), "path": row.get("path"),
-            "content_sha": row.get("content_sha"),
-            "page_bytes": row.get("page_bytes"),
-            "n_passages": len(row.get("passages") or []),
-            "n_images": sum(len(p.get("images") or [])
-                            for p in row.get("passages") or []),
-            "query": row.get("query"), "fetched_at": time.time(),
-        }
-        done = await self._store.write(
-            data=b"", blob_path=os.path.join(self.root_dir, row.get("path") or ""),
-            key=(sha, ",".join(row.get("concepts") or [row.get("name", "")])),
-            record=record)
-        if done:
-            self.sunk += 1
-            return row
-        return None
+        await asyncio.to_thread(write_documents, self.root_dir, [collected_document(row)])
+        self.sunk += 1
+        return row

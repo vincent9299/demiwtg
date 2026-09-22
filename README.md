@@ -1,7 +1,13 @@
 # demiwtg
 
-标签体系（taxonomy + concepts）治理与 IP 图片数据湖项目。
+业务代码仓库；通用 Dataset、Lance 与执行能力由相邻的 demiflow 提供。
 
-- 架构约束、数据契约、dataset 硬约束：见 **[AGENTS.md](AGENTS.md)**（唯一权威文档）。
-- 代码模块：`taxonomy/`（体系构建富化）、`curation/`（数据策展与检索接地）、`viewer/`（查看器：页面 + 构建脚本 + 产物闭环）、`benchmark/`（评测基准：vlm/t2i/edit 三子模块 + bagel 第 4 场景官方基准评测）；图片采集链已独立为 [demiwtg-data](https://github.com/vincent9299/demiwtg-data) 仓库；`bagel/`（Bagel 官方模型包）已于 2026-09-05 入主仓（模型权重等重物 gitignore 排除）；本地子项目 `modelhub/` 为独立 git 仓库（主仓 .gitignore 整体排除）。
-- 数据：`datasets/`（数据集根；demiwtg = 自建数据集：meta/ 下 taxonomy 两件套（taxonomy.json/concepts.json）入 git，blobs 与清单不入 git）。
+- [采集](collect/README.md)：原始材料获取与入湖。
+- [策展](curation/README.md)：知识、出题、训练数据、评测四框架，当前为 V2。
+- [概念与分类主数据](curation/taxonomy/README.md)：策展内部模块，固定 master release 驱动采集与策展。
+- [架构 review](curation/pipeline_v2/reviews/lance_boundary_review_20260921.md)：边界调整与验证范围。
+- [统一环境](tools/environment/README.md)：工作区 env/bin/python。
+
+Lance 为唯一业务存储层，数据根默认工作区 datasets/。源码、测试和说明纳入 Git；环境、模型、密钥与运行数据不入库。只保留最新源码，归档代码已删除，历史样本与评分保留原版本身份。
+
+目录和架构约束见 [AGENTS.md](AGENTS.md) 顶部。

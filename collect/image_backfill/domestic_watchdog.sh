@@ -1,7 +1,7 @@
 #!/bin/bash
 # 国内源看门狗：静默死亡自动拉起，账本幂等；连续两轮无新增则收工
 cd /yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill
-LOG=/yzp/zhaozy/yangzepeng/0905/demiwtg/state/curation/image_backfill_full_v1
+LOG=/yzp/zhaozy/yangzepeng/0905/demiwtg/collect/image_backfill/checkpoints
 last=-1; stale=0
 while true; do
   for s in 0 1; do

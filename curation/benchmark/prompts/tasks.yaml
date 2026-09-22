@@ -1,0 +1,142 @@
+schema_version: demiflow_prompt_pack_v2
+prompts:
+  construct:
+    version: v2-knowledge-reasoning-target-aware-1
+    model: &id001
+      name: qwen3.8-27b
+      transport: openai_compatible
+      base_url: http://127.0.0.1:8000/v1
+      api_key_env: CURATION_DOWNSTREAM_MODEL_KEY
+    schema_retries: 0
+    template: '{{ instructions }}
+
+
+      将上述业务JSON完整放入响应的result属性，不改变业务字段的含义。
+
+      以下是实际任务和资料。image占位项的number对应后面实际图片的顺序；保留各图的角色和支持限制。
+
+      {{ payload | json }}
+
+      {{ images | numbered_image }}
+
+      '
+    response_schema: &id002
+      type: object
+      required:
+      - result
+      additionalProperties: false
+      properties:
+        result:
+          type: object
+          required:
+          - status
+          properties:
+            status:
+              type: string
+              enum:
+              - ok
+              - insufficient
+          additionalProperties: true
+  review_task:
+    version: v2-bound-training-references-3
+    model: *id001
+    schema_retries: 0
+    template: '{{ instructions }}
+
+
+      将上述业务JSON完整放入响应的result属性，不改变业务字段的含义。
+
+      以下是实际任务和资料。image占位项的number对应后面实际图片的顺序；保留各图的角色和支持限制。
+
+      {{ payload | json }}
+
+      {{ images | numbered_image }}
+
+      '
+    response_schema:
+      type: object
+      required:
+      - result
+      additionalProperties: false
+      properties:
+        result:
+          type: object
+          required:
+          - checks
+          - reason
+          properties:
+            checks:
+              type: object
+              required:
+              - grounding
+              - knowledge_necessary
+              - observable
+              - nonleaking
+              - reasonable_preservation
+              properties:
+                grounding:
+                  type: boolean
+                knowledge_necessary:
+                  type: boolean
+                observable:
+                  type: boolean
+                nonleaking:
+                  type: boolean
+                reasonable_preservation:
+                  type: boolean
+              additionalProperties: false
+            reason:
+              type: string
+              minLength: 1
+          additionalProperties: false
+  select_edit_source:
+    version: v2-knowledge-reasoning-target-aware-1
+    model: *id001
+    schema_retries: 0
+    template: '{{ instructions }}
+
+
+      将上述业务JSON完整放入响应的result属性，不改变业务字段的含义。
+
+      以下是实际任务和资料。image占位项的number对应后面实际图片的顺序；保留各图的角色和支持限制。
+
+      {{ payload | json }}
+
+      {{ images | numbered_image }}
+
+      '
+    response_schema: *id002
+  design_candidates:
+    version: v2-target-visit-one-sample-4
+    model: *id001
+    schema_retries: 0
+    template: '{{ instructions }}
+
+
+      将上述业务JSON完整放入响应的result属性，不改变业务字段的含义。
+
+      以下是实际任务和资料。image占位项的number对应后面实际图片的顺序；保留各图的角色和支持限制。
+
+      {{ payload | json }}
+
+      {{ images | numbered_image }}
+
+      '
+    response_schema: *id002
+  select_edit_source_external:
+    version: v2-knowledge-reasoning-target-aware-1
+    model: *id001
+    schema_retries: 0
+    template: '{{ instructions }}
+
+
+      将上述业务JSON完整放入响应的result属性，不改变业务字段的含义。
+
+      以下是实际任务和资料。image占位项的number对应后面实际图片的顺序；保留各图的角色和支持限制。
+
+      {{ payload | json }}
+
+      {{ images | numbered_image }}
+
+      '
+    response_schema: *id002
