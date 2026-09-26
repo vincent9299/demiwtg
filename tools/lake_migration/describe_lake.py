@@ -195,7 +195,7 @@ def describe(root, destination):
         if prior is None or ref.lance_version > prior.lance_version: latest[ref.relative_uri] = ref
     groups = defaultdict(list)
     for uri, ref in latest.items():
-        key = '/'.join(uri.split('/')[:2]).removesuffix('.lance') + ' · ' + ref.schema_name
+        key = str(Path(ref.resolve(root)).parent.relative_to(root)) + ' · ' + ref.schema_name
         groups[key].append(ref)
     lines = ['# 当前 Lance 数据字典', '',
              '按当前登记的各表最新版本生成。固定发布仍按自身引用读取；表版本不等于 pipeline 版本。', '',
@@ -206,7 +206,7 @@ def describe(root, destination):
         lines.append(f'| {key} | {grain(key)} | {len(refs)} | {sum(x.row_count for x in refs):,} |')
     for key, refs in sorted(groups.items()):
         lines += ['', '## ' + key, '', '粒度：' + grain(key), '',
-                  '表位置：' + '、'.join('`'+x.relative_uri+'`' for x in refs[:3]) + (' 等分片' if len(refs)>3 else ''), '',
+                  '表位置：' + '、'.join('`'+str(Path(x.resolve(root)).relative_to(root))+'`' for x in refs[:3]) + (' 等分片' if len(refs)>3 else ''), '',
                   '| 字段 | Lance/Arrow 类型 | 可空 | 含义 |', '| --- | --- | --- | --- |']
         for field in refs[0].open(root).schema:
             lines.extend(field_rows(field))

@@ -235,8 +235,11 @@ def _store_image(row: dict, extid: str, url: str, license_: str,
                    retries=(0, 5, 15, 30),
                    tmp_path=f"/tmp/b4curl.{os.getpid()}.{threading.get_ident()}.{extid[-8:]}")
     if not r.ok:
-        if _is_transient_curl(r):
+        status = r.status or 0
+        if getattr(r, "throttled", False) or status >= 500 or status in (408, 429):
             raise TransientFetchError(f"{extid}: http:{r.status or r.reason}"[:80])
+        # 网络耗尽类(无状态码:死链/DNS/连接拒绝/重试梯子走完)→行级死信。
+        # 旧版归瞬态→整批回队列→同一死链永远炸批(2026-09-22 gbif 滴灌实锤:0 done 死循环)。
         _STATE.emit_dead(extid, f"http:{r.status or r.reason}"[:60], url)
         return
     data = r.data

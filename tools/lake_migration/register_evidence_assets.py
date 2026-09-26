@@ -2,7 +2,7 @@
 
 面向"证据保全"型散落大件（benchmark 媒体、taxonomy 迁移证据等）：
 逐文件读字节算 sha256，登记为 storage_mode=external 的资产表
-（raw/evidence/<source>/v1/assets.lance）。来源只读、不移动不删除；
+（demiwtg/collect/datasets/evidence_assets__<source>.lance）。来源只读、不移动不删除；
 退役删除仍需显式裁决，本登记只提供可核验清单。
 
 用法（需 demiflow 源码仓 + env 组合 PYTHONPATH）：
@@ -103,7 +103,7 @@ def run(source: str, repo_root: Path, roots, datasets_root=None, workers: int = 
     def rows_factory():
         yield from iter_asset_rows(repo_root, roots, migrated, stats, workers=workers)
 
-    relative = f"raw/evidence/{source}/v1/assets.lance"
+    relative = f"demiwtg/collect/datasets/evidence_assets__{source}.lance"
     # fingerprint 用源清单＋mtime 快照派生；内容变化走新 fingerprint。
     stamp = "|".join(f"{r}:{int((repo_root / r).stat().st_mtime)}" for r in roots)
     ref, rows, replayed = write_table(

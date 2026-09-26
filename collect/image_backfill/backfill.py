@@ -214,7 +214,7 @@ def main() -> None:
         print("[backfill] 无待办，退出")
         return
 
-    from demiflow.standalone import local_data
+    from demiflow import data
     stage = BackfillStage(args.blob_root, sink)
     stage.concurrency = args.concurrency
     stage.queue_depth = args.concurrency * 2
@@ -232,7 +232,7 @@ def main() -> None:
             print(f"[进度] {done_in}/{n}（{rate:.1f} 行/s） "
                   f"落盘={sink.done} 死信={sink.dead_count}", flush=True)
 
-    (local_data().from_items(todo)
+    (data.from_items(todo)
      .map_async(stage)
      .run_stream(on_progress=on_progress, log_every=args.log_every))
     print(f"[backfill] 完成：落盘 {sink.done}、死信 {sink.dead_count}、"

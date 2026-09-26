@@ -10,10 +10,10 @@ from demiflow.lance.storage import schema_hash
 from project import resolve_root
 
 OP='single_material_tables_20260921'
-TARGETS={'images':'raw/images.lance','documents':'raw/documents.lance'}
+TARGETS={'images':'demiwtg/collect/datasets/images.lance','documents':'demiwtg/collect/datasets/documents.lance'}
 
 
-def journal(root):return LanceRecordStore(root,f'runs/maintenance/{OP}/records.lance')
+def journal(root):return LanceRecordStore(root,f'datasets/records__{OP}.lance')
 
 
 def run(root):

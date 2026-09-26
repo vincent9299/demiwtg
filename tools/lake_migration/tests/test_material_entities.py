@@ -40,7 +40,7 @@ def test_document_versions_keep_distinct_bodies_and_merge_concepts(tmp_path):
 
 def test_generated_transport_keeps_provenance_and_concept_associations(tmp_path):
     from PIL import Image
-    from benchmark.focus1000.focus1000_merge_lake import import_results
+    from tools.lake_migration.import_generated_evidence import import_results
     from collect.materials import generation_origin
     path=tmp_path/'image.png';Image.new('RGB',(7,9),'blue').save(path)
     key=sha(path.read_bytes());result=tmp_path/'results.jsonl'

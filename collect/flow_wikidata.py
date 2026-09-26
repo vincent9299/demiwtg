@@ -72,12 +72,12 @@ def main() -> None:
     def factory():
         return iter_truthy(args.concat_cmd)
 
-    from demiflow.standalone import local_data
+    from demiflow import data
     filt = WikidataFilterStage(qids)
     filt.concurrency = args.concurrency
     filt.queue_depth = args.concurrency * 4
     sink = PropsSinkStage(args.out)
-    stats = (local_data()
+    stats = (data
              .from_iter(factory)
              .map_async(filt)
              .map_async(sink)

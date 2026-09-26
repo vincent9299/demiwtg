@@ -1,0 +1,177 @@
+schema_version: demiflow_prompt_pack_v2
+prompts:
+  design_edit:
+    version: edit-v1-inline-1
+    model:
+      name: qwen3.8-27b
+      transport: openai_compatible
+      base_url: http://127.0.0.1:8000/v1
+      api_key_env: EDIT_LOCAL_MODEL_KEY
+    schema_retries: 0
+    template: |-
+      你设计一条图像编辑训练样本。先看实际像素和可靠材料，再联合决定学习内容、已有图角色、合成方案、最终训练指令和参考、审核要求。允许材料不足。
+
+      学习方向候选（可重叠、可补充，不是配额）：概念视觉特征；参考信息应用；条件或关系应用；其他有依据的学习内容。learning_objective 必须说明具体教什么，不能只写概念名或编辑类别。
+      另外独立选择 edit_type：增加、删除、替换、属性修改、空间或姿态变化、背景或场景修改、风格变化、修复、组合编辑、其他。编辑类型说明“做什么操作”，学习方向说明“学什么”。不要为复杂而复杂。
+
+      图片1是角色待定的已有图。existing_role=source 时从它合成训练目标；existing_role=target 时保留它作为真实监督目标，反向编辑它以合成训练原图。根据核心视觉特征能否提供可靠监督来决定，不要求两个方向各占一半。
+      instruction 始终是最终训练原图→目标图的编辑指令。synthesis_instruction 是已有图→新图的实际合成指令；当已有图作 target 时，两者方向相反，不能机械复用同一句话。role_reason 解释选择，supervision_signal 指出目标应当在什么可见区域体现什么学习信号。不要让被遮挡、过小或不存在的细节承担核心监督。
+
+      材料编号是 payload 中 materials 的 number，不是后面图片编号。evidence 选择构题依据；input_materials 选择实际给训练模型的参考（允许空）；synthesis_materials 选择额外给合成模型的材料（允许空）。这三组分别决定，不自动相等。必需配图必须一起选择。已有图不在材料编号中，不得偷偷作为额外作答参考，监督目标不能成为参考。
+      合成调用的图片顺序：图片1=已有图，随后按 synthesis_materials 顺序加入所选图片，文字正文随合成指令提供。训练输入：instruction、编辑原图、按 input_materials 顺序提供正文/参考图。所有内部说明、caption、审核判据不会自动进入训练输入。
+      参考必须有明确用途，不能本身已满足完整指令。若只需照搬参考即可完成，不能声称教会迁移。不得要求看不到、没有依据的唯一细节。知识文本和额外参考均不强制。
+
+      preserve 列出应保持的具体对象/区域/结构。criteria 列出3至6条可从原图、目标及已选参考核验的具体要求，覆盖核心学习信号和实际编辑变化。最终审核会看生成的真实图对，不因你的理由而认可，不会改写任务以迁就失败结果。
+      与 previous_samples 完全相同的指令、输入和目标不应重复交付。不要求措辞唯一。
+
+      返回 JSON 的 result 对象。可行时 status=ok 并填写全部字段；不可行时 status=insufficient，reason 说明本批缺什么，其余字段使用空字符串/空数组，existing_role=source 仅作占位。
+
+      把业务结果放入 JSON 的 result 属性。
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        result:
+          type: object
+          additionalProperties: false
+          properties:
+            reason: &id001
+              type: string
+            learning_objective: *id001
+            edit_type: *id001
+            role_reason: *id001
+            supervision_signal: *id001
+            instruction: *id001
+            synthesis_instruction: *id001
+            reference_reason: *id001
+            status:
+              type: string
+              enum:
+              - ok
+              - insufficient
+            existing_role:
+              type: string
+              enum:
+              - source
+              - target
+            learning_directions: &id002
+              type: array
+              items: *id001
+            preserve: *id002
+            criteria: *id002
+            evidence: &id003
+              type: array
+              items:
+                type: integer
+                minimum: 1
+            input_materials: *id003
+            synthesis_materials: *id003
+          required:
+          - reason
+          - learning_objective
+          - edit_type
+          - role_reason
+          - supervision_signal
+          - instruction
+          - synthesis_instruction
+          - reference_reason
+          - status
+          - existing_role
+          - learning_directions
+          - preserve
+          - criteria
+          - evidence
+          - input_materials
+          - synthesis_materials
+      required:
+      - result
+  review_edit:
+    version: edit-v1-inline-1
+    model:
+      name: qwen3.8-27b
+      transport: openai_compatible
+      base_url: http://127.0.0.1:8000/v1
+      api_key_env: EDIT_LOCAL_MODEL_KEY
+    schema_retries: 0
+    template: |-
+      独立审核一条真实 Edit 训练图对。原图、目标图、实际训练输入和构题依据在 payload 中明确分开。构题者的理由不是证据。只根据实际像素核验，不改写指令、不改变图片角色。
+
+      逐项返回 checks，每项包含 passed（布尔）和 observation（具体像素依据）：
+      - grounded：学习内容和概念特征有依据，不凭名称、caption 或构题者声明认定。
+      - instruction_satisfied：训练方向原图→目标图确实完成所有指令；反向合成不得把训练方向搞反。
+      - visible_supervision：目标核心特征清楚可见，足以监督所述学习目标；遮挡、过小、画错均拒绝。
+      - preservation：应保持的主体身份、背景、布局和局部结构得到保持。指出额外改动。
+      - input_sufficient：只用实际训练指令、原图和所选参考即可理解并完成任务；不能靠隐藏审核说明补题。
+      - nonleaking：目标/近重复没有进入参考；参考本身不是可以直接提交的完整答案。原图与目标不能是无编辑变化的同图。
+      - image_quality：图像清楚，无破坏任务的伪影、结构错误、文字错误。
+
+      另逐条审核 criteria，返回 criterion（从1开始）、passed 和 observation，不漏项。全部 checks 和 criteria 通过才可交付。不确定、看不清、证据不够按不通过处理，并在 reason 中解释。返回 JSON result={checks, criteria, reason}。
+
+      把业务结果放入 JSON 的 result 属性。
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      properties:
+        result:
+          type: object
+          additionalProperties: false
+          properties:
+            checks:
+              type: object
+              additionalProperties: false
+              properties:
+                grounded: &id004
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    passed:
+                      type: boolean
+                    observation:
+                      type: string
+                      minLength: 1
+                  required:
+                  - passed
+                  - observation
+                instruction_satisfied: *id004
+                visible_supervision: *id004
+                preservation: *id004
+                input_sufficient: *id004
+                nonleaking: *id004
+                image_quality: *id004
+              required:
+              - grounded
+              - instruction_satisfied
+              - visible_supervision
+              - preservation
+              - input_sufficient
+              - nonleaking
+              - image_quality
+            criteria:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  criterion:
+                    type: integer
+                    minimum: 1
+                  passed:
+                    type: boolean
+                  observation:
+                    type: string
+                    minLength: 1
+                required:
+                - criterion
+                - passed
+                - observation
+            reason: *id001
+          required:
+          - checks
+          - criteria
+          - reason
+      required:
+      - result

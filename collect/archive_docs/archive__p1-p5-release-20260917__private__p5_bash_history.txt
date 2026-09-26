@@ -1,0 +1,29 @@
+ 
+exit
+exit
+git clone git@github.com:vincent9299/modelhub.git
+cd modelhub/
+./start-direct.sh 
+mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrhXSI+dytj1lqbiW0Z++tIQY8UrDIVKSSgl/3QIlqv kb-crawler-prod-sg-01' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys && echo OK
+whoami; echo '---'; sudo cat /root/.ssh/authorized_keys 2>&1; echo '---'; ls -la /root/.ssh 2>&1
+id; echo '---'; ls -la /home/; echo '---'; grep -E '^(root|ubuntu|lighthouse):' /etc/passwd
+exit
+ls
+cd modelhub/
+./stop.sh && ./sart.sh
+./stop.sh && ./start.sh
+./stop.sh && ./start-direct.sh
+cd /lhcos-data/demiwtg-data/
+ls
+tail -30 concepts_batch_200.json
+head -30 concepts_batch_200.json
+ls
+cd modelhub/
+ls
+python3 ~/demi/demiwtg-data/fleet_report.py
+适当放松的
+ls
+cd demiwtg-data/
+ls
+python fleet_report.py 
+python3 fleet_report.py 

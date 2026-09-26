@@ -68,11 +68,11 @@ def test_current_collection_graph_reads_fixed_master_and_keeps_both_branches(tmp
 def test_wiki_dump_graph_keeps_page_identity_links_and_revision(tmp_path):
     from collect.operators.wiki_dump import WikiParseStage
     from collect.flow_kb import CommitPages
-    from demiflow.standalone import local_data
+    from demiflow import data
     row={'lang':'en','title':'Example','page_id':12,'revision_id':34,
          'is_redirect':False,'redirect_target':None,
          'text':'A page about [[Target]] and [[d:Q123]].'}
-    output=(local_data().from_iter(lambda:iter([row])).map_async(WikiParseStage())
+    output=(data.from_iter(lambda:iter([row])).map_async(WikiParseStage())
         .batch_map(CommitPages(tmp_path),max_batch=2).run_stream())
     assert output.emitted == 1
     saved=lance.dataset(str(tmp_path/DOCUMENTS_URI)).to_table().to_pylist()[0]

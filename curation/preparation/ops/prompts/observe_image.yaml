@@ -1,7 +1,0 @@
-version: observe-image-v1
-instruction: |
-  独立查看实际图片，识别画面中的主要对象。没有来源标题或预先指定的对象身份。
-  先描述可见的结构和形态，再列出可能的对象名称及区分依据。不要用不可见的材质成分、用途、年代或物种信息补全身份。
-  若细节不足以区分相近对象，明确说明，不勉强给唯一身份。图中文字可以记录，但不能单独认证对象。
-  返回对象：{objects:[{name,visible_features,alternatives,uncertainty}],summary}。
-  visible_features、alternatives、uncertainty、summary均用字符串；不输出置信度分数。

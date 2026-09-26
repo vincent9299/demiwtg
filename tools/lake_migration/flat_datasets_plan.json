@@ -1,0 +1,794 @@
+[
+  {
+    "old": "curated/articles.lance",
+    "new": "demiwtg/preparation/datasets/articles.lance"
+  },
+  {
+    "old": "curated/images.lance",
+    "new": "demiwtg/preparation/datasets/images.lance"
+  },
+  {
+    "old": "master/concepts/v1/concepts.lance",
+    "new": "datasets/master_concepts.lance"
+  },
+  {
+    "old": "master/memberships/v1/concept_taxonomy.lance",
+    "new": "datasets/concept_taxonomy.lance"
+  },
+  {
+    "old": "master/taxonomy/v1/edges.lance",
+    "new": "datasets/taxonomy_edges.lance"
+  },
+  {
+    "old": "master/taxonomy/v1/nodes.lance",
+    "new": "datasets/taxonomy_nodes.lance"
+  },
+  {
+    "old": "raw/documents.lance",
+    "new": "demiwtg/collect/datasets/documents.lance"
+  },
+  {
+    "old": "raw/images.lance",
+    "new": "demiwtg/collect/datasets/images.lance"
+  },
+  {
+    "old": "registry/datasets.lance",
+    "new": "datasets/registry_datasets.lance"
+  },
+  {
+    "old": "registry/releases.lance",
+    "new": "datasets/registry_releases.lance"
+  },
+  {
+    "old": "runs/benchmark/concepts10_questions20_20260918/selected_questions.lance",
+    "new": "demiwtg/benchmark/datasets/selected_questions__concepts10_questions20_20260918.lance"
+  },
+  {
+    "old": "runs/collection_history/concept_selections_20260906.lance",
+    "new": "demiwtg/collect/datasets/concept_selections_20260906.lance"
+  },
+  {
+    "old": "runs/collection_history/image_observations_before_loss_20260906.lance",
+    "new": "demiwtg/collect/datasets/image_observations_before_loss_20260906.lance"
+  },
+  {
+    "old": "runs/evaluation/aligned_evaluation_20260919_v5/data.lance",
+    "new": "demiwtg/evaluation/datasets/data__aligned_evaluation_20260919_v5.lance"
+  },
+  {
+    "old": "runs/evaluation/edit_focus200_core/delivery.lance",
+    "new": "demiwtg/evaluation/edit/v1/datasets/delivery__edit_focus200_core.lance"
+  },
+  {
+    "old": "runs/evaluation/two_case_open_models_20260922/input_blobs.lance",
+    "new": "demiwtg/evaluation/datasets/input_blobs__two_case_open_models_20260922.lance"
+  },
+  {
+    "old": "runs/evaluation/two_case_open_models_20260922/output_blobs.lance",
+    "new": "demiwtg/evaluation/datasets/output_blobs__two_case_open_models_20260922.lance"
+  },
+  {
+    "old": "runs/evaluation/two_case_open_models_20260922/records.lance",
+    "new": "demiwtg/evaluation/datasets/records__two_case_open_models_20260922.lance"
+  },
+  {
+    "old": "runs/evaluation/two_case_open_models_20260922/service_records.lance",
+    "new": "demiwtg/evaluation/datasets/service_records__two_case_open_models_20260922.lance"
+  },
+  {
+    "old": "runs/evaluation/two_case_open_models_20260922/visual_reviews.lance",
+    "new": "demiwtg/evaluation/datasets/visual_reviews__two_case_open_models_20260922.lance"
+  },
+  {
+    "old": "runs/knowledge/bench200_production_20260920_v8/knowledge_base.lance",
+    "new": "demiwtg/preparation/datasets/knowledge_base__bench200_production_20260920_v8.lance"
+  },
+  {
+    "old": "runs/maintenance/article_context_20260921/records.lance",
+    "new": "datasets/records__article_context_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/article_figures_20260921/records.lance",
+    "new": "datasets/records__article_figures_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/concept_carriers_20260921/records.lance",
+    "new": "datasets/records__concept_carriers_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/control_layout_20260921/records.lance",
+    "new": "datasets/records__control_layout_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/entity_tables_20260921/records.lance",
+    "new": "datasets/records__entity_tables_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/entity_tables_20260921_retirement/records.lance",
+    "new": "datasets/records__entity_tables_20260921_retirement.lance"
+  },
+  {
+    "old": "runs/maintenance/layout_cleanup_20260921/records.lance",
+    "new": "datasets/records__layout_cleanup_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/material_entities_20260921/records.lance",
+    "new": "datasets/records__material_entities_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/material_entities_20260921_retirement/records.lance",
+    "new": "datasets/records__material_entities_20260921_retirement.lance"
+  },
+  {
+    "old": "runs/maintenance/pilot_cleanup_20260921/records.lance",
+    "new": "datasets/records__pilot_cleanup_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/raw_curated_separation_20260921/records.lance",
+    "new": "datasets/records__raw_curated_separation_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/raw_curated_separation_20260921_retirement/records.lance",
+    "new": "datasets/records__raw_curated_separation_20260921_retirement.lance"
+  },
+  {
+    "old": "runs/maintenance/single_material_tables_20260921/records.lance",
+    "new": "datasets/records__single_material_tables_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/single_tables_retirement_20260921/records.lance",
+    "new": "datasets/records__single_tables_retirement_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/source_evidence_20260921/records.lance",
+    "new": "datasets/records__source_evidence_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/visual_release_cleanup_20260921/records.lance",
+    "new": "datasets/records__visual_release_cleanup_20260921.lance"
+  },
+  {
+    "old": "runs/maintenance/workspace_cleanup_20260923/artifacts.lance",
+    "new": "datasets/artifacts__workspace_cleanup_20260923.lance"
+  },
+  {
+    "old": "runs/maintenance/workspace_cleanup_20260923/blobs.lance",
+    "new": "datasets/blobs__workspace_cleanup_20260923.lance"
+  },
+  {
+    "old": "runs/maintenance/workspace_cleanup_20260923/closure_blobs.lance",
+    "new": "datasets/closure_blobs__workspace_cleanup_20260923.lance"
+  },
+  {
+    "old": "runs/maintenance/workspace_cleanup_20260923/records.lance",
+    "new": "datasets/records__workspace_cleanup_20260923.lance"
+  },
+  {
+    "old": "runs/maintenance/workspace_cleanup_20260923/retained_artifacts.lance",
+    "new": "datasets/retained_artifacts__workspace_cleanup_20260923.lance"
+  },
+  {
+    "old": "runs/migration/image_blob_bytes_v1/progress.lance",
+    "new": "datasets/progress__image_blob_bytes_v1.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923/metadata.lance",
+    "new": "demiwtg/curation/edit/datasets/metadata__qwen21_pilot_20260923.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923/questions_2b9a35696f13004b950c.lance",
+    "new": "demiwtg/curation/edit/datasets/questions_2b9a35696f13004b950c__qwen21_pilot_20260923.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923/cases/edit_ecba64caa46fb22b88f2/design_response.lance",
+    "new": "demiwtg/curation/edit/datasets/design_response__qwen21_pilot_20260923__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923/cases/edit_ecba64caa46fb22b88f2/question.lance",
+    "new": "demiwtg/curation/edit/datasets/question__qwen21_pilot_20260923__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923/cases/edit_f5a95db28ecabba785e3/calls.lance",
+    "new": "demiwtg/curation/edit/datasets/calls__qwen21_pilot_20260923__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923/cases/edit_f5a95db28ecabba785e3/design_response.lance",
+    "new": "demiwtg/curation/edit/datasets/design_response__qwen21_pilot_20260923__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923/cases/edit_f5a95db28ecabba785e3/question.lance",
+    "new": "demiwtg/curation/edit/datasets/question__qwen21_pilot_20260923__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/metadata.lance",
+    "new": "demiwtg/curation/edit/datasets/metadata__qwen21_pilot_20260923_02.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/questions_1f69373914f05bb7b96b.lance",
+    "new": "demiwtg/curation/edit/datasets/questions_1f69373914f05bb7b96b__qwen21_pilot_20260923_02.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/questions_f51ab42844d02df67731.lance",
+    "new": "demiwtg/curation/edit/datasets/questions_f51ab42844d02df67731__qwen21_pilot_20260923_02.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/training_samples_1f69373914f05bb7b96b.lance",
+    "new": "demiwtg/curation/edit/datasets/training_samples_1f69373914f05bb7b96b__qwen21_pilot_20260923_02.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/training_samples_f51ab42844d02df67731.lance",
+    "new": "demiwtg/curation/edit/datasets/training_samples_f51ab42844d02df67731__qwen21_pilot_20260923_02.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_ecba64caa46fb22b88f2/calls.lance",
+    "new": "demiwtg/curation/edit/datasets/calls__qwen21_pilot_20260923_02__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_ecba64caa46fb22b88f2/design_response.lance",
+    "new": "demiwtg/curation/edit/datasets/design_response__qwen21_pilot_20260923_02__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_ecba64caa46fb22b88f2/generated.lance",
+    "new": "demiwtg/curation/edit/datasets/generated__qwen21_pilot_20260923_02__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_ecba64caa46fb22b88f2/pair.lance",
+    "new": "demiwtg/curation/edit/datasets/pair__qwen21_pilot_20260923_02__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_ecba64caa46fb22b88f2/question.lance",
+    "new": "demiwtg/curation/edit/datasets/question__qwen21_pilot_20260923_02__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_ecba64caa46fb22b88f2/review.lance",
+    "new": "demiwtg/curation/edit/datasets/review__qwen21_pilot_20260923_02__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_ecba64caa46fb22b88f2/review_response.lance",
+    "new": "demiwtg/curation/edit/datasets/review_response__qwen21_pilot_20260923_02__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_ecba64caa46fb22b88f2/synthesis_request.lance",
+    "new": "demiwtg/curation/edit/datasets/synthesis_request__qwen21_pilot_20260923_02__edit_ecba64caa46fb22b88f2.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_f5a95db28ecabba785e3/calls.lance",
+    "new": "demiwtg/curation/edit/datasets/calls__qwen21_pilot_20260923_02__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_f5a95db28ecabba785e3/design_response.lance",
+    "new": "demiwtg/curation/edit/datasets/design_response__qwen21_pilot_20260923_02__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_f5a95db28ecabba785e3/generated.lance",
+    "new": "demiwtg/curation/edit/datasets/generated__qwen21_pilot_20260923_02__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_f5a95db28ecabba785e3/pair.lance",
+    "new": "demiwtg/curation/edit/datasets/pair__qwen21_pilot_20260923_02__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_f5a95db28ecabba785e3/question.lance",
+    "new": "demiwtg/curation/edit/datasets/question__qwen21_pilot_20260923_02__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_f5a95db28ecabba785e3/review.lance",
+    "new": "demiwtg/curation/edit/datasets/review__qwen21_pilot_20260923_02__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_f5a95db28ecabba785e3/review_response.lance",
+    "new": "demiwtg/curation/edit/datasets/review_response__qwen21_pilot_20260923_02__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/edit/qwen21_pilot_20260923_02/cases/edit_f5a95db28ecabba785e3/synthesis_request.lance",
+    "new": "demiwtg/curation/edit/datasets/synthesis_request__qwen21_pilot_20260923_02__edit_f5a95db28ecabba785e3.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/debug_unit_66fff252e1e06f62d9bc_1_design_candidates_glm_glm-5.3-flash/model/calls.lance",
+    "new": "demiwtg/curation/t2i/datasets/model_calls__debug_unit_66fff252e1e06f62d9bc_1_design_candidates_glm_glm-5.3-flash.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_01/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/metadata__qwen38_pilot_20260923_01.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/metadata__qwen38_pilot_20260923_02.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_07c4b8a0d76a4f4df567/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_07c4b8a0d76a4f4df567.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_07c4b8a0d76a4f4df567/checkpoints/candidates/82df4ca68c9e9fe9067526ed79d354b5c7bf3dfd45fb15c8f852d6a9b9f3ef4f.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_07c4b8a0d76a4f4df567__candidates__82df4ca68c9e9fe9067526ed79d354b5c7bf3dfd45fb15c8f852d6a9b9f3ef4f.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_07c4b8a0d76a4f4df567/checkpoints/design/340b01769f6cd84093026c2bc0dad2e76dd8200a829645cd105d852b6aa445e0.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_07c4b8a0d76a4f4df567__design__340b01769f6cd84093026c2bc0dad2e76dd8200a829645cd105d852b6aa445e0.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_07c4b8a0d76a4f4df567/checkpoints/export/8393c3651dac1bfbfb6cd28e1b29484bcd58d425cbfe387deb366acfa5ab6fc5.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_07c4b8a0d76a4f4df567__export__8393c3651dac1bfbfb6cd28e1b29484bcd58d425cbfe387deb366acfa5ab6fc5.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_07c4b8a0d76a4f4df567/checkpoints/review/8770b73e8420bf3e3ef8a1adbdcda5ec7cf81465a056de0245ae0b03862958b5.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_07c4b8a0d76a4f4df567__review__8770b73e8420bf3e3ef8a1adbdcda5ec7cf81465a056de0245ae0b03862958b5.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_11c6bf40251031677407/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_11c6bf40251031677407.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_11c6bf40251031677407/checkpoints/candidates/12a7bf8e13b0944db33d8ad9654ccb29388c3bb386d7c257a33711106b482f30.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_11c6bf40251031677407__candidates__12a7bf8e13b0944db33d8ad9654ccb29388c3bb386d7c257a33711106b482f30.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_11c6bf40251031677407/checkpoints/design/cc32c84242fb5d0e29dc2527487ae446042996591a6c17ef1de92d64148bcd80.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_11c6bf40251031677407__design__cc32c84242fb5d0e29dc2527487ae446042996591a6c17ef1de92d64148bcd80.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_11c6bf40251031677407/checkpoints/export/8eb49a2dd5c1f59e781956c9415fb71e31f585e8fdbf56ee60bb7cebd85de419.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_11c6bf40251031677407__export__8eb49a2dd5c1f59e781956c9415fb71e31f585e8fdbf56ee60bb7cebd85de419.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_11c6bf40251031677407/checkpoints/review/287681b1eebe0a6f8b4bd60a4dc6ea13c40e96ba0d6faa09fd171b9c947f30b4.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_11c6bf40251031677407__review__287681b1eebe0a6f8b4bd60a4dc6ea13c40e96ba0d6faa09fd171b9c947f30b4.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_258c6e5244c5dca9a449/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_258c6e5244c5dca9a449.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_258c6e5244c5dca9a449/checkpoints/candidates/81e9b2c99b1dae2fe996d62e9d2d24fe05ba15dc1625d313844c27f154cb69b9.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_258c6e5244c5dca9a449__candidates__81e9b2c99b1dae2fe996d62e9d2d24fe05ba15dc1625d313844c27f154cb69b9.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_258c6e5244c5dca9a449/checkpoints/design/43018284b86ea77bd39d4dc6c085ac1ccab875dd4006e0933b33b6693cb399ba.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_258c6e5244c5dca9a449__design__43018284b86ea77bd39d4dc6c085ac1ccab875dd4006e0933b33b6693cb399ba.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_258c6e5244c5dca9a449/checkpoints/export/b45d2233dee835b3473df4e9f7b1fa78e3611341959335f5f083792129af8b21.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_258c6e5244c5dca9a449__export__b45d2233dee835b3473df4e9f7b1fa78e3611341959335f5f083792129af8b21.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_258c6e5244c5dca9a449/checkpoints/review/45fa03089d5d0546b772856d35701164c928bb53d0524f33164a6e0560c4bf91.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_258c6e5244c5dca9a449__review__45fa03089d5d0546b772856d35701164c928bb53d0524f33164a6e0560c4bf91.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_7ba1438f920ccb72cc5d/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_7ba1438f920ccb72cc5d.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_7ba1438f920ccb72cc5d/checkpoints/candidates/6709ff33a497f459fe940c877397551f92dfbfa95447d25b73ca0a2c7ac2e3d8.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_7ba1438f920ccb72cc5d__candidates__6709ff33a497f459fe940c877397551f92dfbfa95447d25b73ca0a2c7ac2e3d8.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_7ba1438f920ccb72cc5d/checkpoints/design/c3eb5189d9acec2e74276e8846e6eb12730731d230116e79b35b36e1d9e63ed5.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_7ba1438f920ccb72cc5d__design__c3eb5189d9acec2e74276e8846e6eb12730731d230116e79b35b36e1d9e63ed5.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_7ba1438f920ccb72cc5d/checkpoints/export/5fae6f5ea8dbf8057254c4cef640279b6267bfa50911021863e9b1e2aa567484.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_7ba1438f920ccb72cc5d__export__5fae6f5ea8dbf8057254c4cef640279b6267bfa50911021863e9b1e2aa567484.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_7ba1438f920ccb72cc5d/checkpoints/review/5ee922e56b4e419af0ab138d8af254a100cb76c944a70ec75e394a64ef632ddd.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_7ba1438f920ccb72cc5d__review__5ee922e56b4e419af0ab138d8af254a100cb76c944a70ec75e394a64ef632ddd.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_b0acf0fba63badb8e395/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_b0acf0fba63badb8e395.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_b0acf0fba63badb8e395/checkpoints/candidates/06c6e08a5c22341b054162e78fec95788c7824310c376ecf06f0694ca56b7566.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_b0acf0fba63badb8e395__candidates__06c6e08a5c22341b054162e78fec95788c7824310c376ecf06f0694ca56b7566.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_b0acf0fba63badb8e395/checkpoints/design/db11b5fa7ad144b31c5e1d48ff9f35b0ebced90744609a952113ef161d7f0b68.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_b0acf0fba63badb8e395__design__db11b5fa7ad144b31c5e1d48ff9f35b0ebced90744609a952113ef161d7f0b68.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_b0acf0fba63badb8e395/checkpoints/export/d0c8f0022ec214be82a490afa57a77faf0dd441c849db062f5308295b7d8392a.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_b0acf0fba63badb8e395__export__d0c8f0022ec214be82a490afa57a77faf0dd441c849db062f5308295b7d8392a.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_b0acf0fba63badb8e395/checkpoints/review/9a2244f44fbe0ce21acfb2fb2b2dbaa6d03de1d9e6ba719af15092e9500e01d2.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_b0acf0fba63badb8e395__review__9a2244f44fbe0ce21acfb2fb2b2dbaa6d03de1d9e6ba719af15092e9500e01d2.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_d49ff4158ea549bf161e/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_d49ff4158ea549bf161e.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_d49ff4158ea549bf161e/checkpoints/candidates/3fe0de6e4c678bddc0acf13e31a848901a5c0d5017a57d9440b7ade465745145.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_d49ff4158ea549bf161e__candidates__3fe0de6e4c678bddc0acf13e31a848901a5c0d5017a57d9440b7ade465745145.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_d49ff4158ea549bf161e/checkpoints/design/fa2175d3fd1be651954bece3d6d87e499265f1a94983eb8151d82988a324a7c1.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_d49ff4158ea549bf161e__design__fa2175d3fd1be651954bece3d6d87e499265f1a94983eb8151d82988a324a7c1.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_d49ff4158ea549bf161e/checkpoints/export/1227c28064c15f2f512cfa0d14d3c152392832fd08eebfb92afd503e26121c8b.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_d49ff4158ea549bf161e__export__1227c28064c15f2f512cfa0d14d3c152392832fd08eebfb92afd503e26121c8b.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_d49ff4158ea549bf161e/checkpoints/review/c05b4e2c3eb408c92d83cc87495793e860e6fccb80b824676fbb9c84b87618de.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_d49ff4158ea549bf161e__review__c05b4e2c3eb408c92d83cc87495793e860e6fccb80b824676fbb9c84b87618de.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ddf9cc03462adc6c0f70/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_ddf9cc03462adc6c0f70.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ddf9cc03462adc6c0f70/checkpoints/candidates/3945bfccd3f560b1ba2faa72ee4e971d8b2dbafe7dc25ee5c086027ef1e70ea0.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ddf9cc03462adc6c0f70__candidates__3945bfccd3f560b1ba2faa72ee4e971d8b2dbafe7dc25ee5c086027ef1e70ea0.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ddf9cc03462adc6c0f70/checkpoints/design/377e5545689b79a52b0f6bb840e899ce643bee0459b90480edd83a44853e2346.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ddf9cc03462adc6c0f70__design__377e5545689b79a52b0f6bb840e899ce643bee0459b90480edd83a44853e2346.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ddf9cc03462adc6c0f70/checkpoints/export/cbecfbab3bbfa289f64986fe80df1ddd116022bd2e792789f328f867b2cacd75.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ddf9cc03462adc6c0f70__export__cbecfbab3bbfa289f64986fe80df1ddd116022bd2e792789f328f867b2cacd75.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ddf9cc03462adc6c0f70/checkpoints/review/c6218be1c34ff9554adad5fae54619ef99e3db234368c66101601737d30e0081.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ddf9cc03462adc6c0f70__review__c6218be1c34ff9554adad5fae54619ef99e3db234368c66101601737d30e0081.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ea18d33b90b8fd77b8d6/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_ea18d33b90b8fd77b8d6.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ea18d33b90b8fd77b8d6/checkpoints/candidates/961799a48d0e2fd79dab8e99ef60819b973a52b14b1e5ad04b37d611e37e8789.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ea18d33b90b8fd77b8d6__candidates__961799a48d0e2fd79dab8e99ef60819b973a52b14b1e5ad04b37d611e37e8789.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ea18d33b90b8fd77b8d6/checkpoints/design/33a6a2c437f4650a82851d93d1381901652cf8decb21df3f4abf1daf7ff5bb70.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ea18d33b90b8fd77b8d6__design__33a6a2c437f4650a82851d93d1381901652cf8decb21df3f4abf1daf7ff5bb70.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ea18d33b90b8fd77b8d6/checkpoints/export/c7e956e9c3904ba4ad1be596b656c89e47f8afb1ee2933e991b2fd76775d0e7c.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ea18d33b90b8fd77b8d6__export__c7e956e9c3904ba4ad1be596b656c89e47f8afb1ee2933e991b2fd76775d0e7c.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ea18d33b90b8fd77b8d6/checkpoints/review/d14c5a75b81a1f85c2a30695732fe0cd8d694ee9ca773bce4bff6a1cbf5d8f74.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ea18d33b90b8fd77b8d6__review__d14c5a75b81a1f85c2a30695732fe0cd8d694ee9ca773bce4bff6a1cbf5d8f74.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_edde39d623f48ce82ebe/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_edde39d623f48ce82ebe.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_edde39d623f48ce82ebe/checkpoints/candidates/cdc89be0ec36803ef8d3892cd518161b132f951fbfbc7e5b5af03aaaf64d4bb6.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_edde39d623f48ce82ebe__candidates__cdc89be0ec36803ef8d3892cd518161b132f951fbfbc7e5b5af03aaaf64d4bb6.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_edde39d623f48ce82ebe/checkpoints/design/329145753775249a38e9b58512e7374455164020e1b2ea70fbbfca4a847b1d29.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_edde39d623f48ce82ebe__design__329145753775249a38e9b58512e7374455164020e1b2ea70fbbfca4a847b1d29.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_edde39d623f48ce82ebe/checkpoints/export/fffcebac21f8baed37e902cff6eff167b8a3aff497dd30a65432a5042f83bf10.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_edde39d623f48ce82ebe__export__fffcebac21f8baed37e902cff6eff167b8a3aff497dd30a65432a5042f83bf10.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_edde39d623f48ce82ebe/checkpoints/review/093415b0280953c528109e0e369259eacb3293488c9ae189d892297a389de66b.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_edde39d623f48ce82ebe__review__093415b0280953c528109e0e369259eacb3293488c9ae189d892297a389de66b.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_efe4e557cf9bf2d62eda/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_efe4e557cf9bf2d62eda.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_efe4e557cf9bf2d62eda/checkpoints/candidates/51e6726fc596a34692f0fcbd6c77b3a34beb03a4b82b86c07ba3a4a65411cd00.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_efe4e557cf9bf2d62eda__candidates__51e6726fc596a34692f0fcbd6c77b3a34beb03a4b82b86c07ba3a4a65411cd00.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_efe4e557cf9bf2d62eda/checkpoints/design/45a359f40fbab131bdfdd7258b8973c92526f99d03c2d8e37441ad9c069faa8a.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_efe4e557cf9bf2d62eda__design__45a359f40fbab131bdfdd7258b8973c92526f99d03c2d8e37441ad9c069faa8a.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_efe4e557cf9bf2d62eda/checkpoints/export/f414244bb2441165461095e54860573cf2ed8036f3f4b1d1927cab586f9b923d.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_efe4e557cf9bf2d62eda__export__f414244bb2441165461095e54860573cf2ed8036f3f4b1d1927cab586f9b923d.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_efe4e557cf9bf2d62eda/checkpoints/review/feaf149bb97ca7e42c2735055ee391422beea091f5e76dd71a776bca8d71f652.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_efe4e557cf9bf2d62eda__review__feaf149bb97ca7e42c2735055ee391422beea091f5e76dd71a776bca8d71f652.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_f48e4fb1e435d09be4c5/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_f48e4fb1e435d09be4c5.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_f48e4fb1e435d09be4c5/checkpoints/candidates/36792d4deb94556193ca8c8747e02e2dd5ede4d8716aa4866e72f83bb9f320fe.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_f48e4fb1e435d09be4c5__candidates__36792d4deb94556193ca8c8747e02e2dd5ede4d8716aa4866e72f83bb9f320fe.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_f48e4fb1e435d09be4c5/checkpoints/design/83ebd671f209b5f26895e33c67766a44035604216fea98adced29461870318ba.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_f48e4fb1e435d09be4c5__design__83ebd671f209b5f26895e33c67766a44035604216fea98adced29461870318ba.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_f48e4fb1e435d09be4c5/checkpoints/export/fc66d7b105482bcd40b0fe9ef0728fd2fd42b88c821e20a4dd34606bf87b0257.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_f48e4fb1e435d09be4c5__export__fc66d7b105482bcd40b0fe9ef0728fd2fd42b88c821e20a4dd34606bf87b0257.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_f48e4fb1e435d09be4c5/checkpoints/review/932406f0560d38744cf443c11ce09e51e763d1362c9ece10ea9ed868beca3df7.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_f48e4fb1e435d09be4c5__review__932406f0560d38744cf443c11ce09e51e763d1362c9ece10ea9ed868beca3df7.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ffb14f9d8d05ab05377c/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_02__unit_ffb14f9d8d05ab05377c.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ffb14f9d8d05ab05377c/checkpoints/candidates/418165860458804825d17f0d1f46fbb96a4462b58c8d13f03915bc793e8b3c90.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ffb14f9d8d05ab05377c__candidates__418165860458804825d17f0d1f46fbb96a4462b58c8d13f03915bc793e8b3c90.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ffb14f9d8d05ab05377c/checkpoints/design/13f17acba3f1a35263ab0caf9da37c4c3d7a393829080dabbe0ac382b091804f.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ffb14f9d8d05ab05377c__design__13f17acba3f1a35263ab0caf9da37c4c3d7a393829080dabbe0ac382b091804f.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ffb14f9d8d05ab05377c/checkpoints/export/192098a79d0bf755b6e2ee34df1973be6e360961af3a44116b2d68f105dcfb6b.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ffb14f9d8d05ab05377c__export__192098a79d0bf755b6e2ee34df1973be6e360961af3a44116b2d68f105dcfb6b.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/attempts/unit_ffb14f9d8d05ab05377c/checkpoints/review/c1cab93e33e1939abec6b958d5e4f1d1ea4544da51833fc65b619f993ba55ba8.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__unit_ffb14f9d8d05ab05377c__review__c1cab93e33e1939abec6b958d5e4f1d1ea4544da51833fc65b619f993ba55ba8.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/checkpoints/attempts/c2df2c6cb29fc73e55762712afdb663698410f2c676452a696e4a60bb28b3c5c.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_02__c2df2c6cb29fc73e55762712afdb663698410f2c676452a696e4a60bb28b3c5c.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/checkpoints/concepts/a649b5c94783f76c47fd2cd192c809e03496c51046538a83d2139357510ccaa1.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_02__concepts__a649b5c94783f76c47fd2cd192c809e03496c51046538a83d2139357510ccaa1.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/checkpoints/incomplete/7a28c17e6657de2ff7e4cd0eb7da041b183cfaf10152cff98ee0db69978d92a6.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_02__incomplete__7a28c17e6657de2ff7e4cd0eb7da041b183cfaf10152cff98ee0db69978d92a6.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/checkpoints/materials/60dd540e761362f16daa7b9140277f73b3521dfd085f19375c62c4b969b8a334.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_02__materials__60dd540e761362f16daa7b9140277f73b3521dfd085f19375c62c4b969b8a334.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/checkpoints/ready_unit_927c3a3e13d91476ca4e/ffef05e39be0f45e8e2e0c58b1be0f9a219b81636a3039df0be69f36c1045657.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_02__ready_unit_927c3a3e13d91476ca4e__ffef05e39be0f45e8e2e0c58b1be0f9a219b81636a3039df0be69f36c1045657.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/checkpoints/ready_unit_cd96fc9229b3daba093a/a210c169f5d97492e62b85ee1e97e5ad7a47c7aff8a21fc1b5920a0f62da1b36.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_02__ready_unit_cd96fc9229b3daba093a__a210c169f5d97492e62b85ee1e97e5ad7a47c7aff8a21fc1b5920a0f62da1b36.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/checkpoints/ready_unit_cfe81665865601d2ef14/ce97a68d89a352d492c6bf84f90964a62d63fc866337e6a6773b1107031dc8f4.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_02__ready_unit_cfe81665865601d2ef14__ce97a68d89a352d492c6bf84f90964a62d63fc866337e6a6773b1107031dc8f4.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/model/calls.lance",
+    "new": "demiwtg/curation/t2i/datasets/model_calls__qwen38_pilot_20260923_02.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_02/training_samples/cde0bafeab1a980768da9c900e98fc47fe6edcd857bd5df7219e23e6713d9481.lance",
+    "new": "demiwtg/curation/t2i/datasets/training_samples__qwen38_pilot_20260923_02__cde0bafeab1a980768da9c900e98fc47fe6edcd857bd5df7219e23e6713d9481.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/metadata__qwen38_pilot_20260923_03.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_0554c0225ffbc974d0c4/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_03__unit_0554c0225ffbc974d0c4.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_0554c0225ffbc974d0c4/checkpoints/candidates/0696619693f49133ad17b88779863eac683359f6c1b12d8a3d06152b206a1073.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_0554c0225ffbc974d0c4__candidates__0696619693f49133ad17b88779863eac683359f6c1b12d8a3d06152b206a1073.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_0554c0225ffbc974d0c4/checkpoints/design/85b83f5220086978b32d413a13c7105989006bcb763e3785a283ed4c521e3293.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_0554c0225ffbc974d0c4__design__85b83f5220086978b32d413a13c7105989006bcb763e3785a283ed4c521e3293.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_0554c0225ffbc974d0c4/checkpoints/export/cb2d8da6b4664779d7aec3a85c769e231c9e04d1d7ba2a162bb894007e35eb52.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_0554c0225ffbc974d0c4__export__cb2d8da6b4664779d7aec3a85c769e231c9e04d1d7ba2a162bb894007e35eb52.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_0554c0225ffbc974d0c4/checkpoints/review/3a6d365f6611136d7d0c3a495a709be7acd82e5cc7fdcb5f0b303f0c7b0c825c.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_0554c0225ffbc974d0c4__review__3a6d365f6611136d7d0c3a495a709be7acd82e5cc7fdcb5f0b303f0c7b0c825c.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_31318e761fc3ea5c9d49/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_03__unit_31318e761fc3ea5c9d49.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_31318e761fc3ea5c9d49/checkpoints/candidates/c984f51ffbfd6805e1c0fd576993b6a970a65885edbd9fbf4ac909def26a2c0f.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_31318e761fc3ea5c9d49__candidates__c984f51ffbfd6805e1c0fd576993b6a970a65885edbd9fbf4ac909def26a2c0f.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_31318e761fc3ea5c9d49/checkpoints/design/33ceeabd178f8bb0344577a13b01903b06d8a47a350c78468327613cb552424f.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_31318e761fc3ea5c9d49__design__33ceeabd178f8bb0344577a13b01903b06d8a47a350c78468327613cb552424f.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_31318e761fc3ea5c9d49/checkpoints/export/36045a3e67b43d6194e5e58a7b3ea992f1106a026ddc001e9d6a55657cf26ac8.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_31318e761fc3ea5c9d49__export__36045a3e67b43d6194e5e58a7b3ea992f1106a026ddc001e9d6a55657cf26ac8.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_31318e761fc3ea5c9d49/checkpoints/review/7eb3727a2074b9b85c6e12a4bc479e324ade17d8d01c88afa91d2fdf117fc37d.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_31318e761fc3ea5c9d49__review__7eb3727a2074b9b85c6e12a4bc479e324ade17d8d01c88afa91d2fdf117fc37d.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_66fff252e1e06f62d9bc/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_03__unit_66fff252e1e06f62d9bc.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_66fff252e1e06f62d9bc/checkpoints/candidates/02af885baadcf5491a873f58a62a9c7962ee331d94927ac3ad8bc610e05f9154.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_66fff252e1e06f62d9bc__candidates__02af885baadcf5491a873f58a62a9c7962ee331d94927ac3ad8bc610e05f9154.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_66fff252e1e06f62d9bc/checkpoints/design/d43839c5c6869638cd210c7f32de080f9c3bad1d7c79bfda6115da051eaa9ae0.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_66fff252e1e06f62d9bc__design__d43839c5c6869638cd210c7f32de080f9c3bad1d7c79bfda6115da051eaa9ae0.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_66fff252e1e06f62d9bc/checkpoints/export/1c8fdd13ecad019de98831e9eaa5fd7f497fec8709d4812fee95d12e6dee1a15.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_66fff252e1e06f62d9bc__export__1c8fdd13ecad019de98831e9eaa5fd7f497fec8709d4812fee95d12e6dee1a15.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_66fff252e1e06f62d9bc/checkpoints/review/bdb137549abbc43a1b5b087af5ad6fe2731a1661ee82e671da8c35f77ddaeb3d.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_66fff252e1e06f62d9bc__review__bdb137549abbc43a1b5b087af5ad6fe2731a1661ee82e671da8c35f77ddaeb3d.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_70980dd151d515be5ba8/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_03__unit_70980dd151d515be5ba8.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_70980dd151d515be5ba8/checkpoints/candidates/8d48ecb6cc813f59aba5cd7b98bd9cd0790d9b1c413e384bed5407d0b11749b7.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_70980dd151d515be5ba8__candidates__8d48ecb6cc813f59aba5cd7b98bd9cd0790d9b1c413e384bed5407d0b11749b7.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_70980dd151d515be5ba8/checkpoints/design/f043610c22160db7a4ca9dfa625e87aae18c7eeb2c99e28b85c76440edc12a66.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_70980dd151d515be5ba8__design__f043610c22160db7a4ca9dfa625e87aae18c7eeb2c99e28b85c76440edc12a66.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_70980dd151d515be5ba8/checkpoints/export/13cfe83914d7b5ec0e933f8eed7880c5c2a93ed2b55b44ed3407cc1d3cdf8854.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_70980dd151d515be5ba8__export__13cfe83914d7b5ec0e933f8eed7880c5c2a93ed2b55b44ed3407cc1d3cdf8854.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_70980dd151d515be5ba8/checkpoints/review/daa3692d07af204470dbee63a0de2885282341907944f4fcf04788ce17c26237.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_70980dd151d515be5ba8__review__daa3692d07af204470dbee63a0de2885282341907944f4fcf04788ce17c26237.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_77ce0d6b96d70458de44/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_03__unit_77ce0d6b96d70458de44.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_77ce0d6b96d70458de44/checkpoints/candidates/a6c9f75b142306a169ef27b893f8eaf513cb85a500ba87c68af9c63a319ea8e9.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_77ce0d6b96d70458de44__candidates__a6c9f75b142306a169ef27b893f8eaf513cb85a500ba87c68af9c63a319ea8e9.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_77ce0d6b96d70458de44/checkpoints/design/94f5980ffa6694372e2d1c9eba9879c0fa384dd0cacff26256cfa4e006c21193.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_77ce0d6b96d70458de44__design__94f5980ffa6694372e2d1c9eba9879c0fa384dd0cacff26256cfa4e006c21193.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_77ce0d6b96d70458de44/checkpoints/export/9d6437388a6cff7af90597fa71c33b105ae0111c9a94263cffeba934c8181342.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_77ce0d6b96d70458de44__export__9d6437388a6cff7af90597fa71c33b105ae0111c9a94263cffeba934c8181342.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_77ce0d6b96d70458de44/checkpoints/review/19308ecdb7f9477f087d2bc95ca69a9e9f4ee003d88adeea1174bd7bb5fedec8.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_77ce0d6b96d70458de44__review__19308ecdb7f9477f087d2bc95ca69a9e9f4ee003d88adeea1174bd7bb5fedec8.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_7fa66e275fb206bea735/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_03__unit_7fa66e275fb206bea735.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_7fa66e275fb206bea735/checkpoints/candidates/1a0fa192fd882704805556fd4d137a22bb75157b5d205fb0cf11992bac0b6dd9.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_7fa66e275fb206bea735__candidates__1a0fa192fd882704805556fd4d137a22bb75157b5d205fb0cf11992bac0b6dd9.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_7fa66e275fb206bea735/checkpoints/design/cfcb42fee98807ed05c6ad90e44d8203b710d9df805f604438e2af9bc06c98a9.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_7fa66e275fb206bea735__design__cfcb42fee98807ed05c6ad90e44d8203b710d9df805f604438e2af9bc06c98a9.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_7fa66e275fb206bea735/checkpoints/export/b07cb97c96f44ee4928c57a39fcaa6f7fdf01a9a1f0d05529614b1a276c06e2a.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_7fa66e275fb206bea735__export__b07cb97c96f44ee4928c57a39fcaa6f7fdf01a9a1f0d05529614b1a276c06e2a.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_7fa66e275fb206bea735/checkpoints/review/d0a59ae598eb99806241095417dde365aad64630bff877d720ae4f06f10822c7.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_7fa66e275fb206bea735__review__d0a59ae598eb99806241095417dde365aad64630bff877d720ae4f06f10822c7.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_d7d0ec1e3a5ac8fe109b/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_03__unit_d7d0ec1e3a5ac8fe109b.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_d7d0ec1e3a5ac8fe109b/checkpoints/candidates/c344b1879e7603aa70ff68725877bb13faadd60f788ffec2db97e6f4ab2ec4cb.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_d7d0ec1e3a5ac8fe109b__candidates__c344b1879e7603aa70ff68725877bb13faadd60f788ffec2db97e6f4ab2ec4cb.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_d7d0ec1e3a5ac8fe109b/checkpoints/design/160bd1ab4bce1c79d8a23d1e7a4229dd877e968fe8a02244843e6b1c84aae070.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_d7d0ec1e3a5ac8fe109b__design__160bd1ab4bce1c79d8a23d1e7a4229dd877e968fe8a02244843e6b1c84aae070.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_d7d0ec1e3a5ac8fe109b/checkpoints/export/de55172b599a2a945f5c254297fe023ec7f9f6c9bcffde376a2ccd297aac8ae1.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_d7d0ec1e3a5ac8fe109b__export__de55172b599a2a945f5c254297fe023ec7f9f6c9bcffde376a2ccd297aac8ae1.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_d7d0ec1e3a5ac8fe109b/checkpoints/review/ff3c7f1bf0ec9f7f62458bdb4e99fa5c9b183b3c014570a77c5ab9b23d46bebb.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_d7d0ec1e3a5ac8fe109b__review__ff3c7f1bf0ec9f7f62458bdb4e99fa5c9b183b3c014570a77c5ab9b23d46bebb.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_e3890fd843d6687c17af/metadata.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempt_metadata__qwen38_pilot_20260923_03__unit_e3890fd843d6687c17af.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_e3890fd843d6687c17af/checkpoints/candidates/09a3a23c8fed526ab4bb4d5df68a4a8fb6c18519c0da182e34ebf891f24a7f4b.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_e3890fd843d6687c17af__candidates__09a3a23c8fed526ab4bb4d5df68a4a8fb6c18519c0da182e34ebf891f24a7f4b.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_e3890fd843d6687c17af/checkpoints/design/a9aa22e48c85b303e4d685c11dfab42f0706d15432257458363e78217cbbc50f.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_e3890fd843d6687c17af__design__a9aa22e48c85b303e4d685c11dfab42f0706d15432257458363e78217cbbc50f.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_e3890fd843d6687c17af/checkpoints/export/6fa1805bfe7f6e1b759e2c2e37e321d4d58ee657b56e5d9e086eb1185e1f1a00.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_e3890fd843d6687c17af__export__6fa1805bfe7f6e1b759e2c2e37e321d4d58ee657b56e5d9e086eb1185e1f1a00.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/attempts/unit_e3890fd843d6687c17af/checkpoints/review/b6f00012ce08d5441b408f4d1e7fe7a98ca102823998ebae5f4372a99bafe72d.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__unit_e3890fd843d6687c17af__review__b6f00012ce08d5441b408f4d1e7fe7a98ca102823998ebae5f4372a99bafe72d.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/checkpoints/attempts/dba14b1428c5b9c1fcbb41559748502941ee73435e36b0bda2dbf8ac39754acb.lance",
+    "new": "demiwtg/curation/t2i/datasets/attempts__qwen38_pilot_20260923_03__dba14b1428c5b9c1fcbb41559748502941ee73435e36b0bda2dbf8ac39754acb.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/checkpoints/concepts/b24f72ef001b01f95825f5b06a33aa947242c2a28475b99c28b8fdc096196159.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_03__concepts__b24f72ef001b01f95825f5b06a33aa947242c2a28475b99c28b8fdc096196159.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/checkpoints/incomplete/3e56ca9fd14e7450609d82732b9ec91643d30380b3c47baa83c0b992c2a36d79.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_03__incomplete__3e56ca9fd14e7450609d82732b9ec91643d30380b3c47baa83c0b992c2a36d79.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/checkpoints/materials/d6eda2a8b1b35ec4920edc1d2cef4c670e84c238a8edd19fd80bc0f696332f77.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_03__materials__d6eda2a8b1b35ec4920edc1d2cef4c670e84c238a8edd19fd80bc0f696332f77.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/checkpoints/ready_unit_927c3a3e13d91476ca4e/5c47e4d9c1cb0dcb0e2809b7ac08be41b86c1ca597bedea7c1889605aa77e9d2.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_03__ready_unit_927c3a3e13d91476ca4e__5c47e4d9c1cb0dcb0e2809b7ac08be41b86c1ca597bedea7c1889605aa77e9d2.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/checkpoints/ready_unit_cd96fc9229b3daba093a/738a6b67b7a707fdb63d452728eac85707efe4eae05acffc71c621d85c64d8fb.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_03__ready_unit_cd96fc9229b3daba093a__738a6b67b7a707fdb63d452728eac85707efe4eae05acffc71c621d85c64d8fb.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/checkpoints/ready_unit_cfe81665865601d2ef14/a86902c2354e45acc83bc458ec400247e10afcf1ec86dc23d5c1fbabb79d2e39.lance",
+    "new": "demiwtg/curation/t2i/datasets/stage__qwen38_pilot_20260923_03__ready_unit_cfe81665865601d2ef14__a86902c2354e45acc83bc458ec400247e10afcf1ec86dc23d5c1fbabb79d2e39.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/model/calls.lance",
+    "new": "demiwtg/curation/t2i/datasets/model_calls__qwen38_pilot_20260923_03.lance"
+  },
+  {
+    "old": "runs/pipeline/t2i/qwen38_pilot_20260923_03/training_samples/670c2712165898295c8e42cd5b570d103668537bd3b93513150338e11ca95fdd.lance",
+    "new": "demiwtg/curation/t2i/datasets/training_samples__qwen38_pilot_20260923_03__670c2712165898295c8e42cd5b570d103668537bd3b93513150338e11ca95fdd.lance"
+  },
+  {
+    "old": "runs/taxonomy_history/classification_v31_20260824.lance",
+    "new": "datasets/classification_v31_20260824.lance"
+  },
+  {
+    "old": "runs/training/public_pair_probe_20260922/records.lance",
+    "new": "demiwtg/curation/edit/datasets/records__public_pair_probe_20260922.lance"
+  },
+  {
+    "old": "runs/training/public_pair_probe_20260922/source_blobs.lance",
+    "new": "demiwtg/curation/edit/datasets/source_blobs__public_pair_probe_20260922.lance"
+  },
+  {
+    "old": "runs/training/signal_small_20260920/delivery.lance",
+    "new": "demiwtg/curation/datasets/delivery__signal_small_20260920.lance"
+  },
+  {
+    "old": "runs/training/signal_small_20260920/training_samples.lance",
+    "new": "demiwtg/curation/datasets/training_samples__signal_small_20260920.lance"
+  }
+]

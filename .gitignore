@@ -28,35 +28,35 @@ logs/
 
 # 评测结果数据（各赛道子模块内闭环，大体积样本图与题库产物，勿提交）
 benchmark/vlm/data/
-benchmark/t2i/data/
+benchmark/t2i/v1/data/
 
 # 评测数据重组 2026-09-05：仅 README/MANIFEST/HANDOFF/summary 文档入库，样本图/出图/题库/判分/溯源等数据不入 git
 # t2i archive/ = 历史批次分桶归档；bench200/ = 终版 200 题评测集；focus1000/data/ = 千实例样本线数据
-benchmark/t2i/archive/*
-!benchmark/t2i/archive/MANIFEST.md
-benchmark/t2i/bench200/*
-!benchmark/t2i/bench200/README.md
+benchmark/t2i/v1/archive/*
+!benchmark/t2i/v1/archive/MANIFEST.md
+benchmark/t2i/v1/bench200/*
+!benchmark/t2i/v1/bench200/README.md
 benchmark/focus1000/data/
 # edit 整编（见 AGENTS.md 架构决策 2026-09-05「edit 子模块目录对齐 t2i」）：archive/ 仅 MANIFEST.md 入库；
 # synth_v61_pilot/ 批次目录、focus200/ 活图池、judge_prompts/ 物化区、complexity_audit*.jsonl 活素材账本均不入 git
-benchmark/edit/archive/*
-!benchmark/edit/archive/MANIFEST.md
-benchmark/edit/synth_v61_pilot/
-benchmark/edit/bench200/
-benchmark/edit/focus200/
-benchmark/edit/judge_prompts/
-benchmark/edit/complexity_audit.jsonl
-benchmark/edit/complexity_audit_synth.jsonl
+benchmark/edit/v1/archive/*
+!benchmark/edit/v1/archive/MANIFEST.md
+benchmark/edit/v1/synth_v61_pilot/
+benchmark/edit/v1/bench200/
+benchmark/edit/v1/focus200/
+benchmark/edit/v1/judge_prompts/
+benchmark/edit/v1/complexity_audit.jsonl
+benchmark/edit/v1/complexity_audit_synth.jsonl
 # edit 无 data/ 层（2026-09-05，见 AGENTS.md 架构决策）：运行时产物落子模块根
-benchmark/edit/judge_prompts/
-benchmark/edit/samples.jsonl
-benchmark/edit/images/
-benchmark/edit/scores_edit.jsonl
-benchmark/edit/scores_edit.report.json
-benchmark/edit/complexity_audit.jsonl
-benchmark/edit/complexity_audit_synth.jsonl
-benchmark/edit/selected_samples.jsonl
-benchmark/edit/selected_report.json
+benchmark/edit/v1/judge_prompts/
+benchmark/edit/v1/samples.jsonl
+benchmark/edit/v1/images/
+benchmark/edit/v1/scores_edit.jsonl
+benchmark/edit/v1/scores_edit.report.json
+benchmark/edit/v1/complexity_audit.jsonl
+benchmark/edit/v1/complexity_audit_synth.jsonl
+benchmark/edit/v1/selected_samples.jsonl
+benchmark/edit/v1/selected_report.json
 .qoder/*
 # 交接文档进仓（V2 重写的权威工作文档）
 !.qoder/handoff_collect_v2.md
@@ -72,11 +72,11 @@ _st_tmp/
 /bagel/Bagel/models/
 /bagel/Bagel/eval/vlm/data/
 
-# benchmark/bagel/ 第 4 评测场景（BAGEL-7B-MoT 官方基准评测，2026-09-05 整合）：
+# evaluation/bagel/ 第 4 评测场景（BAGEL-7B-MoT 官方基准评测，2026-09-05 整合）：
 # data/ 实体数据（题库/出图/缓存 ~1.2G）与 vendored 官方 git 仓 qib_official/、VLMEvalKit/（可再克隆）不入主仓
-benchmark/bagel/data/
-benchmark/bagel/gen/qib_official/
-benchmark/bagel/vlm/VLMEvalKit/
+evaluation/bagel/data/
+evaluation/bagel/gen/qib_official/
+evaluation/bagel/vlm/VLMEvalKit/
 
 # modelhub 子项目（独立仓库，自带 .git 与 .gitignore，整体不入主仓；见 AGENTS.md 架构决策 2026-08-25）
 modelhub/
@@ -142,3 +142,62 @@ tools/environment/retired_files/
 /curation/*/runs/
 /curation/*/reviews/
 /curation/*/runtime/
+
+# Top-level material/evaluation pipelines and versioned benchmark pipelines.
+/preparation/runs/
+/preparation/runtime/
+/evaluation/runs/
+/evaluation/archive/
+/evaluation/runtime/
+/benchmark/*/v2/runs/
+/benchmark/*/v2/runtime/
+
+# V1 disposable outputs; fixed baseline inputs and results live in Lance.
+/evaluation/t2i/v1/data/
+/evaluation/edit/v1/judge_prompts/
+/evaluation/edit/v1/scores_edit*.json*
+/_demiflow/
+
+# Archived thin evaluation viewers and current curation viewers are source;
+# evidence remains in Lance.
+!/evaluation/archive/
+/evaluation/archive/*
+!/evaluation/archive/two_case_open_models_20260922/
+!/evaluation/archive/historical_reference_review_20260922/
+/evaluation/archive/*/*
+!/evaluation/archive/*/README.md
+!/evaluation/archive/*/review.ipynb
+!/curation/edit/reviews/
+/curation/edit/reviews/*
+!/curation/edit/reviews/public_pair_probe_20260922/
+/curation/edit/reviews/public_pair_probe_20260922/*
+!/curation/edit/reviews/public_pair_probe_20260922/README.md
+!/curation/edit/reviews/public_pair_probe_20260922/review.ipynb
+
+# Pipeline-owned Lance tables and their coordination files
+**/datasets/
+
+# 2026-09-26 采集大批次工作数据不入库（数据留本地/COS/Lance，脚本与交接文档入库）
+# batch4 wikidata 桥接三元组与重下载/重跑/搬运载荷
+/collect/batch4/*.nt
+/collect/batch4/*.nt.gz
+/collect/redownload_20260926/
+/collect/rerun_v2_20260925/*
+!/collect/rerun_v2_20260925/*.py
+!/collect/rerun_v2_20260925/*.sh
+!/collect/rerun_v2_20260925/*.md
+/collect/sample_1m_transfer/*
+!/collect/sample_1m_transfer/*.py
+!/collect/sample_1m_transfer/*.sh
+!/collect/sample_1m_transfer/*.md
+/sample_1m_images/
+# 采集目录备份与退役冷备包
+/collect/_ext_tables_backup_20260924/
+/collect/_volatile_backup_20260924/
+/sync/retired-0922/
+# qid_edges/p31 切分产物 tsv（可再生成），脚本与报告入库
+/collect/qid_edges/*.tsv
+/collect/qid_edges/*.tsv.gz
+/collect/p31/*.tsv
+# 凭据（TMDB token 等）
+.tmdb_token

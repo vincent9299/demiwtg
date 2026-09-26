@@ -1,0 +1,22 @@
+# kb 图池审计·终报(2026-09-17, r 舰队分布式 join2)
+
+- **ledger_rows**: 8861354
+- **badjson**: 1
+- **sniffed_unique_blobs**: 7925013
+- **small_class_counts**: {'jpeg': 4409, 'xml': 8107, 'svg': 4739, 'png': 7921, 'gif': 1642, 'other': 71, 'html': 7904315, 'webp': 43, 'pdf': 2}
+- **html_rows**: 7904315
+- **html_bytes**: 16941086478
+- **html_unique_shas**: 7904311
+- **html_err_codes**: {'429': 7904265, '?': 16, '404': 3, '500': 2, 'Refrigerator magnet (Halbach array)': 1, 'Prominence definition': 1, 'focus-balanced parabolic reflector': 1, 'off-axis parabolic reflector': 1, 'HURA hexagonal coded aperture mask princ': 1, 'Image from the Silk icon theme by Mark J': 1}
+- **html_by_tier**: {'orig': 7903727, 'thumb1200': 588}
+- **html_by_ext**: {'jpg': 6545150, 'png': 635903, 'svg': 577046, 'jpeg': 73717, 'gif': 35324, 'tif': 12767, 'webp': 6789, 'pdf': 5128, 'ogg': 3930, 'webm': 1601}
+- **html_by_ledger_decile**: {'0': 772536, '1': 785283, '2': 755537, '3': 788854, '4': 795116, '5': 804830, '6': 805662, '7': 802385, '8': 779054, '9': 815058}
+- **html_by_day_utc**: {'09-10': '0/7008', '09-11': '3/177030', '09-12': '4648710/5172394', '09-13': '3035387/3265631', '09-14': '220215/239291'}
+- **other_rows**: 0
+- **other_bytes**: 0
+- **redownload_tasks_unique_qid_file**: 7904219
+- **large_sample**: {'checked': 19968, 'html': 1}
+- **note_small_threshold_bytes**: 6000
+- **note**: tasks/unique_shas 为各片直和(同任务跨片重复计), 去重口径见终报说明
+
+>6KB 档为抽样验证(非全量);重收清单: poison_html_rows.jsonl.gz / poison_other_rows.jsonl.gz / thumb1200_rows.jsonl.gz

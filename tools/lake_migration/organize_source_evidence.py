@@ -28,7 +28,7 @@ def rows(ds):
 
 def run(root):
     root = Path(root)
-    journal = LanceRecordStore(root, f'runs/maintenance/{OP}/records.lance')
+    journal = LanceRecordStore(root, f'datasets/records__{OP}.lance')
     specs = journal.get('inputs')
     if specs is None:
         refs = {}
@@ -94,7 +94,7 @@ def run(root):
             s = source_record(payload, system='preloss_collection', source_file=row['source_file'], source_row=row['source_row'])
             yield dict(sha256=payload.get('sha256'), ext=payload.get('ext'), concepts=s['concepts'],
                 source=s, source_payload_sha256=hashlib.sha256(row['payload'].encode()).hexdigest())
-    migrate('image_observations', 'runs/collection_history/image_observations_before_loss_20260906.lance',
+    migrate('image_observations', 'demiwtg/collect/datasets/image_observations_before_loss_20260906.lance',
             IMAGE_OBSERVATIONS, observations, preloss.count_rows())
 
     roster = list(rows(source(OLD + 'rosters.lance')))
@@ -116,7 +116,7 @@ def run(root):
                 aliases=item.get('aliases', []), carriers=carriers,
                 taxonomy_paths=item.get('taxonomy', []), source_file=row['source_file']))
     journal.put('selection_metadata', metadata)
-    migrate('concept_selections', 'runs/collection_history/concept_selections_20260906.lance',
+    migrate('concept_selections', 'demiwtg/collect/datasets/concept_selections_20260906.lance',
             CONCEPT_SELECTIONS, lambda: iter(selections), len(selections))
 
     taxonomy_uri = next(u for u in specs if u.startswith('raw/taxonomy_sources/'))
@@ -144,7 +144,7 @@ def run(root):
                     raise ValueError('Conflicting taxonomy field')
                 out[field] = value
     values = list(joined.values())
-    migrate('taxonomy_history', 'runs/taxonomy_history/classification_v31_20260824.lance',
+    migrate('taxonomy_history', 'datasets/classification_v31_20260824.lance',
             TAXONOMY_HISTORY, lambda: iter(values), len(values))
 
     protocol_row, = list(rows(source(ANNOTATIONS + 'protocol.lance')))

@@ -11,7 +11,7 @@ from project import resolve_root
 
 
 def verify(root):
-    journal = LanceRecordStore(root, 'runs/maintenance/single_material_tables_20260921/records.lance')
+    journal = LanceRecordStore(root, 'datasets/records__single_material_tables_20260921.lance')
     ref = DatasetRef.from_dict(journal.get('images')['ref'])
     images = ref.open(root)
     reader = AssetReader(datasets_root=root, version=ref.lance_version)

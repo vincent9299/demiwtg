@@ -1,0 +1,83 @@
+{
+ "inventory_objects": 8866002,
+ "dir_markers": 256,
+ "ledger_rows": 8861354,
+ "badjson": 1,
+ "tier": {
+  "orig": 8520403,
+  "thumb1200": 340951
+ },
+ "ledger_bytes_total": 772184027133,
+ "missing_blob_rows": 0,
+ "size_mismatch_rows": 1,
+ "small_candidates_unique": 7925013,
+ "large_sample_size": 20000,
+ "large_total_unique": 930104,
+ "thumb1200_rows": 340951,
+ "orphan_objects": 43015,
+ "orphan_bytes": 2241280415,
+ "rows_no_dims": 6047,
+ "rows_zero_bytes": 0,
+ "per_ext": {
+  "jpg": [
+   7326689,
+   671038586671
+  ],
+  "png": [
+   724384,
+   73241388053
+  ],
+  "tif": [
+   33617,
+   10055830746
+  ],
+  "svg": [
+   611945,
+   7018894538
+  ],
+  "jpeg": [
+   80767,
+   5085081491
+  ],
+  "gif": [
+   42468,
+   2273765594
+  ],
+  "tiff": [
+   5013,
+   1433274877
+  ],
+  "webm": [
+   11251,
+   812864827
+  ],
+  "pdf": [
+   6533,
+   647760911
+  ],
+  "webp": [
+   7681,
+   179498402
+  ],
+  "ogg": [
+   4503,
+   98886720
+  ],
+  "djvu": [
+   525,
+   93504888
+  ],
+  "ogv": [
+   2954,
+   89975020
+  ],
+  "xcf": [
+   96,
+   76821183
+  ],
+  "stl": [
+   612,
+   19355170
+  ]
+ }
+}

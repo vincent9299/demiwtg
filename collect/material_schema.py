@@ -2,8 +2,8 @@
 import pyarrow as pa
 import lance
 
-IMAGES_URI = 'raw/images.lance'
-DOCUMENTS_URI = 'raw/documents.lance'
+IMAGES_URI = 'demiwtg/collect/datasets/images.lance'
+DOCUMENTS_URI = 'demiwtg/collect/datasets/documents.lance'
 SOURCE = pa.struct([
     ('source_record_id', pa.string()), ('source_system', pa.string()),
     ('source_file', pa.string()), ('source_row', pa.int64()),

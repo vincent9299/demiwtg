@@ -1,0 +1,62 @@
+{
+ "baseline": {
+  "rows": 16016943,
+  "src_sdc": 5134018,
+  "src_wm": 5097779,
+  "src_openimages": 616645,
+  "src_inat": 3564704,
+  "src_si": 561689,
+  "src_tmdb": 526844,
+  "src_df20": 202190,
+  "src_plantnet": 275200,
+  "src_pubchem": 25806,
+  "src_met": 8380,
+  "src_gbif": 3688,
+  "si_extids": 561886
+ },
+ "merge": {
+  "v2_rows_out": 16016822,
+  "th_cf_wrong_tier": 208816,
+  "wm404_dead_link_blob_alive_kept": 11994,
+  "met_applied": 5744,
+  "wm404_dead_moved_to_deadletter": 121,
+  "met_old_sha_mismatch": 90,
+  "met_missing": 65,
+  "th_never_matched": 276193,
+  "si2_new": 2640447,
+  "si2_skip_si1_wins": 10311,
+  "wm404_add_q": 22,
+  "wm404_add_pid": 14
+ },
+ "bucket_merge": {
+  "final_rows": 18657248,
+  "src_sdc": 5134018,
+  "src_wm": 5097670,
+  "src_openimages": 616645,
+  "src_inat": 3564704,
+  "src_si": 3202136,
+  "src_tmdb": 526844,
+  "src_df20": 202190,
+  "src_plantnet": 275200,
+  "src_pubchem": 25806,
+  "src_met": 8347,
+  "src_gbif": 3688,
+  "absorbed": 43
+ },
+ "deadletter": {
+  "rows": 8424478,
+  "reclassified": 1197,
+  "appended_moved_rows": 121,
+  "pid_dead_sidecar": 35415,
+  "appended_from_v1": 11993
+ },
+ "dead_keys_total": 48665,
+ "alive40_used": 36,
+ "drop_shas": 121,
+ "dead_main_stat": {
+  "blob_ok": 11994,
+  "blob_missing": 121
+ },
+ "ts": 1790228027.119697,
+ "watermark": "manifest_snapshots_0923+final_20260924+met_fix+wm404_final"
+}

@@ -5,7 +5,7 @@ owned by the V2 curation graph, which can run independently after collection.
 """
 import argparse
 from pathlib import Path
-from demiflow.standalone import local_data
+from demiflow import data
 from collect.concepts import resolve_concept_release
 from project import resolve_root
 
@@ -20,7 +20,6 @@ def run(dataset, *, names=None, limit=None, master_release=None, carriers=('imag
     root = Path(dataset)
     release = resolve_concept_release(root, release_id=master_release)
     ref = release['dataset_ref']
-    data = local_data()
     predicate = None
     if names:
         predicate = 'name IN (' + ', '.join("'"+name.replace("'", "''")+"'" for name in names) + ')'

@@ -64,7 +64,7 @@ def export_knowledge_run(kb_jsonl, run_id: str, *, datasets_root=None) -> Datase
                 }
         print(json.dumps(stats, ensure_ascii=False), flush=True)
 
-    relative = f"runs/knowledge/{run_id}/knowledge_base.lance"
+    relative = f"demiwtg/preparation/datasets/knowledge_base__{run_id}.lance"
     ref, rows, replayed = write_table(
         root, relative, schema_name="knowledge_run", schema=curation_schemas.KNOWLEDGE_RUN, schema_version=curation_schemas.SCHEMA_VERSION,
         rows_factory=iter_rows,

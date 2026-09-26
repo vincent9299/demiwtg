@@ -85,7 +85,7 @@ def iter_corpus_rows(parts: list[str], maps: dict[str, dict[int, str]]):
 def main() -> None:
     args = parse_args()
     from operators.wiki_clean import QidDocsSinkStage, WikiCleanStage
-    from demiflow.standalone import local_data
+    from demiflow import data
 
     parts = sorted(glob.glob(args.parts))
     if not parts:
@@ -101,7 +101,7 @@ def main() -> None:
     clean.queue_depth = args.concurrency * 2
     sink = QidDocsSinkStage(pages_root=args.pages_root,
                             manifest=args.manifest)
-    src = local_data().from_iter(
+    src = data.from_iter(
         iter_corpus_rows(parts, maps))
     if args.limit:
         src = src.limit(args.limit)

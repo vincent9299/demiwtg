@@ -1,0 +1,9 @@
+==== 看板(a:medi×2 | b:DF20+img偶 | c:img奇+iNat) 09-15 18:11:45 r=125 ====
+DF20-train_val.tar.gz                       115.74/115.74GB 100% parts=108
+latest-mediainfo.json.bz2                    60.49/ 60.49GB 100% parts=57
+commonswiki-latest-image.sql.gz              18.45/ 18.45GB 100% parts=18
+inaturalist-open-data-20260827.tar.gz        35.09/ 35.09GB 100% parts=33
+CID-InChI-Key.gz                              7.37/  7.37GB 100% parts=7
+CID-SMILES.gz                                 1.49/  1.49GB 100% parts=2
+Smithsonian batches                        46/46
+TOTAL                                       238.63GB

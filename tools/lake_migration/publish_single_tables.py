@@ -10,8 +10,8 @@ from project import resolve_root
 
 def run(root, acceptance_path):
     root = Path(root)
-    materials = LanceRecordStore(root,'runs/maintenance/single_material_tables_20260921/records.lance')
-    evidence = LanceRecordStore(root,'runs/maintenance/source_evidence_20260921/records.lance')
+    materials = LanceRecordStore(root,'datasets/records__single_material_tables_20260921.lance')
+    evidence = LanceRecordStore(root,'datasets/records__source_evidence_20260921.lance')
     acceptance = json.loads(Path(acceptance_path).read_text())
     if acceptance.get('status') != 'passed' or acceptance['real_model_calls'] or acceptance['formal_training_data_published']:
         raise ValueError('Isolated, no-model cross-chain acceptance required')

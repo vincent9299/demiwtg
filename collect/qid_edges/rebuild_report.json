@@ -1,0 +1,23 @@
+{
+ "stat": {
+  "wm_ok": 602119,
+  "wm_resha": 7845533,
+  "wm_th1920": 373,
+  "wm_unhealed": 234007,
+  "wm_dead": 179322,
+  "sdc_heal": 0,
+  "sdc_unhealed": 0,
+  "rows": 8861355
+ },
+ "sdc": {
+  "heal": 0,
+  "unhealed": 2288880
+ },
+ "si_edges": 3906858,
+ "inat_edges": 3582546,
+ "oi_edges": 12266896,
+ "met_edges": 8376,
+ "tri": 504195,
+ "wm404": 26,
+ "elapsed_s": 911.4
+}

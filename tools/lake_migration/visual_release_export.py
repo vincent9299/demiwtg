@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 from project import resolve_root
-from curation.preparation.publication import publish_visual_records
+from tools.lake_migration.visual_publication import publish_visual_records
 
 
 def export_visual_release(meta_jsonl,release_id,*,published_jsonl=None,datasets_root=None,

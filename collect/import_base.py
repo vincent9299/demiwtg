@@ -6,7 +6,7 @@ import argparse
 import json
 import itertools
 from pathlib import Path
-from demiflow.standalone import local_data
+from demiflow import data
 from collect.operators.page import BaseIngestStage, DocsSinkStage
 from project import resolve_root
 
@@ -21,8 +21,8 @@ def main():
         with args.input.open(encoding='utf-8') as stream:
             for line in stream:
                 if line.strip(): yield json.loads(line)
-    data = local_data().from_iter(lambda: itertools.islice(source(), args.limit))
-    result = (data.map_async(BaseIngestStage(str(args.dataset)))
+    documents = data.from_iter(lambda: itertools.islice(source(), args.limit))
+    result = (documents.map_async(BaseIngestStage(str(args.dataset)))
         .map_async(DocsSinkStage(str(args.dataset))).run_stream())
     print(result.summary())
 

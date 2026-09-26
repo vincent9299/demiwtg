@@ -61,7 +61,7 @@ def main() -> None:
     args = parse_args()
     from operators.commons import (CommonsBlobSink, CommonsFetchStage,
                                    iter_p18_tasks)
-    from demiflow.standalone import local_data
+    from demiflow import data
 
     done, _ = load_done(args.manifest)
     factory = iter_p18_tasks(args.concepts, done)
@@ -74,7 +74,7 @@ def main() -> None:
     fetch.concurrency = args.concurrency
     fetch.queue_depth = args.concurrency       # 字节载荷,队列即内存上界
     sink = CommonsBlobSink(blobs_root=args.blobs_root, manifest=args.manifest)
-    src = local_data().from_iter(factory)
+    src = data.from_iter(factory)
     if args.limit:
         src = src.limit(args.limit)
     t0 = time.time()

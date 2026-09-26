@@ -31,9 +31,9 @@ def make_ref(**overrides):
 def test_default_root_at_workspace_top_level():
     root = default_root()
     assert root.is_absolute()
-    assert root.name == "datasets"
-    # 2026-09-20 起：数据根在仓库顶层（demiwtg 之外），业务身份不随位置变化
-    assert root.parent.name == "0905"
+    from project import PROJECT_ROOT
+    assert root == PROJECT_ROOT.parent
+    assert root / "demiwtg" == PROJECT_ROOT
     assert (root / "demiwtg").name == "demiwtg"
 
 

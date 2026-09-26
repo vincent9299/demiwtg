@@ -15,7 +15,7 @@ pytest.importorskip("lance")
 
 
 def test_end_to_end_async_checkpoint_release_move_replay(tmp_path, monkeypatch):
-    from demiflow.standalone import local_data
+    from demiflow import data
 
     root1 = tmp_path / "root1"
     root1.mkdir()
@@ -40,7 +40,7 @@ def test_end_to_end_async_checkpoint_release_move_replay(tmp_path, monkeypatch):
         await asyncio.sleep(0)
         return row
 
-    dataset = local_data().from_iter(rows_factory).map_async(async_touch)
+    dataset = data.from_iter(rows_factory).map_async(async_touch)
     # write_table 吃零参工厂；用 checkpoint 语义直接驱动异步计划：
     from demiflow.lance.checkpoint import checkpoint_lance
     from tools.lake_migration.schemas import ALL_SCHEMAS
@@ -88,7 +88,7 @@ def test_end_to_end_async_checkpoint_release_move_replay(tmp_path, monkeypatch):
         yield  # pragma: no cover
 
     replayed = checkpoint_lance(
-        local_data().from_iter(refusing_factory),
+        data.from_iter(refusing_factory),
         str(root2 / relative), schema=ALL_SCHEMAS["verbatim_records"],
         fingerprint="e2e-r1")
     rows = replayed.take_all()
@@ -106,6 +106,6 @@ def test_end_to_end_async_checkpoint_release_move_replay(tmp_path, monkeypatch):
         plain_uri, mode="overwrite")
     with pytest.raises(Exception):
         checkpoint_lance(
-            local_data().from_iter(refusing_factory), plain_uri,
+            data.from_iter(refusing_factory), plain_uri,
             schema=ALL_SCHEMAS["verbatim_records"], fingerprint="evil")
     assert _lance.dataset(plain_uri).count_rows() == 1   # 原表保全

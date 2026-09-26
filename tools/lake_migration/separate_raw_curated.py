@@ -19,9 +19,9 @@ from demiflow.lance.registry import Catalog, ReleaseRegistry, write_registered_t
 from demiflow.lance.storage import schema_hash
 from demiflow.lance.maintenance import retire_tables
 from collect.material_schema import IMAGES as RAW_IMAGES, IMAGES_URI as RAW_URI, DOCUMENTS_URI
-from curation.preparation.image_schema import IMAGES, IMAGES_URI, IMAGE_CURATION
-from curation.preparation.articles import ARTICLES_URI
-from curation.preparation.images import canonical, project_image, identity
+from preparation.operaters.images import IMAGES, IMAGES_URI, IMAGE_CURATION
+from preparation.operaters.article import ARTICLES_URI
+from preparation.operaters.images import canonical, project_image, identity
 
 OP = 'raw_curated_separation_20260921'
 VISUAL_RELEASE = 'visual_curated_20260921'
@@ -32,7 +32,7 @@ OLD_URIS = ['images.lance','documents.lance','articles.lance']
 
 
 def journal(root):
-    return LanceRecordStore(root, f'runs/maintenance/{OP}/records.lance')
+    return LanceRecordStore(root, f'datasets/records__{OP}.lance')
 
 
 def register(root, uri, name):

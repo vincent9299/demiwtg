@@ -55,7 +55,8 @@ def export_run_artifact(line: str, artifact, run_id: str, *, datasets_root=None)
                 }
         print(json.dumps(stats, ensure_ascii=False), flush=True)
 
-    relative = f"runs/{line}/{run_id}/{artifact_path.stem}.lance"
+    owner = {"benchmark": "benchmark", "training": "curation", "evaluation": "evaluation"}[line]
+    relative = f"demiwtg/{owner}/datasets/{artifact_path.stem}__{run_id}.lance"
     ref, rows, replayed = write_table(
         root, relative, schema_name="verbatim_records", schema=collect_schemas.VERBATIM_RECORDS, schema_version=collect_schemas.SCHEMA_VERSION,
         rows_factory=iter_rows,

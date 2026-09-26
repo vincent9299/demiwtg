@@ -3,7 +3,7 @@ import argparse
 import asyncio
 import itertools
 from pathlib import Path
-from demiflow.standalone import local_data
+from demiflow import data
 from collect.operators.wiki_dump import iter_dump_pages, WikiParseStage
 from collect.ingestion import wiki_document
 from collect.material_writer import write_documents
@@ -35,7 +35,7 @@ def main():
     parse = WikiParseStage()
     parse.concurrency = args.parse_concurrency
     parse.queue_depth = 2 * args.parse_concurrency
-    results = (local_data().from_iter(source).map_async(parse)
+    results = (data.from_iter(source).map_async(parse)
         .batch_map(CommitPages(args.dataset), max_batch=1024, concurrency=1)
         .run_stream())
     print(results.summary())

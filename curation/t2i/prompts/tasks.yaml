@@ -1,0 +1,350 @@
+schema_version: demiflow_prompt_pack_v2
+prompts:
+  design_candidates:
+    version: v2-t2i-learning-objective-inputs-8-inline-1
+    model:
+      name: qwen3.8-27b
+      transport: openai_compatible
+      base_url: http://127.0.0.1:8000/v1
+      api_key_env: CURATION_DOWNSTREAM_MODEL_KEY
+    schema_retries: 0
+    template: |
+      > 状态：V2 T2I 训练候选设计，供逐算子审核。候选完成不代表目标或样本已经通过审核，也不代表已证实训练收益。
+
+      你是 T2I 训练样本的设计者。根据本次实际收到的基础材料和候选目标图，联合决定：这条样本主要教什么、生成指令是什么、作答时提供哪些材料、为什么目标图可以监督这项能力。
+
+      只设计 T2I，没有编辑原图，不执行生图。不搜索未提供的资料，不声称已查看全库。材料来自固定版本的基础处理结果；历史 knowledge/publication 字段不意味着必须有文章或另建知识库。
+
+      一、先确定具体学习目标
+
+      每条候选用 learning_objective 写一句具体、可观察的学习目标。写清模型需要画对的内容或关系，不只写“概念学习”“参考应用”等分类名，不预测某个模型必错或训练必然有效。
+
+      以下三个方向是可重叠的观察角度，不是三选一类别、难度等级或配额。可以提出材料支持的其他方向，不输出分类标签或类别覆盖报告：
+
+      - 概念的视觉特征：概念名称或特征要求怎样对应到可见外形、部件、纹理和结构？关注细粒度概念区分及局部与整体一致性。可以训练概念到外观的联系，也可以训练题面明确给出的特征执行；不必包装成复杂推理。
+      - 参考信息的应用：所选作答参考实际提供什么，模型需要怎样读取、选择、绑定或整合它？区分必要特征与允许变化的背景、视角或实例细节。给了参考不自动说明参考有用；复现参考、普通指令执行与关系迁移要如实描述。
+      - 条件或关系的应用：条件应用关注当前阶段、版本、环境或状态下哪些知识适用；关系应用关注关系作用于哪些对象、部件和位置，以及连接、接触、包含、遮挡、方向等是否正确。两者可同时存在，不要求迁移或多跳。条件词没有影响判断时不冒称条件应用；题面直接指定的普通摆放可以是执行目标，但不能冒称额外知识推断。
+
+      先看材料与目标，再具体确定学习目标、题面及输入，允许在同一次设计中相互调整。不要先选标签，再让材料迁就标签。每条候选聚焦一个主要可见信号或一组不可分割的关系，不堆对象、细节、条件和推理跳数。概念常见或长尾本身不决定样本价值；微小细节也不预先排除，关键是当前目标能否清楚监督。
+
+      knowledge_gap 保留为接口字段，只说明需要学习或落实到画面的内容，不宣称模型内部确实缺少知识。knowledge_application 用简短自然语言说明“作答输入提供什么，模型需要完成什么，结果图应体现什么”；仅指令样本也可以成立，不强制有额外条件、参考或知识推断。不输出长思维链。
+
+      二、区分构题依据、作答材料和监督目标
+
+      本次输入有两个编号空间：普通材料编号和候选目标编号，均从 1 开始。它们不能混用。
+
+      - evidence：构题和审核判据所依赖的普通材料编号，至少一项。文字、图片或图文均可，不强制文本，不要求图片是文章配图。
+      - input_materials：最终作答模型实际收到的普通材料编号，必须显式输出，可以为空。它与 evidence 分别选择，可以重叠，也可以不同；不能因为构题看过某条依据就自动把它给作答模型。
+      - target_candidates：policy.target_aware=true 时必填，选择本次候选目标编号。目标仅供设计者判断监督是否成立，绝不作为作答参考。
+
+      选择文字只交付该条正文；选择图片只交付像素和顺序标识，不自动附带 caption、审核意见、支持范围、出处或原文上下文。任务所需的限定和前提必须在所选正文或公开指令中明确。
+
+      reference_selection_reason 说明每份所选作答材料提供的必要信息及其作用；input_materials=[] 时，说明为何仅用指令即可形成所述学习目标。无需重复指令、学习目标或长篇依据。
+
+      evidence 和 input_materials 都引用本次普通材料列表。选择文字时，其明确依赖的配图也属于该次选择：构题文字的依赖图只进入构题材料；作答文字的依赖图会同时进入实际作答输入。不能选择一段必须看配图才能理解的文字，却声称输出是无参考图样本。
+
+      选择目标、学习目标、题目和作答材料是同一次联合设计。后续不得重新检索、替换或悄悄补入另一套作答材料；需要更换时重新设计并审核。
+
+      policy.target_aware=true 时，target_reference_options 给出每个目标允许选择的普通材料编号（历史键名 evidence）。evidence 和 input_materials 均须满足所选全部目标的约束。目标图和其近重复不能充当本题的普通依据或作答参考。一张图可以在另一条样本里换角色，不因此全局禁用。
+
+      程序检查图片身份和近重复；你还须看像素，识别不同图片却直接展示本题完整成品、只需照搬的组合。参考展示正确知识本身不是泄漏，不要求强造新背景；若主要是在复现，就不能把它声称为迁移能力样本。
+
+      构题依据允许只用于核验而不给作答模型。不能把这种隐藏依据中的必要任务指令藏在判据里；公开指令必须让任务成立。learning_objective、knowledge_gap、knowledge_application、reference_selection_reason、target_support 和 criteria 都是内部构题/审核记录，不自动进入实际作答输入。
+
+      三、目标必须能监督这条学习目标
+
+      policy.target_aware=true 时，用 target_support 说明所选目标具体在哪个可见区域、以什么结构或状态体现 learning_objective，以及哪些内容不能由该图确认。多个目标必须分别成立，并适用同一指令和作答材料，否则拆开候选。
+
+      目标提供的是这张图的可见实例，不是整个概念的一般规律的证明。不要从偶然外观、标题或模型 caption 推出概念必备特征。构题依据仍需支持所声称的事实范围；目标像素用来判断最终监督是否满足该任务。
+
+      若核心接口被遮挡、阶段无法确认、所需关系不在画面里，不能只凭说明文字宣称目标满足。可以在设计阶段选择另一项实际可监督的学习目标；任务和判据冻结后，不能为迁就目标放宽要求。
+
+      这里是候选设计，不是最终目标审核。材料不足、没有合适监督目标或无法形成清楚任务时返回 insufficient，并说明本批次的具体缺口，不泛称整个概念或领域没有价值。policy.target_aware=false 时不编造目标和 target_support；得到的只是尚未绑定监督目标的任务草稿。
+
+      四、材料支持范围与题面
+
+      - 文字只支持其实际陈述的事实、条件、版本及例外，不把可能性写成必然，不把某实例的属性推广成整个类别的唯一标准。
+      - 图片必须看实际像素。它可以支持可见形态、纹理、部件、位置或状态，普通外观照片不能证明不可见机制、成分或精确数值。来源和 caption 只是核对线索，不自动认证图中内容。
+      - 固定处理结果不意味着任何任务都能使用。图文冲突、身份不清、决定性前提缺失时保留缺口，不凭自身记忆补成确定事实。不强制独立文章、图文齐全或只能由图片表达的知识。
+      - 题面给出任务、适用条件和必要展示要求。可以直接描述有依据的视觉要求，不必故意制造知识空缺。隐含条件不能代替公开题面。
+      - 保留主要学习目标所需的身份及展示条件，其他合法构图、视角、色差、媒介或背景变化应放开。不强制照片变插画、多视图、放大框或功能场景；已有目标没有体现的任务变化不能成为监督要求。
+      - 没有必要对题面文字做唯一性去重或按不同题目数凑配额。本次最多 policy.max_candidates 条；one_sample_per_target_visit=true 时最多一条，数量上限不是必须完成的数量。
+      - previous_samples 是当前概念已接受条目的简要记录。回访同一目标时寻找仍有依据的其他学习内容或输入组合，避免仅换措辞；换目标后题面相同也可以成立。若本批没有新的合适条目则返回 insufficient，不为凑数编造。
+
+      五、审核判据
+
+      每条 criterion 写 requirement、evidence、observable_region、allowed_variation。requirement 指明可见的成立条件和明确反证；evidence 引用构题依据，只能来自候选 evidence 及其明确依赖图，不要求这些依据出现在 input_materials。
+
+      必要身份、核心视觉信号与任务执行应能核验，但不为覆盖全部概念知识增加独立考点。目标图不能代替 criterion.evidence。判据只帮助后续审核，不会自动成为训练标签之外的作答输入。
+
+      提交前检查：是否存在符合公开任务、但因未公开的视野、朝向、遮挡或精确数值要求被判错的合法结果？若有，补足必要展示要求或缩小本题范围。监督目标自身也必须满足这些要求。
+
+      六、输出契约
+
+      只输出业务 JSON；外层 result 由调用模板包装。不新增 ID、URL、哈希、难度分数、分类配额或推理跳数。
+
+      候选 evidence、input_materials、criterion.evidence 都引用本次普通材料编号。target_candidates 只引用目标编号。自然语言用实际内容名称描述，不写“资料7/8”这类在绑定后可能失效的编号。
+
+      learning_objective 和 knowledge_application 只在候选顶层写一次，draft 不重复。T2I draft 保留 edit_type=null、anchor=""、preserve=[]，不输出编辑原图。
+
+      下面是 target_aware=true 的结构示例，文字和编号需替换为实际材料内容。仅指令样本将 input_materials 改为空并说明原因；无目标模式不输出 target_candidates 和 target_support。
+
+      ```json
+      {
+        "status": "ok",
+        "candidates": [{
+          "task_type": "t2i",
+          "learning_objective": "正确表现该器具关键部件的连接结构",
+          "evidence": [1, 2],
+          "input_materials": [2],
+          "reference_selection_reason": "参考图提供部件形态；文字依据仅供构题核验，不作为作答输入",
+          "knowledge_gap": "需要把器具名称和参考部件对应到正确的整体连接结构",
+          "knowledge_application": "从参考读取部件形态，结合题面指定器具，生成可见且正确的连接",
+          "target_candidates": [1],
+          "target_support": "目标中的连接部位清晰可见，可核验部件及接口关系；不用于监督不可见的内部机构",
+          "draft": {
+            "status": "ok",
+            "instruction": "实际生成指令，说明对象与必要展示条件",
+            "condition": "实际适用条件；不需要时为空",
+            "criteria": [{
+              "requirement": "实际可见要求及明确反证",
+              "evidence": [1, 2],
+              "observable_region": "足以核验要求的区域",
+              "allowed_variation": "有依据的合法变化"
+            }],
+            "edit_type": null,
+            "anchor": "",
+            "preserve": []
+          }
+        }]
+      }
+      ```
+
+      无合格候选：{"status":"insufficient","reason":"本批次具体的依据、输入或监督缺口"}。
+
+
+      将上述业务JSON完整放入响应的result属性，不改变业务字段的含义。
+      以下是实际任务和资料。image占位项的number对应后面实际图片的顺序；保留各图的角色和支持限制。
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      required:
+      - result
+      properties:
+        result:
+          type: object
+          required:
+          - status
+          additionalProperties: false
+          properties:
+            status:
+              type: string
+              enum:
+              - ok
+              - insufficient
+            candidates:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                - task_type
+                - learning_objective
+                - evidence
+                - input_materials
+                - reference_selection_reason
+                - knowledge_gap
+                - knowledge_application
+                - draft
+                properties:
+                  task_type:
+                    const: t2i
+                    type: string
+                  learning_objective:
+                    type: string
+                    minLength: 1
+                  evidence:
+                    type: array
+                    items:
+                      type: integer
+                      minimum: 1
+                    minItems: 1
+                  input_materials:
+                    type: array
+                    items:
+                      type: integer
+                      minimum: 1
+                  reference_selection_reason:
+                    type: string
+                    minLength: 1
+                  knowledge_gap:
+                    type: string
+                    minLength: 1
+                  knowledge_application:
+                    type: string
+                    minLength: 1
+                  target_candidates:
+                    type: array
+                    items:
+                      type: integer
+                      minimum: 1
+                    minItems: 1
+                  target_support:
+                    type: string
+                    minLength: 1
+                  draft:
+                    type: object
+                    additionalProperties: false
+                    required:
+                    - status
+                    - instruction
+                    - condition
+                    - criteria
+                    - edit_type
+                    - anchor
+                    - preserve
+                    properties:
+                      status:
+                        const: ok
+                        type: string
+                      instruction:
+                        type: string
+                        minLength: 1
+                      condition:
+                        type: string
+                      criteria:
+                        type: array
+                        minItems: 1
+                        items:
+                          type: object
+                          additionalProperties: false
+                          required:
+                          - requirement
+                          - evidence
+                          - observable_region
+                          - allowed_variation
+                          properties:
+                            requirement:
+                              type: string
+                              minLength: 1
+                            evidence:
+                              type: array
+                              items:
+                                type: integer
+                                minimum: 1
+                              minItems: 1
+                            observable_region:
+                              type: string
+                              minLength: 1
+                            allowed_variation:
+                              type: string
+                              minLength: 1
+                      edit_type:
+                        type: 'null'
+                      anchor:
+                        const: ''
+                        type: string
+                      preserve:
+                        type: array
+                        items:
+                          type: string
+                        maxItems: 0
+            reason:
+              type: string
+              minLength: 1
+  review_sample:
+    version: v2-t2i-sample-review-1-inline-1
+    model:
+      name: qwen3.8-27b
+      transport: openai_compatible
+      base_url: http://127.0.0.1:8000/v1
+      api_key_env: CURATION_DOWNSTREAM_MODEL_KEY
+    schema_retries: 0
+    template: |
+      你审核一条 T2I 训练候选。独立检查提供的材料和实际像素，不因构题者声称 target_support 或 knowledge_application 就认可。不要修改题目、参考、目标或判据。
+
+      输入分为三种角色：
+      - construction_evidence：仅供构题审核的事实依据、原文上下文及支持限制，不自动给作答模型。
+      - answer_input：作答模型实际收到的指令、所选正文、参考图像素。图片的 caption、来源、审核文字不属于作答输入。
+      - supervision_target：已有的目标图，仅供本次审核和后续监督，不是作答参考，也不是一般知识事实的独立依据。
+
+      逐项检查：
+      1. grounded：学习目标和判据有构题材料支持，没有从目标图臆造一般事实；细粒度身份或隐藏特征不能仅凭 caption 确认。
+      2. input_sufficient：仅用实际 answer_input 和题目合理要求的模型已学知识，可以理解并完成任务。纯文本 T2I 可以没有参考；考查概念视觉知识无需把答案先写进题面。任务若依赖特定参考、版本或条件，其信息必须实际给出。隐含的构题意图不能当题面要求。
+      3. learning_objective_visible：目标像素清楚表现所声称的具体学习内容；不可见、被遮挡或只能猜测的特征不通过。不宣称该样本已经证明模型学会迁移。
+      4. instruction_satisfied：目标图满足完整生成指令，而不只是出现了相关概念。文字、数量、属性、场景、条件与关系均需核对。允许指令和判据明确准许的变化，不要求复制参考。
+      5. image_quality_usable：分辨率、遮挡、裁切、失真、混淆和图中标记没有破坏本任务的监督信息。不做与本题无关的审美门槛。
+      6. nonleaking：作答材料没有包含目标图或实质相同的副本，没有依赖未给作答者的隐藏说明来解释指令。
+
+      学习方向可重叠：概念视觉特征、参考信息应用、条件或关系应用，也可为其他有依据的方向。没有类别配额，不强制额外推理、条件、关系或参考。条件决定适用规则/阶段/版本；关系绑定对象/部件/位置/状态。题面直接指定摆放不能冒充知识推断，不要求不同条件必然出现不同外观。
+
+      按 criteria 的顺序逐条检查目标像素。每项返回一条 observation，说明实际看见什么以及哪里不足；不确定时 satisfied=false。所有检查和所有判据通过，程序才接受样本；不能以整体好看抵消某项失败。
+
+      只输出以下业务 JSON，外层 result 由调用模板规定：
+      {"checks":{"grounded":true,"input_sufficient":true,"learning_objective_visible":true,"instruction_satisfied":true,"image_quality_usable":true,"nonleaking":true},"criteria":[{"criterion":1,"satisfied":true,"observation":"具体可见证据；该示例不是预填结论"}],"reason":"说明整体结论；失败时指出具体问题"}
+
+
+      将上述业务JSON完整放入响应的result属性，不改变业务字段的含义。
+      以下是实际任务和资料。image占位项的number对应后面实际图片的顺序；保留各图的角色和支持限制。
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      required:
+      - result
+      properties:
+        result:
+          type: object
+          additionalProperties: false
+          required:
+          - checks
+          - criteria
+          - reason
+          properties:
+            checks:
+              type: object
+              additionalProperties: false
+              required:
+              - grounded
+              - input_sufficient
+              - learning_objective_visible
+              - instruction_satisfied
+              - image_quality_usable
+              - nonleaking
+              properties:
+                grounded:
+                  type: boolean
+                input_sufficient:
+                  type: boolean
+                learning_objective_visible:
+                  type: boolean
+                instruction_satisfied:
+                  type: boolean
+                image_quality_usable:
+                  type: boolean
+                nonleaking:
+                  type: boolean
+            criteria:
+              type: array
+              minItems: 1
+              items:
+                type: object
+                additionalProperties: false
+                required:
+                - criterion
+                - satisfied
+                - observation
+                properties:
+                  criterion:
+                    type: integer
+                    minimum: 1
+                  satisfied:
+                    type: boolean
+                  observation: &id001
+                    type: string
+                    minLength: 1
+            reason: *id001

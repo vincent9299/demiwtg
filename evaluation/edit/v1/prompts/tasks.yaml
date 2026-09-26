@@ -1,0 +1,27 @@
+schema_version: demiflow_prompt_pack_v2
+prompts:
+  judge:
+    version: v1-edit-judge-imgedit-1-inline-1
+    model:
+      name: qwen3.8-27b
+      transport: openai_compatible
+      base_url: http://127.0.0.1:8000/v1
+      api_key_env: CURATION_DOWNSTREAM_MODEL_KEY
+    schema_retries: 0
+    response_format: text
+    template: |
+      You are a professional image editing evaluator.
+
+      以下是实际判分任务。image占位项的number对应后面实际图片的顺序；Image 1 = before（原图），Image 2 = after（编辑结果图）。
+
+      {{ payload | json }}
+
+      {{ images | numbered_image }}
+    response_schema:
+      type: object
+      required:
+      - result
+      additionalProperties: false
+      properties:
+        result:
+          type: string

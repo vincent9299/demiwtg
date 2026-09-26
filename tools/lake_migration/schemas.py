@@ -40,7 +40,7 @@ CONCEPT_TAXONOMY_MEMBERSHIPS = pa.schema([
 """Schema lookup for one-off import tools; runtime code imports domain schemas directly."""
 from collect.schemas import VERBATIM_RECORDS
 from .legacy_schemas import CONCEPT_MATCHES, IMAGE_DESCRIPTIONS, KNOWLEDGE_RELEASE, KNOWLEDGE_RUN, VISUAL_MATERIALS_RELEASE
-from curation.preparation.schemas import PIPELINE_STAGE_ROWS
+from preparation.operaters.results import PIPELINE_STAGE_ROWS
 
 SCHEMA_VERSION = "v1"
 ALL_SCHEMAS = {
