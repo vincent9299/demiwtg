@@ -1,0 +1,129 @@
+# ImageRAG 三阶段语义适配；原始依据及差异见 README 的 ImageRAG 节。
+# 每阶段独立标准节点，保留完整前序结论；图片与动态材料置于末尾。
+schema_version: demiflow_prompt_pack_v2
+prompts:
+  decision:
+    version: t2i-imagerag-decision-1
+    model:
+      name: gpt-6.1-sol
+      transport: openai_compatible
+      base_url: http://127.0.0.1:4001/v1
+      api_key_env: MODELHUB_API_KEY
+    schema_retries: 0
+    template: |-
+      ## Task
+
+      Decide whether Image 1 matches the image-generation instruction. Consider both its content and its style. This decision determines whether visual examples should be retrieved before another generation.
+
+      ## Decision
+
+      Compare the visible image with the complete instruction. Answer yes when the requested content and style are represented, or no when there is a mismatch. A pleasing image can still have the wrong content or style. Accept variations that the instruction leaves open. Give a brief description of the visible evidence or limitation supporting your answer.
+
+      ## Output
+
+      Return only JSON with this structure: {"result": {"match": "yes", "reason": "Brief visible evidence."} }. The value of match must be yes or no.
+
+      ## Input
+
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      required: [result]
+      properties:
+        result:
+          type: object
+          additionalProperties: false
+          required: [match, reason]
+          properties:
+            match: {type: string, enum: ["yes", "no"]}
+            reason: {type: string, minLength: 1}
+  concepts:
+    version: t2i-imagerag-concepts-1
+    model:
+      name: gpt-6.1-sol
+      transport: openai_compatible
+      base_url: http://127.0.0.1:4001/v1
+      api_key_env: MODELHUB_API_KEY
+    schema_retries: 0
+    template: |-
+      ## Task
+
+      Identify the visual concepts missing from Image 1 relative to the image-generation instruction. The preceding decision found a mismatch. Focus on content and style concepts that reference images could illustrate, including an incorrectly represented identity, appearance or structure.
+
+      ## Concept selection
+
+      Describe each missing concept briefly and independently, in priority order. For example, if a watercolor picture should contain a bicycle and a dog, but the result is a pencil drawing of a bicycle alone, the missing concepts are watercolor style and a dog. List up to max_concepts concepts. If you cannot identify a useful concept, return an empty list and explain the limitation. An empty list will make the original instruction the retrieval query.
+
+      ## Output
+
+      Return only JSON: {"result": {"concepts": ["watercolor style", "a dog"], "reason": "Brief evidence for the identified gaps."} }. Concepts describe the needed visual examples; reason describes the observed difference or uncertainty.
+
+      ## Input
+
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      required: [result]
+      properties:
+        result:
+          type: object
+          additionalProperties: false
+          required: [concepts, reason]
+          properties:
+            concepts:
+              type: array
+              maxItems: 3
+              items: {type: string, minLength: 1}
+            reason: {type: string, minLength: 1}
+  captions:
+    version: t2i-imagerag-captions-1
+    model:
+      name: gpt-6.1-sol
+      transport: openai_compatible
+      base_url: http://127.0.0.1:4001/v1
+      api_key_env: MODELHUB_API_KEY
+    schema_retries: 0
+    template: |-
+      ## Task
+
+      Write one image caption for each identified missing concept. Each caption describes a reference image that illustrates that concept and will be used as a text-to-image retrieval query.
+
+      ## Caption requirements
+
+      Make each description self-contained: a reader must understand the desired reference image without knowing the original instruction, Image 1 or the preceding conversation. Focus on the individual concept and the visible characteristics that explain it. Describe a useful, correct visual example rather than the error in Image 1. Include context needed to show an action or relationship; unrelated scene requirements need not be carried into every query.
+
+      Preserve the supplied concept order. Write exactly one caption per concept. concept_index is its one-based position in the supplied concepts list.
+
+      ## Output
+
+      Return only JSON: {"result": {"captions": [{"concept_index": 1, "caption": "A complete stand-alone description of the desired reference image."}]} }.
+
+      ## Input
+
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      required: [result]
+      properties:
+        result:
+          type: object
+          additionalProperties: false
+          required: [captions]
+          properties:
+            captions:
+              type: array
+              minItems: 1
+              maxItems: 3
+              items:
+                type: object
+                additionalProperties: false
+                required: [concept_index, caption]
+                properties:
+                  concept_index: {type: integer, minimum: 1, maximum: 3}
+                  caption: {type: string, minLength: 1}

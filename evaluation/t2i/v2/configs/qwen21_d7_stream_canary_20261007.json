@@ -1,0 +1,61 @@
+{
+  "judge": {
+    "mode": "online",
+    "base_url": "http://127.0.0.1:4001/v1",
+    "api_key_env": "MODELHUB_API_KEY",
+    "timeout_s": 900,
+    "max_output_tokens": 32768,
+    "concurrency": 1,
+    "max_context_chars": 60000,
+    "model": "malasci/gpt-6-astra",
+    "reasoning_effort": "xhigh",
+    "stream": true,
+    "stream_include_usage": true
+  },
+  "d_evaluation": {
+    "question_limit": 1,
+    "answers": [
+      {
+        "model": "Qwen-Image-2.1",
+        "answer_mode": "text_only",
+        "source": {
+          "uri": "demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_reanswer_review91_c8_20261006__arm00.lance",
+          "version": 91
+        }
+      },
+      {
+        "model": "Qwen-Image-2.1+正例参考图",
+        "answer_mode": "positive_images",
+        "source": {
+          "uri": "demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_reanswer_review91_c8_20261006__arm01.lance",
+          "version": 91
+        }
+      }
+    ]
+  },
+  "answers": [
+    {
+      "model": "Qwen-Image-2.1",
+      "answer_mode": "text_only",
+      "source": {
+        "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_reanswer_review91_c8_20261006__arm00.lance",
+        "version": 91
+      }
+    },
+    {
+      "model": "Qwen-Image-2.1+正例参考图",
+      "answer_mode": "positive_images",
+      "source": {
+        "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_reanswer_review91_c8_20261006__arm01.lance",
+        "version": 91
+      }
+    }
+  ],
+  "run": "qwen21_d7_stream_canary_20261007",
+  "source": {
+    "uri": "demiwtg/evaluation/t2i/v2/datasets/reanswer_questions__review91_20261006.lance",
+    "version": 1
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/scores_d__qwen21_d7_stream_canary_20261007.lance",
+  "stage": "d"
+}

@@ -1,6 +1,6 @@
 """数据根与存储位置解析。
 
-“独立”首先是解除代码与数据的位置耦合：默认根是工作区（包含 demiwtg/ 与共享 datasets/），
+“独立”首先是解除代码与数据的位置耦合：默认根是工作区（包含 demiwtg/ 与 _demiflow/），
 部署时通过 ``DEMIWTG_DATASETS_ROOT`` 或显式参数指向仓库外目录，业务代码
 不感知具体位置；记录中只保存相对位置（见 refs.DatasetRef）。
 """
@@ -13,12 +13,12 @@ DATASETS_ROOT_ENV = "DEMIWTG_DATASETS_ROOT"
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = PACKAGE_ROOT
-# 2026-09-23：各模块 datasets/ 直接存表；共享表仍在工作区 datasets/。
+# 各生产者的 datasets 与平台 _demiflow 共享同一解析根；公共不等于顶层存储目录。
 DEFAULT_ROOT = PROJECT_ROOT.parent
 
 
 def default_root() -> Path:
-    """项目共同路径根（包含 demiwtg/ 和 datasets/），不检查存在性。"""
+    """项目共同路径根（包含 demiwtg/ 和 _demiflow/），不检查存在性。"""
     return DEFAULT_ROOT
 
 

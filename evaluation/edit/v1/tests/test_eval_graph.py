@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from preparation.operaters import runfiles as storage
-from preparation.operaters.runfiles import saved_stage, run_manifest
+from preparation.articles.operators import runfiles as storage
+from preparation.articles.operators.runfiles import saved_stage, run_manifest
 from demiflow.execution.artifacts import digest
 
 
@@ -14,11 +14,11 @@ def lake(tmp_path, monkeypatch):
     monkeypatch.setenv("DEMIWTG_DATASETS_ROOT", str(tmp_path / "datasets"))
     monkeypatch.setattr(storage, "ROOT", tmp_path)
     monkeypatch.setattr(storage, "code_version", lambda: {"fixture_code": 1})
-    from evaluation.edit.v1.operaters import runfiles
+    from evaluation.edit.v1.operators import runfiles
     bench = tmp_path / "benchmark/edit/v1"
     monkeypatch.setattr(runfiles, "BENCH_DIR", bench)
     monkeypatch.setattr(runfiles, "ALLOWED_SOURCE_ROOT", (bench / "focus200").resolve())
-    from evaluation.edit.v1.operaters import answers
+    from evaluation.edit.v1.operators import answers
     monkeypatch.setattr(answers, "resolve_source",
                         lambda q: runfiles.resolve_source(q))
     from PIL import Image
@@ -65,8 +65,8 @@ def test_offline_graph_builds_jobs_and_pends_judge(lake):
 
 
 def test_binding_judge_text_applies_default_and_clamp(lake):
-    from demiflow.operator_llm.lance_journal import submit_response
-    from preparation.operaters.runfiles import read_record
+    from demiflow.operator_llm.sqlite_offline import submit_response
+    from preparation.articles.operators.runfiles import read_record
     from project import resolve_root
     run, _, cfg = build(lake, lake[2])
     active = next(r for r in saved_stage(run, "judge_requests") if r["status"] == "generated")
@@ -109,7 +109,7 @@ def test_jobs_carry_historical_request_shape_without_calls(lake):
 
 
 def test_parse_scores_matches_legacy_semantics():
-    from evaluation.edit.v1.operaters.judging import parse_scores
+    from evaluation.edit.v1.operators.judging import parse_scores
     from evaluation.edit.v1.tests.fixtures.eval_score import EDIT_DIMS
     raw = "Prompt Compliance:3.5\nVisual Naturalness: 5\n"
     dims = EDIT_DIMS["replace"]

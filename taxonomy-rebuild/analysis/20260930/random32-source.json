@@ -1,0 +1,243 @@
+{
+  "source_version": 4,
+  "seed": "taxonomy-design-random32-v1-20260930",
+  "method": "smallest SHA256(seed + NUL + original name), no category/quality filter",
+  "rows": [
+    {
+      "name": "河边野餐",
+      "aliases": [
+        "Picnic By A River"
+      ],
+      "taxonomy": "[\"行为动作 / 休闲娱乐动作 / 野餐\"]"
+    },
+    {
+      "name": "幽灵",
+      "aliases": [
+        "Ghost",
+        "Simon Riley",
+        "西蒙·莱利",
+        "幽灵",
+        "CoD Ghost",
+        "游骑兵幽灵",
+        "Apparition",
+        "Apparition Figure",
+        "Apparition In Fog",
+        "Apparition Light",
+        "Ghost Apparition",
+        "Mysterious Apparition",
+        "Shadowy Apparition",
+        "Spooky Apparition"
+      ],
+      "taxonomy": "[\"属性与状态 / 恐怖事物\", \"文化艺术与媒介 / 虚构世界与角色 / 游戏角色 / 射击游戏角色\", \"文化艺术与媒介 / 虚构世界与角色 / 志怪鬼怪形象 / 西方鬼怪\", \"文化艺术与媒介 / 虚构世界与角色 / 幻象\", \"文化艺术与媒介 / 虚构世界与角色 / 恶灵\", \"文化艺术与媒介 / 虚构世界与角色 / 超自然主义\"]"
+    },
+    {
+      "name": "L'Oréal Paris Conditioner",
+      "aliases": [],
+      "taxonomy": "[\"人造物体 / 护发素\"]"
+    },
+    {
+      "name": "丹翠雨林",
+      "aliases": [
+        "丹翠雨林",
+        "Daintree Rainforest",
+        "丹特里雨林",
+        "Daintree",
+        "Daintree Forest",
+        "Daintree National Park"
+      ],
+      "taxonomy": "[\"动物 / 著名动物与生态 / 著名自然景观地 / 森林生态\"]"
+    },
+    {
+      "name": "锂电池电动代步车",
+      "aliases": [
+        "Lithium Battery Mobility Scooter"
+      ],
+      "taxonomy": "[\"交通工具 / 非机动车 / 轮椅 / 电动轮椅\"]"
+    },
+    {
+      "name": "小区活动室",
+      "aliases": [
+        "Community Activity Room"
+      ],
+      "taxonomy": "[\"场景 / 室内场景 / 住宅社区场景\"]"
+    },
+    {
+      "name": "星罗棋布的帐篷",
+      "aliases": [
+        "Scattered Tents"
+      ],
+      "taxonomy": "[\"属性与状态 / 星罗棋布\"]"
+    },
+    {
+      "name": "时间扭曲峡谷",
+      "aliases": [
+        "Time Distortion Canyon"
+      ],
+      "taxonomy": "[\"场景 / 自然户外场景 / 科幻场景\"]"
+    },
+    {
+      "name": "Chèvre",
+      "aliases": [],
+      "taxonomy": "[\"食物 / 乳酪 / 山羊奶酪\"]"
+    },
+    {
+      "name": "脸部轮廓",
+      "aliases": [
+        "Facial Contour"
+      ],
+      "taxonomy": "[\"人物与人体 / 脸部特写\"]"
+    },
+    {
+      "name": "猎空",
+      "aliases": [
+        "Tracer",
+        "猎空",
+        "Lena Oxton",
+        "莉娜·奥克斯顿"
+      ],
+      "taxonomy": "[\"文化艺术与媒介 / 虚构世界与角色 / 游戏角色 / 射击游戏角色\", \"文化艺术与媒介 / 虚构世界与角色 / 游戏角色 / 竞技游戏角色\"]"
+    },
+    {
+      "name": "Newton Scale",
+      "aliases": [],
+      "taxonomy": "[\"时间数量与度量 / 温度单位\"]"
+    },
+    {
+      "name": "插头套",
+      "aliases": [
+        "Plug Sleeve"
+      ],
+      "taxonomy": "[\"人造物体 / 服饰全品 / 帽子 / 插头帽\"]"
+    },
+    {
+      "name": "Pelmeni Plate",
+      "aliases": [],
+      "taxonomy": "[\"食物 / 意大利面食 / 饺子 / 俄式饺子\"]"
+    },
+    {
+      "name": "Bare Arms",
+      "aliases": [],
+      "taxonomy": "[\"属性与状态 / 裸露 / 赤膊的\"]"
+    },
+    {
+      "name": "Tropical Helmet",
+      "aliases": [],
+      "taxonomy": "[\"人造物体 / 服饰全品 / 帽子 / 太阳帽 / 木髓头盔\"]"
+    },
+    {
+      "name": "电子期刊",
+      "aliases": [
+        "Electronic Journals"
+      ],
+      "taxonomy": "[\"文化艺术与媒介 / 文学出版 / 电子出版物\"]"
+    },
+    {
+      "name": "辣根美乃滋",
+      "aliases": [
+        "Horseradish Mayonnaise"
+      ],
+      "taxonomy": "[\"食物 / 调味品 / 汁 / 辣根酱\"]"
+    },
+    {
+      "name": "McIntosh Apple Close-up",
+      "aliases": [],
+      "taxonomy": "[\"食物 / 农产品 / 食用水果 / 苹果 / 餐后苹果 / 麦金托什苹果\"]"
+    },
+    {
+      "name": "Pepper Steak And Rice",
+      "aliases": [],
+      "taxonomy": "[\"食物 / 菜肴 / 青椒牛排\"]"
+    },
+    {
+      "name": "猫耳菊花茎分叉",
+      "aliases": [
+        "Cat's Ear Branched Flower Stem"
+      ],
+      "taxonomy": "[\"植物 / 显花植物 / 开花植物 / 野花 / 猫耳菊\"]"
+    },
+    {
+      "name": "国际经济法学",
+      "aliases": [
+        "International Economic Law"
+      ],
+      "taxonomy": "[\"知识与学科 / 学科与知识品牌 / 社会科学 IP / 法学\"]"
+    },
+    {
+      "name": "支脚架",
+      "aliases": [
+        "Leg Stand"
+      ],
+      "taxonomy": "[\"建筑与基础设施 / 建筑区域 / 室 / 壁橱 / 亭 / 投票亭\"]"
+    },
+    {
+      "name": "世界越野跑锦标赛",
+      "aliases": [
+        "World Cross Country Championships"
+      ],
+      "taxonomy": "[\"组织机构与社会事件 / 体育事件 / 田径赛事\"]"
+    },
+    {
+      "name": "沙漠地鼠龟冬眠",
+      "aliases": [
+        "Desert Tortoise Hibernation"
+      ],
+      "taxonomy": "[\"动物 / 爬行动物 / 龟鳖类 / 乌龟 / 陆龟 / 沙漠地鼠龟\"]"
+    },
+    {
+      "name": "白花加州赤莲",
+      "aliases": [
+        "Erythronium Californicum (white)"
+      ],
+      "taxonomy": "[\"植物 / 球根植物 / 百合科植物 / 山慈姑属 / 加州赤莲\"]"
+    },
+    {
+      "name": "邓紫棋「I AM GLORIA」世界巡回演唱会",
+      "aliases": [
+        "G.E.M. I AM GLORIA Tour",
+        "G.E.M. Gloria World Tour",
+        "邓紫棋荣耀世界巡回演唱会",
+        "I AM GLORIA 巡演",
+        "G.E.M. I AM GLORIA",
+        "邓紫棋荣耀巡演",
+        "G.e.m. 'i AM Gloria' World Tour"
+      ],
+      "taxonomy": "[\"文化艺术与媒介 / 内容作品 / 音乐作品 / 演唱会现场\"]"
+    },
+    {
+      "name": "湖滨步道",
+      "aliases": [
+        "Lakeside Trail"
+      ],
+      "taxonomy": "[\"自然景观 / 湖滨\"]"
+    },
+    {
+      "name": "凤翔木版年画",
+      "aliases": [
+        "Fengxiang Woodblock New Year Print"
+      ],
+      "taxonomy": "[\"文化艺术与媒介 / 视觉艺术 / 版画\"]"
+    },
+    {
+      "name": "白色牦牛",
+      "aliases": [
+        "White Yak"
+      ],
+      "taxonomy": "[\"动物 / 哺乳动物 / 有胎盘哺乳动物 / 有蹄哺乳动物 / 偶蹄动物 / 反刍动物 / 牛科动物 / 牛属动物 / 印度瘤牛 / 牦牛\", \"动物 / 哺乳动物 / 有胎盘哺乳动物 / 有蹄哺乳动物 / 偶蹄动物 / 反刍动物 / 牛科动物 / 牛属动物 / 野牛 / 牦牛\"]"
+    },
+    {
+      "name": "冲洗伤口",
+      "aliases": [
+        "Flush Wound",
+        "Rinse Wound"
+      ],
+      "taxonomy": "[\"行为动作 / 改变完整性 / 分开 / 切除 / 冲洗\"]"
+    },
+    {
+      "name": "黑喉红臀鹎",
+      "aliases": [
+        "Black-throated Red-vented Bulbul"
+      ],
+      "taxonomy": "[\"动物 / 鸟类 / 鸣禽 / 鸫 / 夜莺 / 鹎\"]"
+    }
+  ]
+}

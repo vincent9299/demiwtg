@@ -1,0 +1,1489 @@
+{
+  "answers": [
+    {
+      "answer_mode": "imagerag",
+      "api": "images_json",
+      "api_key_env": "MODELHUB_API_KEY",
+      "backend": "modelhub",
+      "base_url": "http://127.0.0.1:8005/v1",
+      "concurrency": 1,
+      "cuda_visible_devices": "1",
+      "device": "cuda:0",
+      "enabled": true,
+      "image_encoding": "preserve",
+      "imagerag": {
+        "additional_initial_answers": [
+          {
+            "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_reanswer_review91_c8_20261006__arm00.lance",
+            "version": 91
+          }
+        ],
+        "caption_sources": [
+          {
+            "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_v3_image_hints.lance",
+            "version": 1
+          },
+          {
+            "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_retry_failed_20261006_r01.lance",
+            "version": 1
+          }
+        ],
+        "embedding_execution": {
+          "batch_size": 8,
+          "concurrency": 1,
+          "options": {
+            "io_workers": 1,
+            "prepare_workers": 1,
+            "response_workers": 1
+          },
+          "queue_depth": 8
+        },
+        "encoder": {
+          "api_key_env": "",
+          "base_url": "http://127.0.0.1:8002/v1",
+          "dimensions": 4096,
+          "encoding_parameters": {
+            "backend_version": "0.28.0",
+            "dimension": 4096,
+            "dtype": "bfloat16",
+            "implementation": "wemm-vllm-pooling-v1",
+            "model_id": "tencent/WeMM-Embedding-9B",
+            "model_revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482",
+            "normalization": "l2_float32",
+            "packages": {
+              "Pillow": "12.3.0",
+              "torch": "2.13.0",
+              "transformers": "5.16.1"
+            },
+            "pixels": {
+              "color": "RGB",
+              "frame": "first",
+              "max": 1048576,
+              "min": 65536,
+              "orientation": "exif_transpose",
+              "transport": "original_if_compatible"
+            },
+            "request": "native_user_content_batched_chat",
+            "template_sha256": "7c3df2aab83ab9096428ec27b6b99ad87c4790418b830d119957634f28c677ba"
+          },
+          "image_transport": "original_if_compatible",
+          "input_format": "chat",
+          "name": "tencent/WeMM-Embedding-9B",
+          "normalize": true,
+          "request_options": {
+            "add_generation_prompt": false,
+            "mm_processor_kwargs": {
+              "max_pixels": 1048576,
+              "min_pixels": 65536
+            }
+          },
+          "revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482"
+        },
+        "initial_answers": {
+          "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_ab_prompt1_c8_20261004__arm00.lance",
+          "version": 299
+        },
+        "max_context_chars": 30000,
+        "max_initial_bytes": 8388608,
+        "max_queries": 32,
+        "pool": {
+          "uri": "demiwtg/preparation/image_embeddings/datasets/image_embeddings__a170b8529adc30d8.lance",
+          "version": 1
+        },
+        "prompt_protocol": "upstream_16c9502",
+        "query_service": {
+          "api_server_count": 1,
+          "chat_template": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B/embedding_chat_template.jinja",
+          "cuda_bin": "/usr/local/cuda/bin",
+          "data_parallel_size": 1,
+          "dtype": "bfloat16",
+          "enable_logging_iteration_details": false,
+          "enable_prefix_caching": false,
+          "enforce_eager": true,
+          "gpu_memory_utilization": 0.5,
+          "gpus": [
+            1
+          ],
+          "language_model_only": false,
+          "limit_mm_per_prompt": null,
+          "max_model_len": 8192,
+          "max_num_batched_tokens": 16384,
+          "max_num_seqs": 16,
+          "mm_processor_cache_gb": 0,
+          "model_path": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B",
+          "omp_num_threads": null,
+          "poll_interval_s": 1,
+          "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+          "readiness_timeout_s": 2,
+          "runner": "pooling",
+          "shutdown_timeout_s": 30,
+          "startup_log_interval_s": 15,
+          "startup_timeout_s": 600,
+          "tensor_parallel_size": 1
+        },
+        "reuse": {
+          "additional_models": [
+            {
+              "answer_mode": "imagerag",
+              "api": "images_json",
+              "api_key_env": "MODELHUB_API_KEY",
+              "backend": "modelhub",
+              "base_url": "http://127.0.0.1:8005/v1",
+              "concurrency": 1,
+              "cuda_visible_devices": "1",
+              "device": "cuda:0",
+              "enabled": true,
+              "image_encoding": "preserve",
+              "imagerag": {
+                "additional_initial_answers": [
+                  {
+                    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_reanswer_review91_c8_20261006__arm00.lance",
+                    "version": 91
+                  }
+                ],
+                "caption_sources": [
+                  {
+                    "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_v3_image_hints.lance",
+                    "version": 1
+                  },
+                  {
+                    "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_retry_failed_20261006_r01.lance",
+                    "version": 1
+                  }
+                ],
+                "embedding_execution": {
+                  "batch_size": 8,
+                  "concurrency": 1,
+                  "flush_interval": null,
+                  "max_requests": null,
+                  "options": {
+                    "batch_decode_pixels": null,
+                    "batch_request_bytes": null,
+                    "collect_journal_totals": true,
+                    "connect_timeout_s": 10,
+                    "document_cache_bytes": 134217728,
+                    "document_cache_entries": 256,
+                    "io_workers": 1,
+                    "keepalive_expiry_s": 5,
+                    "max_decode_pixels": 100000000,
+                    "max_document_blocks": 100000,
+                    "max_document_bytes": 8388608,
+                    "max_document_spans": 4096,
+                    "max_document_text_bytes": 262144,
+                    "max_image_bytes": 67108864,
+                    "max_request_bytes": 100663296,
+                    "max_response_bytes": 67108864,
+                    "png_compress_level": 6,
+                    "pool_timeout_s": 10,
+                    "prepare_workers": 1,
+                    "profile_path": null,
+                    "read_timeout_s": 120,
+                    "response_workers": 1,
+                    "sqlite_journal": null,
+                    "timeout_s": 300,
+                    "trust_env": false,
+                    "write_timeout_s": 120
+                  },
+                  "prefetch_batches": 0,
+                  "queue_depth": 8,
+                  "request_policy": null
+                },
+                "encoder": {
+                  "api_key_env": "",
+                  "base_url": "http://127.0.0.1:8002/v1",
+                  "dimensions": 4096,
+                  "encoding_parameters": {
+                    "backend_version": "0.28.0",
+                    "dimension": 4096,
+                    "dtype": "bfloat16",
+                    "implementation": "wemm-vllm-pooling-v1",
+                    "model_id": "tencent/WeMM-Embedding-9B",
+                    "model_revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482",
+                    "normalization": "l2_float32",
+                    "packages": {
+                      "Pillow": "12.3.0",
+                      "torch": "2.13.0",
+                      "transformers": "5.16.1"
+                    },
+                    "pixels": {
+                      "color": "RGB",
+                      "frame": "first",
+                      "max": 1048576,
+                      "min": 65536,
+                      "orientation": "exif_transpose",
+                      "transport": "original_if_compatible"
+                    },
+                    "request": "native_user_content_batched_chat",
+                    "template_sha256": "7c3df2aab83ab9096428ec27b6b99ad87c4790418b830d119957634f28c677ba"
+                  },
+                  "image_transport": "original_if_compatible",
+                  "input_format": "chat",
+                  "name": "tencent/WeMM-Embedding-9B",
+                  "normalize": true,
+                  "request_options": {
+                    "add_generation_prompt": false,
+                    "mm_processor_kwargs": {
+                      "max_pixels": 1048576,
+                      "min_pixels": 65536
+                    }
+                  },
+                  "revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482"
+                },
+                "initial_answers": {
+                  "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_ab_prompt1_c8_20261004__arm00.lance",
+                  "version": 299
+                },
+                "initial_template": {
+                  "name": "text_only",
+                  "template": "{{ instruction }}",
+                  "version": "t2i-answer-text-1"
+                },
+                "max_context_chars": 30000,
+                "max_initial_bytes": 8388608,
+                "max_queries": 32,
+                "original_prompt_spec": {
+                  "call_config": {
+                    "prompts": {
+                      "captions": {
+                        "input_mode": "messages",
+                        "message_limits": {
+                          "max_bytes": 67108864,
+                          "max_images": 4,
+                          "max_messages": 5,
+                          "max_parts": 9
+                        },
+                        "model": {
+                          "api_key_env": "MODELHUB_API_KEY",
+                          "base_url": "http://127.0.0.1:4001/v1",
+                          "name": "gpt-6.1-sol",
+                          "transport": "openai_compatible"
+                        },
+                        "response_format": "text",
+                        "response_schema": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "result": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "result"
+                          ],
+                          "type": "object"
+                        },
+                        "schema_retries": 0,
+                        "version": "t2i-imagerag-original-captions-16c9502-1"
+                      },
+                      "concepts": {
+                        "input_mode": "messages",
+                        "message_limits": {
+                          "max_bytes": 67108864,
+                          "max_images": 4,
+                          "max_messages": 5,
+                          "max_parts": 9
+                        },
+                        "model": {
+                          "api_key_env": "MODELHUB_API_KEY",
+                          "base_url": "http://127.0.0.1:4001/v1",
+                          "name": "gpt-6.1-sol",
+                          "transport": "openai_compatible"
+                        },
+                        "response_format": "text",
+                        "response_schema": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "result": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "result"
+                          ],
+                          "type": "object"
+                        },
+                        "schema_retries": 0,
+                        "version": "t2i-imagerag-original-concepts-16c9502-1"
+                      },
+                      "decision": {
+                        "input_mode": "messages",
+                        "message_limits": {
+                          "max_bytes": 67108864,
+                          "max_images": 4,
+                          "max_messages": 5,
+                          "max_parts": 9
+                        },
+                        "model": {
+                          "api_key_env": "MODELHUB_API_KEY",
+                          "base_url": "http://127.0.0.1:4001/v1",
+                          "name": "gpt-6.1-sol",
+                          "transport": "openai_compatible"
+                        },
+                        "response_format": "text",
+                        "response_schema": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "result": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "result"
+                          ],
+                          "type": "object"
+                        },
+                        "schema_retries": 0,
+                        "version": "t2i-imagerag-original-decision-16c9502-1"
+                      }
+                    },
+                    "schema_version": "demiflow_prompt_pack_v2"
+                  },
+                  "protocol": "upstream_16c9502",
+                  "templates": {
+                    "captions": "For each concept you suggested above, please suggest {{ k_captions_per_concept }} image captions describing images that explain this concept only. The captions should be stand-alone description of the images, assuming no knowledge of the given images and prompt, that I can use to lookup images with automatically. In your answer only provide the image captions, each in a new line with nothing else other than the caption.",
+                    "concepts": "What are the differences between this image and the required prompt? in your answer only provide missing concepts in terms of content and style, each in a separate line. For example, if the prompt is \"An oil painting of a sheep and a car\" and the image is a painting of a car but not an oil painting, the missing concepts will be:\noil painting style\na sheep",
+                    "decision": "Does this image match the prompt \"{{ prompt }}\"? consider both content and style aspects. only answer yes or no.",
+                    "example": "{{ caption }}: <img><|image_{{ image_index }}|></img>",
+                    "generation": "According to these images of {{ examples }}, generate {{ prompt }}"
+                  },
+                  "upstream_commit": "16c9502a09b5a049f7c30f39b7f48998fd1e2526"
+                },
+                "pool": {
+                  "uri": "demiwtg/preparation/image_embeddings/datasets/image_embeddings__a170b8529adc30d8.lance",
+                  "version": 1
+                },
+                "prompt_pack": {
+                  "prompts": {
+                    "captions": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "malasci/gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-captions-16c9502-1"
+                    },
+                    "concepts": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "malasci/gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-concepts-16c9502-1"
+                    },
+                    "decision": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "malasci/gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-decision-16c9502-1"
+                    }
+                  },
+                  "schema_version": "demiflow_prompt_pack_v2"
+                },
+                "prompt_protocol": "upstream_16c9502",
+                "query_service": {
+                  "api_server_count": 1,
+                  "chat_template": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B/embedding_chat_template.jinja",
+                  "cuda_bin": "/usr/local/cuda/bin",
+                  "data_parallel_size": 1,
+                  "dtype": "bfloat16",
+                  "enable_logging_iteration_details": false,
+                  "enable_prefix_caching": false,
+                  "enforce_eager": true,
+                  "gpu_memory_utilization": 0.5,
+                  "gpus": [
+                    0
+                  ],
+                  "language_model_only": false,
+                  "limit_mm_per_prompt": null,
+                  "max_model_len": 8192,
+                  "max_num_batched_tokens": 16384,
+                  "max_num_seqs": 16,
+                  "mm_processor_cache_gb": 0,
+                  "model_path": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B",
+                  "omp_num_threads": null,
+                  "poll_interval_s": 1,
+                  "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+                  "readiness_timeout_s": 2,
+                  "resource_wait_timeout_s": 0,
+                  "runner": "pooling",
+                  "shutdown_timeout_s": 30,
+                  "startup_log_interval_s": 15,
+                  "startup_timeout_s": 600,
+                  "tensor_parallel_size": 1,
+                  "trust_remote_code": false
+                },
+                "vlm": {
+                  "api_key_env": "MODELHUB_API_KEY",
+                  "base_url": "http://127.0.0.1:4001/v1",
+                  "concurrency": 4,
+                  "max_output_tokens": 4096,
+                  "mode": "online",
+                  "model": "malasci/gpt-6.1-sol",
+                  "reasoning_effort": null,
+                  "timeout_s": 600
+                }
+              },
+              "max_reference_images": 3,
+              "model": "Qwen-Image-2.1",
+              "model_path": "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+              "parameters": {
+                "num_inference_steps": 40,
+                "output_resolution": 1024,
+                "response_format": "b64_json",
+                "seed": 42,
+                "size": "1024x1024"
+              },
+              "prompt_template": {
+                "name": "imagerag_original",
+                "template": "According to these images of {{ examples }}, generate {{ instruction }}{{ images | image }}",
+                "version": "t2i-answer-imagerag-original-16c9502-1"
+              },
+              "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+              "queue_depth": 1,
+              "revision": "qwen21-local-json-multi-40steps-1024-20261004",
+              "seed": 42,
+              "shared_service": {
+                "configuration": {
+                  "base_url": "http://127.0.0.1:8005/v1",
+                  "command": [
+                    "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+                    "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+                    "--backend",
+                    "qwen-image-2.1",
+                    "--model-path",
+                    "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+                    "--served-model-name",
+                    "Qwen-Image-2.1",
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    "8005",
+                    "--steps",
+                    "40"
+                  ],
+                  "env": {
+                    "HF_HUB_OFFLINE": "1",
+                    "PYTHONPATH": "/tmp/edit_qwen21_dependencies:/tmp/edit_diffusers_official/src"
+                  },
+                  "expected_model": "Qwen-Image-2.1",
+                  "gpus": [
+                    1
+                  ],
+                  "log_path": "_demiflow/evaluation_t2i_v2/qwen21_imagerag_full_20261008/image_service.log",
+                  "root": "/yzp/zhaozy/yangzepeng/0905",
+                  "shutdown_timeout_s": 30,
+                  "startup_timeout_s": 600
+                },
+                "name": "t2i_eval_qwen21_imagerag_palace_canary_20261008",
+                "request_concurrency": 16,
+                "root": "/yzp/zhaozy/yangzepeng/0905",
+                "stop_when_idle": true
+              },
+              "timeout_s": 900,
+              "use_references": true
+            },
+            {
+              "answer_mode": "imagerag",
+              "api": "images_json",
+              "api_key_env": "MODELHUB_API_KEY",
+              "backend": "modelhub",
+              "base_url": "http://127.0.0.1:8005/v1",
+              "concurrency": 8,
+              "cuda_visible_devices": "1",
+              "device": "cuda:0",
+              "enabled": true,
+              "image_encoding": "preserve",
+              "imagerag": {
+                "additional_initial_answers": [
+                  {
+                    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_reanswer_review91_c8_20261006__arm00.lance",
+                    "version": 91
+                  }
+                ],
+                "caption_sources": [
+                  {
+                    "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_v3_image_hints.lance",
+                    "version": 1
+                  },
+                  {
+                    "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_retry_failed_20261006_r01.lance",
+                    "version": 1
+                  }
+                ],
+                "embedding_execution": {
+                  "batch_size": 8,
+                  "concurrency": 1,
+                  "flush_interval": null,
+                  "max_requests": null,
+                  "options": {
+                    "batch_decode_pixels": null,
+                    "batch_request_bytes": null,
+                    "collect_journal_totals": true,
+                    "connect_timeout_s": 10,
+                    "document_cache_bytes": 134217728,
+                    "document_cache_entries": 256,
+                    "io_workers": 1,
+                    "keepalive_expiry_s": 5,
+                    "max_decode_pixels": 100000000,
+                    "max_document_blocks": 100000,
+                    "max_document_bytes": 8388608,
+                    "max_document_spans": 4096,
+                    "max_document_text_bytes": 262144,
+                    "max_image_bytes": 67108864,
+                    "max_request_bytes": 100663296,
+                    "max_response_bytes": 67108864,
+                    "png_compress_level": 6,
+                    "pool_timeout_s": 10,
+                    "prepare_workers": 1,
+                    "profile_path": null,
+                    "read_timeout_s": 120,
+                    "response_workers": 1,
+                    "sqlite_journal": null,
+                    "timeout_s": 300,
+                    "trust_env": false,
+                    "write_timeout_s": 120
+                  },
+                  "prefetch_batches": 0,
+                  "queue_depth": 8,
+                  "request_policy": null
+                },
+                "encoder": {
+                  "api_key_env": "",
+                  "base_url": "http://127.0.0.1:8002/v1",
+                  "dimensions": 4096,
+                  "encoding_parameters": {
+                    "backend_version": "0.28.0",
+                    "dimension": 4096,
+                    "dtype": "bfloat16",
+                    "implementation": "wemm-vllm-pooling-v1",
+                    "model_id": "tencent/WeMM-Embedding-9B",
+                    "model_revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482",
+                    "normalization": "l2_float32",
+                    "packages": {
+                      "Pillow": "12.3.0",
+                      "torch": "2.13.0",
+                      "transformers": "5.16.1"
+                    },
+                    "pixels": {
+                      "color": "RGB",
+                      "frame": "first",
+                      "max": 1048576,
+                      "min": 65536,
+                      "orientation": "exif_transpose",
+                      "transport": "original_if_compatible"
+                    },
+                    "request": "native_user_content_batched_chat",
+                    "template_sha256": "7c3df2aab83ab9096428ec27b6b99ad87c4790418b830d119957634f28c677ba"
+                  },
+                  "image_transport": "original_if_compatible",
+                  "input_format": "chat",
+                  "name": "tencent/WeMM-Embedding-9B",
+                  "normalize": true,
+                  "request_options": {
+                    "add_generation_prompt": false,
+                    "mm_processor_kwargs": {
+                      "max_pixels": 1048576,
+                      "min_pixels": 65536
+                    }
+                  },
+                  "revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482"
+                },
+                "initial_answers": {
+                  "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_ab_prompt1_c8_20261004__arm00.lance",
+                  "version": 299
+                },
+                "initial_template": {
+                  "name": "text_only",
+                  "template": "{{ instruction }}",
+                  "version": "t2i-answer-text-1"
+                },
+                "max_context_chars": 30000,
+                "max_initial_bytes": 8388608,
+                "max_queries": 32,
+                "original_prompt_spec": {
+                  "call_config": {
+                    "prompts": {
+                      "captions": {
+                        "input_mode": "messages",
+                        "message_limits": {
+                          "max_bytes": 67108864,
+                          "max_images": 4,
+                          "max_messages": 5,
+                          "max_parts": 9
+                        },
+                        "model": {
+                          "api_key_env": "MODELHUB_API_KEY",
+                          "base_url": "http://127.0.0.1:4001/v1",
+                          "name": "gpt-6.1-sol",
+                          "transport": "openai_compatible"
+                        },
+                        "response_format": "text",
+                        "response_schema": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "result": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "result"
+                          ],
+                          "type": "object"
+                        },
+                        "schema_retries": 0,
+                        "version": "t2i-imagerag-original-captions-16c9502-1"
+                      },
+                      "concepts": {
+                        "input_mode": "messages",
+                        "message_limits": {
+                          "max_bytes": 67108864,
+                          "max_images": 4,
+                          "max_messages": 5,
+                          "max_parts": 9
+                        },
+                        "model": {
+                          "api_key_env": "MODELHUB_API_KEY",
+                          "base_url": "http://127.0.0.1:4001/v1",
+                          "name": "gpt-6.1-sol",
+                          "transport": "openai_compatible"
+                        },
+                        "response_format": "text",
+                        "response_schema": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "result": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "result"
+                          ],
+                          "type": "object"
+                        },
+                        "schema_retries": 0,
+                        "version": "t2i-imagerag-original-concepts-16c9502-1"
+                      },
+                      "decision": {
+                        "input_mode": "messages",
+                        "message_limits": {
+                          "max_bytes": 67108864,
+                          "max_images": 4,
+                          "max_messages": 5,
+                          "max_parts": 9
+                        },
+                        "model": {
+                          "api_key_env": "MODELHUB_API_KEY",
+                          "base_url": "http://127.0.0.1:4001/v1",
+                          "name": "gpt-6.1-sol",
+                          "transport": "openai_compatible"
+                        },
+                        "response_format": "text",
+                        "response_schema": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "result": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "result"
+                          ],
+                          "type": "object"
+                        },
+                        "schema_retries": 0,
+                        "version": "t2i-imagerag-original-decision-16c9502-1"
+                      }
+                    },
+                    "schema_version": "demiflow_prompt_pack_v2"
+                  },
+                  "protocol": "upstream_16c9502",
+                  "templates": {
+                    "captions": "For each concept you suggested above, please suggest {{ k_captions_per_concept }} image captions describing images that explain this concept only. The captions should be stand-alone description of the images, assuming no knowledge of the given images and prompt, that I can use to lookup images with automatically. In your answer only provide the image captions, each in a new line with nothing else other than the caption.",
+                    "concepts": "What are the differences between this image and the required prompt? in your answer only provide missing concepts in terms of content and style, each in a separate line. For example, if the prompt is \"An oil painting of a sheep and a car\" and the image is a painting of a car but not an oil painting, the missing concepts will be:\noil painting style\na sheep",
+                    "decision": "Does this image match the prompt \"{{ prompt }}\"? consider both content and style aspects. only answer yes or no.",
+                    "example": "{{ caption }}: <img><|image_{{ image_index }}|></img>",
+                    "generation": "According to these images of {{ examples }}, generate {{ prompt }}"
+                  },
+                  "upstream_commit": "16c9502a09b5a049f7c30f39b7f48998fd1e2526"
+                },
+                "pool": {
+                  "uri": "demiwtg/preparation/image_embeddings/datasets/image_embeddings__a170b8529adc30d8.lance",
+                  "version": 1
+                },
+                "prompt_pack": {
+                  "prompts": {
+                    "captions": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "malasci/gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-captions-16c9502-1"
+                    },
+                    "concepts": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "malasci/gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-concepts-16c9502-1"
+                    },
+                    "decision": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "malasci/gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-decision-16c9502-1"
+                    }
+                  },
+                  "schema_version": "demiflow_prompt_pack_v2"
+                },
+                "prompt_protocol": "upstream_16c9502",
+                "query_service": {
+                  "api_server_count": 1,
+                  "chat_template": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B/embedding_chat_template.jinja",
+                  "cuda_bin": "/usr/local/cuda/bin",
+                  "data_parallel_size": 1,
+                  "dtype": "bfloat16",
+                  "enable_logging_iteration_details": false,
+                  "enable_prefix_caching": false,
+                  "enforce_eager": true,
+                  "gpu_memory_utilization": 0.5,
+                  "gpus": [
+                    1
+                  ],
+                  "language_model_only": false,
+                  "limit_mm_per_prompt": null,
+                  "max_model_len": 8192,
+                  "max_num_batched_tokens": 16384,
+                  "max_num_seqs": 16,
+                  "mm_processor_cache_gb": 0,
+                  "model_path": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B",
+                  "omp_num_threads": null,
+                  "poll_interval_s": 1,
+                  "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+                  "readiness_timeout_s": 2,
+                  "resource_wait_timeout_s": 0,
+                  "runner": "pooling",
+                  "shutdown_timeout_s": 30,
+                  "startup_log_interval_s": 15,
+                  "startup_timeout_s": 600,
+                  "tensor_parallel_size": 1,
+                  "trust_remote_code": false
+                },
+                "vlm": {
+                  "api_key_env": "MODELHUB_API_KEY",
+                  "base_url": "http://127.0.0.1:4001/v1",
+                  "concurrency": 4,
+                  "max_output_tokens": 4096,
+                  "mode": "online",
+                  "model": "malasci/gpt-6.1-sol",
+                  "reasoning_effort": null,
+                  "timeout_s": 600
+                }
+              },
+              "max_reference_images": 3,
+              "model": "Qwen-Image-2.1",
+              "model_path": "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+              "parameters": {
+                "num_inference_steps": 40,
+                "output_resolution": 1024,
+                "response_format": "b64_json",
+                "seed": 42,
+                "size": "1024x1024"
+              },
+              "prompt_template": {
+                "name": "imagerag_original",
+                "template": "According to these images of {{ examples }}, generate {{ instruction }}{{ images | image }}",
+                "version": "t2i-answer-imagerag-original-16c9502-1"
+              },
+              "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+              "queue_depth": 8,
+              "revision": "qwen21-local-json-multi-40steps-1024-20261004",
+              "seed": 42,
+              "shared_service": {
+                "configuration": {
+                  "base_url": "http://127.0.0.1:8005/v1",
+                  "command": [
+                    "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+                    "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+                    "--backend",
+                    "qwen-image-2.1",
+                    "--model-path",
+                    "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+                    "--served-model-name",
+                    "Qwen-Image-2.1",
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    "8005",
+                    "--steps",
+                    "40"
+                  ],
+                  "env": {
+                    "HF_HUB_OFFLINE": "1",
+                    "PYTHONPATH": "/tmp/edit_qwen21_dependencies:/tmp/edit_diffusers_official/src"
+                  },
+                  "expected_model": "Qwen-Image-2.1",
+                  "gpus": [
+                    1
+                  ],
+                  "log_path": "_demiflow/evaluation_t2i_v2/qwen21_imagerag_full_20261008/image_service.log",
+                  "root": "/yzp/zhaozy/yangzepeng/0905",
+                  "shutdown_timeout_s": 30,
+                  "startup_timeout_s": 600
+                },
+                "name": "t2i_eval_qwen21_imagerag_full_20261008",
+                "request_concurrency": 16,
+                "root": "/yzp/zhaozy/yangzepeng/0905",
+                "stop_when_idle": true
+              },
+              "timeout_s": 900,
+              "use_references": true
+            }
+          ],
+          "answers": {
+            "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_imagerag_full_recovery_20261008_reuse.lance",
+            "version": 1
+          },
+          "inputs": {
+            "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/rag_inputs__qwen21_imagerag_full_20261008__arm00.lance",
+            "version": 1
+          },
+          "model": {
+            "answer_mode": "imagerag",
+            "api": "images_json",
+            "api_key_env": "MODELHUB_API_KEY",
+            "backend": "modelhub",
+            "base_url": "http://127.0.0.1:8005/v1",
+            "concurrency": 4,
+            "cuda_visible_devices": "0",
+            "device": "cuda:0",
+            "enabled": true,
+            "imagerag": {
+              "additional_initial_answers": [
+                {
+                  "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_reanswer_review91_c8_20261006__arm00.lance",
+                  "version": 91
+                }
+              ],
+              "caption_sources": [
+                {
+                  "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_v3_image_hints.lance",
+                  "version": 1
+                },
+                {
+                  "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_retry_failed_20261006_r01.lance",
+                  "version": 1
+                }
+              ],
+              "embedding_execution": {
+                "batch_size": 8,
+                "concurrency": 1,
+                "flush_interval": null,
+                "max_requests": null,
+                "options": {
+                  "batch_decode_pixels": null,
+                  "batch_request_bytes": null,
+                  "collect_journal_totals": true,
+                  "connect_timeout_s": 10,
+                  "document_cache_bytes": 134217728,
+                  "document_cache_entries": 256,
+                  "io_workers": 1,
+                  "keepalive_expiry_s": 5,
+                  "max_decode_pixels": 100000000,
+                  "max_document_blocks": 100000,
+                  "max_document_bytes": 8388608,
+                  "max_document_spans": 4096,
+                  "max_document_text_bytes": 262144,
+                  "max_image_bytes": 67108864,
+                  "max_request_bytes": 100663296,
+                  "max_response_bytes": 67108864,
+                  "png_compress_level": 6,
+                  "pool_timeout_s": 10,
+                  "prepare_workers": 1,
+                  "profile_path": null,
+                  "read_timeout_s": 120,
+                  "response_workers": 1,
+                  "sqlite_journal": null,
+                  "timeout_s": 300,
+                  "trust_env": false,
+                  "write_timeout_s": 120
+                },
+                "prefetch_batches": 0,
+                "queue_depth": 8,
+                "request_policy": null
+              },
+              "encoder": {
+                "api_key_env": "",
+                "base_url": "http://127.0.0.1:8002/v1",
+                "dimensions": 4096,
+                "encoding_parameters": {
+                  "backend_version": "0.28.0",
+                  "dimension": 4096,
+                  "dtype": "bfloat16",
+                  "implementation": "wemm-vllm-pooling-v1",
+                  "model_id": "tencent/WeMM-Embedding-9B",
+                  "model_revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482",
+                  "normalization": "l2_float32",
+                  "packages": {
+                    "Pillow": "12.3.0",
+                    "torch": "2.13.0",
+                    "transformers": "5.16.1"
+                  },
+                  "pixels": {
+                    "color": "RGB",
+                    "frame": "first",
+                    "max": 1048576,
+                    "min": 65536,
+                    "orientation": "exif_transpose",
+                    "transport": "original_if_compatible"
+                  },
+                  "request": "native_user_content_batched_chat",
+                  "template_sha256": "7c3df2aab83ab9096428ec27b6b99ad87c4790418b830d119957634f28c677ba"
+                },
+                "image_transport": "original_if_compatible",
+                "input_format": "chat",
+                "name": "tencent/WeMM-Embedding-9B",
+                "normalize": true,
+                "request_options": {
+                  "add_generation_prompt": false,
+                  "mm_processor_kwargs": {
+                    "max_pixels": 1048576,
+                    "min_pixels": 65536
+                  }
+                },
+                "revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482"
+              },
+              "initial_answers": {
+                "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_ab_prompt1_c8_20261004__arm00.lance",
+                "version": 299
+              },
+              "initial_template": {
+                "name": "text_only",
+                "template": "{{ instruction }}",
+                "version": "t2i-answer-text-1"
+              },
+              "max_context_chars": 30000,
+              "max_initial_bytes": 8388608,
+              "max_queries": 32,
+              "original_prompt_spec": {
+                "call_config": {
+                  "prompts": {
+                    "captions": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-captions-16c9502-1"
+                    },
+                    "concepts": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-concepts-16c9502-1"
+                    },
+                    "decision": {
+                      "input_mode": "messages",
+                      "message_limits": {
+                        "max_bytes": 67108864,
+                        "max_images": 4,
+                        "max_messages": 5,
+                        "max_parts": 9
+                      },
+                      "model": {
+                        "api_key_env": "MODELHUB_API_KEY",
+                        "base_url": "http://127.0.0.1:4001/v1",
+                        "name": "gpt-6.1-sol",
+                        "transport": "openai_compatible"
+                      },
+                      "response_format": "text",
+                      "response_schema": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "result": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "result"
+                        ],
+                        "type": "object"
+                      },
+                      "schema_retries": 0,
+                      "version": "t2i-imagerag-original-decision-16c9502-1"
+                    }
+                  },
+                  "schema_version": "demiflow_prompt_pack_v2"
+                },
+                "protocol": "upstream_16c9502",
+                "templates": {
+                  "captions": "For each concept you suggested above, please suggest {{ k_captions_per_concept }} image captions describing images that explain this concept only. The captions should be stand-alone description of the images, assuming no knowledge of the given images and prompt, that I can use to lookup images with automatically. In your answer only provide the image captions, each in a new line with nothing else other than the caption.",
+                  "concepts": "What are the differences between this image and the required prompt? in your answer only provide missing concepts in terms of content and style, each in a separate line. For example, if the prompt is \"An oil painting of a sheep and a car\" and the image is a painting of a car but not an oil painting, the missing concepts will be:\noil painting style\na sheep",
+                  "decision": "Does this image match the prompt \"{{ prompt }}\"? consider both content and style aspects. only answer yes or no.",
+                  "example": "{{ caption }}: <img><|image_{{ image_index }}|></img>",
+                  "generation": "According to these images of {{ examples }}, generate {{ prompt }}"
+                },
+                "upstream_commit": "16c9502a09b5a049f7c30f39b7f48998fd1e2526"
+              },
+              "pool": {
+                "uri": "demiwtg/preparation/image_embeddings/datasets/image_embeddings__a170b8529adc30d8.lance",
+                "version": 1
+              },
+              "prompt_pack": {
+                "prompts": {
+                  "captions": {
+                    "input_mode": "messages",
+                    "message_limits": {
+                      "max_bytes": 67108864,
+                      "max_images": 4,
+                      "max_messages": 5,
+                      "max_parts": 9
+                    },
+                    "model": {
+                      "api_key_env": "MODELHUB_API_KEY",
+                      "base_url": "http://127.0.0.1:4001/v1",
+                      "name": "malasci/gpt-6.1-sol",
+                      "transport": "openai_compatible"
+                    },
+                    "response_format": "text",
+                    "response_schema": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "result": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "result"
+                      ],
+                      "type": "object"
+                    },
+                    "schema_retries": 0,
+                    "version": "t2i-imagerag-original-captions-16c9502-1"
+                  },
+                  "concepts": {
+                    "input_mode": "messages",
+                    "message_limits": {
+                      "max_bytes": 67108864,
+                      "max_images": 4,
+                      "max_messages": 5,
+                      "max_parts": 9
+                    },
+                    "model": {
+                      "api_key_env": "MODELHUB_API_KEY",
+                      "base_url": "http://127.0.0.1:4001/v1",
+                      "name": "malasci/gpt-6.1-sol",
+                      "transport": "openai_compatible"
+                    },
+                    "response_format": "text",
+                    "response_schema": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "result": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "result"
+                      ],
+                      "type": "object"
+                    },
+                    "schema_retries": 0,
+                    "version": "t2i-imagerag-original-concepts-16c9502-1"
+                  },
+                  "decision": {
+                    "input_mode": "messages",
+                    "message_limits": {
+                      "max_bytes": 67108864,
+                      "max_images": 4,
+                      "max_messages": 5,
+                      "max_parts": 9
+                    },
+                    "model": {
+                      "api_key_env": "MODELHUB_API_KEY",
+                      "base_url": "http://127.0.0.1:4001/v1",
+                      "name": "malasci/gpt-6.1-sol",
+                      "transport": "openai_compatible"
+                    },
+                    "response_format": "text",
+                    "response_schema": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "result": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "result"
+                      ],
+                      "type": "object"
+                    },
+                    "schema_retries": 0,
+                    "version": "t2i-imagerag-original-decision-16c9502-1"
+                  }
+                },
+                "schema_version": "demiflow_prompt_pack_v2"
+              },
+              "prompt_protocol": "upstream_16c9502",
+              "query_service": {
+                "api_server_count": 1,
+                "chat_template": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B/embedding_chat_template.jinja",
+                "cuda_bin": "/usr/local/cuda/bin",
+                "data_parallel_size": 1,
+                "dtype": "bfloat16",
+                "enable_logging_iteration_details": false,
+                "enable_prefix_caching": false,
+                "enforce_eager": true,
+                "gpu_memory_utilization": 0.5,
+                "gpus": [
+                  0
+                ],
+                "language_model_only": false,
+                "limit_mm_per_prompt": null,
+                "max_model_len": 8192,
+                "max_num_batched_tokens": 16384,
+                "max_num_seqs": 16,
+                "mm_processor_cache_gb": 0,
+                "model_path": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B",
+                "omp_num_threads": null,
+                "poll_interval_s": 1,
+                "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+                "readiness_timeout_s": 2,
+                "resource_wait_timeout_s": 0,
+                "runner": "pooling",
+                "shutdown_timeout_s": 30,
+                "startup_log_interval_s": 15,
+                "startup_timeout_s": 600,
+                "tensor_parallel_size": 1,
+                "trust_remote_code": false
+              },
+              "vlm": {
+                "api_key_env": "MODELHUB_API_KEY",
+                "base_url": "http://127.0.0.1:4001/v1",
+                "concurrency": 4,
+                "max_output_tokens": 4096,
+                "mode": "online",
+                "model": "malasci/gpt-6.1-sol",
+                "reasoning_effort": null,
+                "timeout_s": 600
+              }
+            },
+            "max_reference_images": 3,
+            "model": "Qwen-Image-2.1",
+            "model_path": "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+            "parameters": {
+              "num_inference_steps": 40,
+              "output_resolution": 1024,
+              "response_format": "b64_json",
+              "seed": 42,
+              "size": "1024x1024"
+            },
+            "prompt_template": {
+              "name": "imagerag_original",
+              "template": "According to these images of {{ examples }}, generate {{ instruction }}{{ images | image }}",
+              "version": "t2i-answer-imagerag-original-16c9502-1"
+            },
+            "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+            "queue_depth": 4,
+            "revision": "qwen21-local-json-multi-40steps-1024-20261004",
+            "seed": 42,
+            "shared_service": {
+              "configuration": {
+                "base_url": "http://127.0.0.1:8005/v1",
+                "command": [
+                  "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+                  "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+                  "--backend",
+                  "qwen-image-2.1",
+                  "--model-path",
+                  "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+                  "--served-model-name",
+                  "Qwen-Image-2.1",
+                  "--host",
+                  "127.0.0.1",
+                  "--port",
+                  "8005",
+                  "--steps",
+                  "40"
+                ],
+                "env": {
+                  "HF_HUB_OFFLINE": "1",
+                  "PYTHONPATH": "/tmp/edit_qwen21_dependencies:/tmp/edit_diffusers_official/src"
+                },
+                "expected_model": "Qwen-Image-2.1",
+                "gpus": [
+                  0
+                ],
+                "log_path": "_demiflow/evaluation_t2i_v2/qwen21_imagerag_pilot20_20261008_r1/image_service.log",
+                "root": "/yzp/zhaozy/yangzepeng/0905",
+                "shutdown_timeout_s": 30,
+                "startup_timeout_s": 600
+              },
+              "name": "t2i_eval_qwen21_imagerag_pilot20_20261008_r1",
+              "request_concurrency": 16,
+              "root": "/yzp/zhaozy/yangzepeng/0905",
+              "stop_when_idle": true
+            },
+            "timeout_s": 900,
+            "use_references": true
+          }
+        },
+        "vlm": {
+          "api_key_env": "MODELHUB_API_KEY",
+          "base_url": "http://127.0.0.1:4001/v1",
+          "concurrency": 4,
+          "max_output_tokens": 4096,
+          "model": "malasci/gpt-6.1-sol",
+          "timeout_s": 600
+        }
+      },
+      "max_reference_images": 3,
+      "model": "Qwen-Image-2.1",
+      "model_path": "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+      "parameters": {
+        "num_inference_steps": 40,
+        "output_resolution": 1024,
+        "response_format": "b64_json",
+        "seed": 42,
+        "size": "1024x1024"
+      },
+      "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+      "queue_depth": 1,
+      "revision": "qwen21-local-json-multi-40steps-1024-20261004",
+      "seed": 42,
+      "shared_service": {
+        "configuration": {
+          "base_url": "http://127.0.0.1:8005/v1",
+          "command": [
+            "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+            "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+            "--backend",
+            "qwen-image-2.1",
+            "--model-path",
+            "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+            "--served-model-name",
+            "Qwen-Image-2.1",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8005",
+            "--steps",
+            "40"
+          ],
+          "env": {
+            "HF_HUB_OFFLINE": "1",
+            "PYTHONPATH": "/tmp/edit_qwen21_dependencies:/tmp/edit_diffusers_official/src"
+          },
+          "expected_model": "Qwen-Image-2.1",
+          "gpus": [
+            1
+          ],
+          "log_path": "_demiflow/evaluation_t2i_v2/qwen21_imagerag_full_recovery_20261008/image_service.log",
+          "root": "/yzp/zhaozy/yangzepeng/0905",
+          "shutdown_timeout_s": 30,
+          "startup_timeout_s": 600
+        },
+        "name": "t2i_eval_qwen21_imagerag_full_recovery_20261008",
+        "request_concurrency": 16,
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "stop_when_idle": true
+      },
+      "timeout_s": 900,
+      "reference_preprocessing": "oversized_to_3840_jpeg90_v1"
+    }
+  ],
+  "arm_concurrency": 1,
+  "max_consecutive_failures": 3,
+  "max_questions": 3,
+  "parallel_answers": true,
+  "run": "qwen21_imagerag_pixels3_20261008_r1",
+  "source": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/questions__qwen21_imagerag_pixels3_20261008.lance",
+    "version": 1
+  },
+  "stage": "answers",
+  "stream_judging": false,
+  "target": "demiwtg/evaluation/t2i/v2/datasets/answers__qwen21_imagerag_pixels3_20261008_r1.lance"
+}

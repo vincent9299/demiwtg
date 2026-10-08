@@ -8,8 +8,8 @@ from project import historical_evidence, default_root, evidence_key
 def evidence():
     return historical_evidence(default_root())
 
-from preparation.operaters import runfiles as storage
-from preparation.operaters.runfiles import saved_stage, run_manifest
+from preparation.articles.operators import runfiles as storage
+from preparation.articles.operators.runfiles import saved_stage, run_manifest
 
 
 @pytest.fixture
@@ -61,7 +61,7 @@ def test_offline_graph_prepares_requests_and_pends_without_responses(lake):
     active = next(r for r in requests if r["status"] == "ready_to_author")
     assert active["prompt_images"] == []  # v6.0 authors without images
     assert active["prompt_payload"]["概念名"] == "软银 NAO"
-    from preparation.operaters.runfiles import read_record
+    from preparation.articles.operators.runfiles import read_record
     assert "prompt_instructions" not in active
     messages = read_record(active['synthesize_binding']['request_ref'])['messages']
     text = next(m['content'] for m in messages if m['role'] == 'user')
@@ -73,8 +73,8 @@ def test_offline_graph_prepares_requests_and_pends_without_responses(lake):
 
 
 def test_binding_a_response_produces_an_audited_question(lake):
-    from demiflow.operator_llm.lance_journal import submit_response
-    from preparation.operaters.runfiles import read_record
+    from demiflow.operator_llm.sqlite_offline import submit_response
+    from preparation.articles.operators.runfiles import read_record
     from project import resolve_root
     run, _, config = build(lake)
     active = next(r for r in saved_stage(run, "requests") if r["status"] == "ready_to_author")
@@ -95,7 +95,7 @@ def test_binding_a_response_produces_an_audited_question(lake):
 
 
 def test_reject_cannot_construct_and_empty_design_keep_explicit_statuses(lake):
-    from benchmark.t2i.v1.operaters.prompting import apply_synth
+    from benchmark.t2i.v1.operators.prompting import apply_synth
     base = {"status": "ready_to_author", "task_id": "t", "qid": "t",
             "synthesize_binding": {"request_ref": {}}, "instance": "x",
             "sample_id": "s", "author_model": "m"}
@@ -114,8 +114,8 @@ def test_reject_cannot_construct_and_empty_design_keep_explicit_statuses(lake):
 def test_historical_raw_responses_parse_identically():
     """Replay historical r11 raw responses through the new parser and audit."""
     from benchmark.t2i.v1.tests.fixtures.eval_synthesize import audit_v60 as old_audit, extract_json_object as old_extract
-    from benchmark.t2i.v1.operaters.prompting import extract_json_object as new_extract
-    from benchmark.t2i.v1.operaters.audit import audit_v60 as new_audit
+    from benchmark.t2i.v1.operators.prompting import extract_json_object as new_extract
+    from benchmark.t2i.v1.operators.audit import audit_v60 as new_audit
     raw_dir = storage.ROOT / "benchmark/t2i/v1/bench200/provenance/r11_synth/raw"
     raws = [name for name in evidence().paths(evidence_key(raw_dir)+"/") if name.endswith(".json")]
     if not raws:
@@ -134,7 +134,7 @@ def test_historical_raw_responses_parse_identically():
 
 
 def test_historical_questions_reaudit_without_new_warnings():
-    from benchmark.t2i.v1.operaters.audit import audit_v60
+    from benchmark.t2i.v1.operators.audit import audit_v60
     from benchmark.t2i.v1.tests.fixtures.eval_synthesize import audit_v60 as old_audit
     questions_path = storage.ROOT / "benchmark/t2i/v1/bench200/questions.jsonl"
     rows = [json.loads(line) for line in evidence().read_text(evidence_key(questions_path)).splitlines() if line.strip()]
@@ -145,8 +145,8 @@ def test_historical_questions_reaudit_without_new_warnings():
 def test_final_question_table_append_overwrite_and_resume(lake):
     """V1 新输出支持追加和覆盖；同一完成阶段续跑保持固定版本。"""
     import lance
-    from demiflow.operator_llm.lance_journal import submit_response
-    from preparation.operaters.runfiles import read_record
+    from demiflow.operator_llm.sqlite_offline import submit_response
+    from preparation.articles.operators.runfiles import read_record
     from project import resolve_root
     from benchmark.t2i.v1.t2i_v1_benchmark_pipeline import run_pipeline
     base, _, cfg = build(lake)

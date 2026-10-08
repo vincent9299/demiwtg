@@ -1,0 +1,72 @@
+# 原文及执行声明：业务组装 messages，平台每次只执行一次 completion。
+# 对应 omnigen_first、无输入参考图、decision=True、only_rephrase=False。
+# |- 防止额外尾换行；模板只替换动态变量，不增加标题、JSON 或 system。
+upstream_commit: 16c9502a09b5a049f7c30f39b7f48998fd1e2526
+protocol: upstream_16c9502
+templates:
+  decision: |-
+    Does this image match the prompt "{{ prompt }}"? consider both content and style aspects. only answer yes or no.
+  concepts: |-
+    What are the differences between this image and the required prompt? in your answer only provide missing concepts in terms of content and style, each in a separate line. For example, if the prompt is "An oil painting of a sheep and a car" and the image is a painting of a car but not an oil painting, the missing concepts will be:
+    oil painting style
+    a sheep
+  captions: |-
+    For each concept you suggested above, please suggest {{ k_captions_per_concept }} image captions describing images that explain this concept only. The captions should be stand-alone description of the images, assuming no knowledge of the given images and prompt, that I can use to lookup images with automatically. In your answer only provide the image captions, each in a new line with nothing else other than the caption.
+  example: |-
+    {{ caption }}: <img><|image_{{ image_index }}|></img>
+  generation: |-
+    According to these images of {{ examples }}, generate {{ prompt }}
+call_config:
+  schema_version: demiflow_prompt_pack_v2
+  prompts:
+    decision:
+      version: t2i-imagerag-original-decision-16c9502-1
+      model:
+        name: gpt-6.1-sol
+        transport: openai_compatible
+        base_url: http://127.0.0.1:4001/v1
+        api_key_env: MODELHUB_API_KEY
+      input_mode: messages
+      message_limits: {max_messages: 5, max_parts: 9, max_images: 4, max_bytes: 67108864}
+      response_format: text
+      schema_retries: 0
+      response_schema:
+        type: object
+        required: [result]
+        additionalProperties: false
+        properties:
+          result: {type: string}
+    concepts:
+      version: t2i-imagerag-original-concepts-16c9502-1
+      model:
+        name: gpt-6.1-sol
+        transport: openai_compatible
+        base_url: http://127.0.0.1:4001/v1
+        api_key_env: MODELHUB_API_KEY
+      input_mode: messages
+      message_limits: {max_messages: 5, max_parts: 9, max_images: 4, max_bytes: 67108864}
+      response_format: text
+      schema_retries: 0
+      response_schema:
+        type: object
+        required: [result]
+        additionalProperties: false
+        properties:
+          result: {type: string}
+    captions:
+      version: t2i-imagerag-original-captions-16c9502-1
+      model:
+        name: gpt-6.1-sol
+        transport: openai_compatible
+        base_url: http://127.0.0.1:4001/v1
+        api_key_env: MODELHUB_API_KEY
+      input_mode: messages
+      message_limits: {max_messages: 5, max_parts: 9, max_images: 4, max_bytes: 67108864}
+      response_format: text
+      schema_retries: 0
+      response_schema:
+        type: object
+        required: [result]
+        additionalProperties: false
+        properties:
+          result: {type: string}

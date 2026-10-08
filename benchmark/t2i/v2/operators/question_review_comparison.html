@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>T2I · Review 版本对比</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:#233146;font:15px/1.7 system-ui}main{max-width:1560px;margin:auto;padding:24px}h1{font-size:25px;margin:0 0 8px}h2{font-size:21px}h3{font-size:17px;margin:8px 0 14px}p{margin:8px 0}.muted{color:#68778d}.controls{position:sticky;top:0;z-index:2;background:#f3f6fa;display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px;border:1px solid #d4dfec;border-radius:8px;margin:18px 0}button,input,select{font:inherit;border:1px solid #bac9da;border-radius:6px;padding:6px 10px;background:white}button{cursor:pointer}button:disabled{opacity:.4;cursor:default}input{max-width:240px}select{max-width:400px}.columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}.panel,.shared{background:white;border:1px solid #d7e0eb;border-radius:10px;padding:20px;min-width:0}.shared{margin:16px 0}.left{border-top:4px solid #69788f}.right{border-top:4px solid #267756}.section{margin:24px 0}.badge{display:inline-block;background:#eaf0f7;border-radius:5px;padding:3px 8px;margin:0 6px 8px 0}.right .badge{background:#e6f3ec}.text,pre,.run{white-space:pre-wrap;overflow-wrap:anywhere}.run{font-size:12px;color:#69788b}pre{font:12px/1.6 monospace;margin:10px 0}details{margin:12px 0}summary{cursor:pointer;font-weight:600}.requirement{border-bottom:1px solid #e0e6ee;padding:14px 0}.requirement:first-child{padding-top:0}.requirement:last-child{border-bottom:0;padding-bottom:0}.requirement h4{margin:0 0 10px;font-size:15px}.criterion{margin-top:10px}.label{font-size:12px;color:#68778d}.images{display:flex;flex-wrap:wrap;gap:12px}.images figure{margin:0}.images img{max-width:190px;max-height:190px}.summary-table{width:100%;border-collapse:collapse}.summary-table th,.summary-table td{padding:8px 12px;border-bottom:1px solid #e1e7f0;text-align:left}.empty{color:#7a8796}.notice{padding:10px 14px;background:#fff5dd;border-radius:6px}@media(max-width:760px){main{padding:12px}.columns{grid-template-columns:1fr}.panel{padding:15px}}
+</style>
+<main>
+<h1>题目 Review · V1 与 V4 对比</h1>
+<p class="muted">同一题左右对照，两版原始结果均保留。检查清单按维度分组，各版编号保持原样；新增、合并或改写的条目不按编号强行配对。</p>
+<div id="stats" class="muted"></div>
+<div class="controls"><input id="search" placeholder="搜索概念或题面" aria-label="搜索题目"><select id="concept" aria-label="选择题目"></select><button id="prev">上一题</button><span id="page"></span><button id="next">下一题</button></div>
+<div id="case"></div>
+<details class="shared"><summary>对比来源与固定结果版本</summary><pre id="metadata"></pre></details>
+</main>
+<script id="review-data" type="application/json">__REVIEW_DATA__</script>
+<script>
+(()=>{'use strict';
+const D=JSON.parse(document.getElementById('review-data').textContent),$=id=>document.getElementById(id);
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const text=x=>`<div class="text">${esc(x)}</div>`,json=x=>`<pre>${esc(JSON.stringify(x,null,2))}</pre>`;
+const checklist=c=>JSON.parse(c?.requirements_json||'[]');
+const version=c=>(c?.actual_parameters?.prompt_version||'无调用记录').split('/')[0];
+const group=(c,kind)=>checklist(c).filter(r=>kind==='other'?r.dimension==='other_instruction_following':r.dimension==='task_correctness'&&r.is_core===(kind==='core'));
+const count=(c,kind)=>c?group(c,kind).length:'—';
+const points=c=>(c?.result?.question?.test_points||[]).map((p,i)=>`<div class="requirement"><h4>${i+1}. ${esc(p.point)}</h4><div class="label">判据</div>${text(p.criterion)}<details><summary>依据</summary>${text(p.basis)}</details></div>`).join('')||'<p class="empty">尚无定稿考点。</p>';
+const requirements=(c,kind)=>group(c,kind).map(r=>`<div class="requirement"><h4>${esc(r.id)} · ${esc(r.requirement)}</h4><div class="criterion"><div class="label">判据</div>${text(r.criterion)}</div>${r.applicability?`<p class="label">触发条件</p>${text(r.applicability)}`:''}<details><summary>依据与核心性说明</summary>${text(r.basis)}</details></div>`).join('')||'<p class="empty">本版没有此类检查项。</p>';
+const panel=(c,side,body)=>`<section class="panel ${side}" data-side="${side}">${c?body(c):'<p class="empty">此版本没有对应题目的结果。</p>'}</section>`;
+const section=(title,p,body)=>`<section class="section"><h3>${title}</h3><div class="columns">${panel(p.left,'left',body)}${panel(p.right,'right',body)}</div></section>`;
+function input(c){const images=c.actual_images||[];return `<div>${json(c.actual_parameters)}</div><details><summary>展开完整实际输入文本</summary>${text(c.actual_request||'没有已保存的请求，不按当前模板补写。')}</details><h4>实际输入参考图 · ${images.length} 张</h4><div class="images">${images.map(i=>`<figure><figcaption>Image ${i.number}</figcaption>${i.error?text(i.error):`<img src="${D.media[i.media]}" alt="实际参考图 ${i.number}">`}<details><summary>原图引用</summary>${json(i.reference)}</details></figure>`).join('')}</div><details><summary>本题全部作者正例图引用</summary>${json(c.available_references)}</details><details><summary>文档回调 · ${c.operator_observations.length} 次记录</summary>${json(c.operator_observations)}</details><details><summary>Codex 原生工具事件 · ${c.native_tool_events.length} 条</summary>${json(c.native_tool_events)}</details><details><summary>原始结果与调用引用</summary>${json({result:c.result,request_ref:c.request_ref,response_ref:c.response_ref,question_revision:c.question_revision})}</details>${c.prior_results.length?`<details><summary>本版此前尝试（保留失败记录）</summary>${json(c.prior_results)}</details>`:''}`;}
+let filtered=D.cases,selected=D.cases.find(c=>c.concept===D.initial_concept)?.source_task_id||D.cases[0]?.source_task_id;
+$('stats').textContent=`共 ${D.meta.recorded} 题，两版均有结果 ${D.meta.paired} 题 · 查看刷新时间：${D.meta.updated_at}`;
+$('metadata').textContent=JSON.stringify(D.meta,null,2);
+function render(){
+const q=$('search').value.trim().toLowerCase();filtered=D.cases.filter(c=>(c.concept+' '+(c.left?.original_instruction||'')+' '+(c.right?.original_instruction||'')).toLowerCase().includes(q));
+if(!filtered.some(c=>c.source_task_id===selected))selected=filtered[0]?.source_task_id;
+$('concept').innerHTML=filtered.map(c=>`<option value="${esc(c.source_task_id)}">${esc(c.concept)}</option>`).join('');$('concept').value=selected||'';
+const index=filtered.findIndex(c=>c.source_task_id===selected),p=filtered[index];$('prev').disabled=index<=0;$('next').disabled=index<0||index===filtered.length-1;$('page').textContent=p?`${index+1} / ${filtered.length}`:'0 / 0';
+if(!p){$('case').innerHTML='<p class="shared empty">没有符合筛选条件的题目。</p>';return;}
+const l=p.left,r=p.right,same=l&&r&&l.original_instruction===r.original_instruction;
+const header=(c,label)=>`<h3>${label}</h3><span class="badge">${esc(version(c))}</span><span class="badge">${esc(c.review_status)}</span><p class="run">${esc(c.source_run)}</p>${text(c.review_reason)}`;
+const summary=[['核心正确性',count(l,'core'),count(r,'core')],['非核心正确性',count(l,'noncore'),count(r,'noncore')],['其他题面遵循',count(l,'other'),count(r,'other')],['全部检查项',l?checklist(l).length:'—',r?checklist(r).length:'—'],['定稿考点',l?.result?.question?.test_points?.length??'—',r?.result?.question?.test_points?.length??'—']];
+$('case').innerHTML=`<h2>${esc(p.concept)}</h2><div class="columns">${panel(l,'left',c=>header(c,'V1 · 旧版'))}${panel(r,'right',c=>header(c,'V4 · 新版'))}</div><div class="shared"><h3>数量对照</h3><table class="summary-table"><thead><tr><th>分类</th><th>V1</th><th>V4</th></tr></thead><tbody>${summary.map(row=>`<tr>${row.map(value=>`<td>${esc(value)}</td>`).join('')}</tr>`).join('')}</tbody></table><p class="muted">这里只比较条目数量，不代表得分；两版均为真实审核输出。</p></div>${same?`<details class="shared"><summary>两版共同的原始题面</summary>${text(l.original_instruction)}</details>`:section('原始题面',p,c=>text(c.original_instruction))}${section('定稿题面',p,c=>text(c.result?.question?.instruction||'尚无定稿'))}${section('定稿考点',p,points)}${section('任务正确性 · 核心',p,c=>requirements(c,'core'))}${section('任务正确性 · 非核心',p,c=>requirements(c,'noncore'))}${section('其他题面遵循',p,c=>requirements(c,'other'))}${section('修改说明与未决问题',p,c=>json({changes:c.result?.changes||[],issues:c.result?.issues||[],requires_new_answer:c.requires_new_answer}))}${section('真实输入、参考图与工具记录',p,input)}`;
+}
+$('search').addEventListener('input',render);$('concept').addEventListener('change',()=>{selected=$('concept').value;render();});
+$('prev').addEventListener('click',()=>{const i=filtered.findIndex(c=>c.source_task_id===selected);selected=filtered[Math.max(0,i-1)]?.source_task_id;render();});
+$('next').addEventListener('click',()=>{const i=filtered.findIndex(c=>c.source_task_id===selected);selected=filtered[Math.min(filtered.length-1,i+1)]?.source_task_id;render();});
+render();})();
+</script></html>

@@ -1,0 +1,54 @@
+{
+  "version": "visual-combined-v1",
+  "occurrences": 3439,
+  "concepts": 3315,
+  "exact_label_overlap": 124,
+  "new_labels": 2851,
+  "same_label_different_group": 13,
+  "level_1": 16,
+  "level_2": 108,
+  "level_3": 352,
+  "root_counts": {
+    "动物": 1397,
+    "植物": 166,
+    "真菌": 29,
+    "微观生物结构": 9,
+    "人物与人体": 32,
+    "交通工具": 119,
+    "器具与设备": 512,
+    "建筑与设施": 240,
+    "食物与食材": 185,
+    "服饰与造型": 40,
+    "艺术与装饰品": 217,
+    "图像与标识": 148,
+    "自然环境与物质": 60,
+    "活动与场景": 108,
+    "抽象与文化主题": 24,
+    "待明确主体": 29
+  },
+  "placement_counts": {
+    "按当前导航约定归类": 3252,
+    "需要上下文": 39,
+    "需要明确视觉载体": 24
+  },
+  "name_scope_counts": {
+    "未核验到种": 1223,
+    "不适用": 1694,
+    "未明确到种": 90,
+    "主体待确认": 29,
+    "范围待确认": 85,
+    "品种或栽培类型": 190,
+    "种下名称待核": 4
+  },
+  "old_paths_changed": 72,
+  "preservation_checks_passed": true,
+  "semantic_accuracy_measured": false,
+  "independent_semantic_review": false,
+  "all_species_verified": false,
+  "pipeline_model_api_calls": 0,
+  "source_sha256": {
+    "B1": "39c43ea8c2e5e3bf1c08f826d0183756a4a9e652cef545f4a973f470f5799d33",
+    "B2": "ad2ab2f914b473d97dafedc978efb3ffd01cf6601d3195d6977d4e259809a62f"
+  },
+  "decision_sha256": "60e3a0bd81a9c0de21eb8dbefadbc8da64116b6447be3210859d661909f9ca60"
+}

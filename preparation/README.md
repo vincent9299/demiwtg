@@ -1,47 +1,49 @@
-# 基础材料准备 · V2
+# 基础材料准备
 
-交付边界（2026-09-26）：清洗在 preparation 出口完成，T2I 下游只按公开状态取独立文字和图片。
+公共材料按职责拆分子 pipeline；多个生产者可按约定更新同一目标表的不同字段。
 
-- `article_entity` 检查预检错误、正文依据及引用完整性；存在错误时不能交付为 reviewed。正文中明确的图号、方位图或指图表达（如“如图1所示”“图1”）所在段落排除，其他文字不改写，剩余段落的元信息索引同步调整。被排除段落保留在 context_json 的 audit.excluded_figure_paragraphs 中；全部依赖配图时状态为 insufficient_materials。此规则识别明确指代，不声称解决所有语义上的图像依赖。
-- `write_curation` 按传入的原图 DatasetRef 读取来源元数据，统一来源和生成标记；已知生成图、公开状态矛盾、缺支持范围的关系不交付为 published/keep。source_refs 保留实际存储路径和版本；外部 URL 缺失不等于来源缺失，可追溯的原始表绑定仍保留，不编造 URL。原始审核 JSON 保留作审计，下游无需解释。
-- T2I 不再匹配文章配图或消费原始引用。上游内部的图文审核和溯源字段继续保留，供准备过程和其他消费者使用；不重跑模型来完成上述出口清洗。
-- 新规则作用于新的实体导出；旧固定版本和已保存的历史结果不回写。使用新规则时需重新导出 preparation 结果，并在消费者配置中指定新版本。
+| 职责 | 正式入口 | 手工配置与查看 | 公共目标 |
+| --- | --- | --- | --- |
+| 视觉概念审定与分类树 | [concepts_pipeline.py](concepts/concepts_pipeline.py) | [concepts_debug.ipynb](concepts/concepts_debug.ipynb) | 本模块独立采纳快照；master/images 只读 |
+| 增量分类树与概念挂载 | [taxonomy_pipeline.py](taxonomy/taxonomy_pipeline.py) | [taxonomy_debug.ipynb](taxonomy/taxonomy_debug.ipynb) | 固定 P2 → 大模型上下文/操作循环 → 全量挂载、复核与修订；独立候选表 |
+| 共用概念正例图 | [concept_positive_images_pipeline.py](concept_positive_images/concept_positive_images_pipeline.py) | [concept_positive_images_debug.ipynb](concept_positive_images/concept_positive_images_debug.ipynb) | P2 身份核准概念 → 多图视觉／综合机审；公共图片表只读 |
+| 已核准概念补齐正例图片 | [concept_image_backfill_pipeline.py](concept_image_backfill/concept_image_backfill_pipeline.py) | [concept_image_backfill_debug.ipynb](concept_image_backfill/concept_image_backfill_debug.ipynb) | 固定最新 ready 范围 → 已有正例缺口 → 平台图片搜索／获取 → 正式关系审核；默认每概念至少 10 张 |
+| QID 图片元数据与技术特征 | [qid_images_pipeline.py](qid_images/qid_images_pipeline.py) | [qid_images_debug.ipynb](qid_images/qid_images_debug.ipynb) | `demiwtg/preparation/qid_images/datasets/qid_images.lance`；每 SHA 一行 |
+| QID 概念元数据与完整图片供给 | [qid_concepts_pipeline.py](qid_concepts/qid_concepts_pipeline.py) | [qid_concepts_debug.ipynb](qid_concepts/qid_concepts_debug.ipynb) | `demiwtg/preparation/qid_concepts/datasets/qid_concepts.lance`；每 QID 一行 |
+| QID 本地视觉考察价值初筛 | [qid_review_pipeline.py](qid_review/qid_review_pipeline.py) | [qid_review_debug.ipynb](qid_review/qid_review_debug.ipynb) | 固定 QID 与关联文档 → 有界正文选段 → 本地考察价值初筛；独立候选方向、低优先和待补证结果 |
+| 统一视觉概念与候选择值 | [visual_concepts_pipeline.py](visual_concepts/visual_concepts_pipeline.py) | [visual_concepts_debug.ipynb](visual_concepts/visual_concepts_debug.ipynb) | 固定 QID 保留项＋旧身份审核 → 显式等价对齐 → 生效值及全部类型化候选；完整原记录保留 |
+| 图片目录与尺寸 | [image_catalog_pipeline.py](images/catalog/image_catalog_pipeline.py) | [image_catalog_debug.ipynb](images/catalog/image_catalog_debug.ipynb) | `demiwtg/preparation/images/catalog/datasets/images.lance` 基础字段 |
+| 已获取图片统一登记与审核状态 | [image_consolidation_pipeline.py](images/consolidation/image_consolidation_pipeline.py) | [image_consolidation_debug.ipynb](images/consolidation/image_consolidation_debug.ipynb) | 已有下载/缓存/队列/审核固定来源 → SHA 去重 → 公共图片目录部分列合并 |
+| 公共图片向量 | [image_embeddings_pipeline.py](image_embeddings/image_embeddings_pipeline.py) | [image_embeddings_debug.ipynb](image_embeddings/image_embeddings_debug.ipynb) | 本模块 `datasets/image_embeddings__<encoder_id前16位>.lance`；WeMM-Embedding-9B，通过平台 map_embeddings 编码和管理服务，按 SHA 增量维护、契约分表 |
+| 公共文档元数据与结构 | [documents_pipeline.py](documents/documents_pipeline.py) | [documents_debug.ipynb](documents/documents_debug.ipynb) | 文档宽表、章节与段落区间；正文复用现有公共对象库；正在验收 |
+| 公共文档向量 | [document_embeddings_pipeline.py](document_embeddings/document_embeddings_pipeline.py) | [document_embeddings_debug.ipynb](document_embeddings/document_embeddings_debug.ipynb) | 调用平台 `Dataset.document_embeddings`，按模型契约增量维护文档代表与正文块向量；全量尚未启动 |
 
-文章目标使用 `write_mode`，文章流程中的图片目标使用 `visual_write_mode`；独立视觉流程与重放入口使用 `write_mode`。可选 `'append'`（按行追加，不合并同主键）、`'overwrite'`（仅保留本次结果，空结果也会清空目标）或 `'merge'`（默认，保留原主键合并）。notebook 对应 `WRITE_MODE`、`IMAGE_WRITE_MODE`，CLI 对应 `--write-mode`、`--visual-write-mode`。目标和模式随运行冻结，变更时使用新运行名；原始图文表不受结果写入模式影响。
+每条 pipeline 的入口、notebook、`operators/`、`prompts/`、`tests/` 和 README 都在自己的目录。父级只负责分组，不保留混合算子/提示词或额外入口。图片基础字段边界与审核迁移说明见 [图片准备](images/README.md)。旧 articles 和概念配图生产入口已退役，当前文档准备使用 documents，概念正例图使用 concept_positive_images。
 
-文章入口的 `sources` 配置 `concepts/documents/images` 的 `uri/version`；`target_uri` 指定文章结果表，`visual_target_uri` 指定图片结果表。独立视觉入口用 `input_path` 指定固定输入，`target_uri` 指定图片结果表。结果默认沿用原有按主键合并语义（`merge`），也支持显式追加和覆盖。 `preparation_debug.ipynb` 已列出可修改的源、目标参数。
+公共文档生产归上述两个 preparation 入口。此前 embedding 选型的小规模检索评测已按用户要求移出项目，保留在工作区 `_demiflow/document_embeddings_20261003/wiki_retrieval/`，不属于现役 pipeline，也不是两条生产流程的依赖；原固定 Lance 引用通过平台搬迁映射继续可读。宽表范围包括 Wikipedia 导入和其他流程已经下载的文档，来源接通及固定版本以 documents 的实际验收记录为准。
 
-原始材料 → 清洗与筛选 → 文章整理／视觉审核 → 保存结果。没有独立的发布流程。
+Wikipedia 存量登记的代码与新 run 回执已迁至 [collect/wiki_documents](../collect/wiki_documents/README.md)。共享正文对象统一位于 `preparation/datasets/documents/objects`，公共索引位于 `preparation/datasets/documents/library/index.sqlite`；旧对象 URI 通过两个目录兼容链接继续访问同一资产，历史登记表和版本留在原处。公共文档宽表、结构节点与向量仍由 preparation 维护。
 
-```text
-preparation/
-  operaters/                         文档/图片 I/O、模型协议及专用校验
-  prompts/                     prompt 源码、组装、标注配置、离线请求／响应
-  preparation_pipeline.py                  文章/视觉流程、必要配置与统一 CLI
-  preparation_debug.ipynb                  按需调用、读表和看图命令
-  tests/
-```
+部分列写入和显式增列直接使用 demiflow 的通用 `Dataset.write_lance(mode='merge', on=..., update_columns=...)` 与 `data.add_lance_columns`。项目负责列归属、业务去重、来源绑定与审核规则；平台负责键、类型、版本冲突和原子数据提交，不包含图片业务。
 
-| operaters 模块 | 职责 |
-| --- | --- |
-| inputs | 固定输入、材料转换、证据范围与图片角色校验 |
-| documents | 文档解析、正文清洗、来源结构修复 |
-| identity | 材料可用性与身份审核响应校验 |
-| text | 正文分块、相关性选择 |
-| images | 图片 schema 与字节绑定、标注复用、双模型审核、结果校验 |
-| routing | 图文关联、embedding 与容量分组 |
-| article | 文章请求与解析、引用终审、文章 schema 与写入 |
-| results | 阶段行转换、保存 curated 实体及固定结果引用 |
-| runfiles | Lance run/stage 绑定、来源与源码冻结 |
+469 是已退役概念配图流程的历史处理范围，固定结果保留。材料优先 200 个名单代码已移到 T2I V2，历史名单和 CSV 原样保留。
 
-map、join、reduce、分批、并发模型调用、锁和通用进程工具直接使用 demiflow。`preparation_pipeline.py` 在主线展开来源谓词、关联键、材料数量统计及字段投影；同步阶段用 `Dataset.write_lance(mode=..., schema=...)`，异步响应按批交给官方 Lance writer，用 `read_lance` 读取已提交固定版本；阶段表位于数据根的 `demiwtg/preparation/datasets/<stage>__<run>.lance`。业务模块定义字段、规则和输入绑定；没有 data、runtime、configs、inspection 辅助层。
+各现役入口按自身 README 读取固定版本并交付本模块数据。旧 `articles/datasets/articles.lance` 与 `preparation/datasets` 中的中间表、固定版本和调用日志保留；旧 notebook 输出已归档，不作为当前生产入口。
 
-CLI：`python -m preparation.preparation_pipeline --help`；文章用 `--flow article --ids ...`，视觉用 `--flow visual --input ...`。CLI 与 notebook 直接调用 `preparation_pipeline.py` 中的同一个函数。离线请求查看与回填入口为 `python -m preparation.prompts.responses --help`。
+CLI 使用各子目录的完整模块名，例如 `python -m preparation.images.catalog.image_catalog_pipeline --help`。旧 `images_pipeline --flow` 入口已移除。离线响应传输由 T2I 训练维护，评测显式复用，工具为 `python -m curation.t2i_training_samples.prompts.responses --help`。
 
-运行定位为 `preparation/datasets/<run>`，业务数据只写 Lance。原始表只读，视觉结果绑定固定 raw DatasetRef；结果写 `preparation/datasets/articles.lance`、`preparation/datasets/images.lance`，不登记 release。历史 run、旧 release 和存量字段保留原数据契约；历史 release 导入归 `tools/lake_migration/`。
+跨 pipeline 契约均有归属：公共图片 schema 在 `images/catalog/operators/schema.py`；图片像素与历史记录转换在 `images/catalog/operators/records.py`；文章及公共材料读取、阶段行格式和固定引用在 `articles/operators/`。这些是已有消费者实际使用的契约，不是新的 pipeline 入口。布局检查在 `articles/tests/test_pipeline_layout.py`，不再为 preparation 跳过目录检查。
 
-Python 流程入口在 `preparation_pipeline.py`；debug notebook 是按需运行命令的地方，只保留导入、参数、调用和简单查看。
+2026-09-29 图片对象交付：图片目录、审核与文章发布交付独立对象的 `image_uri + sha256`，curation 的任务审核直接消费这一对字段。collect 的表内 Blob 只由采集生产者适配器读取；公共 `source_refs` 保留来源追溯。 生产图片已完成导出和原址切换，当前表使用独立对象 URI；固定历史输入的范围和已有判断保留。实际版本与退役回执见根目录 docs/image_objects_20260929.md。
 
-`preparation_debug.ipynb` 第一格用已安装的 Lance 原生 SQL（`dataset.sql(...).build().to_batch_records()`）读取固定版本，直接写实际表路径。顶部 `CONCEPT_WHERE` 过滤概念，`ARTICLE_WHERE` 过滤文档，`IMAGE_WHERE` 统一过滤全部已发布图与文章配图；例如 `width >= 512 AND height >= 512`、`width > height` 或 `ext = 'png'`。`width/height` 来自原图表的 `resolution.stored_width/stored_height`，是存储图片的像素尺寸；NULL 不通过尺寸比较。概念先过滤再取 `CONCEPT_RANGE`，图片先过滤再按 SHA 排序并取 `IMAGE_RANGE`；尺寸过滤不改变概念编号，仍先显示文档，再显示缩略图及原图分辨率。
 
-数据表直接平铺本模块 `datasets/`，运行名/题目编号仅作表名后缀；不建立 runs 或 history 数据子目录。历史固定引用和共同路径根说明见仓库 `tools/lake_migration/FLAT_DATASETS.md`。
+QID 全集由 `qid_images`（一 SHA 一行）和 `qid_concepts`（一 QID 一行）分别维护，通过显式 release 绑定版本，供下游采样消费。它们与名称体系 `concepts/images` 的身份契约分开。`qid_sub_*` 是 subset 的采样产物，归 `demiwtg/subset/datasets/`；不能作为公共全集定义。
+
+2026-10-02：共用层包括 P1–P4 和共用概念正例图；P1–P4 判断规则不改，仅调整共享资产默认路径与搬迁解析，正例图从 benchmark/t2i/image_audit 迁入 concept_positive_images。Edit 场景原图与训练样本构造按任务用途归 [curation](../curation/README.md)。公共中性标注已退役，原有字段和结果保留。
+
+
+公共表按生产者归属，不再维护工作区顶层公共 datasets。master 是 collect 的历史导入底库，文档库由 wiki_documents 管理；已按用户要求等原 P1/P2 退出后完成迁移，当前默认路径已更新，冻结配置仍可按旧引用读取。详细位置、架构图与实际完成状态见 [归属说明](../docs/asset_ownership_20261002.md)。
+
+2026-10-03：图片内容统一接入 `preparation/datasets/images/objects`，名称图片目录与 QID／100k subset 共用 CAS；旧对象路径保留同 inode 硬链接。新平台获取在 `preparation/datasets/images/library/index.sqlite` 保存已验证 URL 索引。整合回执和运行验收见 [图片获取交付](../docs/image_acquisition_20261003.md)。
+
+2026-10-02：新增 [公共图片向量准备](image_embeddings/README.md)，直接消费固定图片来源及独立对象，供任务侧检索复用，不依赖概念审核或 Edit 标签。本轮只实现与隔离验收，不启动生产向量计算；索引管理和出题接线属于后续阶段。

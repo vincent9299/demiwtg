@@ -1,0 +1,526 @@
+[NbConvertApp] Converting notebook /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/source_image_debug.ipynb to notebook
+/opt/conda/lib/python3.11/site-packages/nbformat/__init__.py:93: MissingIDFieldWarning: Code cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+[2026-09-27T13:46:58Z WARN  lance::dataset::write::insert] No existing dataset at /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/category_results__scene_pool_category_l3_v1.lance, it will be created
+[2026-09-27T13:47:18Z WARN  lance::dataset::write::insert] No existing dataset at /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/concept_candidates__scene_pool_category_l3_v1.lance, it will be created
+Traceback (most recent call last):
+  File "/opt/conda/bin/jupyter-nbconvert", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/jupyter_core/application.py", line 280, in launch_instance
+    super().launch_instance(argv=argv, **kwargs)
+  File "/opt/conda/lib/python3.11/site-packages/traitlets/config/application.py", line 1053, in launch_instance
+    app.start()
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/nbconvertapp.py", line 412, in start
+    self.convert_notebooks()
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/nbconvertapp.py", line 590, in convert_notebooks
+    self.convert_single_notebook(notebook_filename)
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/nbconvertapp.py", line 556, in convert_single_notebook
+    output, resources = self.export_single_notebook(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/nbconvertapp.py", line 479, in export_single_notebook
+    output, resources = self.exporter.from_filename(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/exporters/exporter.py", line 201, in from_filename
+    return self.from_file(f, resources=resources, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/exporters/exporter.py", line 220, in from_file
+    return self.from_notebook_node(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/exporters/notebook.py", line 36, in from_notebook_node
+    nb_copy, resources = super().from_notebook_node(nb, resources, **kw)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/exporters/exporter.py", line 154, in from_notebook_node
+    nb_copy, resources = self._preprocess(nb_copy, resources)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/exporters/exporter.py", line 352, in _preprocess
+    nbc, resc = preprocessor(nbc, resc)
+                ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/preprocessors/base.py", line 48, in __call__
+    return self.preprocess(nb, resources)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/preprocessors/execute.py", line 102, in preprocess
+    self.preprocess_cell(cell, resources, index)
+  File "/opt/conda/lib/python3.11/site-packages/nbconvert/preprocessors/execute.py", line 123, in preprocess_cell
+    cell = self.execute_cell(cell, index, store_history=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/jupyter_core/utils/__init__.py", line 173, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/asyncio/base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/opt/conda/lib/python3.11/site-packages/nbclient/client.py", line 1058, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/conda/lib/python3.11/site-packages/nbclient/client.py", line 914, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+# 执行入口：按 cfg 读取来源 → 处理/调用模型 → 写阶段表，返回截至 through 的摘要。
+# complete 判断行处理是否完成，不表示所有行都 keep；pending/失败使其为 False。
+import asyncio
+
+result = await asyncio.to_thread(source_image_pipeline.run_pipeline, cfg)
+result
+
+------------------
+
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+0.0s] 输入：/yzp/zhaozy/yangzepeng/0905/datasets/master_concepts.lance@2；/yzp/zhaozy/yangzepeng/0905/datasets/images.lance@9；目标池=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/pool__scene_pool_category_l3_v1.lance
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+0.0s] 按 taxonomy 前 3 层分组；4B 只看大域和分类路径
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+21.2s] 范围：385292 个概念、7917 个分类分组
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+21.2s] 分类开始：模型=qwen3-4b-instruct-2507，并发=128，新请求预算=8000；相同完整响应从 demiwtg/benchmark/edit/source_images/datasets/calls__scene_pool_category_l3_v1.lance 复用
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+21.3s] 加载模型 qwen3-4b-instruct-2507：GPU=[0, 1]，DP=2，TP=1；服务日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+36.4s] 模型仍在加载：qwen3-4b-instruct-2507，已等 15s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+51.4s] 模型仍在加载：qwen3-4b-instruct-2507，已等 30s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+66.4s] 模型仍在加载：qwen3-4b-instruct-2507，已等 45s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+81.4s] 模型仍在加载：qwen3-4b-instruct-2507，已等 60s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+96.5s] 模型仍在加载：qwen3-4b-instruct-2507，已等 75s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+111.5s] 模型仍在加载：qwen3-4b-instruct-2507，已等 90s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+126.5s] 模型仍在加载：qwen3-4b-instruct-2507，已等 105s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+141.5s] 模型仍在加载：qwen3-4b-instruct-2507，已等 120s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+156.5s] 模型仍在加载：qwen3-4b-instruct-2507，已等 135s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+171.5s] 模型仍在加载：qwen3-4b-instruct-2507，已等 150s；日志=/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/model__scene_pool_category_l3_v1__text.log
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+173.6s] 模型就绪：qwen3-4b-instruct-2507，PID=41903，加载耗时=152.3s
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+173.8s] 分类进度：处理 1/7917，响应复用=1；状态={'screened': 1}；决定={'reject': 1}；耗时=152.6s，处理速度=0.4 行/分钟（含复用）；最近=交通工具 / 丢弃物 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+174.1s] 分类进度：处理 50/7917，响应复用=50；状态={'screened': 50}；决定={'reject': 4, 'keep': 40, 'hold': 6}；耗时=152.9s，处理速度=19.6 行/分钟（含复用）；最近=交通工具 / 司机 / 汽车驾驶者 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+174.3s] 分类进度：处理 100/7917，响应复用=100；状态={'screened': 100}；决定={'reject': 19, 'keep': 65, 'hold': 16}；耗时=153.1s，处理速度=39.2 行/分钟（含复用）；最近=交通工具 / 水上交通工具 / 帆船 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+174.6s] 分类进度：处理 150/7917，响应复用=150；状态={'screened': 150}；决定={'reject': 24, 'keep': 108, 'hold': 18}；耗时=153.4s，处理速度=58.7 行/分钟（含复用）；最近=交通工具 / 畜力与传统载具 / 驴车 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+174.9s] 分类进度：处理 200/7917，响应复用=200；状态={'screened': 200}；决定={'reject': 35, 'keep': 143, 'hold': 22}；耗时=153.7s，处理速度=78.1 行/分钟（含复用）；最近=交通工具 / 训练场 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+175.2s] 分类进度：处理 250/7917，响应复用=250；状态={'screened': 250}；决定={'reject': 39, 'keep': 187, 'hold': 24}；耗时=154.0s，处理速度=97.4 行/分钟（含复用）；最近=交通工具 / 陆地民用车辆 / 运动型多用途车 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+175.5s] 分类进度：处理 300/7917，响应复用=300；状态={'screened': 300}；决定={'reject': 58, 'keep': 203, 'hold': 39}；耗时=154.3s，处理速度=116.7 行/分钟（含复用）；最近=人物与人体 / 交战者 / 角斗士 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+175.8s] 分类进度：处理 350/7917，响应复用=350；状态={'screened': 350}；决定={'reject': 65, 'keep': 213, 'hold': 72}；耗时=154.6s，处理速度=135.8 行/分钟（含复用）；最近=人物与人体 / 伊甸园场景 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+176.1s] 分类进度：处理 400/7917，响应复用=400；状态={'screened': 400}；决定={'reject': 77, 'keep': 219, 'hold': 104}；耗时=154.9s，处理速度=155.0 行/分钟（含复用）；最近=人物与人体 / 体态姿势 / 坐姿 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+176.4s] 分类进度：处理 450/7917，响应复用=450；状态={'screened': 450}；决定={'reject': 94, 'keep': 228, 'hold': 128}；耗时=155.2s，处理速度=174.0 行/分钟（含复用）；最近=人物与人体 / 劳动者 / 加油器 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+176.7s] 分类进度：处理 500/7917，响应复用=500；状态={'screened': 500}；决定={'reject': 104, 'keep': 241, 'hold': 155}；耗时=155.5s，处理速度=192.9 行/分钟（含复用）；最近=人物与人体 / 发型与毛发 / 编发 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+177.0s] 分类进度：处理 550/7917，响应复用=550；状态={'screened': 550}；决定={'reject': 124, 'keep': 250, 'hold': 176}；耗时=155.8s，处理速度=211.8 行/分钟（含复用）；最近=人物与人体 / 好人 / 恩人 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+177.4s] 分类进度：处理 600/7917，响应复用=600；状态={'screened': 600}；决定={'reject': 139, 'keep': 254, 'hold': 207}；耗时=156.2s，处理速度=230.5 行/分钟（含复用）；最近=人物与人体 / 摔倒事件 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+177.7s] 分类进度：处理 650/7917，响应复用=650；状态={'screened': 650}；决定={'reject': 155, 'keep': 262, 'hold': 233}；耗时=156.4s，处理速度=249.3 行/分钟（含复用）；最近=人物与人体 / 激进分子 / 革命者 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+178.0s] 分类进度：处理 700/7917，响应复用=700；状态={'screened': 700}；决定={'reject': 177, 'keep': 266, 'hold': 257}；耗时=156.7s，处理速度=267.9 行/分钟（含复用）；最近=人物与人体 / 继承人 / 接收器 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+178.2s] 分类进度：处理 750/7917，响应复用=750；状态={'screened': 750}；决定={'reject': 187, 'keep': 294, 'hold': 269}；耗时=157.0s，处理速度=286.6 行/分钟（含复用）；最近=人物与人体 / 臀部 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+178.5s] 分类进度：处理 800/7917，响应复用=800；状态={'screened': 800}；决定={'reject': 205, 'keep': 299, 'hold': 296}；耗时=157.3s，处理速度=305.1 行/分钟（含复用）；最近=人物与人体 / 追随者 / 浅黄褐色 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+178.8s] 分类进度：处理 850/7917，响应复用=850；状态={'screened': 850}；决定={'reject': 215, 'keep': 311, 'hold': 324}；耗时=157.6s，处理速度=323.6 行/分钟（含复用）；最近=人造物体 / 乐器与器械 / 分析仪 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+179.1s] 分类进度：处理 900/7917，响应复用=900；状态={'screened': 900}；决定={'reject': 230, 'keep': 339, 'hold': 331}；耗时=157.9s，处理速度=342.0 行/分钟（含复用）；最近=人造物体 / 仪器 / 火炉 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+179.4s] 分类进度：处理 950/7917，响应复用=950；状态={'screened': 950}；决定={'reject': 240, 'keep': 374, 'hold': 336}；耗时=158.2s，处理速度=360.3 行/分钟（含复用）；最近=人造物体 / 信号装置 / 钟 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+179.7s] 分类进度：处理 1000/7917，响应复用=1000；状态={'screened': 1000}；决定={'reject': 251, 'keep': 403, 'hold': 346}；耗时=158.5s，处理速度=378.5 行/分钟（含复用）；最近=人造物体 / 力学系统 / 悬挂系统 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+180.1s] 分类进度：处理 1050/7917，响应复用=1050；状态={'screened': 1050}；决定={'reject': 263, 'keep': 432, 'hold': 355}；耗时=158.8s，处理速度=396.6 行/分钟（含复用）；最近=人造物体 / 加力燃烧室 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+180.4s] 分类进度：处理 1100/7917，响应复用=1100；状态={'screened': 1100}；决定={'reject': 282, 'keep': 450, 'hold': 368}；耗时=159.1s，处理速度=414.7 行/分钟（含复用）；最近=人造物体 / 医疗器械 / 医用耗材 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+180.7s] 分类进度：处理 1150/7917，响应复用=1150；状态={'screened': 1150}；决定={'reject': 307, 'keep': 461, 'hold': 382}；耗时=159.5s，处理速度=432.7 行/分钟（含复用）；最近=人造物体 / 厨房餐厨用品 / 压力锅 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+181.0s] 分类进度：处理 1200/7917，响应复用=1200；状态={'screened': 1200}；决定={'reject': 311, 'keep': 502, 'hold': 387}；耗时=159.8s，处理速度=450.6 行/分钟（含复用）；最近=人造物体 / 发声器 / 号角 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+181.3s] 分类进度：处理 1250/7917，响应复用=1250；状态={'screened': 1250}；决定={'reject': 320, 'keep': 510, 'hold': 420}；耗时=160.1s，处理速度=468.6 行/分钟（含复用）；最近=人造物体 / 台布 / 帆布 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+181.6s] 分类进度：处理 1300/7917，响应复用=1300；状态={'screened': 1300}；决定={'reject': 322, 'keep': 518, 'hold': 460}；耗时=160.4s，处理速度=486.4 行/分钟（含复用）；最近=人造物体 / 台布 / 维耶勒呢 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+181.9s] 分类进度：处理 1350/7917，响应复用=1350；状态={'screened': 1350}；决定={'reject': 337, 'keep': 527, 'hold': 486}；耗时=160.7s，处理速度=504.2 行/分钟（含复用）；最近=人造物体 / 器具 / 拍打器 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+182.2s] 分类进度：处理 1400/7917，响应复用=1400；状态={'screened': 1400}；决定={'reject': 356, 'keep': 543, 'hold': 501}；耗时=160.9s，处理速度=521.9 行/分钟（含复用）；最近=人造物体 / 块状物 / 立方体 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+182.5s] 分类进度：处理 1450/7917，响应复用=1450；状态={'screened': 1450}；决定={'reject': 378, 'keep': 555, 'hold': 517}；耗时=161.2s，处理速度=539.6 行/分钟（含复用）；最近=人造物体 / 娱乐用品 / 萨克斯 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+182.7s] 分类进度：处理 1500/7917，响应复用=1500；状态={'screened': 1500}；决定={'reject': 384, 'keep': 585, 'hold': 531}；耗时=161.5s，处理速度=557.2 行/分钟（含复用）；最近=人造物体 / 家具大件 / 架类 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+183.0s] 分类进度：处理 1550/7917，响应复用=1550；状态={'screened': 1550}；决定={'reject': 385, 'keep': 625, 'hold': 540}；耗时=161.8s，处理速度=574.8 行/分钟（含复用）；最近=人造物体 / 家用电器 / 影音家电 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+183.3s] 分类进度：处理 1600/7917，响应复用=1600；状态={'screened': 1600}；决定={'reject': 391, 'keep': 655, 'hold': 554}；耗时=162.1s，处理速度=592.3 行/分钟（含复用）；最近=人造物体 / 容器 / 垃圾铲 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+183.6s] 分类进度：处理 1650/7917，响应复用=1650；状态={'screened': 1650}；决定={'reject': 396, 'keep': 690, 'hold': 564}；耗时=162.4s，处理速度=609.7 行/分钟（含复用）；最近=人造物体 / 对话气泡 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+183.9s] 分类进度：处理 1700/7917，响应复用=1700；状态={'screened': 1700}；决定={'reject': 414, 'keep': 708, 'hold': 578}；耗时=162.7s，处理速度=627.0 行/分钟（含复用）；最近=人造物体 / 工业机械设备 / 螺丝刀 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+184.2s] 分类进度：处理 1750/7917，响应复用=1750；状态={'screened': 1750}；决定={'reject': 424, 'keep': 742, 'hold': 584}；耗时=162.9s，处理速度=644.4 行/分钟（含复用）；最近=人造物体 / 开口 / 飞机窗口 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+184.5s] 分类进度：处理 1800/7917，响应复用=1800；状态={'screened': 1800}；决定={'reject': 438, 'keep': 767, 'hold': 595}；耗时=163.3s，处理速度=661.5 行/分钟（含复用）；最近=人造物体 / 手工工具 / 电烙铁 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+184.8s] 分类进度：处理 1850/7917，响应复用=1850；状态={'screened': 1850}；决定={'reject': 458, 'keep': 778, 'hold': 614}；耗时=163.5s，处理速度=678.8 行/分钟（含复用）；最近=人造物体 / 捣固器 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+185.1s] 分类进度：处理 1900/7917，响应复用=1900；状态={'screened': 1900}；决定={'reject': 471, 'keep': 797, 'hold': 632}；耗时=163.9s，处理速度=695.5 行/分钟（含复用）；最近=人造物体 / 数码电子产品 / 交换机 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+185.5s] 分类进度：处理 1950/7917，响应复用=1950；状态={'screened': 1950}；决定={'reject': 486, 'keep': 814, 'hold': 650}；耗时=164.2s，处理速度=712.4 行/分钟（含复用）；最近=人造物体 / 服饰全品 / 凉鞋 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+185.7s] 分类进度：处理 2000/7917，响应复用=2000；状态={'screened': 2000}；决定={'reject': 491, 'keep': 826, 'hold': 683}；耗时=164.5s，处理速度=729.4 行/分钟（含复用）；最近=人造物体 / 机器 / 印花盖印机 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+186.0s] 分类进度：处理 2050/7917，响应复用=2050；状态={'screened': 2050}；决定={'reject': 504, 'keep': 853, 'hold': 693}；耗时=164.8s，处理速度=746.2 行/分钟（含复用）；最近=人造物体 / 板状物 / 玻璃盘 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+186.3s] 分类进度：处理 2100/7917，响应复用=2100；状态={'screened': 2100}；决定={'reject': 519, 'keep': 882, 'hold': 699}；耗时=165.1s，处理速度=763.0 行/分钟（含复用）；最近=人造物体 / 武器 / 指关节 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+186.6s] 分类进度：处理 2150/7917，响应复用=2150；状态={'screened': 2150}；决定={'reject': 550, 'keep': 892, 'hold': 708}；耗时=165.4s，处理速度=779.8 行/分钟（含复用）；最近=人造物体 / 浴室加热器 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+186.9s] 分类进度：处理 2200/7917，响应复用=2200；状态={'screened': 2200}；决定={'reject': 564, 'keep': 921, 'hold': 715}；耗时=165.7s，处理速度=796.5 行/分钟（含复用）；最近=人造物体 / 爆炸装置 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+187.2s] 分类进度：处理 2250/7917，响应复用=2250；状态={'screened': 2250}；决定={'reject': 573, 'keep': 932, 'hold': 745}；耗时=166.0s，处理速度=813.2 行/分钟（含复用）；最近=人造物体 / 用具 / 钻井平台 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+187.5s] 分类进度：处理 2300/7917，响应复用=2300；状态={'screened': 2300}；决定={'reject': 606, 'keep': 944, 'hold': 750}；耗时=166.3s，处理速度=829.8 行/分钟（含复用）；最近=人造物体 / 电子设备 / 磁带播放器 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+187.8s] 分类进度：处理 2350/7917，响应复用=2350；状态={'screened': 2350}；决定={'reject': 631, 'keep': 955, 'hold': 764}；耗时=166.6s，处理速度=846.3 行/分钟（含复用）；最近=人造物体 / 约束装置 / 束缚力 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+188.1s] 分类进度：处理 2400/7917，响应复用=2400；状态={'screened': 2400}；决定={'reject': 639, 'keep': 973, 'hold': 788}；耗时=166.9s，处理速度=862.7 行/分钟（含复用）；最近=人造物体 / 药品与化学制品 / 清洁化学品 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+188.4s] 分类进度：处理 2450/7917，响应复用=2450；状态={'screened': 2450}；决定={'reject': 654, 'keep': 985, 'hold': 811}；耗时=167.2s，处理速度=879.2 行/分钟（含复用）；最近=人造物体 / 装饰物 / 涂鸦 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+188.7s] 分类进度：处理 2500/7917，响应复用=2500；状态={'screened': 2500}；决定={'reject': 672, 'keep': 993, 'hold': 835}；耗时=167.5s，处理速度=895.5 行/分钟（含复用）；最近=人造物体 / 触控笔 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+189.0s] 分类进度：处理 2550/7917，响应复用=2550；状态={'screened': 2550}；决定={'reject': 681, 'keep': 1025, 'hold': 844}；耗时=167.8s，处理速度=911.8 行/分钟（含复用）；最近=人造物体 / 通信系统 / 电话系统 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+189.3s] 分类进度：处理 2600/7917，响应复用=2600；状态={'screened': 2600}；决定={'reject': 700, 'keep': 1046, 'hold': 854}；耗时=168.1s，处理速度=928.0 行/分钟（含复用）；最近=人造物体 / 餐厅家具 / 餐桌 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+189.7s] 分类进度：处理 2650/7917，响应复用=2650；状态={'screened': 2650}；决定={'reject': 710, 'keep': 1063, 'hold': 877}；耗时=168.4s，处理速度=944.0 行/分钟（含复用）；最近=动物 / 后代 / 孤儿 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+190.0s] 分类进度：处理 2700/7917，响应复用=2700；状态={'screened': 2700}；决定={'reject': 713, 'keep': 1067, 'hold': 920}；耗时=168.8s，处理速度=960.0 行/分钟（含复用）；最近=动物 / 哺乳动物 / 马科动物 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+190.3s] 分类进度：处理 2750/7917，响应复用=2750；状态={'screened': 2750}；决定={'reject': 723, 'keep': 1074, 'hold': 953}；耗时=169.0s，处理速度=976.1 行/分钟（含复用）；最近=动物 / 昆虫与节肢 / 潮虫类 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+190.6s] 分类进度：处理 2800/7917，响应复用=2800；状态={'screened': 2800}；决定={'reject': 726, 'keep': 1086, 'hold': 988}；耗时=169.3s，处理速度=992.1 行/分钟（含复用）；最近=动物 / 水生非哺乳生物 / 棘皮动物 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+190.8s] 分类进度：处理 2850/7917，响应复用=2850；状态={'screened': 2850}；决定={'reject': 726, 'keep': 1100, 'hold': 1024}；耗时=169.6s，处理速度=1008.1 行/分钟（含复用）；最近=动物 / 爬行动物 / 蜥蜴类 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+191.1s] 分类进度：处理 2900/7917，响应复用=2900；状态={'screened': 2900}；决定={'reject': 734, 'keep': 1116, 'hold': 1050}；耗时=169.9s，处理速度=1024.0 行/分钟（含复用）；最近=动物 / 雄性动物 / 阉公牛 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+191.4s] 分类进度：处理 2950/7917，响应复用=2950；状态={'screened': 2950}；决定={'reject': 736, 'keep': 1143, 'hold': 1071}；耗时=170.2s，处理速度=1040.0 行/分钟（含复用）；最近=动物 / 鸟类 / 雨燕 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+191.7s] 分类进度：处理 3000/7917，响应复用=3000；状态={'screened': 3000}；决定={'reject': 749, 'keep': 1158, 'hold': 1093}；耗时=170.5s，处理速度=1055.8 行/分钟（含复用）；最近=品牌与产品 / 品牌 / 互联网与软件品牌 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+192.0s] 分类进度：处理 3050/7917，响应复用=3050；状态={'screened': 3050}；决定={'reject': 791, 'keep': 1163, 'hold': 1096}；耗时=170.8s，处理速度=1071.6 行/分钟（含复用）；最近=地理与地点 / 半岛地理 / 科德角 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+192.3s] 分类进度：处理 3100/7917，响应复用=3100；状态={'screened': 3100}；决定={'reject': 793, 'keep': 1210, 'hold': 1097}；耗时=171.1s，处理速度=1087.4 行/分钟（含复用）；最近=场景 / 交通出行场景 / 水路出行 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+192.6s] 分类进度：处理 3150/7917，响应复用=3150；状态={'screened': 3150}；决定={'reject': 794, 'keep': 1255, 'hold': 1101}；耗时=171.4s，处理速度=1102.9 行/分钟（含复用）；最近=场景 / 好天气 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+192.9s] 分类进度：处理 3200/7917，响应复用=3200；状态={'screened': 3200}；决定={'reject': 794, 'keep': 1305, 'hold': 1101}；耗时=171.7s，处理速度=1118.4 行/分钟（含复用）；最近=场景 / 室内场景 / 教室 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+193.2s] 分类进度：处理 3250/7917，响应复用=3250；状态={'screened': 3250}；决定={'reject': 795, 'keep': 1353, 'hold': 1102}；耗时=172.0s，处理速度=1134.0 行/分钟（含复用）；最近=场景 / 杀戮场 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+193.5s] 分类进度：处理 3300/7917，响应复用=3300；状态={'screened': 3300}；决定={'reject': 795, 'keep': 1403, 'hold': 1102}；耗时=172.2s，处理速度=1149.5 行/分钟（含复用）；最近=场景 / 自然户外场景 / 瀑布 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+193.8s] 分类进度：处理 3350/7917，响应复用=3350；状态={'screened': 3350}；决定={'reject': 809, 'keep': 1431, 'hold': 1110}；耗时=172.5s，处理速度=1165.0 行/分钟（含复用）；最近=声音 / 乐器 / 迪吉里杜管 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+194.0s] 分类进度：处理 3400/7917，响应复用=3400；状态={'screened': 3400}；决定={'reject': 847, 'keep': 1436, 'hold': 1117}；耗时=172.8s，处理速度=1180.4 行/分钟（含复用）；最近=声音 / 发动机 / 怠速运转 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+194.3s] 分类进度：处理 3450/7917，响应复用=3450；状态={'screened': 3450}；决定={'reject': 895, 'keep': 1437, 'hold': 1118}；耗时=173.1s，处理速度=1195.8 行/分钟（含复用）；最近=声音 / 开关抽屉 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+194.6s] 分类进度：处理 3500/7917，响应复用=3500；状态={'screened': 3500}；决定={'reject': 945, 'keep': 1437, 'hold': 1118}；耗时=173.4s，处理速度=1211.0 行/分钟（含复用）；最近=声音 / 沉闷撞击声 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+195.0s] 分类进度：处理 3550/7917，响应复用=3550；状态={'screened': 3550}；决定={'reject': 994, 'keep': 1438, 'hold': 1118}；耗时=173.7s，处理速度=1226.0 行/分钟（含复用）；最近=声音 / 羊叫声 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+195.2s] 分类进度：处理 3600/7917，响应复用=3600；状态={'screened': 3600}；决定={'reject': 1041, 'keep': 1440, 'hold': 1119}；耗时=174.0s，处理速度=1241.2 行/分钟（含复用）；最近=声音 / 鼓机 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+195.6s] 分类进度：处理 3650/7917，响应复用=3650；状态={'screened': 3650}；决定={'reject': 1062, 'keep': 1447, 'hold': 1141}；耗时=174.3s，处理速度=1256.2 行/分钟（含复用）；最近=属性与状态 / 华丽饰品 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+195.9s] 分类进度：处理 3700/7917，响应复用=3700；状态={'screened': 3700}；决定={'reject': 1083, 'keep': 1454, 'hold': 1163}；耗时=174.6s，处理速度=1271.2 行/分钟（含复用）；最近=属性与状态 / 多尖角 / 急转弯 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+196.2s] 分类进度：处理 3750/7917，响应复用=3750；状态={'screened': 3750}；决定={'reject': 1106, 'keep': 1458, 'hold': 1186}；耗时=174.9s，处理速度=1286.1 行/分钟（含复用）；最近=属性与状态 / 愤怒表现 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+196.5s] 分类进度：处理 3800/7917，响应复用=3800；状态={'screened': 3800}；决定={'reject': 1124, 'keep': 1463, 'hold': 1213}；耗时=175.3s，处理速度=1301.0 行/分钟（含复用）；最近=属性与状态 / 溶解物 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+196.8s] 分类进度：处理 3850/7917，响应复用=3850；状态={'screened': 3850}；决定={'reject': 1152, 'keep': 1466, 'hold': 1232}；耗时=175.5s，处理速度=1315.9 行/分钟（含复用）；最近=属性与状态 / 经验丰富的 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+197.1s] 分类进度：处理 3900/7917，响应复用=3900；状态={'screened': 3900}；决定={'reject': 1175, 'keep': 1475, 'hold': 1250}；耗时=175.8s，处理速度=1330.8 行/分钟（含复用）；最近=建筑与基础设施 / 中心 / 控制中心 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+197.4s] 分类进度：处理 3950/7917，响应复用=3950；状态={'screened': 3950}；决定={'reject': 1176, 'keep': 1522, 'hold': 1252}；耗时=176.1s，处理速度=1345.5 行/分钟（含复用）；最近=建筑与基础设施 / 公寓楼外部 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+197.7s] 分类进度：处理 4000/7917，响应复用=4000；状态={'screened': 4000}；决定={'reject': 1176, 'keep': 1568, 'hold': 1256}；耗时=176.4s，处理速度=1360.3 行/分钟（含复用）；最近=建筑与基础设施 / 商业办公建筑 / 酒店 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+197.9s] 分类进度：处理 4050/7917，响应复用=4050；状态={'screened': 4050}；决定={'reject': 1178, 'keep': 1611, 'hold': 1261}；耗时=176.7s，处理速度=1375.0 行/分钟（含复用）；最近=建筑与基础设施 / 天文馆 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+198.2s] 分类进度：处理 4100/7917，响应复用=4100；状态={'screened': 4100}；决定={'reject': 1178, 'keep': 1659, 'hold': 1263}；耗时=177.0s，处理速度=1389.7 行/分钟（含复用）；最近=建筑与基础设施 / 庇护所 / 临时营房 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+198.5s] 分类进度：处理 4150/7917，响应复用=4150；状态={'screened': 4150}；决定={'reject': 1182, 'keep': 1702, 'hold': 1266}；耗时=177.3s，处理速度=1404.4 行/分钟（含复用）；最近=建筑与基础设施 / 支承结构 / 构架 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+198.8s] 分类进度：处理 4200/7917，响应复用=4200；状态={'screened': 4200}；决定={'reject': 1182, 'keep': 1750, 'hold': 1268}；耗时=177.6s，处理速度=1419.0 行/分钟（含复用）；最近=建筑与基础设施 / 桥 / 铁路桥 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+199.1s] 分类进度：处理 4250/7917，响应复用=4250；状态={'screened': 4250}；决定={'reject': 1188, 'keep': 1790, 'hold': 1272}；耗时=177.9s，处理速度=1433.5 行/分钟（含复用）；最近=建筑与基础设施 / 突出物 / 悬挑部分 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+199.4s] 分类进度：处理 4300/7917，响应复用=4300；状态={'screened': 4300}；决定={'reject': 1193, 'keep': 1832, 'hold': 1275}；耗时=178.2s，处理速度=1447.9 行/分钟（含复用）；最近=建筑与基础设施 / 路桥隧道工程 / 桥梁 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+199.7s] 分类进度：处理 4350/7917，响应复用=4350；状态={'screened': 4350}；决定={'reject': 1195, 'keep': 1875, 'hold': 1280}；耗时=178.5s，处理速度=1462.5 行/分钟（含复用）；最近=建筑与基础设施 / 障碍物 / 横木 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+200.0s] 分类进度：处理 4400/7917，响应复用=4400；状态={'screened': 4400}；决定={'reject': 1214, 'keep': 1888, 'hold': 1298}；耗时=178.7s，处理速度=1477.0 行/分钟（含复用）；最近=文化艺术与媒介 / 传统工艺 / 泥塑 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+200.3s] 分类进度：处理 4450/7917，响应复用=4450；状态={'screened': 4450}；决定={'reject': 1229, 'keep': 1908, 'hold': 1313}；耗时=179.0s，处理速度=1491.3 行/分钟（含复用）；最近=文化艺术与媒介 / 升空现象 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+200.6s] 分类进度：处理 4500/7917，响应复用=4500；状态={'screened': 4500}；决定={'reject': 1245, 'keep': 1918, 'hold': 1337}；耗时=179.3s，处理速度=1505.5 行/分钟（含复用）；最近=文化艺术与媒介 / 平面艺术 / 印刷品 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+200.8s] 分类进度：处理 4550/7917，响应复用=4550；状态={'screened': 4550}；决定={'reject': 1248, 'keep': 1929, 'hold': 1373}；耗时=179.6s，处理速度=1519.9 行/分钟（含复用）；最近=文化艺术与媒介 / 暗色材料 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+201.1s] 分类进度：处理 4600/7917，响应复用=4600；状态={'screened': 4600}；决定={'reject': 1259, 'keep': 1942, 'hold': 1399}；耗时=179.9s，处理速度=1534.0 行/分钟（含复用）；最近=文化艺术与媒介 / 舞台表演 / 戏曲 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+201.4s] 分类进度：处理 4650/7917，响应复用=4650；状态={'screened': 4650}；决定={'reject': 1277, 'keep': 1954, 'hold': 1419}；耗时=180.2s，处理速度=1548.1 行/分钟（含复用）；最近=文化艺术与媒介 / 虚构生物 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+201.7s] 分类进度：处理 4700/7917，响应复用=4700；状态={'screened': 4700}；决定={'reject': 1287, 'keep': 1967, 'hold': 1446}；耗时=180.5s，处理速度=1562.2 行/分钟（含复用）；最近=文化艺术与媒介 / 音乐音频 / 歌曲 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+202.0s] 分类进度：处理 4750/7917，响应复用=4750；状态={'screened': 4750}；决定={'reject': 1327, 'keep': 1967, 'hold': 1456}；耗时=180.8s，处理速度=1576.4 行/分钟（含复用）；最近=文字与信息图形 / 听觉交流 / 音乐角色 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+202.3s] 分类进度：处理 4800/7917，响应复用=4800；状态={'screened': 4800}；决定={'reject': 1368, 'keep': 1974, 'hold': 1458}；耗时=181.1s，处理速度=1590.6 行/分钟（含复用）；最近=文字与信息图形 / 数字与编码 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+202.6s] 分类进度：处理 4850/7917，响应复用=4850；状态={'screened': 4850}；决定={'reject': 1411, 'keep': 1979, 'hold': 1460}；耗时=181.4s，处理速度=1604.6 行/分钟（含复用）；最近=文字与信息图形 / 科学图形 / 化学结构式 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+202.8s] 分类进度：处理 4900/7917，响应复用=4900；状态={'screened': 4900}；决定={'reject': 1458, 'keep': 1979, 'hold': 1463}；耗时=181.6s，处理速度=1618.7 行/分钟（含复用）；最近=文字与信息图形 / 陈述 / 注解 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+203.1s] 分类进度：处理 4950/7917，响应复用=4950；状态={'screened': 4950}；决定={'reject': 1485, 'keep': 1984, 'hold': 1481}；耗时=181.9s，处理速度=1632.7 行/分钟（含复用）；最近=时间数量与度量 / 支付凭证 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+203.4s] 分类进度：处理 5000/7917，响应复用=5000；状态={'screened': 5000}；决定={'reject': 1514, 'keep': 1991, 'hold': 1495}；耗时=182.2s，处理速度=1646.6 行/分钟（含复用）；最近=时间数量与度量 / 频率单位 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+203.7s] 分类进度：处理 5050/7917，响应复用=5050；状态={'screened': 5050}；决定={'reject': 1543, 'keep': 1996, 'hold': 1511}；耗时=182.5s，处理速度=1660.6 行/分钟（含复用）；最近=材料与物质 / 导体 / 铜 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+204.0s] 分类进度：处理 5100/7917，响应复用=5100；状态={'screened': 5100}；决定={'reject': 1557, 'keep': 2013, 'hold': 1530}；耗时=182.8s，处理速度=1674.4 行/分钟（含复用）；最近=材料与物质 / 燃料 / 木炭 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+204.3s] 分类进度：处理 5150/7917，响应复用=5150；状态={'screened': 5150}；决定={'reject': 1579, 'keep': 2026, 'hold': 1545}；耗时=183.0s，处理速度=1688.2 行/分钟（含复用）；最近=植物 / 乔木灌木林木 / 乔木 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+204.5s] 分类进度：处理 5200/7917，响应复用=5200；状态={'screened': 5200}；决定={'reject': 1579, 'keep': 2073, 'hold': 1548}；耗时=183.3s，处理速度=1701.8 行/分钟（含复用）；最近=植物 / 农作物 / 橡胶树 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+204.8s] 分类进度：处理 5250/7917，响应复用=5250；状态={'screened': 5250}；决定={'reject': 1579, 'keep': 2119, 'hold': 1552}；耗时=183.6s，处理速度=1715.7 行/分钟（含复用）；最近=植物 / 多肉与仙人掌植物 / 块根多肉 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+205.1s] 分类进度：处理 5300/7917，响应复用=5300；状态={'screened': 5300}；决定={'reject': 1591, 'keep': 2145, 'hold': 1564}；耗时=183.9s，处理速度=1729.4 行/分钟（含复用）；最近=植物 / 树冠 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+205.4s] 分类进度：处理 5350/7917，响应复用=5350；状态={'screened': 5350}；决定={'reject': 1593, 'keep': 2178, 'hold': 1579}；耗时=184.2s，处理速度=1742.9 行/分钟（含复用）；最近=植物 / 水生植物 / 金鱼藻 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+205.7s] 分类进度：处理 5400/7917，响应复用=5400；状态={'screened': 5400}；决定={'reject': 1593, 'keep': 2220, 'hold': 1587}；耗时=184.5s，处理速度=1756.5 行/分钟（含复用）；最近=植物 / 草本植物 / 不凋花 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+210.3s] 分类进度：处理 5450/7917，响应复用=5441；状态={'screened': 5450}；决定={'reject': 1599, 'keep': 2232, 'hold': 1619}；耗时=189.1s，处理速度=1729.3 行/分钟（含复用）；最近=植物 / 草本植物 / 加拿大血根草 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+216.6s] 分类进度：处理 5500/7917，响应复用=5441；状态={'screened': 5500}；决定={'reject': 1602, 'keep': 2252, 'hold': 1646}；耗时=195.4s，处理速度=1688.9 行/分钟（含复用）；最近=植物 / 草本植物 / 姜 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+223.2s] 分类进度：处理 5550/7917，响应复用=5441；状态={'screened': 5550}；决定={'reject': 1604, 'keep': 2277, 'hold': 1669}；耗时=202.0s，处理速度=1648.7 行/分钟（含复用）；最近=植物 / 草本植物 / 款冬 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+229.0s] 分类进度：处理 5600/7917，响应复用=5441；状态={'screened': 5600}；决定={'reject': 1610, 'keep': 2304, 'hold': 1686}；耗时=207.8s，处理速度=1617.3 行/分钟（含复用）；最近=植物 / 草本植物 / 粉蝶花 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+235.1s] 分类进度：处理 5650/7917，响应复用=5441；状态={'screened': 5650}；决定={'reject': 1613, 'keep': 2328, 'hold': 1709}；耗时=213.9s，处理速度=1584.6 行/分钟（含复用）；最近=植物 / 草本植物 / 风铃草 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+241.3s] 分类进度：处理 5700/7917，响应复用=5441；状态={'screened': 5700}；决定={'reject': 1613, 'keep': 2375, 'hold': 1712}；耗时=220.1s，处理速度=1553.9 行/分钟（含复用）；最近=植物 / 观赏植物 / 花叶槭 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+248.3s] 分类进度：处理 5750/7917，响应复用=5441；状态={'screened': 5750}；决定={'reject': 1644, 'keep': 2382, 'hold': 1724}；耗时=227.1s，处理速度=1519.4 行/分钟（含复用）；最近=真菌与微生物 / 细菌 / 蓝细菌 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+254.4s] 分类进度：处理 5800/7917，响应复用=5441；状态={'screened': 5800}；决定={'reject': 1672, 'keep': 2383, 'hold': 1745}；耗时=233.2s，处理速度=1492.5 行/分钟（含复用）；最近=真菌与微生物 / 菌类 / 霉菌 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+259.8s] 分类进度：处理 5850/7917，响应复用=5441；状态={'screened': 5850}；决定={'reject': 1695, 'keep': 2388, 'hold': 1767}；耗时=238.6s，处理速度=1471.2 行/分钟（含复用）；最近=知识与学科 / 表格 / 日历 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+265.6s] 分类进度：处理 5900/7917，响应复用=5441；状态={'screened': 5900}；决定={'reject': 1702, 'keep': 2402, 'hold': 1796}；耗时=244.4s，处理速度=1448.4 行/分钟（含复用）；最近=组织机构与社会事件 / 企业 / 承运人 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+271.7s] 分类进度：处理 5950/7917，响应复用=5441；状态={'screened': 5950}；决定={'reject': 1711, 'keep': 2434, 'hold': 1805}；耗时=250.4s，处理速度=1425.5 行/分钟（含复用）；最近=组织机构与社会事件 / 发光现象 / 闪耀 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+277.6s] 分类进度：处理 6000/7917，响应复用=5441；状态={'screened': 6000}；决定={'reject': 1720, 'keep': 2452, 'hold': 1828}；耗时=256.4s，处理速度=1404.2 行/分钟（含复用）；最近=组织机构与社会事件 / 知名组织 / 国际组织 IP → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+283.8s] 分类进度：处理 6050/7917，响应复用=5441；状态={'screened': 6050}；决定={'reject': 1726, 'keep': 2465, 'hold': 1859}；耗时=262.6s，处理速度=1382.3 行/分钟（含复用）；最近=组织机构与社会事件 / 网络创作者类别 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+289.9s] 分类进度：处理 6100/7917，响应复用=5441；状态={'screened': 6100}；决定={'reject': 1737, 'keep': 2488, 'hold': 1875}；耗时=268.6s，处理速度=1362.4 行/分钟（含复用）；最近=自然景观 / 凹陷地 / 床 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+295.8s] 分类进度：处理 6150/7917，响应复用=5441；状态={'screened': 6150}；决定={'reject': 1741, 'keep': 2532, 'hold': 1877}；耗时=274.6s，处理速度=1343.8 行/分钟（含复用）；最近=自然景观 / 天文天象气象 / 彩虹 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+302.2s] 分类进度：处理 6200/7917，响应复用=5441；状态={'screened': 6200}；决定={'reject': 1743, 'keep': 2577, 'hold': 1880}；耗时=281.0s，处理速度=1324.0 行/分钟（含复用）；最近=自然景观 / 悬崖峭壁 / 悬崖 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+308.9s] 分类进度：处理 6250/7917，响应复用=5441；状态={'screened': 6250}；决定={'reject': 1748, 'keep': 2619, 'hold': 1883}；耗时=287.7s，处理速度=1303.6 行/分钟（含复用）；最近=自然景观 / 海湾 / 小海湾 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+315.5s] 分类进度：处理 6300/7917，响应复用=5441；状态={'screened': 6300}；决定={'reject': 1750, 'keep': 2663, 'hold': 1887}；耗时=294.3s，处理速度=1284.4 行/分钟（含复用）；最近=自然景观 / 自然覆盖层 / 屋顶 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+321.3s] 分类进度：处理 6350/7917，响应复用=5441；状态={'screened': 6350}；决定={'reject': 1760, 'keep': 2689, 'hold': 1901}；耗时=300.0s，处理速度=1269.8 行/分钟（含复用）；最近=节日与符号 / 文化图腾 / 动物图腾 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+327.4s] 分类进度：处理 6400/7917，响应复用=5441；状态={'screened': 6400}；决定={'reject': 1784, 'keep': 2694, 'hold': 1922}；耗时=306.1s，处理速度=1254.3 行/分钟（含复用）；最近=节日与符号 / 西方节日 / 圣诞节 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+333.9s] 分类进度：处理 6450/7917，响应复用=5441；状态={'screened': 6450}；决定={'reject': 1798, 'keep': 2713, 'hold': 1939}；耗时=312.7s，处理速度=1237.5 行/分钟（含复用）；最近=行为动作 / 休闲娱乐 / 娱乐 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+339.8s] 分类进度：处理 6500/7917，响应复用=5441；状态={'screened': 6500}；决定={'reject': 1806, 'keep': 2732, 'hold': 1962}；耗时=318.6s，处理速度=1224.1 行/分钟（含复用）；最近=行为动作 / 位置变化 / 滴水声 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+345.9s] 分类进度：处理 6550/7917，响应复用=5441；状态={'screened': 6550}；决定={'reject': 1825, 'keep': 2743, 'hold': 1982}；耗时=324.7s，处理速度=1210.3 行/分钟（含复用）；最近=行为动作 / 修剪 / 修剪树木 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+351.6s] 分类进度：处理 6600/7917，响应复用=5441；状态={'screened': 6600}；决定={'reject': 1838, 'keep': 2751, 'hold': 2011}；耗时=330.4s，处理速度=1198.4 行/分钟（含复用）；最近=行为动作 / 划独木舟或皮划艇 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+357.4s] 分类进度：处理 6650/7917，响应复用=5441；状态={'screened': 6650}；决定={'reject': 1857, 'keep': 2756, 'hold': 2037}；耗时=336.2s，处理速度=1186.9 行/分钟（含复用）；最近=行为动作 / 卡波耶拉 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+363.3s] 分类进度：处理 6700/7917，响应复用=5441；状态={'screened': 6700}；决定={'reject': 1879, 'keep': 2760, 'hold': 2061}；耗时=342.0s，处理速度=1175.3 行/分钟（含复用）；最近=行为动作 / 增加 / 上涨 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+369.5s] 分类进度：处理 6750/7917，响应复用=5441；状态={'screened': 6750}；决定={'reject': 1894, 'keep': 2775, 'hold': 2081}；耗时=348.2s，处理速度=1163.0 行/分钟（含复用）；最近=行为动作 / 工作学习动作 / 工程施工 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+375.6s] 分类进度：处理 6800/7917，响应复用=5441；状态={'screened': 6800}；决定={'reject': 1901, 'keep': 2799, 'hold': 2100}；耗时=354.4s，处理速度=1151.3 行/分钟（含复用）；最近=行为动作 / 引发 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+381.3s] 分类进度：处理 6850/7917，响应复用=5441；状态={'screened': 6850}；决定={'reject': 1913, 'keep': 2801, 'hold': 2136}；耗时=360.1s，处理速度=1141.4 行/分钟（含复用）；最近=行为动作 / 抛硬币 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+388.2s] 分类进度：处理 6900/7917，响应复用=5441；状态={'screened': 6900}；决定={'reject': 1925, 'keep': 2805, 'hold': 2170}；耗时=366.9s，处理速度=1128.2 行/分钟（含复用）；最近=行为动作 / 插入 / 填料 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+394.2s] 分类进度：处理 6950/7917，响应复用=5441；状态={'screened': 6950}；决定={'reject': 1948, 'keep': 2808, 'hold': 2194}；耗时=373.0s，处理速度=1118.0 行/分钟（含复用）；最近=行为动作 / 改变完整性 / 生火 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+400.4s] 分类进度：处理 7000/7917，响应复用=5441；状态={'screened': 7000}；决定={'reject': 1959, 'keep': 2836, 'hold': 2205}；耗时=379.1s，处理速度=1107.8 行/分钟（含复用）；最近=行为动作 / 日常生活动作 / 穿衣打扮 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+406.5s] 分类进度：处理 7050/7917，响应复用=5441；状态={'screened': 7050}；决定={'reject': 1975, 'keep': 2850, 'hold': 2225}；耗时=385.2s，处理速度=1098.0 行/分钟（含复用）；最近=行为动作 / 涉过泥地 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+412.6s] 分类进度：处理 7100/7917，响应复用=5441；状态={'screened': 7100}；决定={'reject': 1998, 'keep': 2852, 'hold': 2250}；耗时=391.4s，处理速度=1088.3 行/分钟（含复用）；最近=行为动作 / 社交与日常行为 / 作为 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+418.4s] 分类进度：处理 7150/7917，响应复用=5441；状态={'screened': 7150}；决定={'reject': 2012, 'keep': 2856, 'hold': 2282}；耗时=397.1s，处理速度=1080.2 行/分钟（含复用）；最近=行为动作 / 继续跑 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+424.4s] 分类进度：处理 7200/7917，响应复用=5441；状态={'screened': 7200}；决定={'reject': 2029, 'keep': 2858, 'hold': 2313}；耗时=403.2s，处理速度=1071.5 行/分钟（含复用）；最近=行为动作 / 请求动作 / 定单 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+430.7s] 分类进度：处理 7250/7917，响应复用=5441；状态={'screened': 7250}；决定={'reject': 2043, 'keep': 2864, 'hold': 2343}；耗时=409.4s，处理速度=1062.4 行/分钟（含复用）；最近=行为动作 / 雪地摩托运动 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+437.2s] 分类进度：处理 7300/7917，响应复用=5441；状态={'screened': 7300}；决定={'reject': 2051, 'keep': 2889, 'hold': 2360}；耗时=416.0s，处理速度=1052.9 行/分钟（含复用）；最近=食物 / 中式主食面点 / 盖饭 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+443.2s] 分类进度：处理 7350/7917，响应复用=5441；状态={'screened': 7350}；决定={'reject': 2053, 'keep': 2930, 'hold': 2367}；耗时=422.0s，处理速度=1045.1 行/分钟（含复用）；最近=食物 / 中式菜肴汤品 / 粤菜 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+450.5s] 分类进度：处理 7400/7917，响应复用=5441；状态={'screened': 7400}；决定={'reject': 2058, 'keep': 2959, 'hold': 2383}；耗时=429.3s，处理速度=1034.2 行/分钟（含复用）；最近=食物 / 咖啡饮品与器具 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+456.6s] 分类进度：处理 7450/7917，响应复用=5441；状态={'screened': 7450}；决定={'reject': 2061, 'keep': 2984, 'hold': 2405}；耗时=435.3s，处理速度=1026.8 行/分钟（含复用）；最近=食物 / 早餐食品 / 荞麦食品 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+462.7s] 分类进度：处理 7500/7917，响应复用=5441；状态={'screened': 7500}；决定={'reject': 2066, 'keep': 3011, 'hold': 2423}；耗时=441.5s，处理速度=1019.3 行/分钟（含复用）；最近=食物 / 烘焙甜品点心 / 月饼 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+469.3s] 分类进度：处理 7550/7917，响应复用=5441；状态={'screened': 7550}；决定={'reject': 2070, 'keep': 3035, 'hold': 2445}；耗时=448.1s，处理速度=1011.0 行/分钟（含复用）；最近=食物 / 生鲜食材 / 畜肉原料 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+476.1s] 分类进度：处理 7600/7917，响应复用=5441；状态={'screened': 7600}；决定={'reject': 2075, 'keep': 3060, 'hold': 2465}；耗时=454.9s，处理速度=1002.5 行/分钟（含复用）；最近=食物 / 膳食补充剂 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+482.6s] 分类进度：处理 7650/7917，响应复用=5441；状态={'screened': 7650}；决定={'reject': 2087, 'keep': 3084, 'hold': 2479}；耗时=461.3s，处理速度=994.9 行/分钟（含复用）；最近=食物 / 菜肴 / 火腿鸡蛋 → hold
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+489.3s] 分类进度：处理 7700/7917，响应复用=5441；状态={'screened': 7700}；决定={'reject': 2101, 'keep': 3097, 'hold': 2502}；耗时=468.0s，处理速度=987.1 行/分钟（含复用）；最近=食物 / 菜肴 / 西班牙海鲜饭 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+496.8s] 分类进度：处理 7750/7917，响应复用=5441；状态={'screened': 7750}；决定={'reject': 2111, 'keep': 3120, 'hold': 2519}；耗时=475.6s，处理速度=977.8 行/分钟（含复用）；最近=食物 / 调味剂 / 旱金莲 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+503.5s] 分类进度：处理 7800/7917，响应复用=5441；状态={'screened': 7800}；决定={'reject': 2134, 'keep': 3139, 'hold': 2527}；耗时=482.3s，处理速度=970.4 行/分钟（含复用）；最近=食物 / 调味品 / 鱼露 → reject
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+510.0s] 分类进度：处理 7850/7917，响应复用=5441；状态={'screened': 7850}；决定={'reject': 2148, 'keep': 3164, 'hold': 2538}；耗时=488.8s，处理速度=963.7 行/分钟（含复用）；最近=食物 / 餐序 / 主菜 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+516.0s] 分类进度：处理 7900/7917，响应复用=5441；状态={'screened': 7900}；决定={'reject': 2152, 'keep': 3204, 'hold': 2544}；耗时=494.8s，处理速度=958.0 行/分钟（含复用）；最近=食物 / 饮品类 / 酸奶 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+516.7s] 分类进度：处理 7917/7917，响应复用=5441；状态={'screened': 7917}；决定={'reject': 2154, 'keep': 3214, 'hold': 2549}；耗时=495.4s，处理速度=958.8 行/分钟（含复用）；最近=食物 / 饲料 / 干草 → keep
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+516.9s] 释放模型：qwen3-4b-instruct-2507，PID=41903
+----- stderr -----
+[2026-09-27T13:46:58Z WARN  lance::dataset::write::insert] No existing dataset at /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/category_results__scene_pool_category_l3_v1.lance, it will be created
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+517.6s] 分类结果已写入 /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/category_results__scene_pool_category_l3_v1.lance@1
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+517.7s] 分类状态={'screened': 7917}；决定={'hold': 2549, 'keep': 3214, 'reject': 2154}
+----- stderr -----
+[2026-09-27T13:47:18Z WARN  lance::dataset::write::insert] No existing dataset at /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/concept_candidates__scene_pool_category_l3_v1.lance, it will be created
+----- stdout -----
+[Edit 原图][scene_pool_category_l3_v1][+538.5s] 按 concept 关联公共图片目录、按 SHA 合并；复用尺寸，短边须 > 1024
+------------------
+
+[31m---------------------------------------------------------------------------[39m
+[31mInvalidLanceRequest[39m                       Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[3][39m[32m, line 5[39m
+[32m      1[39m [38;5;66;03m# 执行入口：按 cfg 读取来源 → 处理/调用模型 → 写阶段表，返回截至 through 的摘要。[39;00m
+[32m      2[39m [38;5;66;03m# complete 判断行处理是否完成，不表示所有行都 keep；pending/失败使其为 False。[39;00m
+[32m      3[39m [38;5;28;01mimport[39;00m asyncio
+[32m      4[39m 
+[32m----> [39m[32m5[39m result = [38;5;28;01mawait[39;00m asyncio.to_thread(source_image_pipeline.run_pipeline, cfg)
+[32m      6[39m result
+
+[36mFile [39m[32m/yzp/zhaozy/yangzepeng/0905/env/lib/python3.11/asyncio/threads.py:25[39m, in [36mto_thread[39m[34m(func, *args, **kwargs)[39m
+[32m     23[39m ctx = contextvars.copy_context()
+[32m     24[39m func_call = functools.partial(ctx.run, func, *args, **kwargs)
+[32m---> [39m[32m25[39m [38;5;28;01mreturn[39;00m [38;5;28;01mawait[39;00m loop.run_in_executor([38;5;28;01mNone[39;00m, func_call)
+
+[36mFile [39m[32m/yzp/zhaozy/yangzepeng/0905/env/lib/python3.11/concurrent/futures/thread.py:58[39m, in [36m_WorkItem.run[39m[34m(self)[39m
+[32m     55[39m     [38;5;28;01mreturn[39;00m
+[32m     57[39m [38;5;28;01mtry[39;00m:
+[32m---> [39m[32m58[39m     result = [30;43mself[39;49m[30;43m.[39;49m[30;43mfn[39;49m[30;43m([39;49m[30;43m*[39;49m[30;43mself[39;49m[30;43m.[39;49m[30;43margs[39;49m[30;43m,[39;49m[30;43m [39;49m[30;43m*[39;49m[30;43m*[39;49m[30;43mself[39;49m[30;43m.[39;49m[30;43mkwargs[39;49m[30;43m)[39;49m
+[32m     59[39m [38;5;28;01mexcept[39;00m [38;5;167;01mBaseException[39;00m [38;5;28;01mas[39;00m exc:
+[32m     60[39m     [38;5;28mself[39m.future.set_exception(exc)
+
+[36mFile [39m[32m/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/source_image_pipeline.py:446[39m, in [36mrun_pipeline[39m[34m(config)[39m
+[32m    441[39m [38;5;66;03m# 已完成目录补齐的行 → 只读基础列并传递 ready/read_error 等技术状态。[39;00m
+[32m    442[39m [38;5;66;03m# 两个 reader 按 dimension_status 是否为空互斥，使用同一固定版本和概念过滤；[39;00m
+[32m    443[39m [38;5;66;03m# 公共 images@9 全部有状态，因而不会展开任何历史标注。[39;00m
+[32m    444[39m delivered = [33m'[39m[33mdimension_status IS NOT NULL[39m[33m'[39m [38;5;28;01mif[39;00m [33m'[39m[33mdimension_status[39m[33m'[39m [38;5;129;01min[39;00m image_schema.names [38;5;28;01melse[39;00m [33m'[39m[33mfalse[39m[33m'[39m
+[32m    445[39m images = (
+[32m--> [39m[32m446[39m     [30;43mdata[39;49m[30;43m.[39;49m[30;43mread_lance[39;49m[30;43m([39;49m[30;43mstr[39;49m[30;43m([39;49m[30;43mimage_uri[39;49m[30;43m)[39;49m[30;43m,[39;49m[30;43m [39;49m[30;43mversion[39;49m[30;43m=[39;49m[30;43mconfig[39;49m[30;43m[[39;49m[30;43m'[39;49m[30;43mimage_source[39;49m[30;43m'[39;49m[30;43m][39;49m[30;43m[[39;49m[30;43m'[39;49m[30;43mversion[39;49m[30;43m'[39;49m[30;43m][39;49m[30;43m,[39;49m
+[32m    447[39m [30;43m                    [39;49m[30;43mcolumns[39;49m[30;43m=[39;49m[30;43mimage_columns[39;49m[30;43m,[39;49m[30;43m [39;49m[30;43mfilter[39;49m[30;43m=[39;49m[30;43mimage_filter[39;49m[30;43m [39;49m[30;43m+[39;49m[30;43m [39;49m[30;43m'[39;49m[30;43m AND ([39;49m[30;43m'[39;49m[30;43m [39;49m[30;43m+[39;49m[30;43m [39;49m[30;43mdelivered[39;49m[30;43m [39;49m[30;43m+[39;49m[30;43m [39;49m[30;43m'[39;49m[30;43m)[39;49m[30;43m'[39;49m[30;43m)[39;49m
+[32m    448[39m     .flat_map(expand_image, fn_kwargs={[33m'[39m[33mpublished_only[39m[33m'[39m: config[[33m'[39m[33mpublished_only[39m[33m'[39m]})
+[32m    449[39m )
+[32m    450[39m [38;5;66;03m# 未交付技术状态的旧行 → preparation 行投影复用历史实测尺寸 → 同样展开 concept×SHA。[39;00m
+[32m    451[39m [38;5;66;03m# 若旧行也无可用历史尺寸，inspect_resolution 才按已交付的固定引用补读。[39;00m
+[32m    452[39m legacy_columns = image_columns + ([[33m'[39m[33mconcept_assessments[39m[33m'[39m]
+[32m    453[39m     [38;5;28;01mif[39;00m [33m'[39m[33mconcept_assessments[39m[33m'[39m [38;5;129;01min[39;00m image_schema.names [38;5;129;01mand[39;00m [33m'[39m[33mconcept_assessments[39m[33m'[39m [38;5;129;01mnot[39;00m [38;5;129;01min[39;00m image_columns [38;5;28;01melse[39;00m [])
+
+[36mFile [39m[32m/yzp/zhaozy/yangzepeng/0905/demiflow/demiflow/data/read_api.py:229[39m, in [36mread_lance[39m[34m(uri, version, columns, filter, limit, storage_options, backend_options)[39m
+[32m    211[39m [38;5;28;01mdef[39;00m[38;5;250m [39m[34mread_lance[39m(
+[32m    212[39m     uri: [38;5;28mstr[39m,
+[32m    213[39m     *,
+[32m   (...)[39m[32m    219[39m     backend_options=[38;5;28;01mNone[39;00m,
+[32m    220[39m ) -> Dataset:
+[32m    221[39m [38;5;250m    [39m[33;03m"""Create a lazy Dataset from a Lance scan.[39;00m
+[32m    222[39m 
+[32m    223[39m [33;03m    ``version`` selects an exact positive Lance version; ``None`` resolves[39;00m
+[32m   (...)[39m[32m    227[39m [33;03m    only Demiflow physical scheduling options. Formal Candidates should bind[39;00m
+[32m    228[39m [33;03m    fixed inputs to an exact version obtained from authorized inspection."""[39;00m
+[32m--> [39m[32m229[39m     [38;5;28;01mreturn[39;00m [30;43mDataAPI[39;49m[30;43m([39;49m[30;43m_current_executor[39;49m[30;43m.[39;49m[30;43mget[39;49m[30;43m([39;49m[30;43m)[39;49m[30;43m)[39;49m[30;43m.[39;49m[30;43mread_lance[39;49m[30;43m([39;49m
+[32m    230[39m [30;43m        [39;49m[30;43muri[39;49m[30;43m,[39;49m
+[32m    231[39m [30;43m        [39;49m[30;43mversion[39;49m[30;43m=[39;49m[30;43mversion[39;49m[30;43m,[39;49m
+[32m    232[39m [30;43m        [39;49m[30;43mcolumns[39;49m[30;43m=[39;49m[30;43mcolumns[39;49m[30;43m,[39;49m
+[32m    233[39m [30;43m        [39;49m[30;43mfilter[39;49m[30;43m=[39;49m[30;43mfilter[39;49m[30;43m,[39;49m
+[32m    234[39m [30;43m        [39;49m[30;43mlimit[39;49m[30;43m=[39;49m[30;43mlimit[39;49m[30;43m,[39;49m
+[32m    235[39m [30;43m        [39;49m[30;43mstorage_options[39;49m[30;43m=[39;49m[30;43mstorage_options[39;49m[30;43m,[39;49m
+[32m    236[39m [30;43m        [39;49m[30;43mbackend_options[39;49m[30;43m=[39;49m[30;43mbackend_options[39;49m[30;43m,[39;49m
+[32m    237[39m [30;43m    [39;49m[30;43m)[39;49m
+
+[36mFile [39m[32m/yzp/zhaozy/yangzepeng/0905/demiflow/demiflow/data/api.py:270[39m, in [36mDataAPI.read_lance[39m[34m(self, uri, version, columns, filter, limit, storage_options, backend_options)[39m
+[32m    259[39m [38;5;250m[39m[33;03m"""Create a lazy Dataset from a Lance scan.[39;00m
+[32m    260[39m 
+[32m    261[39m [33;03m``version`` selects an exact positive Lance version; ``None`` resolves[39;00m
+[32m   (...)[39m[32m    266[39m [33;03mfixed inputs to an exact version obtained from authorized inspection.[39;00m
+[32m    267[39m [33;03m"""[39;00m
+[32m    268[39m [38;5;28;01mfrom[39;00m[38;5;250m [39m[34;01m.[39;00m[34;01m.[39;00m[34;01mlance[39;00m[34;01m.[39;00m[34;01mmodel[39;00m[38;5;250m [39m[38;5;28;01mimport[39;00m LanceScanSpec
+[32m--> [39m[32m270[39m query = [30;43mLanceScanSpec[39;49m[30;43m([39;49m
+[32m    271[39m [30;43m    [39;49m[30;43muri[39;49m[30;43m=[39;49m[30;43muri[39;49m[30;43m,[39;49m[30;43m [39;49m[30;43mversion[39;49m[30;43m=[39;49m[30;43mversion[39;49m[30;43m,[39;49m[30;43m [39;49m[30;43mcolumns[39;49m[30;43m=[39;49m[30;43mcolumns[39;49m[30;43m,[39;49m[30;43m [39;49m[30;43mfilter[39;49m[30;43m=[39;49m[30;43mfilter[39;49m[30;43m,[39;49m
+[32m    272[39m [30;43m    [39;49m[30;43mlimit[39;49m[30;43m=[39;49m[30;43mlimit[39;49m[30;43m,[39;49m[30;43m [39;49m[30;43mstorage_options[39;49m[30;43m=[39;49m[30;43mstorage_options[39;49m[30;43m,[39;49m
+[32m    273[39m [30;43m[39;49m[30;43m)[39;49m
+[32m    274[39m [38;5;28;01mreturn[39;00m Dataset(
+[32m    275[39m     LanceSource(
+[32m    276[39m         query,
+[32m   (...)[39m[32m    279[39m     LogicalPlan(), [38;5;28mself[39m._executor,
+[32m    280[39m )
+
+[36mFile [39m[32m<string>:9[39m, in [36m__create_fn__.<locals>.__init__[39m[34m(self, uri, version, columns, filter, limit, storage_options)[39m
+
+[36mFile [39m[32m/yzp/zhaozy/yangzepeng/0905/demiflow/demiflow/lance/model.py:38[39m, in [36mLanceScanSpec.__post_init__[39m[34m(self)[39m
+[32m     36[39m [38;5;28mobject[39m.[34m__setattr__[39m([38;5;28mself[39m, [33m"[39m[33mversion[39m[33m"[39m, _optional_positive_int([38;5;28mself[39m.version, [33m"[39m[33mversion[39m[33m"[39m))
+[32m     37[39m [38;5;28mobject[39m.[34m__setattr__[39m([38;5;28mself[39m, [33m"[39m[33mcolumns[39m[33m"[39m, normalize_columns([38;5;28mself[39m.columns))
+[32m---> [39m[32m38[39m [38;5;28mobject[39m.[34m__setattr__[39m([38;5;28mself[39m, [33m"[39m[33mfilter[39m[33m"[39m, [30;43mnormalize_filter[39;49m[30;43m([39;49m[30;43mself[39;49m[30;43m.[39;49m[30;43mfilter[39;49m[30;43m)[39;49m)
+[32m     39[39m [38;5;28mobject[39m.[34m__setattr__[39m([38;5;28mself[39m, [33m"[39m[33mlimit[39m[33m"[39m, _optional_positive_int([38;5;28mself[39m.limit, [33m"[39m[33mlimit[39m[33m"[39m))
+[32m     40[39m [38;5;28mobject[39m.[34m__setattr__[39m([38;5;28mself[39m, [33m"[39m[33mstorage_options[39m[33m"[39m, normalize_storage_options([38;5;28mself[39m.storage_options))
+
+[36mFile [39m[32m/yzp/zhaozy/yangzepeng/0905/demiflow/demiflow/lance/model.py:334[39m, in [36mnormalize_filter[39m[34m(value)[39m
+[32m    332[39m result = _normalized_text(value, [33m"[39m[33mfilter[39m[33m"[39m)
+[32m    333[39m [38;5;28;01mif[39;00m [38;5;28mlen[39m(result.encode([33m"[39m[33mutf-8[39m[33m"[39m)) > _MAX_FILTER_BYTES:
+[32m--> [39m[32m334[39m     [38;5;28;01mraise[39;00m InvalidLanceRequest([33m"[39m[33mfilter exceeds 64 KiB[39m[33m"[39m)
+[32m    335[39m [38;5;28;01mreturn[39;00m result
+
+[31mInvalidLanceRequest[39m: filter exceeds 64 KiB
+

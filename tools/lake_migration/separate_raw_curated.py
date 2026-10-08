@@ -13,15 +13,16 @@ from concurrent.futures import ThreadPoolExecutor
 import lance
 from PIL import Image
 from demiflow.lance.consolidate import consolidate_local_tables
-from demiflow.lance.records import LanceRecordStore
+from demiflow.lance.legacy import read_legacy_record
+from demiflow.execution.artifacts import immutable, read
 from demiflow.lance.refs import DatasetRef
 from demiflow.lance.registry import Catalog, ReleaseRegistry, write_registered_table
 from demiflow.lance.storage import schema_hash
 from demiflow.lance.maintenance import retire_tables
 from collect.material_schema import IMAGES as RAW_IMAGES, IMAGES_URI as RAW_URI, DOCUMENTS_URI
-from preparation.operaters.images import IMAGES, IMAGES_URI, IMAGE_CURATION
-from preparation.operaters.article import ARTICLES_URI
-from preparation.operaters.images import canonical, project_image, identity
+from preparation.images.catalog.operators.schema import IMAGES, IMAGES_URI, IMAGE_CURATION
+from preparation.articles.operators.article import ARTICLES_URI
+from preparation.images.catalog.operators.records import canonical, project_image, identity
 
 OP = 'raw_curated_separation_20260921'
 VISUAL_RELEASE = 'visual_curated_20260921'
@@ -32,7 +33,7 @@ OLD_URIS = ['images.lance','documents.lance','articles.lance']
 
 
 def journal(root):
-    return LanceRecordStore(root, f'datasets/records__{OP}.lance')
+    return (Path(root) / '_demiflow' / 'maintenance' / Path(f'datasets/records__{OP}.lance').stem.removeprefix('records__'), f'datasets/records__{OP}.lance')
 
 
 def register(root, uri, name):
@@ -68,12 +69,12 @@ def checksum(records):
 
 def prepare(root):
     root=Path(root); j=journal(root)
-    if not j.get('inputs'):
+    if not read(j[0] / ('inputs' + '.json')) if (j[0] / ('inputs' + '.json')).exists() else read_legacy_record(root, j[1], 'inputs'):
         refs=Catalog(root).registered()
-        j.put('inputs',{uri:max((r for r in refs if r.relative_uri==uri),key=lambda r:r.lance_version).to_dict() for uri in OLD_URIS})
-    inputs=j.get('inputs')
+        immutable(j[0] / ('inputs' + '.json'), {uri: max((r for r in refs if r.relative_uri == uri), key=lambda r: r.lance_version).to_dict() for uri in OLD_URIS})
+    inputs=read(j[0] / ('inputs' + '.json')) if (j[0] / ('inputs' + '.json')).exists() else read_legacy_record(root, j[1], 'inputs')
     def source(uri):return DatasetRef.from_dict(inputs[uri]).open(root)
-    if not j.get('raw_images'):
+    if not read(j[0] / ('raw_images' + '.json')) if (j[0] / ('raw_images' + '.json')).exists() else read_legacy_record(root, j[1], 'raw_images'):
         current=source('images.lance')
         # This saved version is the exact raw snapshot before attributes were added.
         candidates=[v['version'] for v in current.versions() if v['version'] < current.version]
@@ -89,16 +90,16 @@ def prepare(root):
         ds=consolidate_local_tables([original],root/RAW_URI)
         add_indexes(root,RAW_URI,[('sha256','BTREE'),('concepts','LABEL_LIST')])
         ref=register(root,RAW_URI,'raw_images')
-        j.put('raw_images',{'ref':ref.to_dict(),'original_version':original.version,'raw_files_and_masks_equal':True})
+        immutable(j[0] / ('raw_images' + '.json'), {'ref': ref.to_dict(), 'original_version': original.version, 'raw_files_and_masks_equal': True})
         print('raw images ready',ref.row_count,flush=True)
-    raw_ref=DatasetRef.from_dict(j.get('raw_images')['ref'])
-    if not j.get('documents'):
+    raw_ref=DatasetRef.from_dict((read(j[0] / ('raw_images' + '.json')) if (j[0] / ('raw_images' + '.json')).exists() else read_legacy_record(root, j[1], 'raw_images'))['ref'])
+    if not read(j[0] / ('documents' + '.json')) if (j[0] / ('documents' + '.json')).exists() else read_legacy_record(root, j[1], 'documents'):
         consolidate_local_tables([source('documents.lance')],root/DOCUMENTS_URI)
         add_indexes(root,DOCUMENTS_URI,[('document_id','BTREE'),('concepts','LABEL_LIST')])
         ref=register(root,DOCUMENTS_URI,'raw_documents')
-        j.put('documents',{'ref':ref.to_dict(),'same_immutable_files':True})
+        immutable(j[0] / ('documents' + '.json'), {'ref': ref.to_dict(), 'same_immutable_files': True})
         print('raw documents ready',ref.row_count,flush=True)
-    if not j.get('curated_images'):
+    if not read(j[0] / ('curated_images' + '.json')) if (j[0] / ('curated_images' + '.json')).exists() else read_legacy_record(root, j[1], 'curated_images'):
         counts={k:0 for k in ('descriptions','concept_matches','concept_assessments')}
         binding=canonical(raw_ref.to_dict())
         def projected():
@@ -121,26 +122,25 @@ def prepare(root):
         counts={k:sum(len(row[k] or []) for row in rows(ref.open(root),[k])) for k in counts}
         add_indexes(root,IMAGES_URI,[('sha256','BTREE'),('concepts','LABEL_LIST'),('published_concepts','LABEL_LIST'),('release_ids','LABEL_LIST')])
         ref=register(root,IMAGES_URI,'curated_images')
-        j.put('curated_images',{'ref':ref.to_dict(),'full_content_verified':actual,'annotation_counts':counts,
-            'source_binding':'migration snapshot; original historical runtime identity is preserved in provenance'})
+        immutable(j[0] / ('curated_images' + '.json'), {'ref': ref.to_dict(), 'full_content_verified': actual, 'annotation_counts': counts, 'source_binding': 'migration snapshot; original historical runtime identity is preserved in provenance'})
         print('curated ready',n,counts,flush=True)
-    if not j.get('articles'):
+    if not read(j[0] / ('articles' + '.json')) if (j[0] / ('articles' + '.json')).exists() else read_legacy_record(root, j[1], 'articles'):
         consolidate_local_tables([source('articles.lance')],root/ARTICLES_URI)
         add_indexes(root,ARTICLES_URI,[('article_id','BTREE'),('concept','BTREE'),('release_ids','LABEL_LIST')])
         ref=register(root,ARTICLES_URI,'articles')
         if checksum(rows(ref.open(root)))!=checksum(rows(source('articles.lance'))):raise ValueError('Article content mismatch')
-        j.put('articles',{'ref':ref.to_dict(),'full_content_verified':True})
+        immutable(j[0] / ('articles' + '.json'), {'ref': ref.to_dict(), 'full_content_verified': True})
         print('articles ready',ref.row_count,flush=True)
-    return {k:j.get(k) for k in ('raw_images','curated_images','documents','articles')}
+    return {k:read(j[0] / (k + '.json')) if (j[0] / (k + '.json')).exists() else read_legacy_record(root, j[1], k) for k in ('raw_images','curated_images','documents','articles')}
 
 
 def verify_pixels(root, after=False):
     from collect.assets import AssetReader
-    j=journal(root);raw=DatasetRef.from_dict(j.get('raw_images')['ref']);ds=raw.open(root)
-    cur=DatasetRef.from_dict(j.get('curated_images')['ref']).open(root)
+    j=journal(root);raw=DatasetRef.from_dict((read(j[0] / ('raw_images' + '.json')) if (j[0] / ('raw_images' + '.json')).exists() else read_legacy_record(root, j[1], 'raw_images'))['ref']);ds=raw.open(root)
+    cur=DatasetRef.from_dict((read(j[0] / ('curated_images' + '.json')) if (j[0] / ('curated_images' + '.json')).exists() else read_legacy_record(root, j[1], 'curated_images'))['ref']).open(root)
     keys=set(cur.to_table(columns=['sha256'],filter='array_length(published_concepts) > 0')['sha256'].to_pylist())
     visual_count=len(keys);figures=0
-    art=DatasetRef.from_dict(j.get('articles')['ref']).open(root)
+    art=DatasetRef.from_dict((read(j[0] / ('articles' + '.json')) if (j[0] / ('articles' + '.json')).exists() else read_legacy_record(root, j[1], 'articles'))['ref']).open(root)
     for row in rows(art,['illustrations']):
         for image in row['illustrations'] or []:keys.add(image['sha256']);figures+=1
     for fragment in ds.get_fragments():
@@ -159,30 +159,30 @@ def verify_pixels(root, after=False):
             if i%1000==0:print('pixels',i,'/',len(keys),flush=True)
     if errors:raise ValueError(str(errors))
     proof={'raw_ref':raw.to_dict(),'visual_unique':visual_count,'article_figures':figures,'verified_unique':len(keys),'errors':errors}
-    j.put('pixels_after' if after else 'pixels',proof)
+    immutable(j[0] / (('pixels_after' if after else 'pixels') + '.json'), proof)
     return proof
 
 
 def cutover(root):
     root=Path(root);j=journal(root)
-    if not j.get('acceptance') or not j.get('pixels'):raise ValueError('Acceptance and pixel proofs required')
-    if not j.get('retired'):
-        for uri,spec in j.get('inputs').items():
+    if not read(j[0] / ('acceptance' + '.json')) if (j[0] / ('acceptance' + '.json')).exists() else read_legacy_record(root, j[1], 'acceptance') or not read(j[0] / ('pixels' + '.json')) if (j[0] / ('pixels' + '.json')).exists() else read_legacy_record(root, j[1], 'pixels'):raise ValueError('Acceptance and pixel proofs required')
+    if not read(j[0] / ('retired' + '.json')) if (j[0] / ('retired' + '.json')).exists() else read_legacy_record(root, j[1], 'retired'):
+        for uri,spec in (read(j[0] / ('inputs' + '.json')) if (j[0] / ('inputs' + '.json')).exists() else read_legacy_record(root, j[1], 'inputs')).items():
             if (root/uri).exists() and lance.dataset(str(root/uri)).version!=spec['lance_version']:raise ValueError('Source advanced: '+uri)
         # Retire obsolete publication refs before registering successors. Their
         # selection IDs stay in immutable historical records inside the new tables.
         result=retire_tables(root,table_uris=OLD_URIS,release_ids=OLD_RELEASES,operation_id=OP+'_retirement',
             reason='User corrected scope: raw source tables must be separate from curated output; full value, byte and consumer verification passed')
-        j.put('retired',result)
-    refs={k:DatasetRef.from_dict(j.get(k)['ref']) for k in ('raw_images','curated_images','documents','articles')}
+        immutable(j[0] / ('retired' + '.json'), result)
+    refs={k:DatasetRef.from_dict((read(j[0] / (k + '.json')) if (j[0] / (k + '.json')).exists() else read_legacy_record(root, j[1], k))['ref']) for k in ('raw_images','curated_images','documents','articles')}
     for rid,kind,keys,selection in [(RAW_RELEASE,'materials',['raw_images','documents'],None),
         (VISUAL_RELEASE,'visual_materials',['curated_images'],'visual_images_20260921'),
         (ARTICLE_RELEASE,'knowledge',['articles'],'knowledge_articles_20260921')]:
         ReleaseRegistry(root).register(rid,release_kind=kind,table_refs=[refs[k] for k in keys],pipeline_run=OP,
             validation={'selection_release_id':selection,'audit_record':j.relative_uri})
     for ref in Catalog(root).registered():ref.open(root)
-    j.put('complete',{'all_surviving_refs_open':True,'old_tables_retired':OLD_URIS})
-    return j.get('complete')
+    immutable(j[0] / ('complete' + '.json'), {'all_surviving_refs_open': True, 'old_tables_retired': OLD_URIS})
+    return read(j[0] / ('complete' + '.json')) if (j[0] / ('complete' + '.json')).exists() else read_legacy_record(root, j[1], 'complete')
 
 
 if __name__=='__main__':

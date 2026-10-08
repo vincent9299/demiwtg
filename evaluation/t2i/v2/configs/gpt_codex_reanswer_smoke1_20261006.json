@@ -1,0 +1,63 @@
+{
+  "run": "gpt_codex_reanswer_smoke1_20261006",
+  "source": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i/v2/datasets/question_reviews__ready_positive2_reauthor_v17_review_20261006__question_review.lance",
+    "version": 2
+  },
+  "target": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answers__gpt_codex_reanswer_smoke1_20261006.lance",
+  "answers": [
+    {
+      "backend": "codex_exec",
+      "model": "Codex原生生图",
+      "seed": 42,
+      "parameters": {},
+      "concurrency": 1,
+      "queue_depth": 1,
+      "timeout_s": 1200,
+      "max_context_chars": 60000,
+      "max_reference_images": 5,
+      "revision": "codex-native-image-gpt6astra-xhigh-v1-20261006",
+      "codex_exec": {
+        "bin": "/root/.vscode-server-codex/.vscode-server/extensions/openai.chatgpt-26.5917.62051/bin/linux-x86_64/codex",
+        "reasoning_effort": "xhigh",
+        "web_search": "disabled",
+        "image_generation": true,
+        "artifact_store": {
+          "directory": "/yzp/zhaozy/yangzepeng/0905/objects"
+        },
+        "max_artifact_files": 1,
+        "max_artifact_bytes": 33554432
+      },
+      "answer_mode": "text_only"
+    },
+    {
+      "backend": "codex_exec",
+      "model": "Codex原生生图",
+      "seed": 42,
+      "parameters": {},
+      "concurrency": 1,
+      "queue_depth": 1,
+      "timeout_s": 1200,
+      "max_context_chars": 60000,
+      "max_reference_images": 5,
+      "revision": "codex-native-image-gpt6astra-xhigh-v1-20261006",
+      "codex_exec": {
+        "bin": "/root/.vscode-server-codex/.vscode-server/extensions/openai.chatgpt-26.5917.62051/bin/linux-x86_64/codex",
+        "reasoning_effort": "xhigh",
+        "web_search": "disabled",
+        "image_generation": true,
+        "artifact_store": {
+          "directory": "/yzp/zhaozy/yangzepeng/0905/objects"
+        },
+        "max_artifact_files": 1,
+        "max_artifact_bytes": 33554432
+      },
+      "answer_mode": "positive_images"
+    }
+  ],
+  "parallel_answers": true,
+  "stream_judging": false,
+  "arm_concurrency": 2,
+  "max_questions": 1,
+  "max_consecutive_failures": 1
+}

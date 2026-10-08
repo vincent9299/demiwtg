@@ -1,1 +1,2 @@
 trafilatura==2.0.0
+rdflib==7.4.0

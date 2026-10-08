@@ -1,0 +1,41 @@
+schema_version: demiflow_prompt_pack_v2
+prompts:
+  answer_codex:
+    version: t2i-answer-codex-2
+    model:
+      name: gpt-6-astra
+      transport: openai_compatible
+      base_url: https://api.malasci.com/v1
+      api_key_env: MODELHUB_API_KEY
+    schema_retries: 0
+    template: |
+      ## 图像作答
+
+      调用原生图像生成工具，按下方完整指令生成一张图像。将下方作答指令完整交给生图工具，保持其中的内容、数量、关系、风格和展示要求。只调用一次生图工具，交付这一张作答，不追加改图、自评或第二次生成。
+
+      如附有参考图，按作答指令中说明的用途交给生图工具；没有附图时按纯文本生成。不搜索或添加其他参考图，不用代码绘图，不把输入参考图直接作为作答。
+
+      ## 交付
+
+      把实际生成的最终图片原样复制到运行时提供的 artifact_directory，使用单层文件名，不创建链接。返回 status=generated、该文件的 artifact 名称和空字符串 reason。如果工具不可用、生成失败或不能导出图片，返回 status=failed、artifact=null，并在 reason 说明实际原因；不以文字说明或程序绘图代替作答。
+
+      ## 作答指令
+
+      {{ answer_text }}{{ images | image }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      required: [result]
+      properties:
+        result:
+          type: object
+          additionalProperties: false
+          required: [status, artifact, reason]
+          properties:
+            status:
+              type: string
+              enum: [generated, failed]
+            artifact:
+              type: [string, 'null']
+            reason:
+              type: string

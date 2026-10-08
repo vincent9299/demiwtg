@@ -1,717 +1,459 @@
-"""从固定输入读取出题单位，展开构题请求、检查响应，按配置写基准题表。"""
+"""config → run_pipeline：Codex 编辑出题 → 可选本地 Qwen 作答和 GPT 联合评审。
 
-from benchmark.edit.v2.operaters.transforms import (
-    combine_concept_materials,
-    build_visual_item,
-    apply_figure_review,
-    deduplicate_figures,
-    select_published_materials,
-    apply_visual_review,
-    build_text_item,
-    decode_article,
-    mark_missing_evidence,
-    build_figure_item,
-    decode_visual_record,
-    check_visual_identity,
-    filter_missing_figures,
-    paragraph_evidence,
-    check_figure_selection,
-)
+CLI 与 notebook 共用唯一入口。只读公共图文和可选原图池；所有写入属于 Edit V2。
+输入/设计每概念一行，候选每题一行；prompt 和业务响应规则由本目录维护。
+"""
+from demiflow.operator_llm.call_ref import journal_options as sqlite_call_options
+import argparse
+import json
+from pathlib import Path
+from time import perf_counter
 
 import lance
 import pyarrow as pa
-from demiflow.execution.artifacts import digest
-from demiflow.lance.refs import DatasetRef
-from demiflow.lance.registry import Catalog
-from demiflow.lance.storage import schema_hash
-from preparation.operaters.results import PIPELINE_STAGE_ROWS, to_stage_row, from_stage_row
-import argparse
-from project import resolve_root
-import json
-from pathlib import Path
-from demiflow.execution.artifacts import read, run_lock
-from functools import partial
 from demiflow import data
-from preparation.operaters.inputs import source_asset, attach_identity, material_review
-from benchmark.edit.v2.operaters.authoring import (
-    graph_version,
-    AuthoringRunFiles,
-    split_guard,
+from demiflow.agent import load_agent_config
+from demiflow.operator_api import definitions, tool_definition
+from demiflow.execution.artifacts import digest, run_lock
+from demiflow.operator_llm.parser import load_prompt_pack
+from demiflow.objects import LocalObjectStore, ObjectRef
+from project import resolve_root
+from benchmark.edit.v2.operators.authoring import prepare_request, check_response
+from benchmark.edit.v2.operators.images import image_object_ref
+from benchmark.edit.v2.operators.materials import cohort_input
+from benchmark.edit.v2.operators.probe import (
+    probe_config, candidate_row, answer_input, AnswerImage, prepare_review, check_review,
+    GENERATIONS, REVIEWS,
 )
-from benchmark.edit.v2.operaters.prompting import (
-    prompt_config, prompt_responses, prepare_design, apply_design,
-)
 
-DEFAULT_MODEL = {
-    "base_url": "http://127.0.0.1:8000/v1",
-    "model": "qwen3.8-27b",
-    "max_output_tokens": 4096,
-    "max_calls": 12,
-    "timeout_s": 240,
-}
-
-
-def config(
-    mode,
-    registry=None,
-    max_calls=12,
-    author_model=None,
-    author_effort=None,
-    *,
-    seed=0,
-    max_units=2,
-    task_types=('edit',),
-    max_context_chars=60000,
-    max_reference_images=16,
-    concepts=None,
-):
-    """配置概念范围、图片/上下文及调用预算；每概念固定选一张原图并出一道题。"""
-    if mode not in {'offline', 'local'}:
-        raise ValueError('mode must be offline or local')
-    if mode == 'local' and author_model not in {None, DEFAULT_MODEL['model']}:
-        raise ValueError('Local transport uses the configured local Qwen, not an offline author')
-    if max_units is not None and (type(max_units) is not int or max_units < 1):
-        raise ValueError('max_units must be a positive integer or None')
-    if any(type(value) is not int or value < 1 for value in (max_calls, max_reference_images)):
-        raise ValueError('Run budgets must be positive integers')
-    if list(task_types) != ['edit'] or max_context_chars < 100:
-        raise ValueError('Invalid task types or context limits')
-    if concepts is not None and (
-        not concepts or isinstance(concepts, str)
-        or any(not isinstance(c, str) or not c.strip() for c in concepts)
-        or len(set(concepts)) != len(concepts)
-    ):
-        raise ValueError('Concept selection must be nonempty unique names, or None for all')
-    return {
-        'mode': mode,
-        'split_registry': read(registry) if registry else None,
-        'concepts': list(concepts) if concepts is not None else None,
-        'seed': seed, 'max_units': max_units, 'task_types': list(task_types),
-        'max_context_chars': max_context_chars, 'max_reference_images': max_reference_images,
-        'author': {
-            'backend': mode,
-            'model': author_model or (DEFAULT_MODEL['model'] if mode == 'local' else 'external'),
-            'reasoning_effort': author_effort,
-        },
-        'model': {**DEFAULT_MODEL, 'max_calls': max_calls},
-    }
+DATASETS = Path('demiwtg/benchmark/edit/v2/datasets')
+PROMPTS = Path(__file__).parent / 'prompts'
+BLOB = pa.struct([('uri', pa.string()), ('sha256', pa.string())])
+REF = pa.struct([('uri', pa.string()), ('version', pa.int64())])
+CHECK = pa.struct([('check', pa.int64()), ('passed', pa.bool_()), ('evidence', pa.string())])
+SOURCE_CHECK = pa.struct([('status', pa.string()), ('observations', pa.list_(CHECK)), ('reason', pa.string())])
+QUESTION = pa.struct([
+    ('seed_image', pa.int64()), ('seed_image_id', pa.string()), ('source_image_edit', pa.string()),
+    ('source_image_checks', pa.list_(pa.string())), ('source_artifact', pa.string()),
+    ('source_image_check', SOURCE_CHECK), ('instruction', pa.string()),
+    ('test_points', pa.list_(pa.struct([('point', pa.string()), ('basis', pa.string()), ('criterion', pa.string())]))),
+])
+INPUTS = pa.schema([('concept', pa.string()), ('taxonomy', pa.list_(pa.string())),
+                    ('status', pa.string()), ('reason', pa.large_string()), ('references_json', pa.large_string())])
+DESIGNS = pa.schema([*INPUTS, ('question', QUESTION), ('seed_asset', BLOB), ('edit_source', BLOB),
+                     ('reasoning', pa.large_string()), ('call_json', pa.large_string())])
+QUESTIONS = pa.schema([('task_id', pa.string()), ('concept', pa.string()), ('taxonomy', pa.list_(pa.string())),
+                       ('status', pa.string()), *QUESTION, ('seed_asset', BLOB), ('edit_source', BLOB),
+                       ('references_json', pa.large_string()), ('reasoning', pa.large_string()),
+                       ('call_json', pa.large_string())])
+SUMMARY = pa.schema([('run', pa.string()), ('status', pa.string()), ('error', pa.large_string()),
+                     ('complete', pa.bool_()), ('config_json', pa.large_string()),
+                     ('counts', pa.list_(pa.struct([('status', pa.string()), ('count', pa.int64())]))),
+                     ('candidate_count', pa.int64()), ('inputs', REF), ('designs', REF), ('candidates', REF),
+                     ('generations', REF), ('reviews', REF), ('probe_json', pa.large_string())])
 
 
-def run_pipeline(
-    run, knowledge_runs, config, through="candidates", visual_runs=None, *, target_uri=None, write_mode='overwrite'
-):
-    """每概念一次请求完成选图及单题设计；待审题按 write_mode 写目标表，失败留设计表。"""
+def config(*, run, concepts=None, screening_source=None, cohort_source=None, sample_size=None, sample_seed=0,
+           article_source=None, visual_source=None,
+           target_uri=None, write_mode='overwrite', agent_config=None,
+           document_resources=None, max_generation_attempts=2, max_calls=None,
+           max_reference_images=8,
+           concurrency=1, queue_depth=1, progress_every=1, through='author', probe=None):
+    """只接固定 uri/version。显式概念、keep 抽样或固定审定名单三选一。
+
+    初始图片只接已审核的概念正例；场景候选图由 agent 按需检索获得。
+    max_calls 限制新增 Codex 会话数；max_generation_attempts 是作者指令中的工具尝试预算，
+    不冒充后端硬调用配额。timeout_s 为一次完整会话时限（秒）。
+    Codex 模型、工具、执行预算和任务均由单份 agent_config 提供；业务节点不覆盖。
+    """
+    if agent_config is None:
+        raise ValueError('Edit authoring requires agent_config; no fallback authoring backend')
+    agent_config = str(Path(agent_config).resolve())
+    agent = load_agent_config(agent_config)
+    if agent.environment.runtime != 'codex':
+        raise ValueError('Edit agent_config requires runtime: codex')
+    if agent.environment.resources is not None:
+        raise ValueError('Edit documents are local paths in the prompt, not operator resources')
+    model = agent.prompt_pack.prompt_definitions['design_question'].model.name
+    max_context_chars = agent.environment.max_context_chars
+    document_resources = document_resources or {}
+    if (not isinstance(document_resources, dict) or len(document_resources) > 4096
+            or len(json.dumps(document_resources, ensure_ascii=False)) > 8 * 1024**2):
+        raise ValueError('document_resources exceeds the finite concept/resource catalog budget')
+    for concept, resources in document_resources.items():
+        if not isinstance(concept, str) or not isinstance(resources, dict) or len(resources) > 64:
+            raise ValueError('document_resources maps concepts to at most 64 fixed local documents')
+        for name, document in resources.items():
+            if (not isinstance(name, str) or not name.strip() or not isinstance(document, dict)
+                    or not isinstance(document.get('url'), str)):
+                raise ValueError('Each document requires an identifier, document_ref and source url')
+            ref = ObjectRef(**document['document_ref'])
+            if not ref.uri.startswith('file:'):
+                raise ValueError('Edit documents require local file snapshots for Codex to read')
+            if 'eligible' in document and type(document['eligible']) is not bool:
+                raise ValueError('Document eligible must be a boolean')
+    for name, source in [('screening_source', screening_source), ('cohort_source', cohort_source), ('article_source', article_source),
+                         ('visual_source', visual_source)]:
+        if source is not None and (not isinstance(source, dict) or set(source) != {'uri', 'version'}
+                or not isinstance(source['uri'], str) or not source['uri'].strip()
+                or type(source['version']) is not int or source['version'] < 1):
+            raise ValueError(name + ' requires a fixed uri/version')
+    if cohort_source is not None:
+        if (any(value is not None for value in (concepts, screening_source, article_source, visual_source))
+                or document_resources or type(sample_size) is not int or not 1 <= sample_size <= 4096):
+            raise ValueError('cohort_source requires sample_size (1..4096) and excludes other material sources')
+    elif screening_source is not None:
+        if concepts is not None or type(sample_size) is not int or sample_size < 1:
+            raise ValueError('screening_source requires sample_size and excludes concepts')
+    elif (sample_size is not None or not isinstance(concepts, (list, tuple)) or not concepts
+          or any(not isinstance(c, str) or not c.strip() for c in concepts) or len(set(concepts)) != len(concepts)):
+        raise ValueError('Select nonempty unique concepts or screening_source/sample_size')
+    if type(sample_seed) is not int:
+        raise ValueError('sample_seed must be an integer')
+    if max_calls is None:
+        max_calls = sample_size if screening_source or cohort_source else len(concepts)
+        max_calls = min(max_calls, agent.max_requests)
+    for value in (max_generation_attempts, max_reference_images,
+                  max_context_chars, concurrency, queue_depth, progress_every):
+        if type(value) is not int or value < 1:
+            raise ValueError('Counts and budgets must be positive integers')
+    if type(max_calls) is not int or max_calls < 0:
+        raise ValueError('max_calls must be nonnegative')
+    if max_calls > agent.max_requests:
+        raise ValueError('max_calls can only tighten agent budgets.max_requests')
     if write_mode not in {'append', 'overwrite'}:
         raise ValueError('write_mode must be append or overwrite')
-    if through not in {'knowledge', 'design', 'candidates'}:
-        raise ValueError('through must be knowledge, design or candidates')
-    with run_lock(Path(run).parent / '_demiflow' / Path(run).name):
-        # 冻结来源表版本和出题配置；下面分别读取文章与视觉条目，再按 concept 关联。
-        files = AuthoringRunFiles(
-            run, knowledge_runs, "benchmark", config, graph_version("benchmark"), visual_runs=visual_runs
-        )
-        # 最终题表路径和写入模式独立配置；同名续跑固定输出配置。
-        target_uri = str((files.storage_root / target_uri).resolve()) if target_uri else None
-        files.records.put('output', {'uri': target_uri, 'write_mode': write_mode})
-        guard = split_guard(files)
-        pack, options = prompt_config(run, config)
-        # 1. 文章：从固定版本读取，保留审核通过的正文；历史阶段表只解码已有 payload。
-        article_sources = [
-            data.read_lance(
-                str(
-                    resolve_root()
-                    / (source['uri'] if 'uri' in source else source['dataset_ref']['relative_uri'])
-                ),
-                version=source['version'] if 'uri' in source else source['dataset_ref']['lance_version'],
-                filter=(
-                    "array_contains(release_ids, '" + source['release_id'].replace("'", "''") + "')"
-                    if source.get('release_id')
-                    else None
-                ),
-            )
-            .filter(lambda row: 'payload' in row or row['review_status'] == 'reviewed')
-            .map(decode_article)
-            .map(
-                lambda row, source=source: {
-                    'concept': row['concept'],
-                    'record': row,
-                    'source': source,
-                    'content_sha256': digest(row),
-                }
-            )
-            for source in files.knowledge_runs
-        ]
-        articles = (
-            article_sources[0].union(*article_sources[1:])
-            if article_sources
-            else data.from_arrow(pa.table({'concept': pa.array([], type=pa.string())}))
-        )
-        articles = (
-            (articles)
-            .reduce_by_key(
-                'concept',
-                lambda acc, row: {
-                    **(acc or row),
-                    'conflict': bool(
-                        acc and (acc['conflict'] or acc['content_sha256'] != row['content_sha256'])
-                    ),
-                },
-            )
-            .materialize()
-        )
-        conflicts = articles.filter(lambda row: row['conflict']).select_columns(['concept']).take(1)
-        if conflicts:
-            raise ValueError('Conflicting article publications: ' + conflicts[0]['concept'])
+    if through not in {'author', 'probe'}:
+        raise ValueError('through must be author or probe')
+    if through == 'probe' and (probe is None or write_mode != 'overwrite'):
+        raise ValueError('through=probe requires probe settings and run-owned overwrite outputs')
+    if probe is not None:
+        probe = probe_config(probe, maximum=sample_size if screening_source or cohort_source else len(concepts))
+    return dict(run=str(run), concepts=list(concepts) if concepts is not None else None,
+                screening_source=screening_source, cohort_source=cohort_source, sample_size=sample_size, sample_seed=sample_seed,
+                article_source=article_source, visual_source=visual_source,
+                target_uri=str(target_uri) if target_uri else None,
+                write_mode=write_mode, mode='codex', model=model, agent_config=agent_config,
+                agent_config_digest=agent.prompt_pack.content_hash,
+                document_resources=document_resources,
+                generate_source=bool(agent.options.get('codex_agent', {}).get('image_generation')),
+                max_generation_attempts=max_generation_attempts,
+                max_calls=max_calls, max_reference_images=max_reference_images, max_context_chars=max_context_chars,
+                timeout_s=agent.options.get('timeout_s', 900),
+                concurrency=concurrency, queue_depth=queue_depth, progress_every=progress_every,
+                through=through, probe=probe)
 
-        # 2. 图片：展开一图的各概念审核结果，只保留发布且审核通过的关系，再解码图片证据。
-        visual_sources = [
-            data.read_lance(
-                str(
-                    resolve_root()
-                    / (source['uri'] if 'uri' in source else source['dataset_ref']['relative_uri'])
-                ),
-                version=source['version'] if 'uri' in source else source['dataset_ref']['lance_version'],
-                filter=(
-                    "array_contains(release_ids, '" + source['release_id'].replace("'", "''") + "')"
-                    if source.get('release_id')
-                    else None
-                ),
-            )
-            .flat_map(
-                lambda row: (
-                    [row]
-                    if 'payload' in row
-                    else [
-                        {**assessment, 'sha256': row['sha256']}
-                        for assessment in row['concept_assessments'] or []
-                    ]
-                )
-            )
-            .filter(
-                lambda row, release_id=source.get('release_id'): 'payload' in row
-                or (
-                    row['published']
-                    and (release_id in row['release_ids'] if release_id else row['review_status'] == 'keep')
-                )
-            )
-            .map(decode_visual_record)
-            .map(
-                lambda row, source=source: {
-                    'concept': row['concept'],
-                    'record': row,
-                    'source': source,
-                    'content_sha256': digest(row),
-                }
-            )
-            for source in files.visual_runs
-        ]
-        visuals = (
-            visual_sources[0].union(*visual_sources[1:])
-            if visual_sources
-            else data.from_arrow(pa.table({'concept': pa.array([], type=pa.string())}))
-        )
-        visuals = (
-            (visuals)
-            .reduce_by_key(
-                'concept',
-                lambda acc, row: {
-                    'concept': row['concept'],
-                    'visual_records': (acc['visual_records'] if acc else []) + [row['record']],
-                    'visual_sources': (acc['visual_sources'] if acc else []) + [row['source']],
-                    'visual_materials': (acc['visual_materials'] if acc else [])
-                    + row['record'].get('visual_materials', []),
-                },
-            )
-            .materialize()
-        )
 
-        # 3. 按 concept 关联文章与图片；anti 分支保留只有图片的概念。
-        visual_inputs = visuals.join(articles.select_columns(['concept']), on='concept', how='anti').map(
-            lambda row: {
-                **row['visual_records'][0],
-                'knowledge': [],
-                'publication_kind': 'visual_materials',
-                'visual_materials': row['visual_materials'],
-                '_visual_sources': row['visual_sources'],
-                '_candidate_specs': [
-                    v for i, v in enumerate(row['visual_sources']) if v not in row['visual_sources'][:i]
-                ],
-                '_knowledge_sha256': digest(row['visual_records']),
-            }
-        )
-        source_materials = (
-            articles.join(visuals, on='concept', how='left').map(combine_concept_materials)
-        ).union(visual_inputs)
-        # 独立图片不受文章失败影响：先检查发布身份与支持范围，再验证图片来源和字节。
-        source_materials = source_materials.materialize()
-        if source_materials.filter(
-            lambda row: row.get('publication_kind') == 'visual_materials' and bool(row.get('knowledge'))
-        ).take(1):
-            raise ValueError('Visual-only publication cannot assert article knowledge')
-        visual_items = (
-            source_materials.flat_map(
-                lambda row: [
-                    {
-                        'concept': row['concept'],
-                        'parent': row,
-                        'visual': visual,
-                        'publication': visual.get('publication', {}),
-                        'image': visual.get('image', {}),
-                    }
-                    for visual in row.get('visual_materials', [])
-                ]
-            )
-            .map(lambda row: {**row, 'support': row['publication'].get('support', {})})
-            .map(check_visual_identity)
-            .map(lambda row: {**row, 'asset': source_asset(row['image']) if not row['issue'] else None})
-            .map(
-                lambda row: {
-                    **row,
-                    'issue': row['issue']
-                    or (None if row['asset'] else 'Independent visual pixels/provenance unavailable'),
+def run_pipeline(config):
+    """读公共交付而不重跑 preparation；完成落表才发布固定版本回执。
+
+    每个概念收到全部入选种子，独立上下文一次出题；实际图片只在需要请求时按 Blob 读入。
+    不足/缺图/合成失败/技术失败保留在 designs；仅原图已绑定且作者自检通过的题进入 candidates。
+    """
+    root = resolve_root()
+    if not config.get('agent_config') or config.get('mode') != 'codex':
+        raise ValueError('Edit authoring requires agent_config and the Codex agent runtime')
+    agent = load_agent_config(config['agent_config'])
+    if agent.prompt_pack.content_hash != config['agent_config_digest']:
+        raise ValueError('agent_config changed after config(); rebuild config to use the new complete declaration')
+    can_search = 'search_vectors' in agent.environment.operators
+    api_configuration = []
+    for name, api in definitions(agent.environment.operators)[0].items():
+        api_configuration.append({**tool_definition(api),
+            'fixed_arguments': agent.environment.operator_settings.get(name, {}).get('arguments', {}),
+            'platform_arguments': {key: getattr(agent.environment, source[7:])
+                if source.startswith('limits.') else {'bound_from': source}
+                for key, source in api['bindings'].items()},
+            'result_images': agent.environment.image_output(name)})
+    run = Path(config['run']).resolve()
+    if run.parent != (root / DATASETS).resolve() or run.suffix:
+        raise ValueError('run must be a suffix-free name under ' + str(root / DATASETS))
+    outputs = {name: str(run.parent / f'{name}__{run.name}.lance')
+               for name in ('inputs', 'designs', 'candidates', 'summary', 'calls', 'generations', 'reviews', 'probe_calls')}
+    if config['target_uri']:
+        outputs['candidates'] = str((root / config['target_uri']).resolve())
+    sources = {name: {'uri': str((root / source['uri']).resolve()), 'version': source['version']}
+               for name in ('screening_source', 'cohort_source', 'article_source', 'visual_source')
+               if (source := config[name]) is not None}
+    if len(set(outputs.values())) != len(outputs) or set(outputs.values()) & {s['uri'] for s in sources.values()}:
+        raise ValueError('Sources and each output table must have distinct paths')
+    started = perf_counter()
+    progress = {'done': 0, 'reused': 0}
+
+    def log(message):
+        print(f'[Edit V2][{run.name}][+{perf_counter() - started:.1f}s] {message}', flush=True)
+
+    def observe(row):
+        progress['done'] += 1
+        progress['reused'] += bool(json.loads(row['call_json']).get('reused'))
+        if progress['done'] % config['progress_every'] == 0 or row['status'] not in {'candidate', 'insufficient'}:
+            log(f'已处理={progress["done"]}/{len(names)}，响应复用={progress["reused"]}；'
+                f'{row["concept"]}: {row["status"]} {row["reason"]}')
+        return {name: row[name] for name in DESIGNS.names}
+
+    log(f'开始；mode={config["mode"]}，model={config["model"]}，并发={config["concurrency"]}；输出={run.parent}')
+    with run_lock(root / '_demiflow' / 'benchmark_edit_v2' / run.name):
+        # New criterion/probe columns require a fresh run; never silently rewrite old business schemas.
+        for name, schema in [('designs', DESIGNS), ('candidates', QUESTIONS), ('summary', SUMMARY),
+                             ('generations', GENERATIONS), ('reviews', REVIEWS)]:
+            if Path(outputs[name]).exists() and not lance.dataset(outputs[name]).schema.equals(schema, check_metadata=False):
+                raise ValueError('Incompatible existing ' + name + ' schema; use a new run/target')
+        # 本次开始即替换旧摘要；异常或中断不会把上轮成功回执冒充本次完成。
+        summary = {'run': run.name, 'status': 'running', 'error': '', 'complete': False,
+                   'config_json': json.dumps(config, ensure_ascii=False), 'counts': [], 'candidate_count': 0,
+                   'inputs': None, 'designs': None, 'candidates': None,
+                   'generations': None, 'reviews': None, 'probe_json': None}
+        data.from_items([summary]).write_lance(outputs['summary'], mode='overwrite', schema=SUMMARY)
+        try:
+            # 1. 固定 keep 名单，按 seed/name 稳定抽样；只传名称和全部 taxonomy。
+            if 'cohort_source' in sources:
+                # 固定名单已完成审定与选图；按生产者的 selection_rank 取前 N 项。
+                cohort = data.read_lance(**sources['cohort_source'],
+                    columns=['concept', 'concept_id', 'assessment_id', 'taxonomy', 'selection_rank',
+                             'positive_images', 'concept_record'],
+                    filter=f'selection_rank >= 1 AND selection_rank <= {config["sample_size"]}')
+                prepared_inputs = cohort.map(cohort_input, fn_kwargs={
+                    'source': sources['cohort_source'], 'max_reference_images': config['max_reference_images']}).materialize()
+                names = [row['concept'] for row in prepared_inputs.select_columns(['concept']).take(config['sample_size'] + 1)]
+                if len(names) != config['sample_size'] or len(set(names)) != len(names):
+                    raise ValueError('Cohort selected count or canonical names differ from the declared sample')
+                concepts = prepared_inputs.select_columns(['concept', 'taxonomy'])
+            elif 'screening_source' in sources:
+                selected = (data.read_lance(**sources['screening_source'], columns=['concept', 'taxonomy'],
+                    filter="status = 'screened' AND decision = 'keep'")
+                    .reduce_by_key('concept', lambda acc, row: {'concept': row['concept'],
+                        'taxonomy': list(dict.fromkeys((acc['taxonomy'] if acc else []) + (row['taxonomy'] or [])))})
+                    .map(lambda row: {**row, 'group': 'keep', 'rank': digest([config['sample_seed'], row['concept']])})
+                    .reduce_by_key('group', lambda acc, row: {'group': 'keep',
+                        'count': (acc['count'] if acc else 0) + 1,
+                        'selected': sorted((acc['selected'] if acc else []) + [row],
+                                           key=lambda item: (item['rank'], item['concept']))[:config['sample_size']]})
+                    .materialize())
+                counts = selected.take(1)
+                if not counts or counts[0]['count'] < config['sample_size']:
+                    raise ValueError('Not enough screened/keep concepts for sample_size')
+                concepts = selected.flat_map(lambda row: [
+                    {'concept': r['concept'], 'taxonomy': r['taxonomy']} for r in row['selected']]).materialize()
+                names = [r['concept'] for r in concepts.take_all()]
+            else:
+                names = config['concepts']
+                concepts = data.from_items([{'concept': name, 'taxonomy': []} for name in names])
+            log(f'本批={len(names)} 个概念；读取固定材料版本 {sources}')
+            empty = data.from_arrow(pa.table({'concept': pa.array([], type=pa.string())}))
+            # 小批概念只用于 reader 谓词；材料仍留在原生 Dataset 中聚合/关联。
+            quoted = ["'" + name.replace("'", "''") + "'" for name in names]
+            texts = empty
+            if 'article_source' in sources:
+                texts = (data.read_lance(**sources['article_source'], columns=['concept', 'content'],
+                    filter="review_status = 'reviewed' AND concept IN (" + ','.join(quoted) + ')')
+                    .flat_map(lambda row: [{'concept': row['concept'], 'text': {'kind': 'text',
+                        'title': topic['title'], 'text': paragraph}}
+                        for topic in row['content'] or [] for paragraph in topic['content']['paragraphs'] or []])
+                    .reduce_by_key('concept', lambda acc, row: {'concept': row['concept'],
+                        'texts': (acc['texts'] if acc else []) + [row['text']]}))
+            image_relations = empty
+            if 'visual_source' in sources:
+                image_relations = (data.read_lance(**sources['visual_source'],
+                    columns=['sha256', 'image_uri', 'concept_assessments'],
+                    filter=' OR '.join('array_contains(published_concepts, ' + c + ')' for c in quoted))
+                    .flat_map(lambda row: [{'concept': a['concept'], 'sha256': row['sha256'],
+                        'role': 'concept_reference', 'image_uri': row['image_uri'], 'object_ref': None}
+                        for a in row['concept_assessments'] or [] if a['concept'] in names
+                        and a['published'] and a['review_status'] == 'keep']))
+            images = (image_relations.reduce_by_key(['concept', 'sha256'], lambda acc, row: acc or row)
+                .reduce_by_key('concept', lambda acc, row: {'concept': row['concept'],
+                    'images': sorted((acc['images'] if acc else []) + [row], key=lambda r: r['sha256'])[:config['max_reference_images']]})
+                .map(lambda row: {'concept': row['concept'], 'images': [{'kind': 'image', 'role': im['role'],
+                    'object_ref': im['object_ref'] or image_object_ref(im)} for im in row['images']]}))
+            if 'visual_source' not in sources:
+                images = empty
+            # 2. 编号冻结到 inputs：文字材料号与实际图片号独立；缺图保留明确状态。
+            if 'cohort_source' not in sources:
+                prepared_inputs = (concepts.join(texts, on='concept', how='left').join(images, on='concept', how='left')
+                .map(lambda row: {'concept': row['concept'], 'taxonomy': row['taxonomy'],
+                    'status': 'ready' if row.get('images') or can_search else 'needs_seed_images',
+                    'reason': '' if row.get('images') or can_search else 'No seed images in the selected fixed sources',
+                    'references_json': json.dumps([{'number': i, **ref} for i, ref in enumerate(
+                        (row.get('texts') or []) + (row.get('images') or []) + [
+                            {'kind': 'document', 'document_id': key, 'document': value}
+                            for key, value in config['document_resources'].get(row['concept'], {}).items()], 1)], ensure_ascii=False)}))
+            prepared_inputs.write_lance(outputs['inputs'], mode='overwrite', schema=INPUTS)
+            inputs = {'uri': outputs['inputs'], 'version': lance.dataset(outputs['inputs']).version}
+            summary['inputs'] = inputs
+            log(f'输入表已提交 @{inputs["version"]}；开始出题，会话超时={config["timeout_s"]}s')
+            # 3. 唯一出题节点：agentmap + Codex，每概念独立会话。
+            definition = agent.prompt_pack.prompt_definitions['design_question']
+            result_schema = definition.response_schema['properties']['result']
+            question_schema = result_schema['properties']['question']
+            calls = {'root': str(root), 'relative_uri': str(DATASETS / f'calls__{run.name}.lance')}
+            options = {'sqlite_journal': sqlite_call_options(**calls)}
+            prepared = (data.read_lance(**inputs)
+                .map(prepare_request, fn_kwargs={'max_context_chars': config['max_context_chars'],
+                    'prompt_chars': len(definition.template.source), 'generate_source': config['generate_source'],
+                    'max_generation_attempts': config['max_generation_attempts'],
+                    'api_configuration': api_configuration}))
+            node = dict(config=agent, options=options, max_requests=config['max_calls'],
+                    inputs={'concept_material': 'concept_material', 'evidence_materials': 'evidence_materials',
+                            'positive_examples': 'positive_examples', 'execution_context': 'execution_context',
+                            'images': 'prompt_images', 'api_configuration': 'api_configuration'}, output='design_result',
+                    call_output='design_call', error_output='design_error', when=lambda row: row['status'] == 'ready',
+                    concurrency=config['concurrency'], queue_depth=config['queue_depth'])
+            designed = prepared.agentmap_async('design_question', **node)
+            checked = (designed
+                .map(check_response, fn_kwargs={'question_schema': question_schema, 'generate_source': config['generate_source']})
+                .map(observe))
+            if config['through'] == 'probe':
+                probe = config['probe']
+                review_pack = load_prompt_pack(PROMPTS / 'review.yaml')
+                review_definition = review_pack.prompt_definitions['review_answer']
+                review_calls = {'root': str(root), 'relative_uri': str(DATASETS / f'probe_calls__{run.name}.lance')}
+                review_options = {
+                    'sqlite_journal': {**sqlite_call_options(**review_calls), 'max_requests': probe['max_review_calls']},
+                    'timeout_s': probe['review_timeout_s'], 'verify_model': 'listed',
+                    'require_finish_reason_stop': True, 'trust_env': False, 'gateway': 'litellm',
+                    'request_options': {'max_tokens': probe['review_max_output_tokens'],
+                        'reasoning_effort': probe['review_reasoning_effort']},
                 }
-            )
-            .materialize()
-        )
-        visual_items = visual_items.map(build_visual_item)
-        visual_items = visual_items.map(apply_visual_review).materialize()
-        visual_groups = visual_items.reduce_by_key(
-            'concept',
-            lambda acc, row: {
-                'concept': row['concept'],
-                'visual_items': (acc['visual_items'] if acc else []) + ([] if row['issue'] else [row['item']]),
-                'visual_issues': (acc['visual_issues'] if acc else [])
-                + ([row['issue']] if row['issue'] else []),
-            },
-        )
-        # 文章只交付最终审核通过、且未预检失败的内容；每段文字必须有自己的引用或被选中的配图。
-        topics = (
-            source_materials.filter(
-                lambda row: row.get('publication_kind') != 'visual_materials'
-                and row.get('status') == 'reviewed'
-                and not row.get('audit', {}).get('preflight_error')
-            )
-        ).flat_map(
-            lambda row: [
-                {'concept': row['concept'], 'parent': row, 'topic': topic, 'topic_index': ti}
-                for ti, topic in enumerate(row.get('knowledge', []))
-            ]
-        )
-        # 同 image_id 的独立图片优先于文章配图；文章中重复放置的图片仅第一次成功交付后保留。
-        # 主题/段落位置来自文章原数组，用于保留材料编号的已有顺序，不引入概念排序约束。
-        article_items = (
-            topics.flat_map(
-                lambda row: [
-                    {**row, 'paragraph_index': pi, 'text': text}
-                    for pi, text in enumerate(row['topic'].get('content', {}).get('paragraphs', []))
-                ]
-            )
-            .map(paragraph_evidence)
-            .map(
-                lambda row: {
-                    **row,
-                    'source_ids': sorted(
-                        {
-                            sid
-                            for ref in row['refs']
-                            if 'text' in ref.get('kinds', [])
-                            for sid in ref.get('source_ids', [])
-                        }
-                    ),
-                    'passages': {p['source_id']: p for p in row['parent'].get('published_passages', [])},
-                }
-            )
-            .map(
-                lambda row: {
-                    **row,
-                    'missing': [sid for sid in row['source_ids'] if sid not in row['passages']],
-                }
-            )
-            .map(mark_missing_evidence)
-            .map(build_text_item)
-            .map(
-                lambda row: (
-                    {
-                        **row,
-                        'item': {
-                            **row['item'],
-                            'review': material_review(row['topic']['title'], row['parent']),
-                        },
-                    }
-                    if not row['issue']
-                    else row
-                )
-            )
-            .map(
-                lambda row: {
-                    'concept': row['concept'],
-                    'position': [row['topic_index'], 0, row['paragraph_index']],
-                    'item': row.get('item'),
-                    'issue': row['issue'],
-                }
-            )
-            .union(
-                topics.flat_map(
-                    lambda row: [
-                        {**row, 'placement': placement, 'placement_index': pi}
-                        for pi, placement in enumerate(row['topic'].get('content', {}).get('images', []))
-                    ]
-                )
-                .join(visual_groups, on='concept', how='left')
-                .filter(
-                    lambda row: row['placement']['image_id']
-                    not in [item['image_id'] for item in row.get('visual_items', [])]
-                )
-                .map(
-                    lambda row: {
-                        **row,
-                        'image': next(
-                            (
-                                image
-                                for image in row['parent'].get('published_images', [])
-                                if (image.get('image_id') or image.get('record', {}).get('image_id'))
-                                == row['placement']['image_id']
-                            ),
-                            None,
-                        ),
-                    }
-                )
-                .map(check_figure_selection)
-                .map(lambda row: {**row, 'asset': source_asset(row['image']) if not row['issue'] else None})
-                .map(
-                    lambda row: {
-                        **row,
-                        'issue': row['issue']
-                        or (
-                            None
-                            if row['asset']
-                            else {
-                                'image_id': row['placement']['image_id'],
-                                'reason': 'Final figure bytes/provenance unavailable',
-                            }
-                        ),
-                    }
-                )
-                .map(build_figure_item)
-                .map(
-                    lambda row: {
-                        **row,
-                        'support': (
-                            row['topic']['content']['paragraphs'][row['placement']['paragraph_index']]
-                            if type(row['placement'].get('paragraph_index')) is int
-                            and 0
-                            <= row['placement']['paragraph_index']
-                            < len(row['topic'].get('content', {}).get('paragraphs', []))
-                            else ''
-                        ),
-                    }
-                )
-                .map(apply_figure_review)
-                .map(
-                    lambda row: {
-                        'concept': row['concept'],
-                        'position': [row['topic_index'], 1, row['placement_index']],
-                        'item': row.get('item'),
-                        'issue': row['issue'],
-                    }
-                )
-            )
-            .reduce_by_key(
-                'concept',
-                lambda acc, row: {
-                    'concept': row['concept'],
-                    'entries': (acc['entries'] if acc else []) + [row],
-                },
-            )
-            .map(lambda row: {**row, 'entries': sorted(row['entries'], key=lambda item: item['position'])})
-            .map(deduplicate_figures)
-        )
-        delivered_materials = (
-            source_materials.join(visual_groups, on='concept', how='left')
-            .join(article_items, on='concept', how='left')
-            .map(
-                lambda row: {
-                    **row,
-                    'materials': row.get('visual_items', [])
-                    + [entry['item'] for entry in row.get('entries', []) if entry['item']],
-                }
-            )
-            .map(select_published_materials)
-        )
-        # 解码发布条目后，显式排除保留集材料；文字依赖的配图被排除时，文字也不交给作者。
-        version = digest(
-            {
-                "upstream": files.previous,
-                "stage": 'knowledge',
-                "extra": None,
-                "implementation": files.manifest.get("implementation"),
-            }
-        )
-        relative = str(
-            Path(files.relative).parent
-            / ('knowledge' + '__' + Path(files.relative).name + '__' + version + '.lance')
-        )
-        uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'knowledge' + "/" + version)
-        reused = entry is not None
-        if not reused:
-            if Path(uri).exists():
-                raise ValueError("Unfinished stage table; inspect it before retrying: " + uri)
-            (
-                delivered_materials.map(
-                    lambda row: {
-                        **{k: v for k, v in row.items() if k != '_candidate_specs'},
-                        'knowledge_version': files.knowledge_version,
-                    }
-                )
-                .map(
-                    lambda row: {
-                        **row,
-                        'materials': [
-                            {**item, 'knowledge_version': files.knowledge_version} for item in row['materials']
-                        ],
-                    }
-                )
-                .map(
-                    lambda row: {
-                        **row,
-                        'issues': row['delivery_issues']
-                        + [
-                            {'item_id': item['item_id'], 'reason': 'Formal-test reservation'}
-                            for item in row['materials']
-                            if not guard.allows_item(item, False)
-                        ],
-                        'materials': [item for item in row['materials'] if guard.allows_item(item, False)],
-                    }
-                )
-                .map(
-                    lambda row: {
-                        **row,
-                        'figure_ids': {
-                            item['image_id'] for item in row['materials'] if item['kind'] == 'image'
-                        },
-                    }
-                )
-                .map(filter_missing_figures)
-                .map(
-                    lambda row: {
-                        **row,
-                        'unit_id': 'unit_'
-                        + digest(['benchmark', 'edit', row['concept'], row['knowledge_version']])[:20],
-                        'branch': 'benchmark',
-                        'status': 'knowledge_available' if row['materials'] else 'needs_materials',
-                        'sampling_key': digest([config['seed'], row['concept']]),
-                        'edit_source': None,
-                    }
-                )
-                .map(lambda row: {**row, 'task_id': row['unit_id']})
-                .drop_columns(['figure_ids'])
-                .map(partial(to_stage_row, stage='knowledge', upstream_identity=files.previous, migrated_us=0))
-            ).write_lance(uri, mode='overwrite', schema=PIPELINE_STAGE_ROWS)
-            committed = lance.dataset(uri)
-            ref = DatasetRef(
-                relative[:-6],
-                relative,
-                committed.version,
-                files.schema_name,
-                files.schema_version,
-                schema_hash(PIPELINE_STAGE_ROWS),
-                committed.count_rows(),
-            )
-            Catalog(files.storage_root).register(ref)
-            entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'knowledge' + "/" + version, entry)
-        files.stages['knowledge'] = entry
-        (files.reused if reused else files.new).append('knowledge')
-        files.previous = {"stage": 'knowledge', "stage_version": version}
-        knowledge = data.read_lance(uri, version=entry["dataset_ref"]["lance_version"]).map(from_stage_row)
-        if through == "knowledge":
-            return files.finish()
-        scope = knowledge
-        # 每个选中概念保留一行；缺材料/缺图片也留状态，不在模型调用前丢失。
-        if config.get("concepts"):
-            scope = scope.filter(lambda r: r["concept"] in config["concepts"])
-        if config["max_units"] is not None:
-            ranks = scope.map(lambda r: (r["sampling_key"], r["unit_id"])).take_all()
-            selected_ids = {unit for _, unit in sorted(ranks)[: config["max_units"]]}
-            scope = scope.filter(lambda r: r["unit_id"] in selected_ids)
-        version = digest(
-            {
-                "upstream": files.previous,
-                "stage": 'design',
-                "extra": prompt_responses(run),
-                "implementation": files.manifest.get("implementation"),
-            }
-        )
-        relative = str(
-            Path(files.relative).parent
-            / ('design' + '__' + Path(files.relative).name + '__' + version + '.lance')
-        )
-        uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'design' + "/" + version)
-        reused = entry is not None
-        if not reused:
-            if Path(uri).exists():
-                raise ValueError("Unfinished stage table; inspect it before retrying: " + uri)
-            (
-                scope.map(partial(prepare_design, run=run, pack=pack))
-                .map_prompt_async(
-                    "design_question",
-                    config=pack,
-                    options=options,
-                    max_requests=config['model']['max_calls'],
-                    inputs={"payload": "prompt_payload", "images": "prompt_images"},
-                    output="design_result",
-                    call_output="design_call",
-                    error_output="design_error",
-                    when=lambda r: r["status"] == "knowledge_available",
-                    concurrency=1,
-                    queue_depth=1,
-                )
-                .map(apply_design, fn_kwargs={
-                    'run': run, 'guard': guard,
-                    'question_schema': pack.prompt_definitions['design_question'].response_schema[
-                        'properties']['result']['properties']['question'],
-                })
-                .map(partial(to_stage_row, stage='design', upstream_identity=files.previous, migrated_us=0))
-                .materialize()
-                .write_lance(uri, mode='overwrite', schema=PIPELINE_STAGE_ROWS)
-            )
-            committed = lance.dataset(uri)
-            ref = DatasetRef(
-                relative[:-6],
-                relative,
-                committed.version,
-                files.schema_name,
-                files.schema_version,
-                schema_hash(PIPELINE_STAGE_ROWS),
-                committed.count_rows(),
-            )
-            Catalog(files.storage_root).register(ref)
-            entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'design' + "/" + version, entry)
-        files.stages['design'] = entry
-        (files.reused if reused else files.new).append('design')
-        files.previous = {"stage": 'design', "stage_version": version}
-        designed = data.read_lance(uri, version=entry["dataset_ref"]["lance_version"]).map(from_stage_row)
-        if through == "design":
-            return files.finish()
-        # 每个成功概念直接投影成一道待审题；绑定已发送图片的原图引用，不再检索、定稿或审题。
-        version = digest(
-            {
-                "upstream": files.previous,
-                "stage": 'candidates',
-                "extra": None,
-                "implementation": files.manifest.get("implementation"),
-            }
-        )
-        relative = str(
-            Path(files.relative).parent
-            / ('candidates' + '__' + Path(files.relative).name + '__' + version + '.lance')
-        )
-        if target_uri:
-            relative = str(Path(target_uri).relative_to(files.storage_root))
-        uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'candidates' + "/" + version)
-        reused = entry is not None
-        if not reused:
-            if not target_uri and Path(uri).exists():
-                raise ValueError("Unfinished stage table; inspect it before retrying: " + uri)
-            (
-                designed.filter(lambda row: row['status'] == 'unreviewed').map(
-                    lambda row: {
-                        'task_id': 'edit_' + digest([row['concept'], row['question'], row['edit_source']['sha256'],
-                                                   [item['item_id'] for item in row['materials']]]),
-                        'concept': row['concept'], 'status': 'unreviewed', 'task_type': 'edit',
-                        **row['question'], 'edit_source': row['edit_source'],
-                        'source_material_number': row['source_material_number'],
-                        'materials': row['materials'], 'knowledge_version': row['knowledge_version'],
-                        'design_provenance': row['design_provenance'],
-                    }
-                ).map(
-                    partial(to_stage_row, stage='candidates', upstream_identity=files.previous, migrated_us=0)
-                )
-            ).write_lance(uri, mode=write_mode, schema=PIPELINE_STAGE_ROWS)
-            committed = lance.dataset(uri)
-            ref = DatasetRef(
-                relative[:-6],
-                relative,
-                committed.version,
-                files.schema_name,
-                files.schema_version,
-                schema_hash(PIPELINE_STAGE_ROWS),
-                committed.count_rows(),
-            )
-            Catalog(files.storage_root).register(ref)
-            entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'candidates' + "/" + version, entry)
-        files.stages['candidates'] = entry
-        (files.reused if reused else files.new).append('candidates')
-        files.previous = {"stage": 'candidates', "stage_version": version}
-        return files.finish()
+                probe_state = {'settings': probe, 'calls': review_calls,
+                    'review_model': review_definition.model.name, 'review_version': review_definition.version}
+                summary['probe_json'] = json.dumps(probe_state, ensure_ascii=False)
+
+                def drained(stats):
+                    summary.update({name: ref for name, ref in stats.outputs.items() if name in SUMMARY.names})
+                    summary['probe_json'] = json.dumps({**probe_state, 'miss': stats.miss}, ensure_ascii=False)
+                    data.from_items([summary]).write_lance(outputs['summary'], mode='overwrite', schema=SUMMARY)
+
+                # Preserve the existing online cache identity; this constant is not an execution mode.
+                identity = digest({'implementation': 'edit-inline-probe-1', 'offline': False,
+                    **{key: probe[key] for key in ('model', 'revision', 'base_url', 'image_size',
+                                                  'steps', 'run_seed', 'max_image_bytes')}})
+                log(f'流水探测：{probe["model"]} 编辑 → {review_definition.model.name} / xhigh')
+                # All four sinks belong to this run. A committed candidate immediately advances to answering.
+                stats = (checked
+                    .save_lance(outputs['designs'], schema=DESIGNS, key='concept', stage='designs', max_batch=1, queue_depth=1)
+                    .filter(lambda row: row['status'] == 'candidate').map(candidate_row)
+                    .save_lance(outputs['candidates'], schema=QUESTIONS, key='task_id', stage='candidates', max_batch=1, queue_depth=1)
+                    .map(answer_input)
+                    .map_cached(AnswerImage(probe, LocalObjectStore(root / 'objects')),
+                        cache_dir=root / '_demiflow' / 'benchmark_edit_v2' / run.name / 'generation_cache', version=identity,
+                        cache_when=lambda row: row['status'] not in {'budget_exhausted', 'pending_generation'})
+                    .map(lambda row: log(f'试作答：{row["concept"]} {row["status"]} {row["reason"]}') or row)
+                    .save_lance(outputs['generations'], schema=GENERATIONS, key='task_id', stage='generations',
+                        max_batch=1, queue_depth=1, output_ref='generation_source')
+                    .map(prepare_review, fn_kwargs={'max_context_chars': probe['review_max_context_chars'],
+                        'prompt_chars': len(review_definition.template.source)})
+                    .map_prompt_async('review_answer', config=review_pack, options=review_options,
+                        max_requests=probe['max_review_calls'], inputs={'payload': 'review_payload', 'images': 'review_images'},
+                        output='review_result', call_output='review_call', error_output='review_error',
+                        when=lambda row: row['review_status'] == 'ready',
+                        concurrency=probe['review_concurrency'], queue_depth=probe['review_queue_depth'])
+                    .map(check_review, fn_kwargs={'response_schema': review_definition.response_schema})
+                    .map(lambda row: log(f'评审：{row["concept"]} {row["review_status"]} {row["review_reason"]}') or row)
+                    .save_lance(outputs['reviews'], schema=REVIEWS, key='task_id', stage='reviews', max_batch=1, queue_depth=1)
+                    .run_stream(on_drain=drained))
+                refs = stats.outputs
+                # Only bounded keys/status summaries leave Dataset; model payloads stay in typed tables.
+                design_keys = data.read_lance(**refs['designs'], columns=['concept', 'status']).take(len(names)+1)
+                if len(design_keys) != len(names) or {r['concept'] for r in design_keys} != set(names):
+                    raise ValueError('Design outputs do not cover this run input exactly')
+                keys = {}
+                for stage in ('candidates', 'generations', 'reviews'):
+                    rows = data.read_lance(**refs[stage], columns=['task_id']).take(len(names)+1)
+                    keys[stage] = {r['task_id'] for r in rows}
+                    if len(rows) != len(keys[stage]) or len(rows) > len(names):
+                        raise ValueError('Duplicate or excess task IDs: ' + stage)
+                if keys['candidates'] != keys['generations'] or keys['candidates'] != keys['reviews']:
+                    raise ValueError('Probe stages do not cover the same candidate tasks')
+                counts = {}
+                for row in design_keys:
+                    counts[row['status']] = counts.get(row['status'], 0)+1
+                probe_counts = {}
+                for stage, field in (('generations', 'status'), ('reviews', 'review_status')):
+                    probe_counts[stage] = {r[field]: r['count'] for r in data.read_lance(**refs[stage], columns=[field])
+                        .reduce_by_key(field, lambda acc, row, field=field: {field: row[field],
+                            'count': (acc['count'] if acc else 0)+1}).take_all()}
+                complete = (not stats.miss and set(counts) <= {'candidate', 'insufficient'}
+                    and set(probe_counts['generations']) <= {'generated'}
+                    and set(probe_counts['reviews']) <= {'reviewed'})
+                state = {'complete': complete, 'counts': counts, 'candidate_count': len(keys['candidates']),
+                    'inputs': inputs, **refs, 'calls': calls, 'sources': sources,
+                    'probe': {**probe_state, 'counts': probe_counts, 'miss': stats.miss}}
+                summary.update(status='complete' if complete else 'incomplete', complete=complete,
+                    counts=[{'status': k, 'count': v} for k,v in counts.items()], candidate_count=state['candidate_count'],
+                    probe_json=json.dumps(state['probe'], ensure_ascii=False), **refs)
+                data.from_items([summary]).write_lance(outputs['summary'], mode='overwrite', schema=SUMMARY)
+                log(f'出题与探测落表：{counts}；{probe_counts}；complete={complete}')
+                return state
+            checked.materialize().write_lance(outputs['designs'], mode='overwrite', schema=DESIGNS)
+            designs_ref = {'uri': outputs['designs'], 'version': lance.dataset(outputs['designs']).version}
+            summary['designs'] = designs_ref
+            designs = data.read_lance(**designs_ref)
+            log(f'设计表已提交 @{designs_ref["version"]}；开始写候选')
+            # 4. 候选只交付已存在且作者检查通过的原图。内部种子/判据留审计列，不作为作答输入。
+            questions = (designs.filter(lambda row: row['status'] == 'candidate').map(candidate_row)
+                .materialize())
+            count = questions.count()
+            # 同目标写锁内按 task_id anti join，避免追加续跑重复；不冻结旧配置或复制旧业务封装。
+            with run_lock(root / '_demiflow' / 'edit_v2_targets' / digest(outputs['candidates'])):
+                delivery = questions
+                if config['write_mode'] == 'append' and Path(outputs['candidates']).exists():
+                    delivery = questions.join(data.read_lance(outputs['candidates'],
+                        version=lance.dataset(outputs['candidates']).version, columns=['task_id']), on='task_id', how='anti')
+                delivery.write_lance(outputs['candidates'], mode=config['write_mode'], schema=QUESTIONS)
+                candidates = {'uri': outputs['candidates'], 'version': lance.dataset(outputs['candidates']).version}
+            counts = {r['status']: r['count'] for r in designs.reduce_by_key('status', lambda acc, row: {
+                'status': row['status'], 'count': (acc['count'] if acc else 0) + 1}).take_all()}
+            state = {'complete': set(counts) <= {'candidate', 'insufficient'}, 'counts': counts, 'candidate_count': count,
+                     'inputs': inputs, 'designs': designs_ref, 'candidates': candidates, 'calls': calls, 'sources': sources}
+            summary.update(status='complete' if state['complete'] else 'incomplete', complete=state['complete'],
+                           counts=[{'status': k, 'count': v} for k, v in counts.items()],
+                           candidate_count=count, candidates=candidates)
+            data.from_items([summary]).write_lance(outputs['summary'], mode='overwrite', schema=SUMMARY)
+            log(f'完成落表；{counts}，本批候选={count}，complete={state["complete"]}（不表示独立审核通过）')
+            return state
+        except BaseException as exc:
+            summary.update(status='failed', error=f'{type(exc).__name__}: {exc}', complete=False)
+            # 摘要写失败也保留原始异常，不能覆盖其定位信息。
+            try:
+                data.from_items([summary]).write_lance(outputs['summary'], mode='overwrite', schema=SUMMARY)
+            except Exception as summary_error:
+                log(f'失败摘要写入失败：{summary_error}')
+            log(f'运行失败：{type(exc).__name__}: {exc}；本次未发布完成回执')
+            raise
 
 
 def main():
-    branch = "benchmark"
-    parser = argparse.ArgumentParser(
-        description=f"V2 independent EDIT {branch} pipeline (demiflow Python pipeline)"
-    )
-    parser.add_argument("--run", required=True, type=Path)
-    parser.add_argument('--sources', type=Path, help='JSON: articles/visuals 的 uri/version 列表')
-    parser.add_argument('--target', help='最终题表路径')
-    parser.add_argument(
-        '--write-mode', choices=['append', 'overwrite'], default='overwrite', help='目标表追加或覆盖'
-    )
-    parser.add_argument('--knowledge-runs', nargs='*', default=[])
-    parser.add_argument(
-        '--visual-runs',
-        nargs='*',
-        default=[],
-        help='Independent visual publication runs/releases; combined per concept with articles',
-    )
-    parser.add_argument(
-        "--split-registry", type=Path, help='Existing formal-test reservation; omitted means development only'
-    )
-    parser.add_argument('--concepts', nargs='+', help='Published concept scope; omitted means all')
-    parser.add_argument('--seed', type=int, default=0)
-    parser.add_argument('--max-units', type=int, default=2)
-    parser.add_argument('--task-types', choices=['edit'], nargs='+', default=['edit'])
-    parser.add_argument("--mode", choices=["offline", "local"], default="offline")
-    parser.add_argument('--through', choices=['knowledge', 'design', 'candidates'], default='candidates')
-    parser.add_argument('--max-context-chars', type=int, default=60000)
-    parser.add_argument('--max-reference-images', type=int, default=16)
-    parser.add_argument("--max-calls", type=int, default=12)
-    parser.add_argument("--author-model", help="Offline author identity recorded in the frozen run")
-    parser.add_argument("--author-effort", help="Offline author reasoning effort")
-    args = parser.parse_args()
-    if args.max_calls < 1:
-        parser.error("--max-calls must be positive")
-    sources = (
-        read(args.sources) if args.sources else {'articles': args.knowledge_runs, 'visuals': args.visual_runs}
-    )
-    result = run_pipeline(
-        args.run,
-        sources.get('articles', []),
-        config(
-            args.mode,
-            args.split_registry,
-            args.max_calls,
-            args.author_model,
-            args.author_effort,
-            concepts=args.concepts,
-            seed=args.seed,
-            max_units=args.max_units,
-            task_types=args.task_types,
-            max_context_chars=args.max_context_chars,
-            max_reference_images=args.max_reference_images,
-        ),
-        through=args.through,
-        visual_runs=sources.get('visuals', []),
-        target_uri=args.target,
-        write_mode=args.write_mode,
-    )
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--run', required=True)
+    parser.add_argument('--concept', action='append')
+    for name in ('screening', 'cohort', 'article', 'visual'):
+        parser.add_argument('--' + name + '-table')
+        parser.add_argument('--' + name + '-version', type=int)
+    parser.add_argument('--sample-size', type=int)
+    parser.add_argument('--sample-seed', type=int, default=0)
+    parser.add_argument('--target-uri')
+    parser.add_argument('--write-mode', choices=['overwrite', 'append'], default='overwrite')
+    parser.add_argument('--agent-config', required=True, help='唯一出题配置：完整 demiflow_agent_v2 YAML')
+    parser.add_argument('--document-resources-json', help='concept → 材料编号 → 固定本地 document_ref 与来源 url 的 JSON 文件')
+    parser.add_argument('--through', choices=['author', 'probe'], default='author')
+    parser.add_argument('--probe-json', help='本地 Qwen-Image-2.1 作答与 GPT 联合评审配置')
+    for name, default in [('max-generation-attempts', 2), ('max-calls', None), ('max-reference-images', 8),
+                          ('concurrency', 1), ('queue-depth', 1), ('progress-every', 1)]:
+        parser.add_argument('--' + name, type=int, default=default)
+    args = vars(parser.parse_args())
+    for name in ('screening', 'cohort', 'article', 'visual'):
+        uri, version = args.pop(name + '_table'), args.pop(name + '_version')
+        if bool(uri) != (version is not None):
+            parser.error(name + ' table and version must be supplied together')
+        args[name + '_source'] = {'uri': uri, 'version': version} if uri else None
+    document_file = args.pop('document_resources_json')
+    args['document_resources'] = json.loads(Path(document_file).read_text()) if document_file else None
+    probe_file = args.pop('probe_json')
+    args['probe'] = json.loads(Path(probe_file).read_text()) if probe_file else None
+    args['concepts'] = args.pop('concept')
+    args['run'] = resolve_root() / DATASETS / args['run']
+    run_pipeline(config(**args))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

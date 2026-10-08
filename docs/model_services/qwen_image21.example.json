@@ -1,0 +1,9 @@
+{
+  "command": ["env-qwen-image21/bin/python", "models/serve_z_image.py", "--backend", "qwen-image-2.1", "--model-path", "models/Qwen-Image-2.1", "--served-model-name", "Qwen-Image-2.1", "--port", "8005", "--offload", "--vae-tiling"],
+  "base_url": "http://127.0.0.1:8005/v1",
+  "gpus": [0],
+  "ready_path": "/health",
+  "expected_model": "Qwen-Image-2.1",
+  "startup_timeout_s": 900,
+  "shutdown_timeout_s": 30
+}

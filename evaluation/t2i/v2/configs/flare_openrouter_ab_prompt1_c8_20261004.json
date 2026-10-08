@@ -1,0 +1,58 @@
+{
+  "run": "flare_openrouter_ab_prompt1_c8_20261004",
+  "source": {
+    "uri": "demiwtg/benchmark/t2i/v2/datasets/candidates__ready_positive300_common85_codex_v16_probe_20261004.lance",
+    "version": 300
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/scores_ab__flare_openrouter_ab_prompt1_c8_20261004.lance",
+  "answers": [
+    {
+      "backend": "modelhub",
+      "model": "openrouter/openai/gpt-image-2.5-flare",
+      "provider_model": "openai/gpt-image-2.5-flare",
+      "api": "openrouter_images",
+      "base_url": "http://127.0.0.1:4002/openrouter",
+      "api_key_env": "MODELHUB_API_KEY",
+      "parameters": {
+        "aspect_ratio": "1:1",
+        "quality": "auto"
+      },
+      "timeout_s": 900,
+      "answer_mode": "text_only",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8
+    },
+    {
+      "backend": "modelhub",
+      "model": "openrouter/openai/gpt-image-2.5-flare",
+      "provider_model": "openai/gpt-image-2.5-flare",
+      "api": "openrouter_images",
+      "base_url": "http://127.0.0.1:4002/openrouter",
+      "api_key_env": "MODELHUB_API_KEY",
+      "parameters": {
+        "aspect_ratio": "1:1",
+        "quality": "auto"
+      },
+      "timeout_s": 900,
+      "answer_mode": "positive_images",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8
+    }
+  ],
+  "judge": {
+    "model": "malasci/gpt-6-astra",
+    "base_url": "http://127.0.0.1:4001/v1",
+    "api_key_env": "MODELHUB_API_KEY",
+    "timeout_s": 900,
+    "max_output_tokens": 32768,
+    "concurrency": 8,
+    "max_context_chars": 60000,
+    "reasoning_effort": "xhigh"
+  },
+  "stream_judging": true,
+  "arm_concurrency": 2,
+  "max_questions": 300,
+  "max_consecutive_failures": 3
+}

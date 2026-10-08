@@ -9,7 +9,8 @@ import json
 from pathlib import Path
 
 from demiflow.lance.registry import Catalog, write_registered_table
-from demiflow.lance.records import LanceRecordStore
+from demiflow.lance.legacy import read_legacy_record
+from demiflow.execution.artifacts import immutable, read
 from demiflow.lance.refs import DatasetRef
 from tools.lake_migration.material_history import (KNOWLEDGE_DRAFTS, IMAGE_OBSERVATIONS,
     CONCEPT_SELECTIONS, TAXONOMY_HISTORY, ANNOTATION_PROTOCOLS)
@@ -28,8 +29,8 @@ def rows(ds):
 
 def run(root):
     root = Path(root)
-    journal = LanceRecordStore(root, f'datasets/records__{OP}.lance')
-    specs = journal.get('inputs')
+    journal = (Path(root) / '_demiflow' / 'maintenance' / Path(f'datasets/records__{OP}.lance').stem.removeprefix('records__'), f'datasets/records__{OP}.lance')
+    specs = read(journal[0] / ('inputs' + '.json')) if (journal[0] / ('inputs' + '.json')).exists() else read_legacy_record(root, journal[1], 'inputs')
     if specs is None:
         refs = {}
         for ref in Catalog(root).registered():
@@ -40,11 +41,11 @@ def run(root):
         specs = {k: v.to_dict() for k, v in refs.items()}
         if len(specs) != 7:
             raise ValueError('Unexpected source inventory')
-        journal.put('inputs', specs)
+        immutable(journal[0] / ('inputs' + '.json'), specs)
 
     names = ('knowledge_drafts','image_observations','concept_selections','taxonomy_history',
              'annotation_protocols','image_descriptions','concept_matches')
-    completed = {name:journal.get(name) for name in names}
+    completed = {name:read(journal[0] / (name + '.json')) if (journal[0] / (name + '.json')).exists() else read_legacy_record(root, journal[1], name) for name in names}
     if all(completed.values()):
         for saved in completed.values(): DatasetRef.from_dict(saved['ref']).open(root)
         return completed
@@ -53,7 +54,7 @@ def run(root):
         return DatasetRef.from_dict(specs[uri]).open(root)
 
     def migrate(name, uri, schema, factory, expected_count):
-        saved = journal.get(name)
+        saved = read(journal[0] / (name + '.json')) if (journal[0] / (name + '.json')).exists() else read_legacy_record(root, journal[1], name)
         if saved:
             DatasetRef.from_dict(saved['ref']).open(root)
             return
@@ -74,7 +75,7 @@ def run(root):
             checked += batch.num_rows
         if next(expected, None) is not None:
             raise ValueError('Unexpected extra source rows')
-        journal.put(name, {'ref': ref.to_dict(), 'rows': count, 'all_typed_rows_verified': True})
+        immutable(journal[0] / (name + '.json'), {'ref': ref.to_dict(), 'rows': count, 'all_typed_rows_verified': True})
         print(name, count, 'verified', flush=True)
 
     draft = source(OLD + 'docs_draft.lance')
@@ -115,7 +116,7 @@ def run(root):
             selections.append(dict(selection_name=name, ordinal=i, concept=item['name'],
                 aliases=item.get('aliases', []), carriers=carriers,
                 taxonomy_paths=item.get('taxonomy', []), source_file=row['source_file']))
-    journal.put('selection_metadata', metadata)
+    immutable(journal[0] / ('selection_metadata' + '.json'), metadata)
     migrate('concept_selections', 'demiwtg/collect/datasets/concept_selections_20260906.lance',
             CONCEPT_SELECTIONS, lambda: iter(selections), len(selections))
 
@@ -164,7 +165,8 @@ def run(root):
             for row in rows(ds):
                 yield {**row, 'protocol_id':protocol_id}
         migrate(name, 'derived/annotations/' + name + '.lance', schema, annotated, ds.count_rows())
-    return {k:v for k,v in journal.items().items() if isinstance(v,dict) and 'ref' in v}
+    return {name: (read(journal[0] / (name + '.json')) if (journal[0] / (name + '.json')).exists()
+                   else read_legacy_record(root, journal[1], name)) for name in names}
 
 if __name__ == '__main__':
     run(resolve_root())

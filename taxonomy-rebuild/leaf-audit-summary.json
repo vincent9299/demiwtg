@@ -1,0 +1,17 @@
+{
+  "scope": "视觉版中动物、植物、真菌三个一级类目，共166条；按名称核查，不是图像鉴定或完整物种名录修订。",
+  "active_edition": "visual",
+  "counts": {
+    "明确高阶类群": 7,
+    "属级名称": 8,
+    "类群＋标本或遗存": 3,
+    "宽泛通名，未明确到种": 3,
+    "名称有歧义，待确认": 10
+  },
+  "named_records_in_audit": 31,
+  "higher_rank_or_broad_names": 21,
+  "ambiguous_names": 10,
+  "excluded_composite_forms": 31,
+  "unchanged_concept_names": true,
+  "caveat": "未列入问题清单不等于完成物种级科学核验；品种和部位不等于粗粒度科目。"
+}

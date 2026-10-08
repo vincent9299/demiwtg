@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+"""Project-local entry; only runs commands explicitly supplied by the caller."""
+import json
+from pathlib import Path
+import sys
+
+root = Path(__file__).resolve().parent.parent
+config = json.loads((root / ".demiforge/project.json").read_text(encoding="utf-8"))
+sys.path.insert(0, str((root / config["tool_root"]).resolve()))
+from demiurge.demiforge.development.cli import main
+raise SystemExit(main(["--project", str(root), *sys.argv[1:]]))

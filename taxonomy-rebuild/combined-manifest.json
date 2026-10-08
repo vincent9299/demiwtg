@@ -1,0 +1,36 @@
+{
+  "version": "visual-combined-v1",
+  "date": "2026-09-30",
+  "batches": [
+    {
+      "batch": "B1",
+      "path": "inputs/original-table.txt",
+      "sha256": "39c43ea8c2e5e3bf1c08f826d0183756a4a9e652cef545f4a973f470f5799d33",
+      "group_counts": [
+        25,
+        225,
+        214
+      ]
+    },
+    {
+      "batch": "B2",
+      "path": "inputs/batch2-original-table.txt",
+      "sha256": "ad2ab2f914b473d97dafedc978efb3ffd01cf6601d3195d6977d4e259809a62f",
+      "group_counts": [
+        151,
+        1204,
+        1620
+      ]
+    }
+  ],
+  "expected_unique_concepts": 3315,
+  "expected_occurrences": 3439,
+  "exact_label_overlap": 124,
+  "decision_file": "combined-decisions.json",
+  "decision_sha256": "60e3a0bd81a9c0de21eb8dbefadbc8da64116b6447be3210859d661909f9ca60",
+  "decision_author": "当前 Codex 会话",
+  "pipeline_model": null,
+  "pipeline_model_api_calls": 0,
+  "independent_semantic_review": false,
+  "species_identity_fully_verified": false
+}

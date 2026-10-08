@@ -1,5 +1,7 @@
 # Edit V1 · 基准构建
 
+> **项目强制规范**：本 pipeline 的开发、修改、运行配置与评审必须先阅读并遵守 [《项目 Pipeline 强制规范》](../../../PIPELINE_SPEC.md)。本 README 仅补充本流程的具体约定，不替代或放宽项目规范。
+
 `target_uri`（CLI `--target`）指定新运行的题目输出表。`write_mode='overwrite'`（默认）覆盖最终目标表，`write_mode='append'` 追加本次输出，不去重或更新已有行。notebook 显式配置 `WRITE_MODE`，CLI 使用 `--write-mode overwrite|append`。目标路径和写入模式随运行冻结；新增批次用新 `RUN_ID`，更新已有结果用覆盖。中间阶段表仍按原来的断点规则保存。
 
 ## demiflow 框架版（当前活动入口，v6.1 image-first 构题链）
@@ -23,3 +25,5 @@
 Python 流程入口在 `edit_v1_benchmark_pipeline.py`；debug notebook 是按需运行命令的地方，只保留导入、参数、调用和简单查看。
 
 数据表直接平铺本模块 `datasets/`，运行名/题目编号仅作表名后缀；不建立 runs 或 history 数据子目录。历史固定引用和共同路径根说明见仓库 `tools/lake_migration/FLAT_DATASETS.md`。
+
+2026-09-29 图片对象交付：新生成图和材料引用使用 object_ref={uri,sha256}；历史命名证据可只读回放，需要生成新的图片引用时须先将旧 artifacts 表迁移为含 object_uri 的新表。 生产图片已完成导出和原址切换，当前表使用独立对象 URI；固定历史输入的范围和已有判断保留。实际版本与退役回执见根目录 docs/image_objects_20260929.md。

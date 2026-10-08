@@ -1,6 +1,6 @@
 """从固定输入读取出题单位，展开构题请求、检查响应，按配置写基准题表。"""
 
-from benchmark.t2i.v1.operaters.transforms import (
+from benchmark.t2i.v1.operators.transforms import (
     expand_author_models,
     bind_question_metadata,
 )
@@ -11,18 +11,18 @@ from demiflow.execution.artifacts import digest
 from demiflow.lance.refs import DatasetRef
 from demiflow.lance.registry import Catalog
 from demiflow.lance.storage import schema_hash
-from preparation.operaters.results import PIPELINE_STAGE_ROWS, to_stage_row, from_stage_row
+from preparation.articles.operators.results import PIPELINE_STAGE_ROWS, to_stage_row, from_stage_row
 from project import historical_input
 import argparse
 import json
 from pathlib import Path
-from benchmark.t2i.v1.operaters.runfiles import T2IAuthoringRunFiles, graph_digest
+from benchmark.t2i.v1.operators.runfiles import T2IAuthoringRunFiles, graph_digest
 from functools import partial
 from demiflow import data
 from demiflow.execution.artifacts import run_lock
-from benchmark.t2i.v1.operaters.runfiles import fail
-from benchmark.t2i.v1.operaters.prompting import prompt_config, prepare_synth, apply_synth, prompt_responses
-from benchmark.t2i.v1.operaters.audit import AuditSynthesized
+from benchmark.t2i.v1.operators.runfiles import fail
+from benchmark.t2i.v1.operators.prompting import prompt_config, prepare_synth, apply_synth, prompt_responses
+from benchmark.t2i.v1.operators.audit import AuditSynthesized
 
 DEFAULT_MODEL = {
     "base_url": "http://127.0.0.1:8000/v1",
@@ -65,7 +65,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
         files = T2IAuthoringRunFiles(run, config, graph_digest(), samples)
         # 目标与模式随运行冻结，完成的输出在续跑时不重复写入。
         target_uri = str((files.storage_root / target_uri).resolve()) if target_uri else None
-        files.records.put('output', {'uri': target_uri, 'write_mode': write_mode})
+        files.records.save_configuration('output', {'uri': target_uri, 'write_mode': write_mode})
         pack, options = prompt_config(run, config)
         samples_stage = data.from_items(
             [
@@ -101,7 +101,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             / ('samples' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'samples' + "/" + version)
+        entry = files.records.stage('samples', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -123,7 +123,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'samples' + "/" + version, entry)
+            files.records.commit_stage('samples', entry, version, immutable=True)
         files.stages['samples'] = entry
         (files.reused if reused else files.new).append('samples')
         files.previous = {"stage": 'samples', "stage_version": version}
@@ -144,7 +144,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             / ('jobs' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'jobs' + "/" + version)
+        entry = files.records.stage('jobs', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -166,7 +166,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'jobs' + "/" + version, entry)
+            files.records.commit_stage('jobs', entry, version, immutable=True)
         files.stages['jobs'] = entry
         (files.reused if reused else files.new).append('jobs')
         files.previous = {"stage": 'jobs', "stage_version": version}
@@ -185,7 +185,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             / ('requests' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'requests' + "/" + version)
+        entry = files.records.stage('requests', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -207,7 +207,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'requests' + "/" + version, entry)
+            files.records.commit_stage('requests', entry, version, immutable=True)
         files.stages['requests'] = entry
         (files.reused if reused else files.new).append('requests')
         files.previous = {"stage": 'requests', "stage_version": version}
@@ -228,7 +228,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             / ('synthesize' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'synthesize' + "/" + version)
+        entry = files.records.stage('synthesize', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -264,7 +264,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'synthesize' + "/" + version, entry)
+            files.records.commit_stage('synthesize', entry, version, immutable=True)
         files.stages['synthesize'] = entry
         (files.reused if reused else files.new).append('synthesize')
         files.previous = {"stage": 'synthesize', "stage_version": version}
@@ -284,7 +284,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             / ('audit' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'audit' + "/" + version)
+        entry = files.records.stage('audit', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -306,7 +306,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'audit' + "/" + version, entry)
+            files.records.commit_stage('audit', entry, version, immutable=True)
         files.stages['audit'] = entry
         (files.reused if reused else files.new).append('audit')
         files.previous = {"stage": 'audit', "stage_version": version}
@@ -327,7 +327,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             / ('export' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'export' + "/" + version)
+        entry = files.records.stage('export', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -360,7 +360,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'export' + "/" + version, entry)
+            files.records.commit_stage('export', entry, version, immutable=True)
         files.stages['export'] = entry
         (files.reused if reused else files.new).append('export')
         files.previous = {"stage": 'export', "stage_version": version}
@@ -380,7 +380,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
         if target_uri:
             relative = str(Path(target_uri).relative_to(files.storage_root))
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'questions' + "/" + version)
+        entry = files.records.stage('questions', version)
         reused = entry is not None
         if not reused:
             if not target_uri and Path(uri).exists():
@@ -402,7 +402,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'questions' + "/" + version, entry)
+            files.records.commit_stage('questions', entry, version, immutable=True)
         files.stages['questions'] = entry
         (files.reused if reused else files.new).append('questions')
         files.previous = {"stage": 'questions', "stage_version": version}
@@ -420,7 +420,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             / ('gaps' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'gaps' + "/" + version)
+        entry = files.records.stage('gaps', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -442,7 +442,7 @@ def run_pipeline(run, samples, config, through="export", *, target_uri=None, wri
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'gaps' + "/" + version, entry)
+            files.records.commit_stage('gaps', entry, version, immutable=True)
         files.stages['gaps'] = entry
         (files.reused if reused else files.new).append('gaps')
         files.previous = {"stage": 'gaps', "stage_version": version}

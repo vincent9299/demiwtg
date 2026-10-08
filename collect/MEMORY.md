@@ -853,3 +853,43 @@ sg_cos_mirror 拉回件中够格的已升级到 `0905/datasets/`(湖侧唯一副
 - **回程三条路全堵**: ①r→湖直连 scp 仅 ~40-90KB/s/机(机器被其他会话任务占带宽+湖直连入站窄) ②COS 中继用户否决(费用) ③湖直连 wikimedia 仍被限速(惩罚 >3h 未解, 21KB/s;当日 16 连接触发的 429 教训:wikimedia 按 IP 长窗惩罚)
 - **当前挂起态**: 礼貌回收器 /tmp/fleet_puller.sh(每机单流+块级断点+全齐自动装配校验, fleet_parts/pull.log)慢速爬行;备用线 direct/aria2c 单连接慢爬;用户去找空闲机器
 - **教训**: pkill/pgrep -f 会匹配到包装 shell 自杀, 一律用 /proc cmdline 精确匹配或按 PID; 湖机 ssh ProxyCommand 走代理(/tmp/proxyconnect.py)已验证可用但带宽无改善
+
+## 2026-09-26 凌晨:本机大盘点+批准清理(~273G)
+**image_observations_before_loss_20260906.lance(1.4G,collect/datasets/)=09-06 早期丢失事件前的图片采集观测表快照**(done/dead 事实、错误、blob key,LANCE_PLAN 的 qid_image_observations 族;records/README 同源佐证),历史恢复证据,现役等价物在 images.v2 系。**已删(用户批准)**:sample_1m_images 131G、/root/wd_full 57G(损坏稀疏 dump 残件)、image_backfill/checkpoints 41G(工具壳保留,补下载交接引用)、sample_1m_transfer 余量 22.6G、_volatile_backup_0924 9.3G、rerun_v2_0925 6.4G、records 大件 2.8G(preloss 清单/data_sync,小件概念草稿保留)、batch4 1.9G(代码存 archive_docs/batch4_code)、镜像 .parts 94M。**保全**:loss_report_20260925(357M)+sg_migration_audit→datasets/archive/(补下载交接文档路径已更新)。**风险记账**:迁移终报称旧GZ桶 lhcos-cee54 已被用户 0925 手工删除→**84,184 张"可救"实已灭失但仍在账本**(rescuable 清单已存 archive,潜在二次出账);282,724 SG 未处理仍在旧桶 blob 区。/tmp 68G 易失件(qid_scan 49G 等)待认领。
+
+## 2026-09-26 中午:三任务交付(lance 化+备份总集+盘点)与 20260926b 并轨确认
+**lance 化(用户裁定"没必要的不 lance")**:`datasets/lance/` 四表全绿——images_v2(17,756,205 行,**基于 20260926b canonical**)、qid_edges(253,636,173)、qid_concepts_fat(7,826,266)、concept_xref(25,475,205);后两张**对齐既有迁移表规范**(source_file/source_row/raw_payload large_string/migrated_at_us 溯源列);两张 concept 表不合并,公共键 qid 查询时按需 join。坑:NT 整行正则兜不住 lang 标签/数据类型/空白节点(`_:` OWL 公理 8 行),需结构化剥壳。**备份总集 `backup_master_20260926/`(68G,全真实拷贝,用户要求去硬链)**:authority(权威元数据全家 48G)+lance_tables_pre_20260926(既有 11 表 5.7G 快照)+lance(四表 11G)+project_memory(92M)+audit(manifest_snapshots 4.7G);README=逐项"是什么/为什么来/怎么校验"+未入包清单(972G 管线 lance 表/模型/git/凭据不入)。**20260926b 并轨确认**:04:53 rerun_v2 会话合法发布 clean+出账合并版(md5 b21e0725,17,756,205 行,sha 集合与 20260926 等价,已登记),canonical 已指 b;我的 lance/备份总集建于其后天然对齐 b 版;三方 md5 边车已修为可移植相对路径(20260926=cf356e79/20260926b=b21e0725/0924e=2d9f7d13),谱系文档已更新。
+
+## 2026-09-26 午后:datasets 收敛为纯 lance 布局(用户拍板)
+**datasets/ 现状=15 张 lance 表+文档**:新增四表直放根目录且全 qid 前缀——qid_images_v2.lance(17,756,205)/qid_edges.lance(253,636,173)/qid_concepts_fat.lance(7,826,266)/qid_concept_xref.lance(25,475,205);备份总集 lance/ 同步改名。**非 lance 文本已从 datasets 删除**(逐项核对备份总集 authority/ 在位后才删;20260926b 日期件按"同版本只留最新"以 canonical 名留存备份),文本权威位置=backup_master_20260926/authority/,三份说明文档+README 已加位置变更注记。**注意**:datasets/wd_full/(10:02 出现,direct+fleet_parts,进行中)是另一会话在重下 Wikidata dump,**勿动勿备份**。后续恢复/重建文本件一律从备份总集取(带 md5 边车)。
+
+## 2026-09-26 午后:兄弟会话 datasets lance 化大清理波及本线(已恢复)
+- **事件**: 兄弟会话将 datasets/ 原始文本件全部转 lance 表后迁移/清理: 账本全家安全移驻 backup_master_20260926/authority/(images.v2=20260926b md5 b21e0725/出账版/lost/archive/20260924e), **但 rerun_v2_20260925/ 与 sample_1m_transfer/assets/ 被直接删除**(Linux 无回收站, 审计无搬迁记录)
+- **幸存输入**: /dev/shm/rerun_edges{,_post,_clean,_mrg} 四套边集, sg_cos_mirror qid_edges.tsv.gz+标签, _staging xref, batch2 清单, p31/ 目录, qid_edges/ 脚本目录, fleet 20 台机上 dump+抽取
+- **重建完成**(用户新规: 工作目录放 datasets/ 下带全名, 跑完只留最终结果): datasets/wd_taxonomy_upgrade_20260926/; p31_all/p279_all/ext 从 qid_edges 再生(ext 47,988,965 行与原版逐位一致), haveimg 从 shm edges 再生 5,232,252; v6 重建=**3,552 类/零超限(max 4,997)/92%区间**(与丢失版 3,657 的差异=p31_all 重抽值序致首值主类微差, 同方法同约束自洽)
+- **护航状态**: hub A(r2) 1-10 段完成(watcher 于 r11 边界精确收刀), hub B(r4) 解析 11-20 段中(384M@r15); cron 每 15 分钟巡航, B 完成后自动: r2 内网合并 sort -u → gzip 回传湖 → ext+ext2 合并 → v6r2 重切 → 质量报告
+- **教训**: 两会话并行时工作目录要么放 datasets/ 带全名前缀, 要么及时归档; 一次性大产物(canonical 账本)务必在协调登记表留 md5 以便事后核对
+
+## 2026-09-26 下午:fleet 抽取完成 → v6r3 分类达标(护航全程)
+- **fleet 双 hub 流式抽取完成**: A(r2,1-10段) watcher 精确收刀 + B(r4,11-20段) exit=0; r2 内网合并 sort -u = **80,977,015 条唯一边**(P27/P17/P577/P170, md5 988763f7); 回传用 split 19 块并行 scp(分块校验+补拉+md5 终验逐位一致)
+- **v6r2→v6r3 迭代**: v6r2(四新谓词进瀑布)=4,734类/分段21.8%; 发现重建 p31_all 值序致未上卷 234k(旧体系仅5k) → v6r3 加**多值回退**(P31 候选依次试到能上卷)+**12条人工桥**(bridge_p279.tsv, 按旧体系桶位: 设施→地理位置/化学实体类→商品/Unicode→软件等) → 未上卷 102k(2.0%真长尾)
+- **v6r3 终态**: **4,826 类/零超限(max 4,995)/85%区间内[200,5000]/分段类 20.3%(起点36.1%)/零纯QID标签**; 残留分段大户=未归类长尾102k/畫作·无体裁值95k(艺术谓词耗尽)/无职业无国籍人类40k/法國市鎮35k
+- **成果落位** datasets/wd_taxonomy_upgrade_20260926/(README 含再生路径): cut_categories_v6r3+qid_cut_map_v6r3+qid_edges_all(1.29亿行)+ext2.gz(唯一副本)+balance_cut5x.py+桥表; 中间件(p31_all等)已按用户规清理(5分钟可再生)
+- 护航 cron 已撤; 下一步待用户拍板: ①v6r3 类目体系是否收编为采样框架 ②出 manifest_1m_v4(口径已定: 全图/不限短边/不封顶)
+
+## 2026-09-26 傍晚:分类终版定稿 + v4 采样交付(用户裁定收敛)
+- **用户三条裁定**: ①严禁重新下载,等 r2/r4 恢复(其 sshd 趴了需控制台重启,第二轮 8 谓词抽取取消) ②不再追细分,剩余分段类少采即可(不影响多样性) ③r2/r4 留给本线但暂不可用
+- **终版分类 cut_categories_final**: 4,951 类/零超限(max 4,997)/分段 17.7%(起点36.1%)/零QID标签/匿名污染(佚名Q4233718+Art UK网站Q105003187 当无值)清零; 段大户留存=畫作·作者其他65k/未归类长尾50k/无职业无国籍40k/法國市鎮35k
+- **v4 采样落地**(口径=全图/不限短边/不封顶, 4,204类≥200水填241, seed=42): 1,003,493 实体/3,707,927 图/4.731TB; 图/实体均值3.70; 桶级人类26.6%/建筑19.3%/生物8.6%/艺术6.9%; 图源 wm26.8%/sdc26.4%/inat17.4%/si15.8% 四源均衡
+- **工作目录终态** datasets/wd_taxonomy_upgrade_20260926/(4.0G): manifest_1m_v4.tsv+sample表+cut_final+qid_edges_all+ext2.gz+脚本+桥表; 中间版本已清
+- fleet 状态: r2/r4 sshd 死待重启(重启后 dump 20 段仍全在, 第二轮谓词想跑随时可恢复); 其余 18 台空闲, r5/r13 救援下载已按指令终止并清理
+
+## 2026-09-27:五桶终账收官,机器全退(迁移/转储/补采会话)
+
+**终态**:五桶并存=shcos(5,643,303/6.84TB,转储终点)+sgcos(9,502,656/~11TB,图片库+补采kb/与变体kbvar/)+gzcos(2,995,455/4.50TB)+oldsg(3,870,829/4.85TB,未转储残留)+oldgz(84,027/0.12TB,唯一副本勿删)。总索引`cos_ledger_20260926/final/sha_bucket_index_FINAL.tsv`(18,879,084唯一sha→桶)。补采三账:正品659,086→sgcos kb/,变体23,188→kbvar/(sdc缩略图重渲染,原sha映射在变体账),死信~15.7万=灭失(不在任何桶)。r/rr 40台+tb 30台全退。**下一棒交接:`HANDOFF_20260927_五桶总账合并.md`**(canonical加cos_loc存储位置字段+变体/灭失附属件)。教训存档:护航重启必须"二次确认+只补拉永不杀"(代理抖动误判会连环杀健康worker);pkill模式含启动文本=自杀;轻量机公网带宽可能被限近零(TCP通载荷死)。
+
+## 2026-09-27:images.v2 20260927 合并发布(回账+变体转正+cos_loc)
+按 HANDOFF_20260927_五桶总账合并(用户两次修订规则:变体直接转正;sha256=变体实际值——内容寻址底线,398 个变体字节与库内已有内容相同的实证支持此裁定)。**canonical=18,437,871 行**(底本 20260926b 17,756,205+正品 659,086+变体转正 22,580),md5 `b3cab650…`(2,352,589,339B),位于 backup authority/。**cos_loc 五字段全表覆盖**:{tag,bucket,domain,key,key_pattern},取图=https://<domain>/<key>;shcos 双键族用真实键字典,其余桶由 blob_path 派生。**账目终局闭合**:887,403=659,086+22,580+348(撞库跳过,内容已在库)+205,389 余失(157,178 死链/弃采+48,211 无URL);260=done∩变体重叠按正品优先。附属件:variants 23,188 三态(22,580 promoted/348 content_already/260 exact_preferred)/lost_remaining/no_loc 437(五桶均无,待查)。抽验:五桶 HEAD 100/100,变体 HEAD 10/10+下载复算 3/3。**lance qid_images_v2 已重建**于 collect/datasets(18,437,871 行,含 cos_loc struct 列+orig_sha256+variant_of_lost_sha)。坑:①pgrep 自杀坑新形态——heredoc 内含明文脚本名,kill $(pgrep -f) 自杀致补丁静默失败,杀进程必须独立命令;②gzcos 键为裸 blobs/ 前缀(无前置斜杠),过滤条件勿用 /blobs;③死信账文件(redl_fail)交接列了但未交付,余失原因以 nourl 清单区分。回滚链:0924e→20260926b→20260927(旧 20260926 cf 版按用户"只留最新"裁定删除)。
+
+## 2026-09-27 午后:副本去重 + qid_concepts 主表规格扩充
+**副本纪律(用户拍板:原始文本只留备份总集一份)**:sg_cos_mirror 整目录删除(43G 平行副本,删前逐项核对 backup authority/audit/project_memory 全在位,rebuild_report 双处 md5 一致);_staging/raw 残件清空。备份总集 70G 成为唯一文本持有处。**qid_concepts 主表规格更新**(collect/datasets/qid_concepts_使用与合并说明.md,给 Codex):①澄清 p18/P373=采集期候选种子指针(非已下载件引用);②新增 image_shas/images_n(自 qid_images_v2 倒排,30,114,293 边,成员有图 2,529,218/7,826,266);③label_en/zh 标签兜底(qid_class_labels 4.47M qid,∩成员 320,762,仅 title 为空时填);④第二阶段元数据候选清单(qid_edges 度/pages 聚合/meta_dumps 间接 join;**dump 重抽不可行——156GB 残件已损坏**)。验收从五项扩为七项。

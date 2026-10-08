@@ -1,0 +1,276 @@
+{
+  "master": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/datasets/master_concepts.lance",
+    "version": 4,
+    "counts": {
+      "rows": 385292,
+      "name_has_edge_whitespace": 0,
+      "empty_names": 0,
+      "alias_entries": 609186,
+      "rows_with_aliases": 292566,
+      "self_alias_rows": 17298,
+      "carrier_entries": 770574,
+      "rows_with_carriers": 385292,
+      "paths_with_empty_segment": 0,
+      "cross_root_rows": 15355
+    },
+    "distinct_path_strings": 16692,
+    "path_depth_by_occurrence": {
+      "1": 1,
+      "2": 53767,
+      "3": 128173,
+      "4": 133569,
+      "5": 79811,
+      "6": 29187,
+      "7": 13308,
+      "8": 5658,
+      "9": 2685,
+      "10": 471,
+      "11": 145
+    },
+    "path_count_per_concept": {
+      "1": 348152,
+      "2": 25574,
+      "3": 6449,
+      "4": 2428,
+      "5": 1089,
+      "6": 566,
+      "7": 364,
+      "8": 253,
+      "9": 137,
+      "10": 82,
+      "11": 61,
+      "12": 33,
+      "13": 32,
+      "14": 16,
+      "15": 11,
+      "16": 10,
+      "17": 6,
+      "18": 7,
+      "19": 1,
+      "20": 4,
+      "21": 2,
+      "22": 2,
+      "23": 3,
+      "26": 1,
+      "27": 3,
+      "42": 1,
+      "53": 1,
+      "54": 1,
+      "60": 3
+    },
+    "roots_per_concept_deduplicated": [
+      [
+        "人造物体",
+        94531
+      ],
+      [
+        "建筑与基础设施",
+        37190
+      ],
+      [
+        "植物",
+        31858
+      ],
+      [
+        "动物",
+        30956
+      ],
+      [
+        "行为动作",
+        27412
+      ],
+      [
+        "食物",
+        24595
+      ],
+      [
+        "人物与人体",
+        23901
+      ],
+      [
+        "文化艺术与媒介",
+        22412
+      ],
+      [
+        "场景",
+        13215
+      ],
+      [
+        "自然景观",
+        11001
+      ],
+      [
+        "文字与信息图形",
+        10726
+      ],
+      [
+        "属性与状态",
+        10369
+      ],
+      [
+        "交通工具",
+        9607
+      ],
+      [
+        "组织机构与社会事件",
+        8984
+      ],
+      [
+        "声音",
+        8967
+      ],
+      [
+        "品牌与产品",
+        8535
+      ],
+      [
+        "知识与学科",
+        5991
+      ],
+      [
+        "材料与物质",
+        5479
+      ],
+      [
+        "时间数量与度量",
+        4842
+      ],
+      [
+        "节日与符号",
+        4228
+      ],
+      [
+        "真菌与微生物",
+        2319
+      ],
+      [
+        "体育与游戏",
+        2111
+      ],
+      [
+        "历史与时代",
+        1565
+      ],
+      [
+        "地理与地点",
+        1342
+      ],
+      [
+        "数字与互联网文化",
+        1057
+      ],
+      [
+        "政治、法律与社会制度",
+        518
+      ],
+      [
+        "医学与健康",
+        465
+      ],
+      [
+        "民族、语言与文化",
+        278
+      ],
+      [
+        "宗教与信仰",
+        22
+      ]
+    ],
+    "distinct_alias_strings": 567586,
+    "alias_strings_used_by_multiple_rows": 33283,
+    "alias_strings_equal_to_a_master_name": 37550,
+    "largest_path_counts": [
+      [
+        60,
+        "雌鸟"
+      ],
+      [
+        60,
+        "雄鸟"
+      ],
+      [
+        60,
+        "幼鸟"
+      ],
+      [
+        54,
+        "指名亚种"
+      ],
+      [
+        53,
+        "繁殖羽"
+      ],
+      [
+        42,
+        "薄荷"
+      ]
+    ],
+    "elapsed_seconds": 3.9
+  },
+  "images": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/datasets/images.lance",
+    "version": 16,
+    "counts": {
+      "rows": 2164671,
+      "concept_array_entries": 2899561,
+      "published_concept_array_entries": 9563,
+      "rows_with_uri": 2127760,
+      "rows_with_published_concepts": 9557,
+      "entries_from_rows_ge1000": 133731,
+      "rows_ge1000": 12
+    },
+    "concept_array_length_histogram": {
+      "2": 156148,
+      "1": 1924950,
+      "3-10": 74920,
+      "11-100": 7113,
+      "0": 1258,
+      "101-1000": 270,
+      "1001+": 12
+    },
+    "availability": {
+      "available": 2127760,
+      "metadata_only": 36911
+    },
+    "largest_concept_arrays": [
+      [
+        65462,
+        "a9774fe50ec7c3b29c6460dabd15976e0f8081c6adafc9437e01d9f7b0ad0cb0"
+      ],
+      [
+        45404,
+        "4b9f9694bc72584f4ca57e943270385ec6325936990d309a9bfdf9a0a6e6d7aa"
+      ],
+      [
+        4838,
+        "04b2aa69c4a7b46743989c9bd10030e8eda2a98901b76b7f40f9dc8484e7f398"
+      ],
+      [
+        4803,
+        "f007762dcf3865e3ec7358654f76df695d580c8d90cbe3dca932e5974ee9e072"
+      ],
+      [
+        2682,
+        "76299b1694dd009a10a75742927e12471a81475a629c61b567bce9b92d67e24c"
+      ]
+    ],
+    "count_note": "array element counts, not uniqueness-checked relations; no pixels read",
+    "elapsed_seconds": 2.82
+  },
+  "articles": {
+    "version": 8,
+    "rows": 53091,
+    "distinct_concept_names": 53032,
+    "names_in_master": 53032,
+    "review_status": {
+      "unreviewed": 52980,
+      "reviewed": 111
+    },
+    "article_kind": {
+      "summary": 52980,
+      "knowledge": 111
+    },
+    "elapsed_seconds": 0.12
+  }
+}

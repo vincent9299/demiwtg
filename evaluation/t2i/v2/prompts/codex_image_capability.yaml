@@ -1,0 +1,51 @@
+schema_version: demiflow_agent_v2
+runtime: codex
+model:
+  name: gpt-6-astra
+operators: []
+budgets:
+  max_requests: 1
+  max_context_chars: 12000
+options:
+  timeout_s: 600
+  codex_agent:
+    bin: /root/.vscode-server-codex/.vscode-server/extensions/openai.chatgpt-26.5917.62051/bin/linux-x86_64/codex
+    reasoning_effort: xhigh
+    model_revision: malasci-native-image-capability-20261006-v2
+    web_search: disabled
+    shell_tool: true
+    view_image: true
+    image_generation: true
+    artifact_store:
+      directory: /yzp/zhaozy/yangzepeng/0905/objects
+    max_artifact_files: 1
+    max_artifact_bytes: 33554432
+    max_output_bytes: 50331648
+    max_message_bytes: 33554432
+tasks:
+  image_capability:
+    version: t2i-codex-image-capability-2
+    template: |
+      核验当前会话的原生图像生成能力。
+      如果工具列表包含原生生图工具，调用一次，生成白色背景上的蓝色圆形，并将实际生成图片保存到运行时给出的 artifact_directory。
+      如果没有该工具，直接报告 unsupported，并说明实际可用工具中为何无法完成；不要用 shell、Python、SVG、其他 API 或既有图片替代原生生图。
+      若工具调用失败，报告 failed，并保留实际错误。不要重试，不读取任何凭据或项目文件，不访问网络。
+      result 中 status 为 generated、unsupported 或 failed；reason 说明实际观察；artifact 为实际图片文件名，没有产物则为 null。
+      本次核验标识：{{ probe_id }}
+    response_schema:
+      type: object
+      additionalProperties: false
+      required: [result]
+      properties:
+        result:
+          type: object
+          additionalProperties: false
+          required: [status, reason, artifact]
+          properties:
+            status:
+              type: string
+              enum: [generated, unsupported, failed]
+            reason:
+              type: string
+            artifact:
+              type: [string, 'null']

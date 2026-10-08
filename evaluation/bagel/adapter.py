@@ -4,6 +4,7 @@ Preserves the tested fp32 VAE/bf16 projection fixes and output-only geometry.
 """
 import os
 import sys
+import importlib
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 BAGEL_ROOT = ROOT / "bagel/Bagel"
@@ -12,6 +13,19 @@ CONFIG = dict(image_shapes=(1024, 1024), num_timesteps=50,
               timestep_shift=3.0, cfg_renorm_min=0.0, cfg_renorm_type="global",
               do_sample=False, think=False, understanding_output=False,
               max_think_token_n=1000, text_temperature=0.3, enable_taylorseer=False)
+
+
+def check_runtime(model_path):
+    """只读检查本地权重与官方依赖；不加载权重、不分配 GPU、不联网下载。"""
+    for name in ('llm_config.json', 'vit_config.json', 'ae.safetensors', 'ema.safetensors',
+                 'tokenizer_config.json'):
+        if not (Path(model_path) / name).is_file():
+            raise ValueError(f'Missing local BAGEL file: {Path(model_path) / name}')
+    if str(BAGEL_ROOT) not in sys.path:
+        sys.path.insert(0, str(BAGEL_ROOT))
+    for module in ('accelerate', 'transformers.modeling_utils', 'modeling.bagel',
+                   'modeling.qwen2', 'modeling.autoencoder', 'data.transforms', 'inferencer'):
+        importlib.import_module(module)
 
 
 def load_model(model_path, offload_dir):
@@ -29,6 +43,10 @@ def load_model(model_path, offload_dir):
     from data.transforms import ImageTransform
     from inferencer import InterleaveInferencer
 
+    # 在 VAE 或模型进入显卡前拒绝资源不足；服务由平台持有 GPU 租约。
+    free_gb = torch.cuda.mem_get_info(0)[0] / 1024**3
+    if free_gb < 42.0:
+        raise RuntimeError(f'GPU 空闲显存 {free_gb:.1f} GiB < 安全门槛 42.0 GiB，拒绝装模')
     model_path = str(model_path)
     llm_config = Qwen2Config.from_json_file(os.path.join(model_path, "llm_config.json"))
     llm_config.qk_norm = True

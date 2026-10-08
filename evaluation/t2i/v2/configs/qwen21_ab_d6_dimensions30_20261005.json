@@ -1,0 +1,15 @@
+{
+  "questions": {
+    "uri": "demiwtg/evaluation/t2i/v2/datasets/d_questions__qwen21_d6_paired30_20261005.lance",
+    "version": 1
+  },
+  "ab_scores": {
+    "uri": "demiwtg/evaluation/t2i/v2/datasets/scores_ab__qwen21_ab_prompt1_c8_20261004.lance",
+    "version": 1
+  },
+  "d_scores": {
+    "uri": "demiwtg/evaluation/t2i/v2/datasets/scores_d__qwen21_d6_paired30_20261005.lance",
+    "version": 1
+  },
+  "question_limit": 30
+}

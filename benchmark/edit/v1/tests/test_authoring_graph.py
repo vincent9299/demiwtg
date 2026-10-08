@@ -8,8 +8,8 @@ from project import historical_evidence, default_root, evidence_key
 def evidence():
     return historical_evidence(default_root())
 
-from preparation.operaters import runfiles as storage
-from preparation.operaters.runfiles import saved_stage, run_manifest
+from preparation.articles.operators import runfiles as storage
+from preparation.articles.operators.runfiles import saved_stage, run_manifest
 from demiflow.execution.artifacts import digest
 
 
@@ -18,7 +18,7 @@ def lake(tmp_path, monkeypatch):
     monkeypatch.setenv("DEMIWTG_DATASETS_ROOT", str(tmp_path / "datasets"))
     monkeypatch.setattr(storage, "ROOT", tmp_path)
     monkeypatch.setattr(storage, "code_version", lambda: {"fixture_code": 1})
-    from benchmark.edit.v1.operaters import runfiles
+    from benchmark.edit.v1.operators import runfiles
     monkeypatch.setattr(runfiles, "BENCH_DIR", tmp_path / "benchmark/edit/v1")
     from PIL import Image
     bench = tmp_path / "benchmark/edit/v1"
@@ -86,8 +86,8 @@ def test_offline_graph_dispatches_and_pends(lake):
 
 
 def test_binding_construct_response_joins_expected_meta(lake):
-    from demiflow.operator_llm.lance_journal import submit_response
-    from preparation.operaters.runfiles import read_record
+    from demiflow.operator_llm.sqlite_offline import submit_response
+    from preparation.articles.operators.runfiles import read_record
     from project import resolve_root
     run, _, cfg = build(lake)
     active = next(r for r in saved_stage(run, "requests") if r["status"] == "ready_to_author")
@@ -110,8 +110,8 @@ def test_binding_construct_response_joins_expected_meta(lake):
 
 
 def test_cannot_construct_and_echo_violation_are_explicit(lake):
-    from benchmark.edit.v1.operaters.prompting import apply_construct
-    from benchmark.edit.v1.operaters.audit import AuditConstruct
+    from benchmark.edit.v1.operators.prompting import apply_construct
+    from benchmark.edit.v1.operators.audit import AuditConstruct
     base = {"status": "ready_to_author", "task_id": "e001_a0_0_replace", "qid": "e001",
             "instance": "实体", "target_level": "L3", "suite": "basic", "target_edit_type": "replace",
             "source_image": {"path": "/tmp/x.png", "sha256": "a" * 64, "batch": "main",
@@ -132,7 +132,7 @@ def test_cannot_construct_and_echo_violation_are_explicit(lake):
 
 def test_historical_bench200_meta_matches():
     """The expected_meta contract must reproduce the frozen bench200 join."""
-    from benchmark.edit.v1.operaters.plan import expected_meta
+    from benchmark.edit.v1.operators.plan import expected_meta
     questions_path = storage.ROOT / "benchmark/edit/v1/bench200/questions.jsonl"
     rows = [json.loads(line) for line in evidence().read_text(evidence_key(questions_path)).splitlines()
             if line.strip()][:20]
@@ -151,7 +151,7 @@ def test_historical_bench200_meta_matches():
 
 def test_protocol_enums_match_the_v6_1_yaml():
     """The audit's closed enumerations must stay identical to the protocol text."""
-    from benchmark.edit.v1.operaters.audit import ENUM_FIELDS, CANNOT_REASON_CODES
+    from benchmark.edit.v1.operators.audit import ENUM_FIELDS, CANNOT_REASON_CODES
     import yaml
     text = yaml.safe_load((storage.ROOT / "benchmark/edit/v1/prompts/tasks.yaml").read_text())["prompts"]["construct"]["template"]
     if not text:
@@ -166,8 +166,8 @@ def test_protocol_enums_match_the_v6_1_yaml():
 def test_final_question_table_append_overwrite_and_resume(lake):
     """V1 新输出支持追加和覆盖；同一完成阶段续跑保持固定版本。"""
     import lance
-    from demiflow.operator_llm.lance_journal import submit_response
-    from preparation.operaters.runfiles import read_record
+    from demiflow.operator_llm.sqlite_offline import submit_response
+    from preparation.articles.operators.runfiles import read_record
     from project import resolve_root
     from benchmark.edit.v1.edit_v1_benchmark_pipeline import run_pipeline
     base, _, cfg = build(lake)

@@ -1,0 +1,155 @@
+{
+  "categories": {
+    "reject": 2154,
+    "keep": 3214,
+    "hold": 2549
+  },
+  "images": {
+    "reject": 224,
+    "keep": 255,
+    "hold": 16
+  },
+  "image_status": {
+    "annotated": 495,
+    "invalid_response": 4,
+    "unreadable_image": 1
+  },
+  "domains": {
+    "交通工具": {
+      "reject": 39,
+      "keep": 201,
+      "hold": 24
+    },
+    "人物与人体": {
+      "reject": 173,
+      "hold": 292,
+      "keep": 100
+    },
+    "人造物体": {
+      "hold": 538,
+      "reject": 491,
+      "keep": 745
+    },
+    "体育与游戏": {
+      "hold": 2,
+      "reject": 4,
+      "keep": 1
+    },
+    "动物": {
+      "hold": 230,
+      "reject": 34,
+      "keep": 104
+    },
+    "医学与健康": {
+      "keep": 2,
+      "hold": 4,
+      "reject": 1
+    },
+    "历史与时代": {
+      "keep": 5,
+      "hold": 2
+    },
+    "品牌与产品": {
+      "reject": 49,
+      "hold": 4
+    },
+    "地理与地点": {
+      "keep": 33,
+      "hold": 1
+    },
+    "场景": {
+      "reject": 5,
+      "keep": 240,
+      "hold": 10
+    },
+    "声音": {
+      "reject": 246,
+      "hold": 12,
+      "keep": 9
+    },
+    "宗教与信仰": {
+      "keep": 1
+    },
+    "属性与状态": {
+      "reject": 133,
+      "hold": 131,
+      "keep": 26
+    },
+    "建筑与基础设施": {
+      "keep": 412,
+      "hold": 32,
+      "reject": 20
+    },
+    "政治、法律与社会制度": {
+      "reject": 15,
+      "hold": 3
+    },
+    "数字与互联网文化": {
+      "hold": 4,
+      "keep": 1
+    },
+    "文化艺术与媒介": {
+      "hold": 162,
+      "reject": 77,
+      "keep": 87
+    },
+    "文字与信息图形": {
+      "reject": 174,
+      "hold": 12,
+      "keep": 12
+    },
+    "时间数量与度量": {
+      "hold": 33,
+      "reject": 53,
+      "keep": 12
+    },
+    "材料与物质": {
+      "reject": 65,
+      "hold": 49,
+      "keep": 29
+    },
+    "植物": {
+      "keep": 361,
+      "hold": 167,
+      "reject": 34
+    },
+    "民族、语言与文化": {
+      "hold": 5
+    },
+    "真菌与微生物": {
+      "reject": 65,
+      "hold": 31,
+      "keep": 2
+    },
+    "知识与学科": {
+      "reject": 23,
+      "hold": 38,
+      "keep": 7
+    },
+    "组织机构与社会事件": {
+      "hold": 85,
+      "keep": 75,
+      "reject": 35
+    },
+    "自然景观": {
+      "keep": 202,
+      "hold": 19,
+      "reject": 19
+    },
+    "节日与符号": {
+      "keep": 28,
+      "hold": 34,
+      "reject": 34
+    },
+    "行为动作": {
+      "reject": 262,
+      "hold": 432,
+      "keep": 181
+    },
+    "食物": {
+      "keep": 338,
+      "hold": 193,
+      "reject": 103
+    }
+  }
+}

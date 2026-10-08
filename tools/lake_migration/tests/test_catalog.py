@@ -11,7 +11,7 @@ def test_reexports_are_the_platform_implementation():
     assert CatalogConflict is platform_registry.CatalogConflict
     # 登记表按已确认的公共目录平铺；历史引用由位置映射保留
     assert REGISTRY_RELATIVE == platform_registry.REGISTRY_RELATIVE == (
-        "datasets/registry_datasets.lance"
+        "_demiflow/registry/datasets.lance"
     )
 
 

@@ -14,14 +14,16 @@ import lance
 import pyarrow as pa
 from demiflow.lance.artifacts import ARTIFACTS, ArtifactSet
 from demiflow.lance.registry import write_registered_table
-from demiflow.lance.records import LanceRecordStore
+from demiflow.execution.file_ref import save_json_artifact
+from demiflow.lance.legacy import read_legacy_record
+from demiflow.execution.artifacts import immutable, read
 from project import PROJECT_ROOT, resolve_root
 
 RUN_ID = 'workspace_cleanup_20260923'
 IMAGES = {'.png','.jpg','.jpeg','.webp','.gif','.bmp','.tif','.tiff','.avif'}
 RETAIN_ROOTS = ('benchmark/focus1000/data', 'benchmark/t2i/v1/bench200',
                 'benchmark/edit/v1/bench200', 'evaluation/bagel/data',
-                'evaluation/reviews', 'curation/edit/reviews')
+                'evaluation/reviews', 'curation/edit_training_pairs/reviews')
 RETIRE_ROOTS = ('benchmark/focus1000','benchmark/vlm','benchmark/t2i/v1/bench200',
                 'benchmark/t2i/v1/archive','benchmark/edit/v1/bench200',
                 'benchmark/edit/v1/archive','benchmark/edit/v1/focus200',
@@ -93,8 +95,8 @@ def plan(repo=PROJECT_ROOT):
 
 
 def preserve(entries,root=None,repo=PROJECT_ROOT):
-    root=resolve_root(root);repo=Path(repo);log=LanceRecordStore(root,'datasets/records__' + RUN_ID + '.lance')
-    log.put('selected_sources',entries)
+    root=resolve_root(root);repo=Path(repo);log=(Path(root) / '_demiflow' / 'maintenance' / Path('datasets/records__' + RUN_ID + '.lance').stem.removeprefix('records__'), 'datasets/records__' + RUN_ID + '.lance')
+    immutable(log[0] / ('selected_sources' + '.json'), entries)
     # Keep original generation/collection provenance when restoring the few
     # formal source images that have not yet reached raw. No collection code is edited.
     raw=lance.dataset(str(root/'demiwtg/collect/datasets/images.lance'));existing={}
@@ -119,34 +121,25 @@ def preserve(entries,root=None,repo=PROJECT_ROOT):
     for m in missing:existing[m['sha256']]={'availability':'available'}
     raw_bindings={s for s,r in existing.items() if r['availability']=='available'}
     by_sha={e['sha256']:e for e in entries}
-    # A single streaming Blob table, deduplicated across names/roles. Existing
-    # raw bytes use their original fixed table reference and are not recopied.
-    new=[e for s,e in sorted(by_sha.items()) if s not in raw_bindings]
-    schema=pa.schema([pa.field('sha256',pa.string(),nullable=False),lance.blob_field('data')])
-    fingerprint=sha(json.dumps([(e['sha256'],e['byte_size']) for e in new],sort_keys=True).encode())
-    def blobs():
-        for e in new:
-            data=Path(e['source']).read_bytes()
-            if sha(data)!=e['sha256']:raise ValueError('Source changed during preservation: '+e['source'])
-            yield {'sha256':e['sha256'],'data':data}
-    ref,_,_=write_registered_table(root,'datasets/blobs__' + RUN_ID + '.lance',schema=schema,
-        schema_name='evidence_blobs',schema_version='v1',rows_factory=blobs,fingerprint=fingerprint,max_rows_per_batch=8)
-    index=[]
-    for e in entries:
-        in_raw=e['sha256'] in raw_bindings
-        index.append({**{k:v for k,v in e.items() if k!='source'},
-            'blob_uri':'demiwtg/collect/datasets/images.lance' if in_raw else ref.relative_uri,
-            'blob_version':raw.version if in_raw else ref.lance_version,'blob_column':'data'})
+    # 证据对象独立持久化；清单只保存普通 URI 和 SHA，不再跨表引用 Blob。
+    from demiflow.objects import LocalObjectStore
+    store = LocalObjectStore(root / 'objects')
+    object_refs = {}
+    for key, entry in sorted(by_sha.items()):
+        with Path(entry['source']).open('rb') as stream:
+            object_refs[key] = store.put_stream(stream, sha256=key)
+    index = [{**{k: v for k, v in entry.items() if k != 'source'},
+              'object_uri': object_refs[entry['sha256']].uri} for entry in entries]
     manifest,_,_=write_registered_table(root,'datasets/artifacts__' + RUN_ID + '.lance',schema=ARTIFACTS,
         schema_name='named_artifacts',schema_version='v1',rows_factory=lambda:iter(index),
         fingerprint=sha(json.dumps(index,sort_keys=True).encode()))
     evidence=ArtifactSet(root,manifest)
     result=evidence.verify()
     result.update(reference=manifest.to_dict(),restored_source_images=len(missing),
-                  raw_version=raw.version,stored_unique_blobs=len(new),
+                  raw_version=raw.version,stored_unique_objects=len(object_refs),
                   logical_bytes=sum(e['byte_size'] for e in entries),
-                  stored_blob_bytes=sum(e['byte_size'] for e in new))
-    log.put('verified_preservation',result)
+                  stored_object_bytes=sum(e['byte_size'] for e in by_sha.values()))
+    immutable(log[0] / ('verified_preservation' + '.json'), result)
     return result
 
 
@@ -175,8 +168,8 @@ def retire(entries, inventory, root=None, repo=PROJECT_ROOT):
     import stat
     from project import HISTORICAL_EVIDENCE
     root=resolve_root(root); repo=Path(repo).resolve()
-    log=LanceRecordStore(root,'datasets/records__' + RUN_ID + '.lance')
-    verified=log.get('verified_final_preservation')
+    log=(Path(root) / '_demiflow' / 'maintenance' / Path('datasets/records__' + RUN_ID + '.lance').stem.removeprefix('records__'), 'datasets/records__' + RUN_ID + '.lance')
+    verified=read(log[0] / ('verified_final_preservation' + '.json')) if (log[0] / ('verified_final_preservation' + '.json')).exists() else read_legacy_record(root, log[1], 'verified_final_preservation')
     if not verified or verified['reference'] != HISTORICAL_EVIDENCE:
         raise ValueError('Require the verified fixed preservation reference')
     assets=ArtifactSet(root,HISTORICAL_EVIDENCE)
@@ -197,7 +190,7 @@ def retire(entries, inventory, root=None, repo=PROJECT_ROOT):
                 p=Path(directory)/name
                 if p.is_symlink():candidates.add(p);dirs.remove(name)
             candidates.update(Path(directory)/name for name in files)
-    for relative in ('evaluation/reviews','curation/edit/reviews'):
+    for relative in ('evaluation/reviews','curation/edit_training_pairs/reviews'):
         for directory,dirs,files in os.walk(repo/relative,followlinks=False):
             if {'collect','_staging','.git'} & set(Path(directory).relative_to(repo).parts):
                 raise ValueError('Excluded review directory')
@@ -232,8 +225,8 @@ def retire(entries, inventory, root=None, repo=PROJECT_ROOT):
         if e['kind']=='file' and not e['preserved'] and Path(e['path']).suffix in {'.py','.sh','.ipynb'}:
             text=(repo/e['path']).read_text()
             snapshots.append({'path':e['path'],'sha256':e['sha256'],'text':text})
-    log.put('final_retired_source_evidence',snapshots)
-    receipt=log.put('final_retirement_inventory',deletion)
+    immutable(log[0] / ('final_retired_source_evidence' + '.json'), snapshots)
+    receipt=save_json_artifact(log[0] / 'final_retirement_inventory', deletion)
     print({'retirement_inventory':receipt.to_dict(),'files':len(deletion),
            'bytes':sum(e['byte_size'] for e in deletion)},flush=True)
     # The first preservation attempt restored these before the blob checkpoint
@@ -247,13 +240,13 @@ def retire(entries, inventory, root=None, repo=PROJECT_ROOT):
     old_formal=before.to_table(columns=['sha256'],filter=predicate).num_rows
     new_formal=after.to_table(columns=['sha256'],filter=predicate).num_rows
     if (old_formal,new_formal)!=(152,200):raise ValueError('Formal source restoration mismatch')
-    log.put('raw_source_restoration',{'before_version':4,'after_version':5,'restored_images':delta,'formal_images':48,'additional_plan_images':31})
+    immutable(log[0] / ('raw_source_restoration' + '.json'), {'before_version': 4, 'after_version': 5, 'restored_images': delta, 'formal_images': 48, 'additional_plan_images': 31})
     for e in deletion:
         path=repo/e['path'];info=path.lstat()
         if (info.st_mtime_ns,info.st_ino)!=(e['mtime_ns'],e['inode']):
             raise ValueError('Source changed during deletion: '+e['path'])
         path.unlink()
-    for relative in (*roots,'evaluation/reviews','curation/edit/reviews'):
+    for relative in (*roots,'evaluation/reviews','curation/edit_training_pairs/reviews'):
         for directory,_,_ in os.walk(repo/relative,topdown=False,followlinks=False):
             try:Path(directory).rmdir()
             except OSError:pass  # retained current entry notebooks
@@ -261,7 +254,7 @@ def retire(entries, inventory, root=None, repo=PROJECT_ROOT):
             'preserved_deleted_files':sum(e.get('preserved',False) for e in deletion),
             'retired_source_snapshots':len(snapshots),'preservation':verified['reference'],
             'raw_images_restored':delta,'formal_images_restored':48,'plan_images_restored':31,'excluded':['collect','_staging'],'inventory':receipt.to_dict()}
-    log.put('retirement_complete',result)
+    immutable(log[0] / ('retirement_complete' + '.json'), result)
     return result
 
 def main():

@@ -5,7 +5,8 @@ import lance
 from demiflow.lance.consolidate import consolidate_local_tables
 from demiflow.lance.registry import Catalog
 from demiflow.lance.refs import DatasetRef
-from demiflow.lance.records import LanceRecordStore
+from demiflow.lance.legacy import read_legacy_record
+from demiflow.execution.artifacts import immutable, read
 from demiflow.lance.storage import schema_hash
 from project import resolve_root
 
@@ -13,11 +14,11 @@ OP='single_material_tables_20260921'
 TARGETS={'images':'demiwtg/collect/datasets/images.lance','documents':'demiwtg/collect/datasets/documents.lance'}
 
 
-def journal(root):return LanceRecordStore(root,f'datasets/records__{OP}.lance')
+def journal(root):return (Path(root) / '_demiflow' / 'maintenance' / Path(f'datasets/records__{OP}.lance').stem.removeprefix('records__'), f'datasets/records__{OP}.lance')
 
 
 def run(root):
-    root=Path(root);j=journal(root);inputs=j.get('inputs')
+    root=Path(root);j=journal(root);inputs=read(j[0] / ('inputs' + '.json')) if (j[0] / ('inputs' + '.json')).exists() else read_legacy_record(root, j[1], 'inputs')
     if inputs is None:
         latest={}
         for ref in Catalog(root).registered():
@@ -26,9 +27,9 @@ def run(root):
                 if old is None or ref.lance_version>old.lance_version:latest[ref.relative_uri]=ref
         inputs={k:[r.to_dict() for uri,r in sorted(latest.items()) if uri.startswith('raw/'+k+'/')] for k in TARGETS}
         if len(inputs['images'])!=256 or len(inputs['documents'])!=22:raise ValueError('Unexpected source inventory')
-        j.put('inputs',inputs)
+        immutable(j[0] / ('inputs' + '.json'), inputs)
     for kind,uri in TARGETS.items():
-        if j.get(kind):continue
+        if read(j[0] / (kind + '.json')) if (j[0] / (kind + '.json')).exists() else read_legacy_record(root, j[1], kind):continue
         sources=[DatasetRef.from_dict(r).open(root) for r in inputs[kind]]
         target=root/uri
         if target.exists():raise ValueError('Unjournaled target requires explicit recovery: '+uri)
@@ -52,8 +53,7 @@ def run(root):
             checks.append({'source':old.uri,'source_version':old.version,'rows':old.count_rows(),'fragment_start':offset,'fragments':count})
             offset+=count
         Catalog(root).register(ref)
-        j.put(kind,{'ref':ref.to_dict(),'sources':checks,'field_ids_and_file_bytes_preserved':True,
-                    'fragments':len(ds.get_fragments()),'rows':ds.count_rows()})
+        immutable(j[0] / (kind + '.json'), {'ref': ref.to_dict(), 'sources': checks, 'field_ids_and_file_bytes_preserved': True, 'fragments': len(ds.get_fragments()), 'rows': ds.count_rows()})
         print('validated',kind,ref.to_dict(),flush=True)
-    return {k:j.get(k)['ref'] for k in TARGETS}
+    return {k:read(j[0] / (k + '.json')) if (j[0] / (k + '.json')).exists() else read_legacy_record(root, j[1], k)['ref'] for k in TARGETS}
 if __name__=='__main__':print(json.dumps(run(resolve_root())))

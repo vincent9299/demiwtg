@@ -1,21 +1,375 @@
 # AGENTS.md · 项目架构原则与数据约束
 
-### Pipeline 标杆：T2I V2（2026-09-26，用户确认）
+## 第一条：必须遵守项目 Pipeline 强制规范
 
-以 [T2I V2 正式入口](benchmark/t2i/v2/t2i_v2_benchmark_pipeline.py) 为现役 pipeline 编排标杆；[模块说明](benchmark/t2i/v2/README.md) 解释运行和调试方式。下方“Pipeline 编排必须直接表达具体数据流”给出对应代码示例，覆盖其后历史示例中的多题参数、文章配图关联和写死并发。
+**凡涉及 pipeline 的新建、修改、调试、编排、评审与验收，必须先阅读并遵守 [《项目 Pipeline 强制规范》](PIPELINE_SPEC.md)，再阅读目标 pipeline 的 README。不得跳过规范直接实现，不得以旧实现或已有测试通过代替规范验收。**
 
-提炼后的通用原则：
+每个现役 pipeline 的 README 必须在标题后的首段强制引用该规范，新增 pipeline 必须纳入统一布局及引用检查。通用规范只在 `PIPELINE_SPEC.md` 维护；本文件保留项目业务、数据约束及历史决策，与规范冲突的旧条文不再作为 pipeline 实现依据。用户当前明确指令优先，具体授权仍按任务范围执行。
 
-1. **配置直达使用处。** 一个 `run_pipeline(config)` 入口，来源 URI/版本、运行位置、目标表/写模式、概念、预算、并发和模型参数统一配置。reader、writer 和模型节点直接取用；不先打包 manifest 再拆回，不扫描源码冻结运行。
-2. **主线能看见数据关系。** 不同来源分别具名，明确每行粒度、列投影、过滤、展开、聚合和 join 键。文章一行一篇，图片一行一个 SHA，展开后按概念聚合，模型节点一行一个概念。多个来源不能藏进分派循环或阶段函数。
-3. **清洗由生产者负责。** preparation 交付正文、公开可用状态和图片存储引用；下游信任这些契约，保留本业务需要的数量/上下文策略和实际读图校验。不重复清洗、不绕过引用另找默认原始表。未来的排序、去重、匹配策略须有明确需求。
-4. **复杂行处理进算子，跨行关系留主线。** 简单投影内联，复杂请求构造和响应检查放 `operaters/`。算子不另读整表、不执行子 Dataset、不调用模型或写业务表；图片算子按本行已绑定的 Blob 引用读取字节。
-5. **按任务范围组织可选材料。** T2I 用配置概念 left join 图文；缺材料就是空列表，由 prompt 说明，不人为加缺失状态或补齐流程。其他业务是否允许空材料依其自身契约，不能机械照搬 T2I。
-6. **按真实执行边界落表。** 输入、设计、候选各有明确 schema 和 writer；同步链直接写，异步模型链 `materialize().write_lance(...)`。不 `take_all → Python 加工 → from_items`，不以物化冒充边生成边提交。并发由模型节点的 config 控制，每条记录仍独立请求。
-7. **运行记录解决实际问题。** 同名运行按当前配置重新读数，原生调用日志复用相同请求；写模式和 append 提交去重在输出处可见。不增加源码/配置冻结、层层引用转换或额外调度框架。
-8. **调试跟随实际调用。** Python 为唯一正式流程入口，notebook 调用它并在运行后只读预览。模型原始响应保留在原生日志；模型节点把服务实际返回的 reasoning 沿当前行传给 writer，在设计表与最终候选表保存 nullable reasoning 列，便于直接查表调试。它是调试字段，不纳入模型题目 schema、题目 ID 或后续 prompt。设计行另保存 response_ref，可按引用查看耗时、usage、finish_reason 和完整响应；call_json 不重复保存推理正文。未返回 reasoning 时存 null，失败/截断响应已有的 reasoning 仍保留在设计表。
+后续 review 发现的规范缺口、歧义、冲突或通用改进，集中登记到根目录 [PIPELINE_SPEC_TODO.md](PIPELINE_SPEC_TODO.md)，记录证据、关联条款、状态及完成标准；已有规范的实现偏差仍须修复，TODO 不替代现行强制要求。
 
-评审时先问：只看入口，能否指出“读什么、每行是什么、如何连接、何时调用模型、写到哪里”？再检查是否存在下游重复清洗、无实际需求的抽象和隐藏 I/O。
+### DemiForge 开发入口（2026-10-06，候选标准试点）
+
+业务 pipeline 开发使用 [DemiForge 项目绑定](.demiforge/project.json) 和 `demiforge` skill；
+项目根运行 `python3 .demiforge/forge list` / `context --id <任务名>` 续接已有任务，
+新任务在修改前用 `start` 固定目标、可改路径、非目标和当前脏工作树基线。
+接入说明见 [DemiForge 最小闭环](../Demiurge/docs/demiforge-quickstart.md)。当前仅登记 `subset`，
+其他 pipeline 先审阅并补齐业务上下文、监测路径和隔离测试命令，不能直接声称已接入。
+统一标准 `1.0.0-candidate.1` 为候选，**本文件第一条及 PIPELINE_SPEC.md 仍有效**；
+不复制维护另一份业务规范。默认上下文只节选本文件入口与 QID 归属，相关历史决定仍须按任务追读。
+只读平台 `demiflow` 不因业务任务获得修改授权；代码开发不授权真实模型、生产读写或共享环境变更。
+检查、fixture 测试与署名语义审查都绑定本次实际文件版本；未覆盖项必须明确，不能把本地接受当作生产验收。
+
+2026-09-29 修订原因：按用户要求集中维护强制规范，并把 fine_screening / zimage_probe 评审暴露的范围、完成状态、缓存、失败与配置问题提炼为通用验收要求。移出的旧条文见 [历史来源](docs/archive/pipeline_rules_from_agents_20260929.md)，不再维护并行的执行规范。
+
+### QID 公共宽表与 subset 归属（2026-10-01，用户授权）
+
+**来源图片监督扩展（2026-10-02，用户后续决策）：** 修改现有 qid_images pipeline，尽量接入可可靠关联的上游原始资料。用户已撤销早期 `source_annotations` 七分类设计，公共字段统一为 `raw_supervision`（原始监督信号）：一个按来源和原始记录名称组织的 JSON，保全标签、框、图注、P18、实际搜索词等已有内容，补齐可读标签名称。来源已有的 Source/分数/标注者等说明原样保留，不新增通用信号分类协议或人工／机器顶层分桶。固定来源和精确图片关联证据保留；消费方自行做视觉机审与综合机审。实现、实际运行范围和发布状态以 [qid_images README](preparation/qid_images/README.md) 及固定回执为准。当前公共表位于 `preparation/qid_images/datasets/qid_images.lance`。
+
+**后续执行接口决策（2026-10-01）：** 用户已要求业务只通过 Dataset API 提交，DataFusion 完全由 demiflow 底层管理，并明确删除旧公开引擎会话入口，防止业务或 AI 再使用旁路 SQL。此决策覆盖下方早期“可选显式接口、默认未切换”的阶段性描述；现行边界见 PIPELINE_SPEC S11.7、Demiflow 的 `docs/datafusion.md` 和两条 QID pipeline README。历史公共表与已发布版本不因执行内核升级自动重写。
+
+用户已确认公共宽表设计并授权完整实施：`preparation/qid_images` 按 SHA 汇总来源、QID 关系与技术特征，`preparation/qid_concepts` 按 fat ∪ 图片账本 QID 汇总名称、xref/桥、一跳关系、文档、分类与完整图片供给。公共目标为 `datasets/qid_images.lance`、`datasets/qid_concepts.lance`，使用显式 release 绑定固定版本供下游消费；名称体系 preparation 仍独立。两个 pipeline README 是本流程完整设计与验收记录的唯一维护入口；README 的通用职责已加入 PIPELINE_SPEC S01.8。
+
+本条覆盖下方旧“qid_sub 是公共表”的归属约定：100k 的两张 `qid_sub_*` 表归 `demiwtg/subset/datasets/`，迁移保留所有 Lance 历史版本、采样字段和原图片 URI，旧引用通过 relocation manifest 解析，原冻结回执不改写。迁移与真实全量发布的完成状态须看两个新 README 和实际控制回执，不能仅凭本设计条目判断已经执行完毕。新公共准备不运行模型、不补下载、不修旧采样桶，也不以 100k 作为全集。
+
+2026-10-01 全量交付已完成：公共 `qid_concepts@1` 10,648,274 个 QID、`qid_images@1` 18,437,838 个 SHA，固定 release 为 `qid_public_20261001_v1`；该名字是发布登记值，不是文件名，实际两表为工作区 `datasets/qid_concepts.lance`、`datasets/qid_images.lance`。30,114,261 条关系双向核对及消费验收通过。旧 100k 两表已整目录迁入 subset，所有文件摘要与历史版本保持，公共表对旧 QID/SHA/选中关系缺失均为 0。完成证据 `_demiflow/qid_public_20261001/postpublication.json`、`_demiflow/qid_subset_ownership_20261001/{coverage,result}.json`。正式发布当时使用原执行器；早期显式原生接口仅是验证阶段，如今已删除该公共入口。当前本地 Dataset 关系算子自动使用平台内部 DataFusion，Python 业务回调保留，源码未修改；详见工作区 DEMIFLOW_PLATFORM_TODO 的 DF-014 和两条 QID README 的最新验收记录。
+
+### 视觉概念主线与 collect 标准化推进约定（2026-09-30）
+
+**2026-10-04 文档主表粒度（用户确认）：** 重定向保留在已有公共 URL 索引的 `redirects` 映射中，文档主表只保留非重定向文档版本。通过 preparation/documents 正式入口退役存量重定向行，后续 metadata 与 QID 关联入口同步排除；正文失败身份、其余行全部字段、旧版本、对象和原索引保留。不把此调整等同于跨来源 URL 去重，具体固定版本和执行结果见该 pipeline README。
+
+**2026-10-03 文档归属最新指令（覆盖此前暂停迁移）：** 用户确认导入代码继续迁至 `collect/wiki_documents`，文档对象统一放在 `preparation/datasets`。已完成同文件系统移动：对象为 `preparation/datasets/documents/objects`，公共索引为 `preparation/datasets/documents/library/index.sqlite`；旧资产目录保留兼容链接，历史登记 Lance 表与固定版本仍在原位，不复制资产、不另建库、不改 concepts 配置或失败回执。正式入口和新回执归 collect；公共文档主表归 preparation/documents。用户随后收紧范围：先交付主表，不读正文统计、不建公共结构树；embedding 暂停，既有向量按用户明确要求清理，保留正文与公共文档索引。迁移证据为 `_demiflow/document_embeddings_20261003/document_assets_move_20261003/result.json`。
+
+**2026-10-03 独立 taxonomy 决策（用户授权）：** 用户要求以现有 3,000+ 原名的身份审定为来源，实现独立 `preparation/taxonomy`：使用已定大模型 agent，按需读取概念/节点定义、成员与动态正文证据，通过局部树操作、挂载、复核和反馈循环迭代。增量须保留并重验旧成员。3,315 是原名范围，不代表均已通过身份检查；具体固定输入、模型调用预算、工程验证、真实质量和 0.1 状态以 [taxonomy README](preparation/taxonomy/README.md) 与固定运行摘要为准，不改写原 P2 或公共表。
+
+用户确认“新工作用到哪个模块，就先补齐该模块及必要依赖的规范；标准化后复用”。通用获取/执行/存储/恢复机制沉淀 demiflow，业务判断留在各 pipeline；不以全 collect 重写作为概念主线前置。当前优先搜索取证与概念审核，历史正文接入、图片下载、批量采集和旧脚本退役按实际使用节点推进。唯一计划记录见 [taxonomy-rebuild/EXECUTION_PLAN.md](taxonomy-rebuild/EXECUTION_PLAN.md)。2026-10-01 用户已确认讨论建议并授权完整实现 P1→P2、补齐 demiflow 通用能力和详细 review；输入必须可配置，3,315 名称不作为固定范围。完整依据见 [P1→P2 实施规范](taxonomy-rebuild/P1_P2_SPEC.md)。用户随后授权调用已定模型并结合真实下载收集性能；可执行有明确预算的小规模验证，不扩大为全批，生产公共表保持只读。
+
+### Evaluation 根目录只保留分类导航（2026-10-03，用户要求）
+
+用户指出根级算子与赛道目录混放；原根级流程实际用于 T2I/Edit 的有知识与无知识对照评测。该流程迁至 `evaluation/knowledge_comparison/` 后，用户明确要求删除，并确认已另存 prompt；因此整目录及活动导入、CLI 测试、源码清单和布局登记均清理，不恢复旧入口或兼容转发。用户另存的 prompt 保留。旧 Edit V1 证据读取及测试仍归 `evaluation/edit/v1/`，历史 rubric packet 的 JSON 解码由材料记录读取方直接处理。删除目录内没有 datasets，未改写历史业务数据，没有运行模型。
+
+### T2I V2 出题内探测（2026-10-03，后续用户要求）
+
+2026-10-04 出题输入进一步收敛（覆盖下方早期输入约定）：保留原始 definition 概念说明和材料来源/本地文档入口，原文由模型按需读取或联网检索。已核实事实、待核实事项、附加限定及此前任务方向不进入初始模型上下文，原审定记录保留溯源。prompt 明确材料清单不完整且不限定考点范围。旧批 definition 部分含形态或教学示例，当前未自动改写，详见 V2 README v16 记录。
+
+同日输入进一步收敛：用户明确移除 references；出题只有概念资料、依据材料和单列正例图，不给模型有图/无图实验条件说明。新表文字依据与正例图分别存储，不保留混合 references_json；配对标记仅留作业务记录。prompt 删除已核实事实和未决事项的重复字段说明，实际资料及其适用条件仍保留。新协议使用新运行/目标，历史20概念结果不重写、不自动运行。
+
+用户明确将 case_annotation 的作答与评审直接融入 V2，出一道题立即 Z-Image 作答、GPT-6 评审，不再启动逐行子 pipeline 或等待全批。image_review/joint/blind 的适用要求合并成一次按既有考点和判据的联合评审，不声称独立盲评。模型最终确认为 Malasci `gpt-6-astra`，`reasoning_effort=xhigh`；出题 Codex 于 2026-10-04 按用户要求也改为 xhigh。V2 agent 配置和普通 prompt 配置各一份，原出题正文/schema 保留；新 probe 的分类不覆盖旧人工标签。共享生成行算子由 V2 维护，case_annotation 显式导入，历史实验、数据和 prompt 保持。用户随后明确清理重复出题入口：V2 出题只走 agentmap_async，agent_codex.yaml 只维护 design_question，tasks.yaml 只维护 review_answer；删除普通单次出题分支及重复 GLM 正文，缺少 agent_config 在执行前报错，不自动切模型。原20概念仅出题批次已结束并暂停；此次实现和隔离验证不自动启动真实探测，见 V2 README。
+
+### T2I 案例标注的唯一维护位置（2026-09-29，用户要求）
+
+**2026-10-03 归属更新（用户授权）：** 案例生成、图片评审、三类标注及人工复核归 `evaluation/t2i/case_annotation/`；代码、notebook、prompt、测试、archive、数据、日志与运行锁均已迁移。已退役 `zimage_probe` 的数据仍有历史消费者，已合并到案例流程 datasets，全部 Lance 版本与调用日志字节保留，旧固定 URI 通过平台精确迁移映射解析。`benchmark/t2i/case_annotation/` 与 `benchmark/t2i/zimage_probe/` 两个旧目录均移除，不留兼容入口或软链。此条覆盖下段“原址 datasets 保留”的旧安排。回执见工作区 `_demiflow/t2i_case_ownership_20261003/result.json`；本次不重跑模型。
+
+用户随后明确要求目录合并：生成、图片评审、三类标注、人工维护和历史主审复核统一归属 `benchmark/t2i/case_annotation/`，唯一正式入口为 `case_annotation_pipeline.config → run_pipeline`、唯一 notebook 为 `case_annotation_debug.ipynb`。`zimage_probe` 现役代码与 notebook 已退役并归档，原址 datasets 仅保留冻结历史引用，新运行不写该目录。一次 Codex 调用同时图评审与提供分类依据，属于联合判断而非独立盲标；旧人工标签和独立盲标证据保留。跨不同 pipeline 的 demiorch graph 编排作为后续 PS-003 TODO，本轮是内聚的单 pipeline。复核通过该模块正式入口写明确 schema 的 Lance，所有日常呈现在其 notebook；旧 HTML/CSV 呈现与导出脚本退役，历史证据在该模块 archive 保留。主审建议不自动覆盖人工 labels；单行编辑必须走正式提交入口的锁、版本与旧值检查。
+
+用户随后明确“以最终复核结果为准”，并要求手标也重新判断：当前采用`adjudications__case_annotation_review_v2_20260929.lance@1`，三类25/225/214、暂缓5，22条手标统一复判，原未选择2条已纳入③。`selected`保留历史，`final_selected`表示最终纳入；旧人工表与v1保持。用户最新要求页面只看最终复核：notebook第2格保留最终三组Z-Image指标与弱点，第3格用1/2/3为行索引、二级分类list/三级分类list/概念list三个字段汇总；分类保留路径前缀、组内去重、完整展示，暂缓单列。GLM与盲标保留为底层证据，不再展示对比。①含本批出错筛选，不能用其低pass率直接作无偏能力排名；暂缓不回填旧类。
+
+### 独立图片对象引用（2026-09-29，用户确认）
+
+用户选择“全部现役图片链路和对应通用能力”，随后明确要求“彻底迁移、切换、导出，不存在 Lance 表里”：本项目图片统一存为独立对象，表中只交付稳定 URI 与内容 SHA256，不再新增表内图片 Blob。具体规范见 [S11](PIPELINE_SPEC.md#s11--存储与平台边界)。本条覆盖下文历史记录中新增 BlobRef/source_refs 像素引用与 LanceBlobStore 交付的约定；历史判断和模型输出保留。生产迁移进度与审计位置见 [改造记录](docs/image_objects_20260929.md)，以实际导出、切换和退役回执为准。
+
+生产执行记录：2,133,062 个对象（923.265 GiB）已导出并核 SHA，75 张业务表原址切换；旧图片载荷及切换备份已退役。当前 collect images@8、公共 images@16、articles@8，源库原有 36,911 条无图片记录仍为空；历史 data 字段仅保留外部文件描述以支持冻结证据，新 head 不含 data。11 份 notebook 的来源引用已更新，既有输出/判断不变。全量 annotation 已用原 SQLite 日志恢复；历史调用日志按原证据规则保留。实际回执在工作区 `_demiflow/image_object_cutover_20260929/`，不作为日常读图依赖。
+
+### QID 下载图片 URI 挂接（2026-09-29，用户要求）
+
+- `collect/datasets/qid_images_v2.lance@11` 新增可空 `image_uri`；490,577 条来源记录对应 490,575 个已下载唯一 SHA，其余 17,947,294 行为 null。公共 `datasets/qid_sub_100k_bucket_v1_images.lance@5` 全部补齐 URI，状态为 `available/object_uri`；concepts、选样、许可、变体及历史快照保持。
+- 普通文件继续位于 `collect/download/blobs/<sha[:2]>/<sha>.<ext>`，两表直接共享绝对 file URI；该目录是持久资产，不能清缓存或移动后不迁移 URI。全量重新核 SHA/大小，544,150,878,170 字节，0 缺失/不符，未复制图片。回执 `_demiflow/qid_image_uris_20260929/published.json` complete；详情见 [交接文档](collect/download/HANDOFF_subsets_pipeline_数据交接.md)。
+- subset pipeline 继承可选源 URI、按实际引用统计完整/部分/待下载，保留已补图覆盖保护；新抽样用 @11、新 run/目标名、`legacy_pool_source=None`。Notebook 原 @10 抽样配置/输出保留，默认不重跑，最后一格独立看 @5。维护脚本只为本次回填，现役读图不依赖维护脚本或队列。
+
+### 共用准备与任务 curation 的用途边界（2026-10-02，用户授权）
+
+**2026-10-03 旧流程退役（用户最新指令）：** 用户确认已有新版，要求删除 `curation/legacy_concept_images` 并去掉依赖，旧 articles 也不再使用，当前文档准备归 `preparation/documents`。旧概念配图目录及 articles 生产入口已删除，不保留审核转发入口；历史 notebook 输出和原有审核档案归档，Lance 表、固定版本与调用日志保留。训练、出题、评测及维护工具需要的图片读写/记录契约归 `preparation/images/catalog/operators/records.py`；articles 下仅保留共享历史材料契约与测试，不登记为现役 pipeline。此条覆盖下方旧消费者须保留概念配图入口的安排。
+
+**2026-10-03 Edit 原图后续决策：** 用户要求清理 `curation/edit_scene_images` 的旧代码和 README，复制 `preparation/image_embeddings` 标准实现，固定使用旧场景候选 `image_inputs__scene_pool_add_v5_l4_keep_hold_tp2_v1.lance@13` 的 172,297 张图片，作为第一版编辑可检索原图。新版只生产 WeMM 图片向量，不再执行旧分类或 add 区域标注。旧表和调用日志保留；历史 reviews、交接材料和 Notebook 输出移到 `curation/archive/edit_scene_images_annotations_20261003`。本次代码替换不代表全量编码或出题检索已完成，状态以新版 README 和运行摘要为准。
+
+用户明确只有 P1–P4 与共用概念正例图属于此处的共用概念层，后确认其归 preparation；P1–P4 本轮保持判断规则，仅调整共享资产默认路径与搬迁解析，共用正例图为 `preparation/concept_positive_images`。任务流程按产物用途命名：`curation/edit_scene_images`、`curation/t2i_training_samples`、`curation/edit_training_pairs`；旧文章／训练依赖的概念配图协议为 `curation/legacy_concept_images`，不是新主线的公共必经步骤。Edit 场景原图须完整迁移，包括数据与日志。公共中性 annotation 已停止并退役，源码在 `curation/archive/image_annotation_20261002`，原结果和调用日志保留；不再生产通用 caption/richness。主说明见 [preparation](preparation/README.md) 与 [curation](curation/README.md)。公共准备表已迁至各生产 pipeline 的 datasets，registry 已迁至工作区 `_demiflow/registry/`。用户要求撤销顶层公共 datasets；概念底库应归 collect/datasets/concepts.lance（去掉 master 文件名，不新增无加工逻辑的 preparation pipeline），文档库应归 preparation/wiki_documents/datasets，已按用户要求等待原 P1/P2 进程退出、运行锁释放且核查没有文档句柄后，完成这两项迁移及默认路径切换；根 datasets 已移除。原 P1/P2 冻结配置与结果保留，退出不表示业务审核成功或完成。实际状态见 [归属说明](docs/asset_ownership_20261002.md)。本条覆盖下文旧启动／归属状态。
+
+### 独立图片中性 annotation（2026-10-01）
+
+**最新运行状态（2026-10-02 10:40 北京时间）：用户要求暂停标注，`neutral_images_v2_20261001` 主进程及所属 vLLM 已停止，双卡释放。run、原始及续跑 journal、已有文件保留；本轮未 export，公共 images 仍为 @16。不得依据下方旧授权或 GPU 临时让位安排自动恢复标注、发布或清扫，等待用户再次要求继续。暂停回执见 `preparation/images/annotation/runs/neutral_images_v2_20261001/pause.json`、`process.json`。**
+
+用户明确图片与文章为独立 pipeline。本次 annotation 已移除概念评分节点、旧 all/image/concept 参数和全库 Python 索引；只维护 descriptions/image_scores。唯一 config → run_pipeline 入口显式区分 prepare/annotate/export，默认 annotate；原生只读 journal replay、固定引用与逐 SHA 完成检查见 [现役 README](preparation/images/annotation/README.md)。下文 2026-09-28 的双节点/四列内容是历史实现记录，不再描述现役 annotation。原 full_label run 与 journal 保留且暂停；旧 launcher 包含已退役参数，不能直接恢复。用户进一步明确本次只改图片标注：articles/review 之间的代码耦合不属于本轮范围，不是 annotation 改造的前置条件；annotation 与二者没有直接代码调用，仅以公共 descriptions 字段供消费者读取。文章、review 及其他会话 QID/概念审定/image_audit 未修改。
+
+用户随后授权继续标注，并明确这是正式运行，必须合并公共表。新 run `neutral_images_v2_20261001` 沿用 images@16 和旧输入@7 的 ready 名单 1,306,045 张；首次复制旧 journal 后继续使用同一副本，保留原始文件及此次新增响应。现配置 through=export、publish_policy=valid_rows，处理结束后自动合并成功的 descriptions/image_scores，失败名单保留，不执行概念评分或自动清扫；CLI/notebook 共用该 run 的 config.json。切换发布方式不改变模型请求身份，已经保存的同请求响应直接复用，输入和阶段表可重建。重复 SHA 复核与业务写入重试循环已删除，状态计数改走 Dataset 聚合，只读回放缺响应使用平台独立错误类型。当前进程按 process.json 核查，完成以 summary 和公共提交版本为准。
+
+### 公共图片 annotation pipeline 第一版（2026-09-28，本会话交付）
+
+- `preparation/images/annotation/` 建成标准 pipeline：唯一入口 `image_annotation_pipeline.py` 的 `config → run_pipeline`，四格 `image_annotation_debug.ipynb`，operators/prompts/tests/README 齐备并纳入统一布局检查。融合历史基础图片标注与 collect_v2 实体评分为两个模型节点：`describe_image` 一图一请求（只有实际图片，1536/JPEG90，产出 DESCRIPTION+richness），`score_concept` 一图一概念一请求（名称/别名/可选知识正文，产出 match_status/kb_match/identity/focus）；`quality=round(0.4kb+0.4focus+0.2richness,1)` 由代码派生，公式 ID `kb_focus_richness_0.4_0.4_0.2_v1` 固定，模型不输出 quality。
+- 公共 `datasets/images.lance` 新增两个 nullable 顶层列 `image_scores`/`concept_scores`（类型在 catalog/operators/schema.py 唯一声明；平台 add_lance_columns 只支持新增顶层列）。annotation 独占四列 `descriptions/concept_matches/image_scores/concept_scores`：descriptions 与 image_scores 同 annotation_id，concept_matches 与 concept_scores 同 annotation_id；按该 ID 幂等合并，同 ID 不同业务内容报冲突，run_id/provenance 差异不算冲突。`annotation_parts='all'|'image'|'concept'` 控制更新的列集合。审核/发布/目录列与未知未来列原样保留；缺目录 SHA 在 merge 前显式报错交回 catalog（anti join 预检，inner join 会静默滤掉缺行）。
+- 标注 ID 与复用：图片级 ID=SHA+实际输入摘要+语义 config_id（prompt 版本/pack hash/模型/预处理/生成参数；并发与 run 名不影响）。复用两层：run 内原生 SQLite journal 复用同请求完整响应；跨 run 按公共表同 config_id 成对记录复用（换 run/收紧范围零新请求）；知识正文或 richness 绑定变化产生新 ID，新旧评分并存不覆盖。`skip_annotated_images=True` 把已有 done 描述的图整体排除出本轮范围（用户要求"打了标签的不需要再打"；范围规则，不为旧图伪造新评分）；`exclude_concept_count_ge` 按固定来源全库去重概念数排除（复现 469 时显式设 3，不写成公共默认）。
+- 阶段表在本模块 `datasets/`（image_inputs/image_results/concept_results/patch/summary，typed，仅 overwrite 本 run 表），运行文件在本模块 `runs/`；像素按行 `source_refs` 绑定的 `demiwtg/collect/datasets/images.lance` 固定版本读取并核 SHA，base64 只进请求不落表；范围计数基于公共目录行内去重非空概念集合，先过滤后关联像素。验收测试为隔离湖+模拟响应（tests/ 22 项含复用零付费、部分模式、并发冲突重试、失败无假状态、ReuseImageAnnotations 兼容）。
+
+### 469 原图范围过滤与审核复用（2026-09-28，用户授权）
+
+- 用户要求排除全库关联去重概念数>=3的图片，并确认可停止旧后处理、切换新代码；新运行仍由用户手动启动。已核实旧v3模型响应完成、未写公共表，精确停止旧469写入者，保留阶段/响应；不影响其他Edit/GPU任务。
+- review notebook改为 `t2i_dual_keep469_visual_v4_scope3_20260928`，`reviewed_run`固定v3、`max_calls=0`、threshold=3。固定raw images@5先过滤再展开，排除行只读SHA和concepts；下游只带来源引用/关联计数/必要元数据，不再复制sources。旧26.29GiB visual_inputs不读取，旧image_requests仅提取概念/图片SHA/编号/模型输入身份，复用已提交image_relevance，模型和服务节点完全跳过。
+- 复用保持旧case_id/image_id/原批次结论，重验保留图片字节；缺失/变化/缺审核绑定不得发布。原图版本、概念身份、模型和prompt契约必须一致，范围只可收紧。排除记录单独保留，过滤图片的旧pending不污染剩余图片状态。全部469概念保留，无图与全过滤分开。
+- 公共目标仍为datasets/images.lance，最终按SHA部分列merge；阶段只写本轮数据。范围外行/其他生产者列保留；本轮观察来源用固定引用，不重新内联原始sources。原图与原模型判断不改写。第三格查看本轮精简结果和分页缩略图，第四格观察后处理与旧调用日志；均不启动模型。
+- demiflow通用修复：物化缓存按编码字节分块并逐行溢写恢复；外排宽行载荷只写一次、归并携带偏移；read_lance显式提供batch_size/batch_readahead/fragment_readahead。内存预算只约束对应缓存，不能宣称整个进程RSS有硬上限；业务概念过滤和发布策略不下沉平台。
+
+
+### T2I 两阶段筛选模块更名（2026-09-28，用户要求）
+
+- `benchmark/t2i/sampling` 更名为 `benchmark/t2i/coarse_screening`（粗筛），`benchmark/t2i/screening` 更名为 `benchmark/t2i/fine_screening`（精筛）。目录、入口文件（`t2i_coarse_screening_pipeline.py` / `t2i_fine_screening_pipeline.py`）、debug notebook、运行锁目录（工作区根 `_demiflow/benchmark_t2i_*`）、跨模块 import、测试、notebook 与 README/交接手册同步更新；lance 表名与 run 名不变，旧路径不再保留转发。
+- 表内存储引用同步迁移：summary/records/results/samples/concepts/reviews 等 35 张表里保存的 uri 字符串（selection、call_json、review_source_uri、payload 等）含旧路径，已按新路径生成新 lance 版本（旧版本保留可审计）；固定版本号引用不受影响，coarse/fine notebook 的只读查看与断点恢复链路已验证可打开全部引用表。
+- 术语统一：分类初筛阶段称粗筛（coarse_screening），双模型逐概念判断阶段称精筛（fine_screening）。v2/Edit 出题的 `screening_source` 参数、prompt 名（`t2i-concept-screening-4`）与表内字段名保持不变。
+
+### Edit V2 标准 pipeline 第一版（2026-09-28，本会话）
+
+- 用户要求按标准 pipeline 清理旧实现，使用 Codex 出题，并提出同一次 Codex 执行内生图、检查、交付。沿用联合设计种子/核心考点/原图构造/题目的既定思路。
+- 已重写为 config → run_pipeline，固定公共图文/可选场景池直接 Dataset 关联，每概念独立 Codex 请求，typed inputs/designs/candidates/summary；原生日志复用。同目标 append 按 task_id 去重。
+- 新 prompt `edit-v2-codex-source-2` 保留基线知识标准，增加作者原图检查记录；只有实际 edit_source 存在且作者检查通过才交付 unreviewed 候选。无图/材料不足/待合成/检查失败/技术失败区分；作者检查不等于独立审核。
+- 移除 Edit V2 的 preparation RunFiles/冻结材料/旧发布适配/JSON 阶段封装/local Qwen 路径，删除未使用 prompting/transforms；测试归 v2/tests，无转发层。V1、历史数据及仍在运行的 source_images 独立流程保留。
+- **平台扩展已获授权并接通**：用户明确“好，接通一下吧”。现有 demiflow codex_exec 增加显式 image_generation、artifact_store 与文件数/总字节数限额。启用时在独立临时 workspace-write 中执行，给作者输入图片路径映射及产物目录；结束清理前按实际文件写 LanceBlobStore，并随原生调用保存固定引用。续跑校验并复用图片，不再生成；存储/缓存图片失败不自动付费重试。文件交付归平台，出题/像素/作者检查规则仍归 Edit。
+- generate_source=True 只支持 Codex；False 显式关闭原生生图，仍可保留 needs_source_synthesis 方案。默认文件限额8个/64MiB为接入层硬限制；max_generation_attempts=2为作者指令预算，不声称可强制工具调用次数。无图片/非图片/未绑定文件/复制种子冒充构造图不得导出；作者检查失败的实际图可留作诊断。
+- Notebook 默认 Codex/gpt-6-astra/xhigh/live，固定 fine_screening@1、articles@4、images@9、5概念，GENERATE_SOURCE=True、RUN_PIPELINE=False，运行名 edit_codex_seed_pilot_v2_20260928。原生图像后端具体型号和账号实际可用性不凭配置推造；开发只跑隔离模拟及回归，真实出题和生图由用户手工试跑。
+
+
+### T2I 两轮分类结果与 high 名单分布（2026-09-28，用户要求对齐 fine_screening 最后一格）
+
+- coarse_screening notebook第二格仍独立只读；现在同时读取L2_RUN_ID二级轮与L3_RUN_ID三级轮的摘要及固定reviews/memberships。各轮展示high/medium/low判断项数、真实分类数、补位项数、档内去重概念数，技术状态单列。此条覆盖此前仅三级快速查看及SHOW_L3_CONCEPT_COUNTS可选计数的约定。
+- 每轮high唯一概念集合按完整taxonomy的全部归属展示二级/三级分布、概念数、占本批比例和完整concept_list，分类内去重、跨分类可重复；不限制为模型判high的路径，不用单一leaf归属，不把补位标签造进taxonomy。缺层级明确显示未标注。
+- 两轮结果分别保留round_views['l2'/'l3']及l2/l3别名；分类名单完整、不截断。第一轮high超11万，逐概念taxonomy大表默认仅保留DataFrame，SHOW_FULL_HIGH_TABLE=True才重复渲染完整大表；各分类内名单不受影响。只读成员元数据，不扫图片/主概念库，不调用模型、不改demiflow；原执行分支、第一格及保存输出保持。
+
+### T2I 三级分类结果独立快速查看（2026-09-28，用户反馈第一格慢）
+
+- coarse_screening notebook第二格默认可独立只读执行，直接接三级轮summary及其固定reviews，不依赖第一格CONFIG/state、不重建上一轮范围。默认只展示high完整明细及三档分类/补位数；L3_VIEW_PRIORITY=None查看全部判断，l3_details保留全集。
+- SHOW_L3_CONCEPT_COUNTS默认False，跳过成员表关联与去重；设True才补档内概念数。只读不扫描图片、全量概念池、不调用模型。第一格全库概览和已有输出保持；只有RUN_L3_PIPELINE=True的执行分支才要求第一格已准备CONFIG及完整state，仍用原正式入口。
+
+### 图片吞吐优化与469手工运行（2026-09-28，用户最新要求）
+
+- 用户要求先优化demiflow与业务pipeline，明确469仍由用户手工运行；开发只做隔离测试和只读配置验证，不启动模型。用户随后确认：能复用准备结果则一并完成此前目录拆分；v2已退出且模型调用为0，允许现在切换。
+- 通用阻塞算子使用demiflow `map_async(..., execution='thread', concurrency=..., queue_depth=...)`，平台管理本级线程池、背压及退出排空，业务不再包装to_thread。默认inline不变；线程模式拒绝异步函数和不可强杀的hard_timeout，调用方保证线程安全与I/O有限超时。SQLite日志、请求身份及不确定调用语义保持。
+- Edit沿用原32读图并发/16队列及请求载荷，仅替换执行机制。469准备并发8/队列8；Qwen客户端128/服务64、Gemma64/32，输入队列16/8；二者依次使用GPU0+1、TP2/DP1，显存0.92、上下文32768、batched_tokens16384、enforce_eager=False、加载900秒。4图/批、1536像素最大边、JPEG90、输出8192及审核prompt保持。
+- 新配置run=`t2i_dual_keep469_visual_v3_tp2_20260928`，旧v2在资源冲突时没有发出模型请求；通过prepared_run复用旧v2两个固定准备表并重验原图SHA，旧阶段与错误保留。notebook四格为配置、手工执行、全部469概念及缩略图/两模型明细表、只读GPU/调用日志观察。第3格支持概念单选/多选/全选、自适应表宽与图片分页，保留无图/待审核概念，未提交不算零通过；只读查看不重跑审核。窗口新请求与缓存复用吞吐分开。参数是实测起点，不预称双卡已打满。
+
+### 公共图片子 pipeline 与平台部分列写入（2026-09-28，用户最新确认）
+
+- 本条覆盖下方“同一图片目标只留一个入口”、469 notebook 第7—9格、旧v1运行名及 borrow 服务约定。图片拆为 `preparation/images/catalog` 和 `preparation/images/review`，各自管理 `config → run_pipeline`、notebook、算子、提示词、测试与 README；共享 schema 和实际复用算子须明确生产者归属，不保留旧 `images_pipeline --flow` 转发。
+- 用户授权扩展 demiflow 的通用按主键部分列 merge 与显式增列；业务直接用 `write_lance(mode='merge', on=..., update_columns=..., when_not_matched=..., expected_version=...)` 和 `data.add_lance_columns`。平台不含图片字段、选样或业务去重；目标字段归属在项目约定，未来公共字段由独立生产者更新。
+- catalog 写基础目录/尺寸；review 写 concept_assessments 和派生集合，保留 descriptions/concept_matches/技术字段及未来其他生产者列。来源与概念关联取并集；整列值的业务合并在项目内完成，公共数据 merge 一次提交，DDL 单独版本。所有本轮结果阶段完成后才写公共目标。
+- 469 是公共 preparation 本次更新范围（固定 fine_screening@1 的全部有效keep，collect images@5）；下游再决定选样。材料优先200代码已移入 benchmark/t2i/v2，旧表/CSV不动。
+- 手工审核 notebook 为 `images/review/image_review_debug.ipynb` 三格：配置、运行、只读查看。run=`t2i_dual_keep469_visual_v2_20260928`，完整taxonomy、无图状态、全范围审核及>=5张通过图统计保留。旧notebook原输出分别保留到catalog/review新路径。
+- 两个模型节点用 demiflow 原生 VLLMService，Qwen3.8→Gemma31 顺序使用GPU0+1/TP2；只启动/释放本节点进程，不接管外部服务。新审核使用SQLite调用日志；历史及文章调用方不批量迁移。开发仅隔离模拟与只读核对，用户手动执行469，不能代停现有服务或启动生产模型。
+
+### T2I 全部 469 个通过概念先审核（2026-09-28，用户最新要求）
+
+- 用户改为全部 469 个双模型有效 keep 概念先跑 preparation，审核后再选样；覆盖下方先挑 200、至少 3 张候选图的本轮约定。历史覆盖表、200 个名单和 CSV 原样保留，不再用作本轮审核范围。
+- preparation/images notebook 第 7 格配置、第 8 格手工运行、第 9 格只读查看；固定 fine_screening high_l3_categories_uniform1000@1 和 collect images@5，run=t2i_dual_keep469_visual_v1_20260928。概念名与完整 taxonomy 提供身份上下文，不传筛选理由；无图/无可读图也保留概念结果但不请求模型。
+- 保持现有 Qwen3.8 初审、Gemma31 独立复审和 borrow 服务策略；批大小 4、并发 4/2、每模型节点预算 5000、输出 8192、timeout600、进度每20条。开发仅隔离模拟与只读配置验证，模型由用户手动启动，不代操作服务。
+- 本轮阶段限定 469 个概念及其图片；公共 images 采用 merge，提交的新版本保留全表，不是本轮子集。查看本轮通过图数与至少5张的概念数，区分无图、不可读、待定/失败和已通过。目录补齐与视觉审核是独立操作，列更新本身不要求绑定；本次未把出题扩大或启动。
+
+### T2I 200 个材料优先概念准备审核（2026-09-28，用户确认）
+
+- 用户选择先从双模型通过的概念里选 200 个准备 preparation 审核，尚不执行模型审核或 200 次出题。现役 images_pipeline 增加 reference_selection_config/run_reference_selection；仅数据统计与名单落表，业务不进入 demiflow。
+- 固定 fine_screening high_l3_categories_uniform1000@1、images@9、articles@4，先已有审核图文，再至少 3 张目录标记可用的非已知生成候选图；seed=20260928，各优先档按三级分类前缀轮转，完整 taxonomy 保留。数量不足报错，不用 hold/failed 或缺材料概念补足。
+- preparation/images notebook 最后一格配置并查看 reference_coverage/reference_concepts 两表，run=t2i_dual_keep_reference200_v1_20260928；独立视觉审核配置接入名单及 collect images@5，调用保持注释。候选图数量不是已发布参考数量，不修改公共表或历史 notebook 输出。原 5-case 出题配置保持。
+
+### T2I 正式出题输出判据与具体任务检查（2026-09-28，用户确认）
+
+- 仅 T2I V2 的每项 `test_points` 改为必填 `point/basis/criterion`：考点、支撑考点及判据的事实与适用条件、最终任务中的可观察正确/错误标准。覆盖下方 T2I 不输出判据的旧约定；不修改 Edit 协议。判据可写出答案，不作为生成模型的作答指令，不新增分值、权重或评测流程，候选仍为 unreviewed。
+- prompt `t2i-v2-independent-materials-6` 保留原五条质量门槛，最终检查集中到“知识可靠、任务需要、图像可判”，联合核对最终题面、考点、依据、判据；保留核心区分价值、必要展示条件、无隐藏要求、合法变化、证据不足与空题出口，不输出检查过程。
+- 同步 YAML 响应定义、Arrow 落表和 notebook 的考点/依据/判据展示。新版 notebook run 为 `dual_keep_codex5_criteria_v3_20260928`，沿用 5 概念抽样、完整 taxonomy、固定图文来源与独立 Codex 配置。旧表及 notebook 输出保留；旧表缺判据时明确显示未输出，不补造标准。开发只做隔离模拟测试，由用户手动试跑。
+
+### T2I 第二轮五条规则增强（2026-09-27，用户确认）
+
+- fine_screening prompt升为t2i-concept-screening-4：原五条标题、解释及严格门槛完整保留，每条内分别补清核心知识如何落在任务中、同条件下值得测的错误、条件对核心的作用、事实/任务要求/可见证据的区别、范围一致性。另补三项具体任务检查，落实到candidate_point/visual_check，不增加响应字段，不要求提前写完整题面。
+- 第一轮仍按分类及少量样例判断优先级，五条核心标准一致，不把第二轮的具体任务检查变成第一轮逐概念出题要求。无材料仍为正常输入，不确定的关键知识不能编造。仅改项目prompt/说明，不改demiflow语义；notebook与GLM交接已同步v4，旧v3用量只作历史参照。
+
+### T2I 真实三级 high 均匀抽样与夜间交接（2026-09-27，用户确认）
+
+- 用户特别强调保持demiflow平台语义干净：本轮GLM夜间护航不授权平台改造，不能把分类/抽样/双模型AND/业务失败策略或本轮模型、路径、run特例混入平台，也不能改缓存、请求身份、不确定请求、锁或存储语义来绕过恢复限制。项目业务留在pipeline/operators/notebook；通用能力缺口登记共同根DEMIFLOW_PLATFORM_TODO.md，需改平台才能继续时报告具体阻塞，不能以持续护航为由临时污染框架。
+- 本条覆盖上一版混合519项试跑：本轮仅199个真实三级 high 分类，320个 high 概念补位项留待后续。固定 mixed v2 memberships@1/reviews@1，以 category_kind=category 在去重与配额前排除补位；26,122个唯一概念，抽样实际在第二轮正式 pipeline 开始处执行。
+- 类间均分、类内按完整路径轮转、跨类概念去重；小类不足取满后分配余量，总量不足报错。当前 seed=20260927、sample_size=1000 已隔离 prepare 验证：194类各5个、5类各6个，无重复和补位。第一轮不抽样、不改上游失败状态；无图文/分类理由，每概念两模型各一次，全部有效 keep 才通过。
+- Notebook 新 run=high_l3_categories_uniform1000_v1_20260927，RUN_PIPELINE=True、MODE=modelhub，用户交给GLM后台执行并持续夜间护航；本次开发不代启生产模型。源notebook是唯一参数来源，后台直接执行同一本，不复制隐藏参数。保留既有输出。
+- 每模型并发4、输出16384、timeout600、progress_every20；追加本run进度日志供后台查看，无完成行不产生定时心跳。交接手册在 benchmark/t2i/fine_screening/archive/GLM_HANDOFF_high_l3_uniform1000_20260927.md。相同完整响应可复用；失败响应/未完成占位不能靠同名重跑自动修复，不能删日志或盲换run全量重算。
+
+### T2I 接三级有效 high 做双模型试跑（2026-09-27，用户要求）
+
+- 三级混合轮调用已结束，但 summary 仍为 waiting_for_reviews：3,184 项有效、101 failed、235 invalid_response，未生成完整 concepts。有效 high 是 199 个真实分类 + 320 个概念补位项，对应 26,442 个唯一概念；不能把“调用结束”写成完整交付。
+- fine_screening 增加成对固定 category_member_source/category_review_source：只接 reviewed/high 分类及其成员，再按 concept 关联既有全量概念池的 name/taxonomy，不沿用旧二级分类优先级。抽样、模型、writer 仍在正式入口；未成功分类留原状态，不改 coarse_screening 的完成门槛。来源对要求显式 sample_size，固定引用保存在 selection。
+- Notebook 来源固定到 mixed v2 的 memberships@1/reviews@1，名称/taxonomy 仍来自 all_master_category_pool@1；新 run=high_l3_dual_pilot1000_v1_20260927。建议先试1,000，MODE=prepare、RUN_PIPELINE=False，不自动提交模型；None 仍表示未定规模。每次请求一个概念，两模型独立判断、全部有效 keep 才通过，无图文/分类理由。
+- Notebook 增加累计 token/耗时情景表。GLM v3 234 个正常响应均值约3,121输入+4,193输出tokens、92.5秒；DeepSeek尚无本项目实测，双模型情景仅暂按同量级估算，不表示已核实配额/价格。既往246个带usage响应有12次在8192截断，因此试跑上限改16,384，不等于实际每次用满。规模、并发和后续扩量依据首批实际 usage/质量再定。
+
+### Edit 原图视觉全量接线与 GLM 护航（2026-09-27，用户确认四级 keep+hold / TP=2）
+
+- 用户确认来源为最新四级4B目标：concept_inputs__scene_pool_category_l4_v1@1、category_results__scene_pool_category_l4_v1@1，回连其原候选 image_checks__scene_pool_category_l3_v1@1；不能从四级keep-only图片目标恢复hold。keep14,317+hold12,857共27,174项，原生Dataset只读核对为82,331概念、172,297张唯一图片。
+- 正式config增加 category_result_source 固定目标复用及 category_decisions 召回档位；匹配当前分组键/类型/成员数、完整状态后跳过文本模型，max_text_calls=0。两个图片限额支持None；本轮全部通过尺寸的候选进视觉，不沿用500图/每概念4图。分类决定原样保存，来源字段不进入视觉请求。
+- Notebook本轮 run=scene_pool_add_v5_l4_keep_hold_tp2_v1，action=run、through=pool；用户交由GLM执行护航，本次开发只配线、隔离测试和只读范围核对，不代为启动生产模型。交接文件在 benchmark/edit/source_images/archive/GLM_HANDOFF_add_pool_v5_20260927.md。
+- 用户明确要求一份模型分两卡：Qwen3.8-27B、GPU0+1、TP=2/DP=1；demiflow原生服务管理负责加载/就绪/释放，业务只配置。当前请求并发128、max_num_seqs128、batched_tokens16384、显存0.92、上下文16384、输出6144、thinking=False、视觉预算约2048 tokens、timeout600。此条覆盖此前DP=2及8192视觉输出的本轮约定；实际吞吐由GLM运行验证，不能预称已打满。
+- 运行参数先改notebook再提交同款；已有完整响应可复用，不等同阶段断点恢复，未完成请求不自动重试。新协议写独立run，历史表/公共数据不改。正常任务完成与技术失败分别计数，验收读固定结果版本和complete，不凭锁释放判断成功。
+
+### Edit 共用原图以 add 用途标注和分级（2026-09-27，用户认可 review 后要求落实）
+
+- 视觉 prompt 当前为 `edit-source-image-5`，按“整图 → 区域 → 新增候选 → 关系要求 → 用途等级”说明每个字段。caption 与场景/视角描述属于整图；区域描述可见事实、位置、空间与占用、锚点、physical_conditions 和限制；新增候选包含 object_types、fit_reason、relations(type/evidence/requirement)、observability。位置和对象类型须有承载、功能、结构、环境或关系依据，不能仅凭“有空位”给所有图附通用对象清单。
+- 允许有依据的复合关系和物理条件，不强求复杂、多区域或多标签；普通光影/位置要求不能自动当作概念核心考点。不得推断隐藏内部、精确物理数值或静态图无法证明的动态结果。add 保留现有对象身份/位置，允许新增引起的必要阴影、反射和遮挡；不能靠删改已有对象腾位置。
+- `add_suitability=high/medium/low/unsuitable/uncertain`。前三档是已确认可用的不同用途等级，均对应 keep；后两项对应 reject/hold。high 看具体适配依据和可观察约束，medium 看明确的基本承载，low 表示已确认但限制显著、用途窄；不确定不得伪装成 low，不按关系复杂度/标签数量/审美或预期模型成功率打分。
+- 用户进一步要求整体移除干扰信息：视觉模型只接固定任务说明和图片，不传 source_concepts/source_groups、上游筛选理由或文件元数据；删除 source_match/source_match_reason 来源审计输出。来源字段仍沿业务数据流用于召回、关联和追溯，但不构造视觉 prompt_payload、不进入视觉字符预算。本条覆盖此前来源匹配审计与 keep 必须 source_match=match 的约定。
+- Prompt 保留直接影响视觉判断的新增条件、区域与对象适配、可见依据/约束/可检查性、等级和检索标签。上游来源、后续出题分工、人工审核、工程处理等说明留在文档，不要求模型同时处理主任务外的流程。同步删除不再需要的输入绑定、响应 schema、校验与图卡字段，不能只删提示词里的提醒而仍发送干扰信息。
+- 模型仅输出等级与原始标注，不输出 decision 或 retrieval_tags。业务 check_image 按等级确定性派生 keep/reject/hold，从 scene_groups、区域 anchor_tags/physical_conditions、候选 relations.type/object_types 按出现顺序去重汇总五类检索标签，不截断。原始响应不改写，派生字段保存在 annotation/交付表供筛选与展示。此条覆盖此前要求模型输出映射及重复标签的约定；结构合格不冒称像素和物理依据已经人工验证。
+- 同步业务 Arrow schema、响应校验、等级进度/摘要、Notebook 图卡和等级过滤。新版视觉表不与旧 schema 混写，执行视觉阶段前检查已有输出，冲突时要求新 run/target；旧表不迁移/补算评分。当前4B分类 prompt、参数、run 和 image_checks 边界保持，新视觉输出预算在 Notebook 配为8192 tokens，开发不自动提交视觉模型实验。
+
+### T2I high 内接续三级分类判断（2026-09-27，用户要求）
+
+- coarse_screening notebook 第二格复用同一个 config/run_pipeline。用户最新要求将 1,477 个 high 直挂概念与 2,043 个真实三级分类一同分组判断，共 3,520 项。正式入口增加可选 short_path_policy='concept'，不新增 pipeline；每批40项，真实分类最多5样例、概念项只有自身1个样例，模型/推理/预算/并发参数继承第一格 CONFIG。
+- 必须接第一轮完整交付的 state。按同一 state 的 reviews 取 high 二级前缀，taxonomy_depth=3；范围外路径不带入。有任一 high 路径达到三级则仅归真实分类；都不足时每概念补一项，最长短路径作上下文，同长度按字典序。category_kind=category/concept 沿 memberships/inputs/reviews/category_priorities 留存，原 taxonomy 不加补位标签；真实分类与同名概念不混并。无 high 范围时停止，不能传空前缀退回全库。此条覆盖此前短路径暂不送审的约定。
+- 五条核心门槛和响应 schema 共用；只有 concept 策略附加 short_path_concepts.txt 单概念适用说明，不要求概念项满足“类内多个概念带来不同考点”。默认 category 策略保持原 prompt/模型载荷/分批摘要，可复用第一轮固定 reviews。混合轮新 run 为 high_l3_with_concepts_batch40_v2_20260927，不误用旧三级轮缓存。
+- 默认 RUN_L3_PIPELINE=False，只读范围和已保存结果；用户手工切换执行。prepare 零模型请求，可核对实际批数；modelhub 才调用 GLM。结果三档全部落新池，固定来源为 L3_SCREENING_SOURCE；下游逐概念双模型粗筛仍单独决定规模。保留第一格已有输出和参数，开发不自动提交生产模型实验。
+
+### Edit 原图接续四级分类与实例细筛（2026-09-27，用户要求）
+
+- 原图 pipeline 新增互斥的接续输入 `concept_input_source + checked_image_source`，均显式固定 URI/version；与公共 `concept_source + image_source` 二选一。接续只读前轮 image_checks 中 ready 图片及其 source_concepts，原生 Dataset 去重后关联完整概念快照；不重跑三级粗筛，不回扫公共图片或补回被前轮排除的图片。
+- 本轮 notebook 为 `scene_pool_category_l4_v1`，来源是 `scene_pool_category_l3_v1` 的 concept_inputs@5、image_checks@1；183,013 张图关联 88,878 个概念。`taxonomy_depth=4, short_path_policy='concept'`：有四级路径时按前四层归类；所有路径均不足时，每概念一个实例末端，最长短路径作上下文、同长度按字典序，不虚构中间层。实际 4,174 个真实分类 + 27,162 个实例 = 31,336 单元，category_kind 留表区分两者。
+- 沿用原 screen_source_category prompt、版本与 schema，载荷仍仅 domain/category；实例名称放入 category 末端，不增加成员样例。该规则覆盖此前“文本永远不含概念名称”的表述，仅限短路径实例补位。每单元一次4B调用，任一分类 keep 则召回该概念；回连图片只保留本轮 keep 概念/分组，并按 SHA 合并，固定 Blob、尺寸与尺寸来源沿行保留。
+- 新持久边界 `through='image_checks'` 在全量回连图片后返回，尚未应用 max_images/max_images_per_concept、未调用视觉模型。Notebook 本轮默认该边界，4B 双卡DP=2、并发128、max_tokens=1024、thinking=False、新请求预算40,000；所有参数均由 config 传入，公开入口和 CLI 同步。
+- 用户明确本轮手工启动/监控，开发只做隔离响应回放和正式来源只读范围核对，不自动提交31,336次调用。Notebook 默认 monitor，手工改 run 后执行统一入口；预览默认本轮最新摘要、各结果表仍按摘要固定版本读取。每阶段打印输入/输出、数量、状态、复用和耗时；保存本次准备/执行摘要，未完成/失败不沿用旧成功。完整请求响应可复用，未完成请求仍不会隐式重试。
+
+### T2I 第一轮全量落表、第二轮决定规模（2026-09-27，用户最新纠正）
+
+- 本条覆盖此前“第一轮抽 5,000 个 high 候选”的约定。第一轮只做全库分类初筛，发布每唯一概念一行的 concepts 全集，high/medium/low 均保留；完整 taxonomy 和 category_priorities 不丢。顶层 priority 是最高所属档，只用于选择范围，不代表逐概念通过。
+- 第一轮入口/CLI/notebook 删除 sample_size、sample_seed、max_per_category、exclude_sources 及 quotas/samples/提交去重实现；完整池采用 overwrite 快照，版本由 Lance 保留。新 run 为 all_master_category_pool_v1_20260927，复用已完成 reviews@1，不重新调用分类模型。
+- 第二轮 notebook 决定实验规模、种子、单类上限及历史排除，实际 high 抽样数据流在 fine_screening 正式入口。SAMPLE_SIZE=None 表示尚未决定规模，不生成可执行 CONFIG；必须先填正整数才能运行，不预设 5,000，也不把 None 当作全 high 执行。可用 prepare 只落本轮样本/配额/输入，不创建模型请求。
+- 第二轮只在 high 内尽量覆盖分类和完整路径，多分类概念去重，数量不足时报错，不从其他档补足。GLM Flash 与 DeepSeek Flash 独立读 name/taxonomy、无图文和分类理由，全部有效且全部 keep 才通过；开发不自动提交第二轮生产模型实验。
+- 第一轮 notebook 继续展示 2,754 类的全集资源概览：概念档内按名称、图片档内按 SHA 去重，跨档可重复，不能混成池顶层最高档归属的互斥计数。图片是关联储备，不表示出题材料审核通过。保留历史表和 notebook 已保存输出。
+- 全集已用 notebook 同一 CONFIG 实际落表为 concepts__all_master_category_pool_v1_20260927.lance@1：385,292 个唯一概念，high 110,568 个；完整复用分类结果，零新增模型请求。第二轮源固定到该版本，SAMPLE_SIZE 仍为 None，未提交第二轮实验。
+
+### 平台改进事项统一登记（2026-09-27，用户要求）
+
+- 共同工作区根目录的 [DEMIFLOW_PLATFORM_TODO.md](../DEMIFLOW_PLATFORM_TODO.md) 专门维护 demiflow 平台待办。DF-001 记录彻底移除 LanceRecordStore 的范围，包含模型日志、其他 pipeline 及历史引用迁移；已完成的 coarse_screening 业务状态改造单独标明。
+- 用户当前明确先推进项目中的 T2I 工作，平台事项后续逐项优化；登记待办不自动触发全平台改造。
+
+### Sampling 运行状态使用显式业务表（2026-09-27，用户讨论后执行）
+
+- coarse_screening 的业务运行摘要和 append 提交记录由本 pipeline 定义 SUMMARY/SAMPLE_COMMITS schema，通过标准 data.read_lance/write_lance 存取 summary__run 与 sample_commits__run；正式入口和 notebook 不再导入 LanceRecordStore。启动先写 preparing 且结果引用为空，阶段完成才登记固定 URI/version，失败不冒充旧成功。
+- 本模块 4 个既有运行的最后状态已迁为 summary@1，旧 records/调用日志/结果表保持原版本；notebook 的参数、用户删减的输出及 high/medium/low 分布展示保持。业务表跨阶段仍固定版本读取，只有运行摘要用于查询当前进度。
+- 用户进一步询问能否连模型日志一起删除 LanceRecordStore，以及其他 pipeline 的依赖。已查到精筛（fine_screening）、T2I/Edit 出题、原图准备、训练、preparation 和评测的直接/间接使用，另有平台日志/运行/维护与历史迁移工具。当前仅 coarse_screening 业务状态已完成替换，模型日志内部和其他流程尚未迁移，不能声称该平台模块已删除。
+
+### 概念挂载合并进主表（2026-09-27，用户要求，已执行）
+
+- 用户明确要求合并并删除 `datasets/concept_taxonomy.lance`。概念与挂载统一由 `datasets/master_concepts.lance` 保存；本条覆盖下方独立 memberships 权威表、四表发布和保留四张主数据表的旧约定，不重建关系表。
+- 主表@3 为 385,292 行。原 name/aliases/carriers/taxonomy 与来源字段逐值保持，taxonomy 仍为 JSON 路径列表；新增 `taxonomy_metadata: list<struct>`，按原路径顺序保存全部 446,775 条关系的原 taxonomy_node_key、ordinal、source_ref、source_record_key、migrated_at_us。元数据内节点键保留 `demiwtg / ` 前缀，概念键由行内 name 提供。今后挂载变化在同一主表版本内同步更新 taxonomy 与对应元数据。
+- 默认采集发布为 `master_data_merged_20260927`（master@3、nodes@1、edges@1）。旧 `master_data_current_20260921` 四表发布、关系表登记和旧映射已退役；历史登记快照与审计内容不改写。主表@1/@2 保留，已有 notebook 的固定@2与保存输出保持。
+- 新 schema 属于 `collect/schemas.py`；一次性入口为 `tools/lake_migration/merge_concept_taxonomy.py`，控制计划和逐字段核验回执在共同根 `_demiflow/concept_taxonomy_merge_20260927/`。删除前完整回读原字段与新增元数据，不把旧关系表 URI 映射为不同 schema 的主表。
+
+### Preparation 按目标表拆分（2026-09-27，用户要求）
+
+- 现役入口按两张公共目标分为 `preparation/articles/articles_pipeline.py` 与 `preparation/images/images_pipeline.py`，各自 notebook 为 `articles_debug.ipynb`、`images_debug.ipynb`。本条覆盖下方文章/视觉统一在 preparation_pipeline 与 preparation_debug 的旧约定，不保留旧入口转发或软链接。
+- 文章入口只写公共 `datasets/articles.lance`；配图仍参与文章审核，直接复用图片入口的 `run_image_review` 子图并保存运行依据，不再自动提交公共图片表，也不保留 `visual_target_uri/visual_write_mode`。图片入口统一负责目录补尺寸、视觉导出与响应重放，目标为 `datasets/images.lance`。
+- 两个 preparation 入口共用父目录的 `operators/`、`prompts/`、`tests/`，不复制算子和提示词。仅允许文章入口导入图片入口的 `run_image_review`；算子仍不得导入 pipeline。两条入口均纳入统一布局检查。
+- 本次为代码与入口整理；阶段、日志、历史运行仍平铺 `preparation/datasets/`，公共表位置、固定引用及 notebook 已保存输出和用户运行开关保持。同步 CLI、调用方和源码登记，测试使用隔离数据根，不启动生产或模型调用。
+
+
+### T2I 分类初筛与分层抽样（2026-09-27，用户要求）
+
+- 在 `benchmark/t2i/coarse_screening/`（原 sampling）新增标准 pipeline，唯一入口 `t2i_coarse_screening_pipeline.config(...) → run_pipeline(config)`，单格 notebook 配置实验参数，登记统一布局检查。主线显式读取 master 固定版本、展开分类、聚合跨叶样例、分类模型请求、关联优先级、分层配额和候选 writer；行/分组计算放 `operators/`，不新增平台 API。
+- 分类 high/medium/low 仅分配抽样投入，概念仍须后续严格 keep/hold 筛选。分类模型初始采用已接入的 `glm/glm-5.3`，具体模型和抽样权重在 notebook；不将“较强模型”当作本任务效果已验证的事实。不提供文章/图片，不因 low 永久删除整个分类。
+- 分类 prompt 完整提供下游概念筛选的五条重要规则作为质量上下文，并写明分类层面的用法：评估样例是否支持类内经常存在符合全部规则且有不同核心价值的方向，不逐样例出题/输出 keep/hold，不靠一个优秀例外抬高整个分类。修改规则时同步核对上下游 prompt；分类理由仍不传给下游概念筛选。
+- 默认全库按二级分类、每类最多 5 个跨完整路径样例；同大域按分类名排序，每次最多 40 类共享完整五条规则，超过字符预算提前拆批。分类响应为 category/priority/sample_fit/reason 数组，漏项/重复/额外分类使整批无效；请求预算和 usage 按批计数，明细仍每类一行。固定分类样例种子和独立抽样种子；大域保底、分类/大域上限及探索比例由调用方显式配置，分类结果未全部有效时不交付新样本。
+- 多路径概念保留完整 taxonomy，只选择一个配额归属避免重复；按优先级再稳定哈希选归属，不宣称完成义项消歧。候选 name/taxonomy 与现有 fine_screening 主表协议一致，输出 sampled 不表示筛选通过；分类理由不传给后续概念筛选。
+- 可显式复用固定版本 reviews，并从固定历史样本按 concept anti join 排除；绑定完整批次输入/prompt/schema/模型（包括同批其他分类），相同才复用。分类摘要、请求批次、判断、配额和候选表平铺本模块 datasets，公共主表只读。Python 默认 prepare；Notebook 保留用户手动设置的运行开关与已有输出，开发不自动启动生产模型。输入 token 按实际批次估计，服务 usage 去掉同批分类重复计数。
+- 首轮 all_master_batch40_v3_20260927 的 86 批有 74 批在 8,192 输出上限处截断，绝大部分预算用于推理；用户明确选择保持 max。Notebook 新运行 all_master_batch40_v3_retry_max_20260927 显式 max、输出上限 65,536（含推理）、超时 1,800 秒。retry_source 固定旧 reviews@1，仅复用整批全 reviewed 的 12 批，其余 74 批重试；与全量复用 review_source 互斥。prepare 显示 retry_plan，不发请求。旧表和日志只读；新旧结果保留真实调用引用。模型参数改变必须考虑原生日志的持久请求预算和失败响应缓存，不能仅改上限后同名重跑；不因技术截断放宽五条规则。
+- retry_max 轮的 74 个新请求均完整结束，合并后 84 批成功、2 批因漏分类/改分类名而无效。当前 notebook 改为 all_master_batch40_v3_retry2_max_20260927，retry_source 固定 retry_max 轮 reviews@1；复用 84 批、仅重试 2 批。参数与输入不变，旧输出保留，仍由用户手动运行。
+- 用户随后明确授权在 VS Code 无法连接时，将 retry2 轮按 notebook 相同 CONFIG 后台提交；此授权覆盖上述本轮手工执行约定。后台仍调用唯一正式 run_pipeline，成功后自动完成本轮 5,000 个候选抽样，不自动启动下游粗筛或出题。
+
+### T2I 粗筛双模型与 Codex 正式出题（2026-09-27，用户要求）
+
+- 粗筛位于 preparation 与正式出题之间，主表使用公共 `datasets/master_concepts.lance` 的概念和完整 taxonomy；当前不提供文章或图片描述。筛选规则优先概念核心、有价值的核心区分潜力和可靠判分，边界案例暂缓，不设通过率目标。
+- 实验模型名单放 fine_screening notebook：`glm/glm-5.3-flash` 与 `galaxy/deepseek-v4.1-flash` 独立读相同输入；全部有效且全部 keep 才保留。结果每概念一行，顶层 decision 存合并结论，model_results 保留每模型原始六字段、执行状态和调用引用，不拼造共同考点。技术失败不得改成 hold；预算按每个模型节点计。
+- 用户要求正式 pipeline 可直接调用本机 Codex，无需另开桌面对话或手工转交。T2I V2 的可选 codex 模式保持原生 prompt 节点、日志、校验和 writer，通过非交互 CLI 执行；不是 Python 直接调用当前会话的 collaboration 工具。
+- 正式出题每概念新建执行上下文，不续接当前讨论或其他概念历史；只传正式出题请求和该概念材料，不传粗筛理由与候选考点。基础指令仍存在，不宣称完全空白上下文。模型和推理参数显式配置，保留真实执行身份，不把 Codex 结果记为 GLM。
+- 正式出题与粗筛共用五条质量门槛，针对最终题目重新检查核心联系、核心区分潜力、外围生成负担、可靠公平判分和自然代表范围。质量不够可直接返回 `question: null` 与具体原因，不能因粗筛通过而凑题；有效空题为业务不足，不进入候选表。
+- 无材料是正常输入，允许充分使用可靠已有知识；用户计划后续用 GPT-6 出题，必要时由出题执行者检索核验关键事实，不强制逐题检索。Codex 配置 `codex_web_search` 默认 live，可选 cached/disabled，进入请求缓存身份及日志；HTTP 模式不自动获得工具。检索事实和实际来源链接写入已有 basis，不虚构输入材料编号，也不自动作为作答模型材料。此处允许作者在同一次出题执行中核验事实，不新增独立检索 pipeline 或审题阶段；具体模型仍由调用方显式设置。
+- Notebook 保持用户手工执行，保留已有输出；新粗筛协议使用新运行名，历史表不回写。开发仅隔离测试和只读检查模型/CLI 能力，不自动启动生产模型批次。
+
+### Subset 先选实体再选图、进度与续跑（2026-09-27，用户授权）
+
+- 用户报告 `pilot100k_bucket_v1_staged_v3` 在 images 的数量/字节校验失败。定位为源表两个 SHA 各重复一行；完整所选 SHA 集合、去重字节数及前序阶段均一致。最终 join 后增加同键 reduce，按相同准入规则保留一条完整原记录（非补回变体优先、稳定消歧），大小冲突明确失败；不改抽样、不下载。透明进度回调改传绑定方法，避免 callable 深拷贝让计数始终为0。
+- 此修复对该失败运行做一次限定旧指纹、完整来源/阶段校验的恢复迁移，原回执及新旧代码差异保存在 subset/datasets 的 `progress_before_image_dedup__...json` 与 `repair__..._image_duplicates.json`；已完成阶段原版本保持，images/summary 不登记完成。此条仅覆盖本次已审计修复的同名续跑，一般代码/配置改变仍拒绝复用。Notebook 参数不变，仍由用户重启 kernel 后手工运行。
+- 用户要求优化 subset 使用 demiflow 的编排，提供 notebook 运行、进度与 resume。本条覆盖旧版先全库选图再选实体的执行顺序及当前后台运行约定；抽样配额/种子/来源/选图语义不变。
+- 冷启动按标准 Dataset 链：窄 QID—SHA 关系 → 精确容量 → 关联分类 → 配额 → 选 QID/深度队列 → 仅入选实体选图 → 预算 → 公共 concepts/images。普通实体只保留基础图前缀；简单计数求和用 aggregate。demiflow 小右表 inner/semi 先过滤左侧再排序，保持原稳定顺序，无新平台 API。
+- 阶段表、JSON 回执与日志平铺 subset/datasets；writer/reader 仍在正式 pipeline 可见。operators/runfiles 只管理业务运行记录、透明行计数和进度，不执行 Dataset、不隐藏表读写。回执绑定配置/代码/来源以及提交版本/时间/schema/行数；未登记阶段不自动视为完成。resume 是阶段粒度，不能承诺排序中间恢复。
+- Notebook 当前 run 为 `pilot100k_bucket_v1_staged_v3`，显式 resume=True、30秒日志、512MiB join 块预算。新版由用户手工执行同步 run_pipeline；首次需重启旧 kernel，不采用中断 await 后线程继续写表的模式。保持保存输出，不伪造生产完成状态。
+- 旧 framework_v2 后台已停止。用户已完成的全量池 `qid_pool__pilot100k_bucket_v1@1`（4,998,328 QID）及 `quotas__pilot100k_bucket_v1@1`（20,938行）通过固定哈希的 `reuse_pool__pilot100k_bucket_v1.json` 回执复用；读取前检查与当前全部采样参数及原表身份一致。这是已完成全量阶段的恢复，不是旧小候选名单准入。
+- 完整 resume 返回原登记结果，不覆盖用户补图后的新版本；需要继续发布时仍保留补图保护。配置/代码改变须使用新 run。公共数据仍只有 concepts/images 两表，图片下载由用户执行。
+
+### demiflow 通用关联优化与 subset 重试（2026-09-27，用户授权）
+
+- 用户明确要求先优化 demiflow 的通用关联与重复排序，再按原参数重试；不得在 subset 另写绕过框架的处理流程。该授权覆盖此前本次不修改平台的开发限制，现有 Dataset API 和采样语义保持。
+- 框架内实现有界小右表索引、重复键内存组/热键落盘、排序块批量 IO、直接同键 join→group 顺序复用；按现有 local workers 上限以 spawn 进程处理大排序块与中间归并。任意 Python reducer 不假设可分解，不自动并行化业务回调。
+- 原 retry1 在候选池@1完成后停止并保留对照。Notebook 当前 run 为 `pilot100k_bucket_v1_framework_v2`，源版本、分类快照、全部采样参数和公共目标名不变；新后台 CONFIG 仍从 notebook 导出，唯一配置差异为 run。状态中记录框架实现 SHA256，成功前不把新任务标为完成。
+- 用户允许必要时以 Rust 实现实际用到的 demiflow 内核；先依据优化后性能剖析限定热点，不因此扩大业务范围或把分类、配额、抽样规则移入原生内核。当前生产重试仍使用已验证的 Python/多进程实现。
+
+### QID subset 独立 pipeline（2026-09-27，用户要求）
+
+新增理由：用户要求将大域配额抽样落成 `demiwtg/subset/` 标准 pipeline，从 collect/datasets 读源，向公共 datasets 交付 `qid_sub_*` 新数据集；图片由用户从 COS 补充。
+
+- 正式入口 `subset/subset_pipeline.py`，实验参数在 `subset/subset_debug.ipynb`；遵循下方 T2I V2 标杆和标准 Dataset 编排，加入统一布局检查。不新增平台 API。
+- 用户要求 notebook 参数始终与实际提交的后台任务一致：后台配置从 notebook CONFIG 导出，参数变更先同步 notebook；不得只在临时启动脚本里覆盖。Notebook 保留本轮只读配置对比、状态查看和成功结果加载入口，后台同样调用正式 run_pipeline；不伪造 notebook 执行输出。
+- 图片与概念读 collect 固定 Lance URI/version；原有分类 TSV 用明确 SHA256 固定，标准 reader 逐行解释。原始采集表只读，不依赖临时抽样缓存。当前完整图片账本为 `qid_images_v2@10` 共18,437,871行，fat仍为@8；旧17,756,205行测算不是当前源容量，运行时重新计算。
+- 配额/候选/运行汇总平铺于 `demiwtg/subset/datasets/`；一个 pipeline 交付公共 `datasets/qid_sub_*_concepts.lance` 主表和 `qid_sub_*_images.lance` 图片表。从 images 统计容量并抽取 QID/图片，按 QID 关联 fat 完整原记录写主表，再从固定主表选中的 SHA 派生去重图片表。主表有序 `image_sha256s` 和 `base_images` 保留选图关系、顺序及基础/增量边界，图表 `selected_qids` 为所选关联反向索引；不另写公共关联表，不按 QID 带回全部来源图片。此处命名子集是用户明确请求的数据资产，不是复制 preparation 样本运行历史。
+- 用户要求先原样搬原字段、不关联 xref：输出 schema 继承固定原表全部字段/类型，再加采样和待补图字段；原始 `qids`、`size_bytes`、`cos_loc`、变体信息、fat页面ID/P18/P373/溯源均逐值保持，不用选中关联覆盖原始 qids，不把 size_bytes 改名。新增字段撞名明确失败。概念原记录缺失时保留所选 QID，其他原列为空，不补外部标签、不执行原文档的全库概念合并任务。
+- subset concepts 还须携带既有采样分类：`main_class/class_id` 来自 `recut_v6/qid_cut_map_final.tsv` 的 main_class/cat_id，`bucket` 来自 `cls_final_4951_浏览版.tsv`，`class_label` 优先读固定 `category_source`（`recut_v6/cut_categories_final.tsv`，含可读标签）；未配置时用桶表原label。`sampling_group/domain` 保留现有派生意义。三份 TSV 读取前后核对 SHA256，分类显示名不改变配额，不将这些字段误称为 fat/images 原列或旧 taxonomy 已完成对齐。
+- 按图片原表说明用 `cos_loc.domain/key` 定位后续下载，禁止根据 blob_path/SHA 重建实际 COS key；默认 `require_cos_loc=True`，无位置行在统计容量前跳过并计数，不发网络请求。图下载由用户另行执行；subset不调用COS或出题模型。
+- 身份消歧、语义错桶检查和任务适用性判断暂不作为 subset 前置阶段；先抽样、补图、试用下游，根据实际反馈再修正。保留现有元数据/配额/预算检查，候选入库不表示任务审核通过。
+- 用户后续确认改为固定 `bucket_targets`：总量 10 万，商品 10,000、人类 9,500、组织机构 4,500，其余 28 桶配额见 notebook。`domain` 是人为汇总字段，不参与重新分配；桶内原始类代表保底，之后按 ≥5/4/3/2/1 图档优先、同档采样组均衡。`core_target=80,000` 为争取目标，当前接受的 `core_minimum=73,577` 为硬下限；不足就失败，不能跨桶挪名额或静默减类。完整来源容量重新计算，候选图片仍仅经过元数据检查。
+- 深度队列按主子集桶配额加权，字节上限与单桶图片关联上限均由调用方配置；基础预算不可满足时明确失败。
+- 图片 Blob 留空且明确 metadata_only/pending_cos；保留固定元数据来源和 COS 路径，不伪造可读 BlobRef。用户于2026-09-27明确授权按 notebook 的已定抽样逻辑后台运行全量元数据抽样，仍不下载图片。已有补图目标禁止被元数据重跑覆盖。
+- 首次启动时上游桶浏览 TSV 已改变50个准入类的桶归属，旧哈希校验失败且未写子集。为遵守用户“按之前定下的逻辑”，本轮 bucket_source 固定 `subset/datasets/bucket_assignment__pilot100k_bucket_v1.tsv`（SHA256 `68cfd3e93e97104c3f733d4474973c67ec425ef84768c7771fd6d2fa04572d1e`）。仅从历史清单恢复完整4779组→桶映射，无冲突，覆盖4927准入类/5,067,011原映射实体；其余24类继续暂缓。逐项依据见同目录 `bucket_assignment_audit__pilot100k_bucket_v1.json`，未改 collect 原件。实际QID/图片候选仍从全量collect@10重算，绝不使用历史候选QID名单限制范围；配额及其他配置未变。
+
+### 三层数据架构（2026-09-27，用户确认）
+
+本条覆盖下方历史记录中“preparation 公共结果放本模块 datasets”及“qid 表放公共 datasets”的布局。路径均相对 `project.resolve_root()` 返回的共同工作区；生产者所在模块不决定公共交付物的存储位置。
+
+| 层 | 存储位置 | 数据与职责 |
+| --- | --- | --- |
+| 原始采集层 | `demiwtg/collect/datasets/` | 原始图文 `images/documents.lance`、`qid_images_v2/qid_edges/qid_concepts_fat/qid_concept_xref.lance` 等采集事实与来源；不混入应用标注或出题结果 |
+| 公共样本层 | `datasets/` | preparation 生产的目标样本表，以及概念主表、taxonomy 等跨 pipeline 共用材料；图片基础信息、描述、审核状态和固定来源引用在此交付 |
+| Pipeline 应用层 | `demiwtg/<pipeline>/datasets/` | 各流程的输入快照、必要中间结果、调用记录、原图候选池、题目、训练条目和评测结果 |
+
+- **数据流与入口可见**：采集写原始层 → preparation 读固定采集版本、清洗/补尺寸/按需标注 → 写公共样本层 → benchmark/训练/评测读显式公共 URI/version → 写各自应用层。图片字节沿公共样本交付的固定 source_refs/BlobRef 读取，下游不绕过交付关系重选默认原始表。具体配置放 notebook，正式入口直接绑定 reader/writer。
+- 公共样本的存储层不代表审核通过；未标注、未审核和不可用状态保持显式，下游按业务条件选择。全量图片目录只按基础列 merge，既有标注和审核列不重算。
+- **preparation 现役公共目标为 `datasets/images.lance` 与 `datasets/articles.lance`。** 起初一并迁出的 `knowledge_base__bench200_production_20260920_v8.lance`、`metadata__test__configured_answering.lance` 已按用户后续要求删除，其现役登记和旧位置映射同步清理；不恢复或重建。公共样本层不新增按运行复制的样本目标表。
+- 目标样本支持按主键更新所负责的列。当前图片目录补齐已通过窄 schema 按 SHA 更新基础列，未提交的标注/审核/发布列保持，新增 SHA 的这些列为空；普通文章/视觉 writer 仍是完整业务结果按主键 merge，不把它描述成任意选列更新接口。按列更新与是否执行某个计算/模型阶段是两回事，跳过标注必须不执行标注节点。
+- 业务表在各自 `datasets/` 下平铺；run/阶段/题目编号作为表名后缀，不新增 runs/history 数据子目录。全局登记与仍被引用的公共证据继续留在公共目录，`_demiflow/` 仅放锁、精确位置映射和迁移回执；这些辅助设施不是第四层业务数据。
+- 迁移采用同文件系统整目录移动，连同每表控制目录保留全部行、版本、索引和字节。旧冻结引用通过共同根 `_demiflow/lance_locations.json` 精确映射到新位置，不改历史引用和 notebook 已保存输出；新代码、默认值、测试及 notebook 配置使用新物理路径，不建旧路径软链接。
+- 现役布局、迁移入口及验证说明见 [三层数据布局](tools/lake_migration/FLAT_DATASETS.md)。本次目录迁移不等于执行全量图片补齐；该流程仍由用户手工运行。
+
+### Preparation 全量图片目录与按列补尺寸（2026-09-27，用户确认）
+
+- 用户要求将采集全量图片纳入 preparation 并补齐尺寸，由用户手工执行；本次不启动生产全量任务、不调用标注模型。入口 `preparation_pipeline.image_catalog_config(...) → run_image_catalog(config)`，配置及手工调用位于 `preparation/image_catalog_debug.ipynb`。
+- 全部采集 SHA 进入目录，独立于文章/视觉审核概念名单。先复用已有实测宽高；仍缺尺寸且有字节时按固定来源读取图头补齐，不放大，不用来源声明尺寸代填。`dimension_read_mode='header'` 是补尺寸默认模式，来源记 `blob_header`，不重复全图 SHA/结构校验；`full` 保留完整校验，来源记 `blob`。尺寸 ready 不表示通过图片内容校验。小图/生成图/无字节记录不从目录删除，缺字节与读取失败保留独立状态。
+- **只更新基础列，不搞标注。** `source_refs/concepts/width/height/availability/byte_size/generation_origin/dimension_source/dimension_status/dimension_error` 通过窄 schema 按 SHA merge；未提供的描述、匹配、审核、published 列保持原值。新 SHA 的标注列为空，采集概念关联不自动升级为审核或发布关系。
+- reader 固定采集与旧目标版本，主线可见 SHA join、补尺寸批算子、阶段 writer 与部分列 merge；最终更新前检查目标版本，保留旧快照。缺字段只扩列；不回写原始采集表、不重算旧标注、不覆盖整张审核表。
+- 默认 notebook 为全量 `max_images=None`；批量和 I/O 并发可改。2026-09-27 首次全量已完成并恢复失败的末尾合并：公共 images@9 共 2,164,671 行，其中 ready 2,127,754、missing_bytes 36,911、read_error 6；旧 900,883 行的标注保持。下游按显式 URI/version 使用，历史 @5 仍是结果子集，不能把 @5 说成全量。
+- 性能要求：缺尺寸图每批一次 SHA 定位/Blob 句柄提取，全流程共享 I/O 并发池；跨本地批处理 worker 汇总总进度，不能把单 worker 计数标成全局进度。Pillow 超大尺寸 warning 汇总为计数，不刷屏；仅在受锁保护的图片打开作用域处理 warning，不关闭全局像素硬上限。正在运行的 notebook 不自动热替换、中断或重启，代码更新用于后续显式调用。
+- 已完成阶段表可由 `catalog_source={uri, version}` 显式复用，仅核对来源绑定、唯一 SHA、行数后重试按列合并，不重复读图。`prepared_source` 仍需固定当前目标版本；失败回滚会生成新版本，不能继续用旧 head。`merge_memory_bytes` 显式控制合并内存池，默认 8 GiB，仅在本次合并期间设置 `LANCE_MEM_POOL_SIZE`，完成/失败均恢复原环境。阶段状态汇总用 Lance 列式聚合，不为几个状态值展开、排序两百万条 Python 行。
+
+### Edit 共用原图准备（2026-09-27，用户确认；三级分类试跑更新）
+
+- 正式入口 `benchmark/edit/source_images/source_image_pipeline.py` 按标准 config(...) → run_pipeline(config) 编排主表分类、4B 剪枝、原图关联、SHA 去重、尺寸过滤、视觉标注和 Lance writer；素材准备的两个 prompt 不改变 Edit V2 单题约定。
+- **按全库概念 taxonomy 前三层归类，第一层为大域，4B 只看 domain/category。** 默认 taxonomy_depth=3，例如动物 / 鸟类 / 猛禽 / 鹰归入动物 / 鸟类 / 猛禽；不足三层保留已有路径，空分类留组。同概念多个深层路径落在同类时去重。当前 master@2 为 385,292 概念、7,917 个三级分类、29 大域；二级为 2,754 类。本条覆盖此前二级默认配置及 16,692 个末端路径加代表概念的方案。
+- 分类模型不接收概念名称、别名、代表样例或成员数量；计数仅落表核对，删除 examples_per_leaf/example_seed 参数。keep 后展开分类内全部成员，多分类概念合并保留的分类与分组，不再逐概念 4B 调用。类别不变时成员变化可复用同一分类请求。
+- 分类是宽松第一轮剪枝：存在稳定的一批场景/空间/承载面来源即可 keep，不因混有无用成员就整类排除；明确无关 reject，无法确定 hold，hold 在结果表待复查而不进入当前图片批次。具体错绑、质量和可编辑区域由视觉模型按像素判断；分类 keep 不代表概念或图片审核通过。
+- notebook 配 taxonomy_prefixes=[]、concepts=None、max_concepts=None，无手写白名单或 200 概念截断。prefixes 是可选实验范围，concepts 精确名单覆盖它；taxonomy_depth、尺寸/限量、模型/并发/预算均在 notebook。文本预算 8,000；每概念最多 4 图，首轮 image_limit=500 同时绑定 max_images/max_image_calls。用户查看 keep 比例和阶段耗时后，可手工改为 5000 扩池；保持同一 run 和 overwrite 复用相同请求并交付扩池后的完整结果，不保证最终池数量或场景配额。
+- 来源显式固定公共 master_concepts@2 与 images@9（2,164,671 行）。新增无标注行通过 concepts 参与候选召回，197 个历史发布概念不限制范围；published_only=True 才检查 published/keep。沿 source_refs 使用固定 Blob，不查 collect latest 或重绑，不回写公共表。
+- category_inputs/category_results 每分类一行；按 category join 主表分组后写 concept_candidates，图片按 concept join、SHA 合并及过滤。候选模式只读公共基础列，dimension_status 为空的旧行才提取历史实测尺寸；已知 read_error/missing_bytes 保留错误不重读，其余缺尺寸才按固定 Blob 补齐。min_short_side 必填，notebook 严格 >1024，小图在数量限额前排除，结果写 image_checks，不放大原图。
+- 明确生成标记排除，未知来源不伪称已验真；缺引用报错，技术失败不变成业务 reject。视觉记录实际可见区域、视角、空间、限制和检索提示；同 SHA 只调用一次，hold/reject 不入池，机器 keep 输出仍 unreviewed。
+- through=categories/image_inputs/pool 控制分类、图片候选及最终池边界；相同模型请求按原生日志复用。notebook 三级运行名 scene_pool_category_l3_v1，历史表和已保存输出不回写。手工 notebook 用 local（4B 文本 + 27B 视觉），Python 默认 offline；开发仅隔离验证，不自动启动完整分类/视觉生产批次，不停止无关服务。
+- 试跑摘要返回 image_decisions，以及 category_elapsed_s/image_elapsed_s；notebook 的视觉 keep 比例仅以 annotated 数量为分母，技术失败/pending 单列。阶段时间包含响应复用和读写、视觉还含读图，不称为纯推理时间或用缓存重跑推算新请求吞吐。
+- **后台运行授权与参数一致性（2026-09-27，用户要求）**：用户因 VS Code 断连明确授权本条 pipeline 加速并后台执行，覆盖此前仅手工启动约定；范围仍按 notebook 的全量三级分类和首轮 image_limit=500。每次提交前先同步源 notebook 的配置，后台用标准 nbconvert 直接执行它、指定项目 demiwtg 内核，保存执行副本与启动回执，不能另写一套隐藏的参数或业务流程。当前文本/视觉并发 64/16，4B 服务启用 CUDA graphs 和 max_num_seqs=64；保持模型请求内容、来源版本和 run 身份，已有完整响应复用。log_path 同时输出后台可追踪的进度文件。
+- 本次性能证据指向调用日志：4,285 个单行分片及反复打开最新版本使一次查找约 470 ms。已用官方 Lance API 合并/索引，保留全部旧版本；现有 LanceRecordStore 内部复用可失效的表句柄，并在原 writer 锁内合并小分片/维护索引，未新增公共 API、业务规则或延迟持久化。固定 RecordRef 与外部提交可见性须回归验证。恢复已停止任务时，仅在旧任务退出并持有运行锁/写锁后，将 98 条无完整响应的本地请求从最新日志头重新排队；完整响应不动，原调用日志 @4288 和控制目录 recovery_20260927.json 保留恢复前证据。正常运行仍不隐式重试不确定请求。
+- 用户允许选择快速本地小模型及必要下载，视觉可用 Qwen3.8-27B / Gemma。下载必须使用公司代理 http://10.127.48.4:3128，大小写 HTTP(S)_PROXY 一致；本地模型 HTTP 保持直连。
+- **模型加载接入入口（2026-09-27，用户要求）**：`text_service/vision_service` 可通过 config/notebook 配置本地权重、GPU、DP/TP、显存比例、上下文/批量预算及启动/退出超时；None 默认沿用外部服务，offline 不加载。模型阶段用小型生命周期函数启动 vLLM、等待就绪，并在退出（含异常）时释放本次进程组；未知占用端口明确失败，不自动接管其他服务。数据读写及原生模型节点仍在 pipeline 主线，不扩 demiflow API。Notebook 当前 GPU=[0,1]、DP=2、TP=1，各阶段两卡各一份同模型；先双卡 4B 分类、释放后再双卡 27B 标注，总并发 128/32，首轮仍为 500 图。vLLM 原生内部负载分配保持单端点和已有请求身份；每次后台提交仍直接执行同一 notebook。覆盖此前模型只能外部启动的约定。
+- 后续实跑发现旧分片整理目标过小，遗留小尾片使维护逐次触发；记录存储改为累计 32 个单行追加片再整理到较大目标，新增交错满片/尾片回归，防止吞吐随运行下降。切换双卡前停止旧任务，持运行锁/写锁保留完整响应与全部历史版本，仅将无响应请求重新排队，另存 dual_gpu 恢复回执；不改变正常不确定请求的处理语义。
+- **大范围图片关联（2026-09-27，用户再次强调平台边界）**：7,917 类完成后召回 196,966 个概念，旧业务将名单拼成约 3.65 MB 的 reader filter，触发平台 64 KiB 限制。关联改为 demiflow 的 `read_lance → flat_map(concept×SHA) → join(selected concepts) → reduce_by_key(SHA)`，概念名单不取到驱动端拼 SQL 或做集合匹配；匹配后才解释历史尺寸和固定图片引用。reader 只下推可用性等固定长度条件。不绕过 demiflow，也不为本次错误放宽过滤器限制；后续实测瓶颈可在平台原生算子中优化。模型请求身份、已有分类响应和图片筛选规则保持。
+
+### 原图 Notebook 监控与重复提交（2026-09-27，用户要求）
+
+- 用户希望从 notebook 观察已运行任务，避免重复执行。原图 notebook 默认 `notebook_action='monitor'`，只用 demiflow `run_is_active` 观察原生锁，限量读取进度日志尾部并刷新，不读图片、不调用模型、不改业务表；监控间隔、观察时长及尾部大小在配置格。
+- `notebook_action='run'` 才请求执行，同 run 已有写入者则转为只读监控；真正写入仍由 `run_pipeline` 原生锁保证唯一。后台任务不因 notebook 监控断开而停止，监控停止或锁释放不能冒称成功。最近落盘的运行摘要可能来自旧执行，显示时须明确。
+- **预览不依赖内存 result（2026-09-27，用户反馈修复）**：监控窗口到期不代表后台完成。两个预览格每次重新读取持久摘要及已提交阶段表，显示 URI/版本/行数，未提交或空表明确提示；图片优先 pool，无 pool 时展示 image_inputs 并标注候选未入池。可在导入/配置后独立执行，不能因摘要尚未写出而静默跳过全部输出。
+- **正式结果预览（2026-09-27，用户明确范围）**：查看 7,917 全量分类链路时，预览固定 `scene_pool_category_l3_v1 / records@1` 及其引用版本，区别 183,013 张尺寸通过、每概念限额后 123,603 张、实际视觉500张和 keep255张。预览可选择 pool/image_checks/image_results 并分页展开模型理由/区域/限制；不将未经视觉判断的全量候选称为可用原图。只读抽看与明细置于本模块 reviews，不改机器结果或新增模型调用。
+- 本次增加监控不等于完成阶段级 resume；已有完整模型响应继续按请求复用，关联/去重等阶段仍会重建。后续后台新提交前须在源 notebook 显式设为 run 并保存，不在后台隐藏覆盖。已启动进程沿用其启动时的 notebook。
 
 ### Preparation 清洗、T2I 独立图文消费（2026-09-26，用户确认）
 
@@ -51,288 +405,6 @@
 - 同步响应、表结构、CLI、notebook、测试和说明；新协议使用新运行名及目标表，历史题目与 notebook 已保存输出不改写。开发只做隔离模拟验证，不调用正式模型。
 
 
-### Dataset 入口与模型算子配置（2026-09-26，用户确认）
-
-- 统一使用 `from demiflow import data`，直接 `data.read_*` / `data.from_*` 创建 Dataset，再连接数据处理与写出方法。`Dataset` 只表示数据集类型，业务代码不构造 `DataAPI()`。删除独立 `standalone.local_data` 入口，不增加旧名兼容、二次工厂或全局模型配置。
-- 执行器选择留在平台：普通脚本默认 Local，打包 Pipeline 使用 Driver 已选执行器。不把整个 `data` 模块作为参数逐层传递，不再创建 `prompt_data`、`review_data` 等只承载模型配置的入口对象。复杂行算子仍只收实际使用的配置。
-- 模型配置直接写在 `map_prompt` / `map_prompt_async` 节点：`config=pack` 或真实 YAML 路径，`options=options`，`max_requests=N`。固定内容仍在 YAML；动态参数及 prompt/schema 在调用处绑定，不能经过数据行透传或先注册别名再查找。
-- 请求上限按**一个已声明的算子节点**累计，覆盖其所有行、并发 worker 及 schema 重试。同一节点重复执行继续累计；重新声明节点有独立计数。日志复用与 offline 不计新请求。日志负责保存与复用请求，不再用整张调用日志的行数强加多个节点共用的上限。
-- 同步和异步模型节点使用相同的配置参数语义。监控可以汇总调用量，但不得因此合并预算。业务配置的 `max_calls` 传给哪个节点，就限制哪个节点；不能继续把它描述为整个 pipeline 的总上限。
-- `data` 模块及 reader 不携带模型业务设置；Local/Ray 执行器仅执行节点已声明的配置。复杂单行算子、图文关联与写表继续遵循下方数据流规则。
-
-```python
-from demiflow import data
-(
-    data.read_lance(input_uri, version=input_version)
-    .map(prepare_request, fn_kwargs=request_options)
-    .map_prompt_async(
-        'design_question', config=pack, options=options, max_requests=max_calls,
-        inputs={'payload': 'prompt_payload', 'images': 'prompt_images'},
-        output='design_result', concurrency=1,
-    )
-    .map(check_response)
-    .materialize()
-    .write_lance(target_uri, mode=write_mode, schema=DESIGNS)
-)
-```
-
-
-
-### Pipeline 编排必须直接表达具体数据流（2026-09-26，用户再次明确）
-
-**Pipeline 是“数据流 + 数据流上的处理算子流水线”。编排层直接描述具体业务数据如何流动，不负责抽象业务流程。** 阅读主线应能看到：读哪张表、一行是什么、筛什么、按什么键关联／聚合、哪个节点调用模型、写到哪里。复杂计算由算子完成，但不能把数据流藏进过程函数。
-
-本节优先于下方关于内联、函数封装及控制结构的旧约定。
-
-1. **按具体数据流分别写，然后显式连接。** 文章有文章的 `read → 处理`，图片有图片的 `read → 处理`，再用 `join(on='concept')` 连接。顺序本身就是结构，不要把固定的两类来源抽象成 `for kind, sources in ...`，在循环中 `if kind` 分派处理，再用 `streams[0]`、`streams[1]` 取回。不要为少写几行而隐藏不同数据流的含义。先核对实际表及业务关系，不把旧接口支持的泛化能力自动当作当前需求，也不反过来要求用户为实现方式选择输入需求。
-2. **算子链表达行处理与复杂处理。** 筛选用 `filter`，展开用 `flat_map`，关联用 `join`，聚合用 `reduce_by_key`，模型调用用 `map_prompt_async`，最终接 writer。简单表达式就地写；复杂 fn/actor 放入 `operaters/`，输入输出明确。算子可以处理当前行的嵌套结构或当前分组的累积值，不能另读整表、执行 Dataset 或封装整个阶段。关联键、聚合键和数据流连接留在主线。
-3. **中间变量表示数据流，不是过程步骤。** 两条待关联的数据流、真实分支、复用结果和持久阶段边界可以命名。单用的 `requests → responses → results` 不应把一条模型处理链割裂。不能为了形式上的“一条链”取消真正的数据分支或已有续跑表。
-4. **外层控制结构必须有真实原因。** 实际业务读取多张同类表时，分别写出具名数据流，再显式 union；不能为了可能出现的多来源，先构造 reader 集合、首表特殊处理或循环追加框架。根据上一次结果决定下一次尝试的反馈循环可以保留。固定业务类型不需要调度循环；行上的条件放入算子。配置、锁和续跑分支控制是否执行数据流，不接管逐行处理。不能把代码组织方便当作增加循环／分支的理由。
-5. **外部数据从 reader 进入，沿 Dataset 写出。** 禁止 `take_all → Python 处理 → from_items`，禁止 `from_items([]).union(...)` 空种子，也不能改用 `from_iter` 掩盖相同问题。`from_items` 只用于真正已有的内存输入，如配置列表、测试行或新产生的尝试控制记录。多个实际需要的同类数据流用 union 连接；可选来源为空时明确保留空分支。
-6. **执行边界使用标准 API。** 同步链直接 `write_lance`；local 异步链可显式 `materialize().write_lance(...)`，不再用外部 `tables.append` 收集结果。为原有提交指纹读取结果时，先固定 Dataset，明细仍由它写出。物化缓存不能替代持久阶段表，不能宣称物化后写表是边生成边提交。
-7. **算子配置在算子调用处声明。** `data.read_*` / `data.from_*` 是统一的数据入口，返回 Dataset；不接收 prompt、调用参数或模型请求预算。`map_prompt` / `map_prompt_async` 直接接收 `config`（PromptPack 或真实 YAML 路径）、`options` 和 `max_requests`，不先注册配置别名。用户已授权本次统一接口；其他 API 缺口仍须先说明并获确认。
-
-**标杆示例：T2I V2 的独立图文 → 每概念请求 → 写表。**
-
-下例摘自正式入口，省略环境初始化、日志和候选提交去重；`config` 是入口参数，`root`、`pack`、`options`、schema 和算子由正式模块提供。可选来源保持显式空分支；同概念允许多篇文章，任务范围由 config.concepts 决定。
-
-```python
-from demiflow import data
-
-quoted_concepts = ["'" + c.replace("'", "''") + "'" for c in config['concepts']]
-
-# 文章每行是一篇已审核文章；同概念的多篇文章均作为材料，不去重或判冲突。
-# preparation 负责正文清洗；这里仅展开主题正文，忽略引用、配图和内部审核字段。
-if config['article_source'] is not None:
-    texts = (
-        data.read_lance(
-            str(root / config['article_source']['uri']),
-            version=config['article_source']['version'], columns=['concept', 'content'],
-            filter="review_status = 'reviewed' AND concept IN (" + ','.join(quoted_concepts) + ')',
-        )
-        .flat_map(lambda row: [
-            {'concept': row['concept'], 'text': {
-                'kind': 'text', 'title': topic['title'], 'text': paragraph,
-            }}
-            for topic in row['content'] or [] for paragraph in topic['content']['paragraphs'] or []
-        ])
-        .reduce_by_key('concept', lambda acc, row: {
-            'concept': row['concept'], 'texts': (acc['texts'] if acc else []) + [row['text']],
-        })
-    )
-else:
-    texts = data.from_arrow(pa.table({'concept': pa.array([], type=pa.string())}))
-
-# 图片每行包含多个概念关系；仅按公开发布/审核状态选取本次概念的图片。
-# 使用 preparation 已交付的存储引用，不读取来源或审核 JSON，不与文章匹配。
-if config['visual_source'] is not None:
-    images = (
-        data.read_lance(
-            str(root / config['visual_source']['uri']),
-            version=config['visual_source']['version'],
-            columns=['sha256', 'source_refs', 'concept_assessments'],
-            filter=' OR '.join('array_contains(published_concepts, ' + c + ')' for c in quoted_concepts),
-        )
-        .flat_map(lambda row: [
-            {'concept': assessment['concept'], 'sha256': row['sha256'],
-             'source_refs': row['source_refs']}
-            for assessment in row['concept_assessments'] or []
-            if assessment['concept'] in config['concepts']
-            and assessment['published'] and assessment['review_status'] == 'keep'
-        ])
-        # 在聚合中限制图片数量，不为未选中的图片读取字节或解析引用。
-        .reduce_by_key('concept', lambda acc, row: {
-            'concept': row['concept'],
-            'images': ((acc['images'] if acc else []) + [row])[:config['max_reference_images']],
-        })
-        .map(lambda row: {
-            'concept': row['concept'],
-            'images': [
-                {'kind': 'image', 'blob_ref': image_blob_ref(im)} for im in row['images']
-            ],
-        })
-    )
-else:
-    images = data.from_arrow(pa.table({'concept': pa.array([], type=pa.string())}))
-
-
-# 真正的内存输入是配置概念；按任务范围关联，缺少材料的概念也保留。
-(
-    data.from_items([{'concept': c} for c in config['concepts']])
-    .join(texts, on='concept', how='left')
-    .join(images, on='concept', how='left')
-    .map(lambda row: {
-        'concept': row['concept'], 'status': 'ready', 'reason': '',
-        'references_json': json.dumps([
-            {'number': i, **ref}
-            for i, ref in enumerate(row.get('texts', []) + row.get('images', []), 1)
-        ], ensure_ascii=False),
-    })
-    .write_lance(input_uri, mode='overwrite', schema=INPUTS)
-)
-input_version = lance.dataset(input_uri).version
-
-# 输入表是持久边界；单概念请求构造、模型调用、响应检查保持连续算子链。
-(
-    data.read_lance(input_uri, version=input_version)
-    .map(prepare_request, fn_kwargs={
-        'max_context_chars': config['max_context_chars'],
-        'prompt_chars': len(pack.prompt_definitions['design_question'].template.source),
-    })
-    .map_prompt_async(
-        'design_question', config=pack, options=options,
-        max_requests=config['max_calls'],
-        inputs={'payload': 'prompt_payload', 'images': 'prompt_images'},
-        output='design_result', call_output='design_call', error_output='design_error',
-        when=lambda row: row['status'] == 'ready',
-        concurrency=config['concurrency'], queue_depth=config['queue_depth'],
-    )
-    .map(check_response, fn_kwargs={
-        'question_schema': pack.prompt_definitions['design_question'].response_schema[
-            'properties']['result']['properties']['question'],
-    })
-    .map(lambda row: {name: row[name] for name in DESIGNS.names})
-    .materialize()
-    .write_lance(designs_uri, mode='overwrite', schema=DESIGNS)
-)
-```
-
-`prepare_request` 只处理当前概念的材料和预算，并按已绑定引用读图；`check_response` 只检查当前响应。两者不决定关联、不执行 Dataset、不循环调用模型。后续从设计表筛选 candidate 并投影到题表，writer 使用 config 的目标和模式；完整实现见标杆入口。
-
-**评审检查：遮住算子内部实现，只看 pipeline，能否画出具体来源、处理节点、关联关系和输出？** 若必须进入某个循环、分派器、`process_materials()` 或 `run_stage()` 才知道读取了什么、关联了什么，编排仍不合格。无需把所有复杂逻辑展开，但数据流及处理职责必须在主线可见。
-
-附：通用 evaluation 保留源表 `number`，缺省使用已有 `task_id`；不为展示顺序将 Dataset 转成迭代器重新编号。
-
-
-### Dataset 数据流编排与行算子边界（2026-09-26，用户进一步纠正）
-
-修订理由：用户指出仅使用 API 还不够，pipeline 应以连续的 Dataset 变换表达数据流，而不是由外层逐步取数、执行、再拼回数据集。用户明确允许定义函数算子供 `map` 等调用。本条修正下方将所有行逻辑强制内联、只允许图片函数的过度限制；原有业务协议与平台扩展需先确认的规则不变。
-
-- **以数据依赖编排，而非以过程变量分段**：线性的读、行变换、模型调用、响应检查和写入用连续 API 链表达。中间 Dataset 变量用于真实分支、关联或复用；变量赋值本身不是执行边界，也不要求把有分支的图硬写成一条超长链。
-- **具名函数是算子，不是子 pipeline**：较复杂的单行请求构造、检查、解析可以写成有明确输入/输出的函数，交给 `map`/`flat_map` 执行；简单字段表达式可内联。函数不能另读整表、创建并执行 Dataset、循环调模型或包住整个业务阶段。模型调用直接使用 `map_prompt_async`；join/reduce/union 等跨行关系仍在主线可见。
-- **数据条件在数据流中处理**：行检查、状态转换、筛选、展开放入算子，不先 `take_all`/逐行循环再实现。应报错的行检查可以在 `map` 函数中抛出；不为了抛错先把匹配行取回外层。算子内部处理本行嵌套列表不等于外层遍历数据集。
-- **控制逻辑只控制数据流**：配置、锁、固定版本、续跑选择、输出提交和确实必要的反馈循环可以在外层；每次迭代仍构建并执行 Dataset 链，不能用外层循环代替逐行处理和模型调度。
-- **明确 action 和物化用途**：链式调用定义变换，`write_lance`/`run_stream` 等终结动作触发执行；`materialize` 同样是执行边界，只有分支复用或固定结果时才用。批式拉取和异步流式都采用数据流表达，但各后端的实际 API 支持以平台实现为准；不因链式写法就宣称全流程流式。
-- **保持 Dataset 到 writer 的连接**：不能 `take_all()` 后仅为落表再 `from_items()`。确需为原有提交指纹或小规模运行汇总取回结果时，注明范围和用途，明细仍由同一个 Dataset 写入。已有输入快照/设计结果表如承担续跑和审计职责，可以作为显式边界，不为了视觉上的“一条链”删除。
-- **日志随真实执行输出**：行日志放在实际算子执行位置；请求开始须对应原生调用开始，不能把上游预取当成请求发送。日志不改变行内容、输入协议和调用次数；不借日志增加重试、轮询或新的调度包装。
-
-T2I V2 的模型链示例（省略具体配置、日志和字段投影，保留标准调用关系）：
-
-```python
-(
-    data.read_lance(input_uri, version=input_version)
-    .map(prepare_request, fn_kwargs=request_options)
-    .map_prompt_async(
-        'design_question', config=pack, options=options, max_requests=max_calls,
-        inputs={'payload': 'prompt_payload', 'images': 'prompt_images'},
-        output='design_result', call_output='design_call', error_output='design_error',
-        when=lambda row: row['status'] == 'ready',
-        concurrency=config['concurrency'], queue_depth=config['queue_depth'],
-    )
-    .map(check_response, fn_kwargs={'question_schema': question_schema})
-    .map(lambda row: {name: row[name] for name in DESIGNS.names})
-    .materialize()
-    .write_lance(designs_uri, mode='overwrite', schema=DESIGNS)
-)
-```
-
-
-### Prompt 配置直接表达，禁止固定正文逐层透传（2026-09-26，用户确认推广）
-
-修订理由：T2I V2 将 MD 正文经 Python 变量、数据行字段、`inputs` 映射传入 YAML，YAML 只剩占位符；正文与 response_schema 分散维护，导致已删除的 criteria 仍被 schema 强制要求。用户要求合入 YAML，并推广到已经开发的 pipeline。
-
-- **固定规则放在使用它的 YAML `template: |` 中**：同一 prompt 的正文、版本、模型配置、`response_schema` 放在同一份标准 prompt pack。不要通过 `read_text()` → `instructions` → `prompt_instructions` → `{{ instructions }}` 原样转递固定正文；不在每行数据中复制运行级配置，不维护同内容的 MD 镜像。
-- **模板参数只表达实际变化的输入**：如概念、材料、题面、图片、题数配置。已有字段能直接绑定就直接绑定，不为套模板改名、转 JSON 再解析或增加转调函数。字段映射、图片编码、实际载荷构造和来源绑定有明确作用时保留；不以“少变量”为由把真实的数据边界混在一起。
-- **不把动态选择当成冗余传递**：不同赛道／编辑类型对应不同规则，保留必要选择；注明按什么字段选择、传入哪部分内容。仅删除共同固定正文的逐行透传，不为消除一个变量复制整套流程，也不把所有类型的规则同时塞给模型。已有历史协议与冻结回放文件不按扩展名批量删除。
-- **正文与结构契约同时修改**：`response_schema` 是机器校验的结构定义；正文说明字段含义并给必要示例，两者必须一致。变更输出同步更新 Arrow schema、响应展开／检查、notebook 展示、测试和 README。不要以兼容为由强制输出已废弃字段。平台会把 schema 提供给模型，但这不能代替字段业务含义的说明；正文中的格式示例仍须与 schema 一致。
-- **删除中间层要核对它承担的约束**：固定正文移入 YAML 后，原有上下文预算仍需计入正文；源码冻结和版本摘要改读 YAML；原始数据中的花括号不得被当成二次模板处理。更新 prompt 版本，新协议使用新运行名；结构不兼容时写新目标表，或由用户明确选择覆盖，不自动迁移历史数据。
-- **以实际请求和结果验证**：隔离数据、模拟响应下检查模型仍收到完整规则及本行输入；检查新响应能通过 schema 并正确落表、废弃结构被拒绝、续跑不重复调用。不要只测试模板文件存在或字符串替换成功。发现标准 API 缺口仍按上方规范先确认，不为简化业务透传自行扩平台。
-
-示例：固定出题规则直接写入 `tasks.yaml`，每次仅绑定当前概念。以下是最小完整示意；业务中的图片、材料和输出结构按实际需要定义。
-
-```yaml
-schema_version: demiflow_prompt_pack_v2
-prompts:
-  design:
-    version: concept-question-1
-    model:
-      name: glm/glm-5.3-flash
-      transport: openai_compatible
-      base_url: http://127.0.0.1:4001/v1
-      api_key_env: MODELHUB_API_KEY
-    schema_retries: 0
-    template: |
-      围绕概念的核心内容设计一道图像生成题，题面应独立明确。
-      当前概念：{{ concept }}
-      返回 JSON：
-      {
-        "result": {
-          "instruction": "题面"
-        }
-      }
-    response_schema:
-      type: object
-      required: [result]
-      additionalProperties: false
-      properties:
-        result:
-          type: object
-          required: [instruction]
-          additionalProperties: false
-          properties:
-            instruction: {type: string, minLength: 1}
-```
-
-```python
-# 模型算子直接读取 tasks.yaml：每概念一行、一次请求；固定正文不进入数据列。
-questions = concepts.map_prompt_async(
-    'design', config='prompts/tasks.yaml', inputs={'concept': 'concept'}, output='question',
-)
-```
-
-这里需要的链路是“数据字段 → 标准模板 → 模型”，不需要“读 MD → 变量 → 新增固定字段 → inputs 改名 → YAML 占位符”。
-
-
-### Pipeline 主线与平台边界（2026-09-26，用户明确要求）
-
-修订理由：T2I V2 将运行记录、材料处理、模型请求和落表挤在同一段代码中，导致读者无法判断处理粒度。用户要求按数据主线整理、使用标准 API，并授权在 demiflow 中增加通用覆盖写入能力。本条补充下方标准读写及代码注释规范。用户随后要求将行、字段的数据操作直接展开为 SQL／Dataset API，禁止未经确认以黑盒函数绕过 API 缺口；以下规则优先于下方旧的“业务转换归算子”约定。
-
-- **按数据流组织正式入口**：主线直接呈现“读数据 → 行／字段变换 → 必要的模型调用 → 校验/展开 → 写数据”。按业务阶段命名 Dataset 变量；步骤不适用就省略，不为套模板增加阶段。不能仅把混杂代码改成若干隐藏读写与执行的函数。
-- **数据操作优先 SQL／Dataset API**：筛选、投影、字段解析与检查、展开、关联、聚合、排序、拼接和编号直接用现有标准 API 表达，如 `read_lance(filter=..., columns=...)`、`filter`、`map`、`flat_map`、`join`、`reduce_by_key`、`sort`、`union`。主线直接显示输入字段、关联键、过滤条件、聚合及排序规则；简单字段表达式可写在 API 调用处。仅在 `map`／`from_iter` 外套一层、内部仍用 Python 字典或循环完成整段关联与材料处理，不算遵循本规范。
-- **让处理粒度可见**：在模型调用处说明一行代表什么、一次请求覆盖什么、是否合并/拆分输入及请求并发数。区分模型请求批次与返回结果的写表批次；不能把 `batch_map` 的落表批大小描述成模型一次接收的任务数量。预算及超限行为由业务显式配置，不隐式截断、拆题、重试或切换模型。
-- **不以封装隐藏数据逻辑**：材料选择、编号、缺失输入处理等规则在正式 pipeline 的 SQL／Dataset 链中可见，不因它们属于业务规则就自动移入 `operaters/`。模型传输、图片解码等非关系操作与行、字段变换分开；已有专用函数不夹带过滤、关联或聚合规则。运行配置及源码／版本冻结单独处理，不隐藏业务表 reader、writer 或执行入口。
-- **不为目录拆算子**：用户进一步明确，不能为了保留 `operaters/` 的文件划分，把普通配置、字段拼接、检查、候选展开包装成独立模块。小流程的模型配置、输出表结构直接放在正式 pipeline；行、字段操作直接写在 Dataset 链中。只有图片读取／编码等必要的非关系操作保留小函数，职责不能扩成整个材料处理或出题流程；不另加转调层。
-- **读写条件显式可见**：来源路径、固定版本、目标路径、Arrow schema 和写入模式在入口或参数块可见。同步落表优先 `Dataset.write_lance(..., mode='append'|'overwrite', schema=...)`；异步模型链仍由 `run_stream()` 执行，按标准批量算子连接官方 Lance writer。只为有实际复用或诊断用途的数据落中间表，不为每个算子自动建表。
-- **区分汇总与流式执行**：不要为接入 Dataset 先无条件 `list()`/`take_all()` 全量加载。确需按概念组合或计算本批输出快照时，注明汇总对象、范围及用途；这类汇总不能宣称为全链路有界流式处理，也不能改变模型请求粒度。
-- **API 缺口先确认，禁止自行绕过**：现有 demiflow API 无法表达必要操作时，先说明具体缺口、建议的通用 API 扩展、行为及影响范围，取得用户明确确认后才实现。若拟采用 SQL／Dataset API 之外的数据处理方案或黑盒算子，也必须在设计落地前说明原因和方案并获确认；不得先写业务绕行代码、包装后再补报。未获确认期间，只推进不依赖该方案的工作。此前某次平台扩展授权不自动适用于新的扩展。
-- **不为非必要行为扩平台**：先判断顺序、容错等是否为真实业务要求，不能为了保留旧实现习惯增加排序字段或平台参数。本次 T2I 材料处理不保证配置中的概念展示顺序；只保留必需配图优先，最终列表编号后保存并复用。不扩展 local sort 或 `map(error_output=...)`。字段缺失、审核不通过等数据条件用 Dataset 显式检查；读取、解码及程序异常默认抛出，不自动转为材料不合格。确有“失败也是业务结果”的已确认需求时，用现有 `map(output=...)` 返回业务定义的结果值。已有模型调用日志及待响应机制不在本次改动范围。
-- **平台只提供通用机制**：demiflow 负责 Dataset 执行、Arrow 类型、写入模式、版本冲突和提交回执，不接收概念、题目、业务表名、运行编号或审核状态。主键合并策略、业务去重、运行冻结与是否完成留在业务侧。平台缺口仍须先说明并获得授权；本次覆盖写入已获授权。
-- **验证实际语义**：修改后验证调用粒度、材料对应关系、空结果、追加/覆盖及续跑行为。writer 成功后才登记已提交版本；复用结果不重复调用模型或追加同一快照。开发检查使用隔离数据与模拟响应，保留历史表及 notebook 已存输出。
-
-### 已有 pipeline 的统一重写与注释（2026-09-26，用户确认推广）
-
-修订理由：用户要求把 T2I V2 中收敛的原则应用到其他已经开发的 pipeline，并完善注释。适用于现役 preparation、训练、benchmark、evaluation 入口，包括仍可执行的版本入口；历史数据、源码归档和 notebook 已保存输出不重写。
-
-- **先列数据契约，再写执行链**：读表处标明来源及固定版本、筛选列和条件；每段说明输入一行代表什么、输出一行代表什么。关联写清键和保留哪一侧，聚合写清分组键；多对多来源先按业务粒度聚合，避免产生重复条目。
-- **字段操作就地表达**：重命名、投影、JSON 字段解析、列表展开、条件检查、拼接及编号直接放在标准 SQL／Dataset 调用处。已有 Dataset 继续连接下一步，不用 `from_iter(dataset.iter_rows)` 转回去重包；不新增来源别名、旧协议往返转换或纯转调函数。
-- **每个操作说明具体条件与结果**：注释应如“按 task_id 展开模型配置，每题每模型一行”“只给 status=generated 且有图片的行打分”“丢弃缺少段落引用的文字并保留原因”。避免只写“整理、对齐、处理、校验”；不逐行复述语法，不用注释替代可见的条件表达式。
-- **配置、数据变换与外部操作各有位置**：模型及 writer 参数在入口可见；表结构与输出字段邻近定义；模型加载、文件／Blob 字节读写、图像编码、协议解析等必要的非关系操作可以保留小函数。函数不能顺带包住一段筛选、关联、调用和写表。已有按结果决定下一次尝试的控制循环保留在正式入口，不能包装成隐藏执行完整流程的数据源。
-- **保留行为，不添加业务规则**：本次整理保留题目协议、检查条件、模型配置、调用粒度、预算、错误分类和续跑提交边界。不为统一形式增加审题、去重、排序、容错、重试或中间表；哪些状态是业务结果、哪些异常应中止，必须按已确认的流程处理。
-- **用原生 writer 收口**：同步 Dataset 直接 `write_lance(..., mode=..., schema=...)`，不手工展开 Arrow 批次再交给同一个 writer。异步链按平台现有支持组合执行；标准 `map` 可以显式投影字段，不为此扩平台。涉及 Lance Blob 编码等专用类型时使用对应官方 API。
-- **平台缺口需先证明必要性并确认**：先尝试现有 SQL／Dataset API 的等价表达，再说明实际缺口；不能把旧实现的展示顺序或自动继续行为当作必需能力。任何平台扩展、非标准数据处理方案，仍须按上方要求事先获得用户确认。
-- **执行上下文不能丢**：删除 Dataset→迭代器→Dataset 的重包时，核对 prompt pack、并发和调用预算仍属于实际执行的 Dataset。异步链之前的同步展开／关联若不能直接执行，用现有 `materialize()` 固定这一段后继续；不以 Python 生成器绕过执行器限制。只在必要边界物化，并说明其数据范围。
-- **输出字段顺序和空值显式定义**：writer 前投影至目标 schema 的列顺序，缺省列明确补空；嵌套结构按既有 Arrow 契约构造。不能依赖 Python 字典或 JSON 解码后的顺序；可选中间字段删除用可处理缺失字段的投影，不假设每种状态都生成了该字段。
-- **按行为验证和清理**：验证源版本、关联数量、模型输入、评分／审核结果、空结果、append／overwrite、失败不误报成功、续跑不重复调用。删除无引用封装及对应导入，更新 README 和必要的 notebook 导入；不保留转发兼容层，不为重构调用真实模型。
-
-### 入口文件加业务前缀（2026-09-25，用户明确要求）
-
-修订理由：用户同时打开多个 debug、pipeline 时无法区分归属，要求文件名都加前缀。本条覆盖下方固定使用 `pipeline.py` / `debug.ipynb` 的旧命名约定；目录分层与执行职责不变。
-
-- 现役入口统一为 `<前缀>_pipeline.py`、`<前缀>_debug.ipynb`。基础处理用 `preparation`，训练用 `t2i_train` / `edit_train`，benchmark 用 `<赛道>_<版本>_benchmark`，分赛道评测用 `<赛道>_<版本>_eval`，通用评测用 `evaluation`。
-- 改名同步 Python 导入、CLI、模型子进程入口、源码快照路径、notebook、文档与目录检查；直接使用新名称，不保留同名旧入口或转发包装。
-- 归档源码、历史表和冻结引用不改写；notebook 的已保存输出与执行计数保持原样。
-
-
 ### T2I 直接使用 preparation 结果表（2026-09-25，用户明确纠正）
 
 修订理由：用户要求去掉输入别名，不增加概念。T2I 出题和训练入口直接写 preparation 结果表路径与固定版本，不要求使用者理解发布登记。用户随后要求 review 并清理重复包装和无效转换。
@@ -340,19 +412,6 @@ questions = concepts.map_prompt_async(
 - notebook 与配置使用 `uri`、`version` 指定文章/图片结果表；按审核状态与概念读取，不再要求提供发布名、别名或 release_id。
 - 当前输入在运行记录及读取链路中保持 `uri`、`version`，不为内部兼容扩成另一套引用再转回路径；不为此读取表头、扫描行数或查询登记。一次请求的图文材料只组装一次，不保留没有业务作用的纯转调包装。
 - 历史运行及其固定引用保持原读取语义；当前入口、注释和说明不沿用旧发布别名。
-
-### 代码注释规范（2026-09-25 制定，2026-09-26 补充，用户明确要求）
-
-修订理由：用户要求将代码注释纳入项目规范，并为本次新增的 T2I Benchmark V2 实现补充注释。
-2026-09-26 补充理由：用户指出“整理材料、选择配图、固定编号、补齐缺失概念”等描述过于抽象，要求注释直接说明实际操作；本次补充适用于项目内所有 pipeline。
-
-- 新增或修改代码时同步维护中文注释与 docstring。模块说明职责；对外函数、业务算子说明输入、输出和关键约束，简单函数可用一句话表达。
-- 在关键流程和非显然的分支处说明业务目的及选择原因，特别是材料选择、编号对应、版本冻结、模型调用、失败状态、续跑及落表完成边界。不要逐行翻译代码或重复变量名。
-- **阶段注释写具体操作**：说明处理什么数据、按什么条件筛选或组合、怎样改变行或字段、输出到哪里。只写与该段相关的关键事实，不机械罗列模板；读者不进入算子实现，也应能理解主线在做什么。
-- **不能用目的代替动作**：“整理、处理、对齐、固定、补齐、保存供复用”等词后必须有具体说明。例如，选图说明优先选哪些图、其余图片如何排序及受哪个参数限制；编号说明对象、顺序和起始值；“补齐缺失概念”须明确是补一条状态行，还是实际补充了材料，不能混为一谈。
-- **结果和分支要可核对**：涉及缺失、超限、失败、跳过或续跑时，说明触发条件、记录的字段/状态及后续动作；涉及落表时，说明每行代表什么、目标表/路径变量、写入模式，以及复用哪个已登记版本。按相邻操作分段注释，不把多种行为压成一句笼统概括。
-- notebook 的参数块直接注明数据源的实际表路径、固定版本及筛选范围，不增加发布名或别名。模型调用和结果预览分段标注，说明手动执行的实际行为。
-- 注释必须与实现一致；修改逻辑时同步更新或删除过时说明。不保留废弃代码作为注释，不为增加注释引入额外封装。
 
 ### T2I Benchmark V2 精简出题（2026-09-25，用户明确要求）
 
@@ -389,42 +448,11 @@ questions = concepts.map_prompt_async(
 - 显式配置发布源、概念、模型与运行名；模型为 `glm/glm-5.3-flash`。Lance writer 留在正式 pipeline，notebook 显示新训练表的实际路径和固定版本，再用标准 `read_lance()` 读取。
 - 每行展示一个样本，区分完整训练输入与监督目标，图片可点击预览；删除独立第二格，不新增查看器或调度包装。手动执行 cell 才调用模型，维护验证使用隔离数据和模拟响应。
 
-### Pipeline 数据按表平铺（2026-09-23，用户确认执行）
-
-用户确认把业务表迁到所属 pipeline 的 `datasets/`（用户已更正拼写），不再建立 runs、history、阶段或 case 数据子目录。这条覆盖下方旧的仓库外集中数据根和 pipeline 固定目录约定。
-
-- 每张 Lance 表直接放所属模块 `datasets/`；名称为业务表名，加运行名、题目编号或指纹消歧。不合并历史表，不改历史行、版本、索引和图片字节。
-- collect 持有原始图片、文档和采集历史；preparation 持有文章、视觉审核和旧 knowledge 运行；curation/t2i、curation/edit 持有各自结果；混合赛道历史表归 benchmark/datasets、curation/datasets；评测归 evaluation 或 evaluation/edit/v1。
-- 主数据、全局登记、分类历史、跨模块维护和迁移证据直接平铺工作区 datasets/。解析根改为共同工作区，默认 PROJECT_ROOT.parent；DEMIWTG_DATASETS_ROOT 同样表示包含 demiwtg/ 和 datasets/ 的工作区根。
-- 历史固定 DatasetRef、RecordRef、BlobRef 原值不改；共同工作区 `_demiflow/lance_locations.json` 精确记录旧表位置到新物理位置的映射。为本次已授权的固定引用重定位，demiflow 标准存储内部支持该映射；不增加业务读写包装，不保留旧路径目录或软链接。现役 notebook 和 pipeline 直接写新实际表路径。
-- `_demiflow` 仅为锁、位置映射、迁移回执等控制文件；所有 datasets/ 忽略 Git。源码快照排除数据目录。保留两仓已有改动，不提交，不调用模型。
-
-
-本文档是**定死的架构约束**。任何代码修改、脚本新增、数据整理，都必须遵守。修改本文件本身就是一次架构决策，需要显式说明理由。
-
-### Notebook 直接读表与运行编号（2026-09-23，用户再次明确纠正）
-
-修订理由：用户认为 `RUN` 目录和 `TASK_ID` 混淆且增加读取成本，要求涉及的查看入口一起调整。此条覆盖下方 notebook 按 RUN/TASK_ID 查看约定。
-
-- 查看直接写实际 Lance 表路径 `TABLE_URI`、固定 `VERSION` 和标准 `read_lance()`；不通过 `read_attempt`、`open_stage_dataset` 或元数据层隐藏要读的表。可用 `CONCEPT` 等业务字段筛选；单题对照从已读结果选择一行，无需手填内部任务编号。
-- `RUN_ID` 唯一表示一次 pipeline/调试运行，不表示某个人或某一道题。只有需要组织运行路径时才使用；路径变量明确叫 `RUN_DIR` 或用途名称。一个运行可包含多道题，题目行的既有 `task_id` 关联主键不改成 run_id。
-- 同步现役 notebook、说明及受影响测试；历史表、内部关联主键和历史模型调用输出不改写。不为更名新增读表 API 或兼容层。
-
-### 所有现役 pipeline 显式使用标准读写 API（2026-09-23，用户再次明确纠正）
-
-修订理由：用户指出出题流程把写表藏在 `files.lance_checkpoint` 等封装中，无法直接看清结果落点，要求涉及的 pipeline 全部改用标准 API。此条适用于 preparation、curation、benchmark、evaluation，覆盖下方旧 checkpoint 编排约定。
-
-- 在 `pipeline.py` 中直接写出 Lance 表路径、Arrow schema、writer 和固定版本 reader。使用现有 `Dataset.read_lance` / `write_lance` 或 Lance/PyArrow 官方 API，不用 `files.lance_checkpoint`、`checkpoint_lance_args`、`Dataset.checkpoint_lance` 隐藏或代替写表。
-- 不新增、扩展或包装标准 API，不通过继承、私有属性、通用 helper 或改名后的保存函数绕过本规则。确需扩展，先说明缺口、具体改动及替代办法，得到用户明确确认后再动平台；本次不修改 demiflow。
-- `map_prompt_async` 使用现有 `run_stream()` 执行。批量结果用标准分批算子接官方 Lance writer；单 case 可收集该 case 的结果后用 `write_lance`。不因异步调用重新引入 checkpoint。空结果也用显式 schema 写出有效 Lance 空表。
-- 业务输入绑定、schema/行转换、审核规则和运行元信息可以保留；运行绑定类不执行 Dataset、不隐藏结果表读写。完成记录只在 writer 成功后登记，续跑读取已登记的固定版本；未完成的表不能当成完成结果。
-- 历史 Lance 引用、样本、模型响应和 notebook 输出不改写。测试使用隔离湖与模拟响应，不启动正式生产、训练或模型调用，保留两仓未提交改动。
-
 ### 非 curation 历史材料归档（2026-09-23，用户明确要求）
 
 修订理由：用户要求当前 curation 以外的历史查看册和审核记录统一收进各自的 archive/，覆盖下方这些模块继续保留 reviews/ 的约定。
 
-- benchmark、evaluation（含 BAGEL）的历史查看册、审核记录直接归所属模块的 archive/，不再套 reviews/；空 reviews/ 删除。正式 pipeline、operaters、prompts、debug 和依赖声明保持现役。
+- benchmark、evaluation（含 BAGEL）的历史查看册、审核记录直接归所属模块的 archive/，不再套 reviews/；空 reviews/ 删除。正式 pipeline、operators、prompts、debug 和依赖声明保持现役。
 - 本次不整理 curation/，保留其当前代码、查看册和运行目录。历史文件仅移动，notebook 输出、模型结论及固定 Lance 证据 ID 原样保留；不把证据 ID 当成本地路径改写。
 - 同步文档链接、Git 忽略规则和目录检查；archive/ 仅存历史材料，不成为新执行入口。保留两仓未提交改动，不提交、不调用模型、不改湖内数据。
 
@@ -447,62 +475,6 @@ questions = concepts.map_prompt_async(
 - 第二格模型使用用户在网关列表核对后选定的 `glm/glm-5.3-flash`，由用户手动运行才发请求；构题和审核分别重放原输入，审核默认仍针对原题。调试日志与原运行隔离，不改历史结论或自动导出训练数据。不加执行开关、辅助模块或新的 pipeline。
 - 编写期间只读取网关模型列表、做模拟接口测试，不替用户实际调用模型。网关未列出的指定模型不得默默替换。
 
-### Debug notebook 只留短模板（2026-09-23，用户再次明确纠正）
-
-修订理由：用户认为自动列阶段、查 manifest、取前几条和 pprint 没有意义，要求只给可改参数的模板，由用户手写算子编排。此条覆盖下方要求预写完整调试链或同输入对照 cell 的旧约定。
-
-- 各 debug.ipynb 只留一段说明和三个代码格：参数（运行/题目 ID/配置文件）、按 ID 看题、导入业务算子供自己编排。基础处理按概念看材料；未实现的 Edit 不伪造读取或执行流程。
-- 配置直接读取显式 JSON 文件并调用现有配置函数；不新增配置加载框架、调试模块、阶段选择器、异常回退或自动报告。查询例子默认注释，用户按需修改和运行。
-- 不预铺逐阶段流程或模型对照执行代码。历史试跑输出移入对应 reviews/ 查看册，保持原输出和执行计数；debug 模板只放链接。
-- 算子、正式 pipeline 与 prompts 不因 notebook 简化而改变。保留两仓未提交改动，不提交、不调用模型或启动生产/训练。
-
-### 所有 pipeline 固定目录（2026-09-23，用户最新明确要求）
-
-修订理由：用户要求严格限制每个 pipeline 使用同一模式，删除 `comparison_pipeline.py` 一类额外入口，并明确将 `ops` 改名为 **`operaters`**。以下约定覆盖本文件所有旧的 ops、native、visual_pipeline、runtime、notebook 执行图和查看器约定。
-
-```text
-<pipeline>/
-  __init__.py
-  pipeline.py        # 正式流程、必要配置、CLI；notebook 调用同一个函数
-  debug.ipynb        # 参数、手动命令、直接读表和看图
-  operaters/         # 业务算子、所属 schema/校验/读写
-  prompts/           # 提示词及其协议、组装
-  tests/             # 回归检查；历史等价性源码仅在 fixtures/ 中
-  README.md
-```
-
-- 所有现役 pipeline 都遵守，不能另建 comparison_pipeline.py、visual_pipeline.py、partition.py、debug.py、runtime.py、presentation.py 等流程或调试入口，也不做旧路径兼容层。正式子流程用同一个 pipeline.py 中的具名函数和 CLI 参数；临时对照直接写 notebook 命令。
-- 目录名严格为用户指定的 `operaters/`；同步更新 Python 导入、notebook、CLI、源码快照、测试与说明。算子不导入 pipeline、notebook 或测试；Python 不解析、编译或执行 notebook。
-- debug notebook 保持短小，不定义调试函数/类、状态机、分发器、报告生成器或热加载器；调用模型/写表的命令默认注释。原生 demiflow 请求日志足够记录临时对照，不再为它建立独立业务 pipeline。
-- preparation 的文章、视觉子流程统一在 pipeline.py 和 debug.ipynb。evaluation 的原 native、请求和模型算子统一在 operaters/；分区审核由同一 CLI 的 --judge-only --backend 调用。
-- 只读历史成果可继续放 reviews/，已有 runs/、冻结协议及依赖清单保留；它们不是新执行入口。evaluation 下 t2i/edit 是版本分组，bagel 是模型接入和官方回归工具，第三方源码不套业务 pipeline 模板。Edit 训练契约尚未确定，不为目录齐全虚构实现。
-- 用 preparation/tests/test_pipeline_layout.py 检查所有 pipeline 根目录、导入方向和 notebook 边界，新增 pipeline 也必须纳入。保留历史数据与 notebook 输出、两仓已有未提交改动；不提交、不调用模型或启动正式生产/训练。
-
-### debug notebook 是按需命令草稿（2026-09-23，用户明确纠正）
-
-修订理由：用户要求删除所有项目 `debug.py`，调试代码直接写在 notebook，并保持简单。此条覆盖下方关于 debug 查看器与自动生成查看册的旧约定。
-
-- notebook 只留短小的参数、显式调用、读表和看图 cell，不设 MODE 状态机、阶段分发器、自动生成报告或热加载框架；执行命令默认注释，按需运行。
-- 删除项目 debug 查看模块，不换名字藏到 presentation 等辅助层；生产 pipeline 不依赖展示代码。真正用于同输入模型对照的候选读取归所属数据算子。
-- 既有 notebook 输出原样留作历史记录；pipeline、算子和 prompts 仍为独立 Python/文本源码。保留未提交改动，不提交，不启动正式生产或模型调用。
-
-### Python pipeline 为唯一执行入口（2026-09-23，用户明确纠正）
-
-修订理由：用户要求整个 demiwtg 不再从 notebook 标签读取、编译或执行 pipeline。此约定覆盖下方所有“notebook 是执行图来源”的旧条目。
-
-- `pipeline.py` 直接定义可导入的流程函数、必要配置和 CLI；命令行与 notebook 调用同一个 Python 函数。多条既有子流程可由具名 Python 函数组合。
-- `ops/` 保持业务算子及所属数据绑定，`prompts/` 保持提示词；Lance run 绑定与源码冻结归所属 `ops/runfiles.py` 或已有业务模块。pipeline 不混入查看器、notebook 初始化和历史试跑配置。
-- debug notebook 只做导入、配置、显式调用、源码/阶段查看。禁止生产代码解析 notebook、按 metadata.tags 取执行图、通过 exec/compile 加载流程或配置；不保留旧 loader/runtime 兼容入口。
-- 保留 notebook 已有输出和旧 Lance 记录；新运行指纹使用 Python 源码。保留两仓已有未提交改动，不启动正式生产、训练或模型服务，不提交。
-
-### 单一 debug 入口与同输入模型对照（2026-09-23，用户明确要求）
-
-修订理由：用户要求标准 pipeline 只保留 debug notebook，将 stepbystep 的有效检查内容并入；同时要求在 T2I debug 手动对照同 case、同提示词的 modelhub GLM-5.3-Flash。
-
-- preparation、curation、benchmark、evaluation 的每条 pipeline 使用自身 debug 入口，逐算子说明、prompts、阶段查看和已有 notebook 输出收在其中；移除独立 stepbystep。CLI 继续只加载原有 `pipeline` 标签图，检查片段不另起第二条执行链。preparation 的文章与视觉两条 pipeline 各有 debug，不合并业务。
-- 模型对照读取原调用冻结的实际多模态消息，校验文本、图片字节及顺序一致。构题与审核分别对照原输入；审核不悄悄改为审核新模型生成的题。对照产物写独立 Lance run，不覆盖历史模型结论，不自动交付训练数据。
-- 本次 modelhub 接入已获明确授权，T2I 可显式选择 `mode=modelhub`；默认对照 cell 不调用，用户手动运行。上游密钥仍由 modelhub 管理，不写入 notebook。保留两仓未提交改动与已有数据，不重启服务、不提交。
-
 ### 工作目录收敛执行（2026-09-23，用户确认执行清单）
 
 修订理由：用户确认执行已核对的清理方案，保留当前主线和有效成果，退役 focus1000 与旧试跑。这次明确授权覆盖下方旧“历史目录原位保留”和“不写生产湖”的维护限制，仅限本次保全与清理。
@@ -512,16 +484,6 @@ questions = concepts.map_prompt_async(
 - focus1000 退出独立 pipeline，不再补跑。已有生成图及提示词/生成记录/59评分/评测排除关系保留；图片保持生成来源和评测约束，不自动成为训练或已审核参考材料。
 - 工作目录清掉退役实验、重复图和可重建导出。先保全必要数据、逐 Blob SHA 核验、迁移消费者和结果复核，再依据显式清单删除；不新建 backup/archive 中转目录或旧路径软链接。
 - 主线为 preparation、curation/t2i 与 edit、benchmark 两赛道、evaluation。V1 留固定基准/重现能力，V2 迭代；BAGEL 作为模型接入及按需官方回归工具。
-
-### Preparation 标准 pipeline 结构（2026-09-23，用户最新明确纠正）
-
-修订理由：用户明确要求只有通用平台、业务算子、业务编排三类归属；此前保留 `data/`、`runtime.py`、`inspection/`、`configs/` 没有完成收缩，本节纠正该约定。
-
-- preparation 仅保留 `ops/`、`prompts/`、pipeline 与 debug 入口，以及测试和说明。`pipeline.py`／`visual_pipeline.py` 负责参数、输入冻结、run／stage 绑定与入口；两本 debug notebook 是实际 demiflow Dataset 编排，`debug.py` 负责只读查看／可重建查看册。不另建 data、runtime 或 inspection 层，不保留旧路径兼容包。
-- `ops/` 保持 inputs、documents、identity、text、images、routing、article、results 八类业务模块。材料读取、范围与引用角色校验归 inputs；图片 schema、SHA 字节绑定、标注审核及本地审核模型选择归 images；文章 schema、引用校验和写入归 article；阶段行转换、保存固定结果归 results。辅助函数归所属算子，不将每个函数包装为算子类。
-- prompt 源码、组装、图片标注配置和业务请求／响应绑定归 `prompts/`。notebook 标签加载、代码指纹、通用显示、进程工具、存储、锁和 checkpoint 归 demiflow；平台不引用项目 schema、模型名或业务路径。业务代码直接调用平台能力。
-- 当前流程是基础材料准备：清洗、筛选、文章整理、视觉审核、保存结果。不建知识库，不登记独立 release。历史 `knowledge`、`publication`、`release_ids` 字段和固定 Lance 引用保持原契约；历史 release 导入归 `tools/lake_migration/`。
-- 更新全部活动消费者；保留已有未提交修改、历史数据和 notebook 输出，不提交、不操作生产湖、不启动模型或重启服务。测试使用隔离数据根。
 
 ### 基准构建与模型评测分工（2026-09-22，用户最新明确要求）
 
@@ -1022,10 +984,6 @@ export no_proxy="localhost,127.0.0.1,192.168.10.0/24,modelscope.cn,modelscope.or
 > **图片全量守护补充（2026-09-10，用户授权选模型和失败拉起）**：本轮沿用已验证的本地 Qwen3.8-27B，候选模型未下载完整，不宣称横向实测胜出。`curation/run_image_pipeline.sh` / `curation/image_supervisor.py` 可接管并恢复当前本地 8000 服务及图片标注进程；该明确授权覆盖此前“不启动/停止用户模型服务”的限制，仅限本任务精确匹配的服务。状态、日志、断点仍在 `state/curation/image_preannotation_v1/`，详见 pipeline_memory.md 设计第 11 节。新增此条是记录本次运行管理授权，不扩展到付费接口或其他任务服务。
 
 > **GPU 让位补充（2026-09-10，用户明确授权）**：图片预标注是利用空闲 GPU 的后台材料整理任务。当前研究实验需要资源时，助手可自行暂停该标注及其本地 Qwen 服务，保留断点和结果，实验结束后恢复原服务与标注；不再为同一让位操作重复询问。具体编排见 `curation/pipeline_memory.md` 第 12 节与 `curation/rag_diagnostic_session.py`。不授权删除标注、不混入其他模型、不影响其他无关任务、不使用付费接口。
-
-### Notebook直接编排Dataset（2026-09-15，用户明确调整）
-
-现役交互入口仍为curation/v4/knowledge_debug.ipynb，但不再使用StreamFlow对象隐藏业务编排。原始来源读取、概念选择、资料关联、计数、分批及知识算子直接通过demiflow Dataset操作连接，业务算子在dataset_operators.py与knowledge_stages.py；notebook_io.py只提供文件读取/版本冻结。StreamFlow保留历史命令行兼容，不作为notebook主线。此条覆盖前述StreamFlow为现役交互编排对象的说明，详见pipeline_memory.md 设计第36节；业务数据契约、原始datasets只读和历史运行不可覆盖约定不变。
 
 ### 知识pipeline统一原生算子接口（2026-09-15，用户要求）
 

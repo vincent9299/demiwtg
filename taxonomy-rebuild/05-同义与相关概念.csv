@@ -1,0 +1,8 @@
+﻿关系,概念ID,原概念,说明
+中英文同义,1-001；1-020,Brassica Oleracea Var. Alboglabra；芥蓝,芥蓝；不合并原记录，不处理学名接受状态。
+中英文同义,2-031；2-121,Mooncake；月饼,Mooncake／月饼。
+同义表达,2-082；2-113,可折叠座椅；折叠椅,可折叠座椅／折叠椅。
+近义或上下位,2-028；2-043,Lane Marking；Road Marking,车道标线与道路标记的范围不一定完全相等，不能自动合并。
+近义或上下位,2-027；2-038,Lancet Arch；Pointed Arch,Lancet arch 是更具体的尖拱形式，不标记为完全同义。
+上位与具体构型,2-008；2-045,Bun Updo；Sock Bun,Bun updo 与 sock bun 保留各自范围。
+同一测量任务，规格可能不同,2-015；2-018；2-022,Digital Blood Pressure Monitor；Electronic Sphygmomanometer；Home Blood Pressure Monitor,三种血压计标签并非必然等价。

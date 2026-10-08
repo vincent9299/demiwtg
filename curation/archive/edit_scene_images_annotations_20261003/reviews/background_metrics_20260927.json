@@ -1,0 +1,62 @@
+[
+  {
+    "time": "2026-09-27T13:14:36.139769+00:00",
+    "gpu": "0, 0 %, 76901 MiB, 124.15 W\n1, 99 %, 27985 MiB, 380.57 W",
+    "metrics": [
+      "vllm:num_requests_running{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 1.0",
+      "vllm:num_requests_waiting{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:generation_tokens_total{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 16212.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"stop\",model_name=\"qwen3-4b-instruct-2507\"} 282.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"length\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"abort\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"error\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"repetition\",model_name=\"qwen3-4b-instruct-2507\"} 0.0"
+    ],
+    "progress": "[Edit 原图][scene_pool_category_l3_v1][+70.3s] 分类进度：处理 2300/7917，响应复用=2049；状态={'screened': 2300}；决定={'reject': 607, 'keep': 943, 'hold': 750}；耗时=50.1s，处理速度=2753.2 行/分钟（含复用）；最近=人造物体 / 电子设备 / 调制解调器 → reject"
+  },
+  {
+    "time": "2026-09-27T13:14:46.244589+00:00",
+    "gpu": "0, 0 %, 76901 MiB, 124.11 W\n1, 97 %, 27985 MiB, 360.71 W",
+    "metrics": [
+      "vllm:num_requests_running{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 3.0",
+      "vllm:num_requests_waiting{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:generation_tokens_total{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 22137.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"stop\",model_name=\"qwen3-4b-instruct-2507\"} 390.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"length\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"abort\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"error\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"repetition\",model_name=\"qwen3-4b-instruct-2507\"} 0.0"
+    ],
+    "progress": "[Edit 原图][scene_pool_category_l3_v1][+79.4s] 分类进度：处理 2400/7917，响应复用=2049；状态={'screened': 2400}；决定={'reject': 639, 'keep': 973, 'hold': 788}；耗时=59.3s，处理速度=2430.2 行/分钟（含复用）；最近=人造物体 / 药品与化学制品 / 清洁化学品 → keep"
+  },
+  {
+    "time": "2026-09-27T13:14:56.314683+00:00",
+    "gpu": "0, 0 %, 76901 MiB, 124.05 W\n1, 98 %, 27985 MiB, 343.86 W",
+    "metrics": [
+      "vllm:num_requests_running{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 5.0",
+      "vllm:num_requests_waiting{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:generation_tokens_total{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 28011.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"stop\",model_name=\"qwen3-4b-instruct-2507\"} 491.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"length\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"abort\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"error\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"repetition\",model_name=\"qwen3-4b-instruct-2507\"} 0.0"
+    ],
+    "progress": "[Edit 原图][scene_pool_category_l3_v1][+89.4s] 分类进度：处理 2500/7917，响应复用=2049；状态={'screened': 2500}；决定={'reject': 672, 'keep': 993, 'hold': 835}；耗时=69.3s，处理速度=2165.7 行/分钟（含复用）；最近=人造物体 / 触控笔 → reject"
+  },
+  {
+    "time": "2026-09-27T13:15:06.440172+00:00",
+    "gpu": "0, 0 %, 76901 MiB, 124.11 W\n1, 97 %, 27985 MiB, 375.67 W",
+    "metrics": [
+      "vllm:num_requests_running{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:num_requests_waiting{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:generation_tokens_total{engine=\"0\",model_name=\"qwen3-4b-instruct-2507\"} 34433.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"stop\",model_name=\"qwen3-4b-instruct-2507\"} 604.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"length\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"abort\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"error\",model_name=\"qwen3-4b-instruct-2507\"} 0.0",
+      "vllm:request_success_total{engine=\"0\",finished_reason=\"repetition\",model_name=\"qwen3-4b-instruct-2507\"} 0.0"
+    ],
+    "progress": "[Edit 原图][scene_pool_category_l3_v1][+99.1s] 分类进度：处理 2600/7917，响应复用=2049；状态={'screened': 2600}；决定={'reject': 700, 'keep': 1046, 'hold': 854}；耗时=78.9s，处理速度=1975.9 行/分钟（含复用）；最近=人造物体 / 餐厅家具 / 餐桌 → keep"
+  }
+]

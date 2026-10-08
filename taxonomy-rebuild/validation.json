@@ -1,0 +1,28 @@
+{
+  "source_sha256": "39c43ea8c2e5e3bf1c08f826d0183756a4a9e652cef545f4a973f470f5799d33",
+  "concept_count": 464,
+  "unique_original_labels": 464,
+  "groups": {
+    "1": 25,
+    "2": 225,
+    "3": 214
+  },
+  "original_labels_exactly_preserved": true,
+  "original_order_preserved": true,
+  "one_primary_path_per_concept_per_edition": true,
+  "review_count": 27,
+  "knowledge_extra_entry_count": 62,
+  "knowledge_concepts_with_extra_entries": 62,
+  "counts": {
+    "visual": {
+      "level_1": 15,
+      "level_2": 67,
+      "level_3": 179
+    },
+    "knowledge": {
+      "level_1": 14,
+      "level_2": 88,
+      "level_3": 181
+    }
+  }
+}

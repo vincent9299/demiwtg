@@ -16,7 +16,10 @@ def test_download_and_page_sinks_use_single_tables_only(tmp_path, monkeypatch):
     row = asyncio.run(download.DownloadStage(str(tmp_path))({'name':'A', 'source':'test', 'tiers':['https://test/image']}))
     assert row['sha256'] == sha(body) and 'blob_path' not in row
     ds = lance.dataset(str(tmp_path/IMAGES_URI))
-    assert ds.count_rows() == 1 and ds.take_blobs('data',indices=[0])[0].read() == body
+    from demiflow.objects import ObjectRef
+    assert ds.count_rows() == 1 and 'data' not in ds.schema.names
+    image = ds.to_table().to_pylist()[0]
+    assert ObjectRef(image['image_uri'], image['sha256']).read() == body
     sink = page.DocsSinkStage(str(tmp_path))
     for text in ['original', 'revised']:
         asyncio.run(sink({'name':'A','page_url':'https://test/page','title':'Page','text':text,'passages':[]}))

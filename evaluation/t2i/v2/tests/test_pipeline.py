@@ -1,3 +1,4 @@
+from evaluation.t2i.v2.operators.run_tables import RunTables
 """验证真实 demiflow/Lance 执行链；图像生成和 judge 响应使用模拟数据。"""
 import ast
 import base64
@@ -14,12 +15,14 @@ import pytest
 import importlib
 import yaml
 from demiflow.errors import LanceWriteError
-from demiflow.lance.blobs import BlobRef, LanceBlobStore
-from demiflow.lance.records import LanceRecordStore
-from demiflow.operator_llm.lance_journal import submit_response
+from demiflow.objects import ObjectRef, LocalObjectStore
+from demiflow.operator_llm.call_ref import read_call, journal_options, PromptRecordRef
+from demiflow.operator_llm.sqlite_journal import SQLitePromptJournal
+from demiflow.operator_llm.sqlite_offline import submit_response
 from demiflow import data
 from evaluation.t2i.v2.t2i_v2_eval_pipeline import DATASETS, PROMPTS, SCORES, config, run_pipeline, run_judging
-from evaluation.t2i.v2.operaters.answers import GenerateImage
+from evaluation.t2i.v2.operators.answers import PrepareAnswer, answer_template, answer_bindings, answer_identity
+from demiflow.image_generation import ImageGenerator as GenerateImage
 from project import resolve_root
 
 
@@ -67,7 +70,7 @@ def judgment():
 def test_roundtrip_input_privacy_scoring_and_resume(monkeypatch, separate):
     calls = []
     def generate(self, instruction, key):
-        calls.append(instruction)
+        calls.append(instruction['body']['prompt'])
         return picture()
     monkeypatch.setattr(GenerateImage, 'remote', generate)
     run, cfg, src = resolve_root() / DATASETS / 'roundtrip', settings(), source()
@@ -79,9 +82,9 @@ def test_roundtrip_input_privacy_scoring_and_resume(monkeypatch, separate):
     assert rows(answered['target'])[0]['judge_json'] is None
     assert pending['counts'] == {'pending_judge': 1}
     answer = rows(answered['target'])[0]
-    assert BlobRef(**json.loads(answer['image_json'])).read(resolve_root()) == picture()
+    assert ObjectRef(**json.loads(answer['image_json'])).read() == picture()
     call = json.loads(rows(pending['target'])[0]['judge_call_json'])
-    request = LanceRecordStore(**pending['calls']).get(call['request_ref']['key'])
+    request = SQLitePromptJournal(**journal_options(**pending['calls'])).read(call['request_ref']['request_id'], 'request')
     text = json.dumps(request, ensure_ascii=False)
     assert '画一个红色圆形。' in text and 'image' in text
     assert all(secret not in text for secret in ('PRIVATE_POINT', 'PRIVATE_RUBRIC', 'PRIVATE_REFERENCE', 'fixture-image'))
@@ -112,7 +115,7 @@ def test_generation_failure_is_not_zero_or_judged(monkeypatch):
     row = rows(state['target'])[0]
     assert row['status'] == 'generation_failed' and 'fixture unavailable' in row['reason']
     assert row['alignment_score'] is None and row['image_json'] is None
-    assert not LanceRecordStore(**state['calls']).keys(prefix='request/')
+    assert not SQLitePromptJournal(**journal_options(**state['calls'])).request_ids()
 
 
 @pytest.mark.parametrize('invalid', [False, True])
@@ -173,115 +176,73 @@ def test_bad_judge_score_is_rejected(monkeypatch):
 
 @pytest.mark.parametrize('api', ['images', 'chat'])
 def test_modelhub_exact_model_endpoint_and_single_request(monkeypatch, api):
-    """测试两种 API 的请求体和图片解析，不向网关发送请求。"""
-    calls = []
-    raw = picture()
-    encoded = base64.b64encode(raw).decode()
-    body = ({'data': [{'b64_json': encoded}]} if api == 'images' else
-            {'choices': [{'message': {'images': [{'image_url': {'url': 'data:image/png;base64,' + encoded}}]}}]})
-    class Response:
-        status_code = 200
-        text = json.dumps(body)
-        def raise_for_status(self):
-            pass
-        def json(self):
-            return body
-    class Session:
-        def __enter__(self):
-            return self
-        def __exit__(self, *args):
-            pass
-        def post(self, url, **kwargs):
-            calls.append((url, kwargs['json']))
-            return Response()
-    monkeypatch.setattr('requests.Session', Session)
-    cfg = settings()['answers'][0] | {'api': api, 'model': 'openrouter/openai/gpt-image-2'}
-    root = resolve_root()
-    actor = GenerateImage(cfg, LanceRecordStore(root, 'records.lance'), LanceBlobStore(root, 'images.lance'), root / 'offload')
-    assert actor.remote('原始题面', 'q1') == raw
-    assert len(calls) == 1 and calls[0][1]['model'] == 'openrouter/openai/gpt-image-2'
-    assert calls[0][0].endswith('/images/generations' if api == 'images' else '/chat/completions')
-    assert calls[0][1].get('prompt', calls[0][1].get('messages')) == ('原始题面' if api == 'images' else [{'role': 'user', 'content': '原始题面'}])
+    import httpx
+    cfg=settings()['answers'][0] | {'api':api,'model':'openrouter/openai/gpt-image-2'}
+    op=native_actor(cfg); original=httpx.Client; calls=[]
+    def respond(request):
+        calls.append(request)
+        b64=base64.b64encode(picture()).decode()
+        body={'data':[{'b64_json':b64}]} if api=='images' else {'choices':[{'message':{'images':[{'image_url':{'url':'data:image/png;base64,'+b64}}]}}]}
+        return httpx.Response(200,json=body)
+    monkeypatch.setattr(httpx,'Client',lambda **kw:original(transport=httpx.MockTransport(respond),**kw))
+    _,call,_=op.generate({'instruction':'原始题面'})
+    assert len(calls)==1
+    body=json.loads(calls[0].content)
+    assert body['model']==cfg['model']
+    assert calls[0].url.path.endswith('/images/generations' if api=='images' else '/chat/completions')
+    assert body.get('prompt')=='原始题面' if api=='images' else body['messages'][0]['content']==[{'type':'text','text':'原始题面'}]
+    op.journal.close()
 
 
-def test_notebook_has_two_independent_steps():
+
+def test_notebook_keeps_three_roles_and_submission_separate_from_readonly_views():
     book = json.loads((Path(__file__).parents[1] / 't2i_v2_eval_debug.ipynb').read_text())
-    assert len(book['cells']) == 2
-    sources = []
-    for cell in book['cells']:
-        assert not cell['outputs'] and cell['execution_count'] is None
-        text = ''.join(cell['source'])
-        compile(text, 't2i_v2_eval_debug.ipynb', 'exec', flags=ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)
-        sources.append(text)
-    assert 'asyncio.to_thread(run_pipeline' in sources[0]
-    assert 'run_judging' not in sources[0]
-    assert 'asyncio.to_thread(run_judging' in sources[1]
-    assert 'run_pipeline' not in sources[1] and 'ANSWER_MODELS' not in sources[1]
-    assert "INPUT_TABLE_URI =" in sources[0] and "INPUT_VERSION =" in sources[0]
-    assert "OUTPUT_TABLE_URI =" in sources[0] and 'target_uri=OUTPUT_TABLE_URI' in sources[0]
-    assert 'INPUT_TABLE_URI =' in sources[1] and 'INPUT_VERSION =' in sources[1]
-    assert 'OUTPUT_TABLE_URI =' in sources[1] and 'target_uri=OUTPUT_TABLE_URI' in sources[1]
+    assert [cell['cell_type'] for cell in book['cells']] == ['code'] * 3
+    assert [cell['metadata']['tags'] for cell in book['cells']] == [
+        ['pipeline-run'], ['pipeline-monitor'], ['pipeline-results']]
+    sources = [''.join(cell['source']) for cell in book['cells']]
+    for text in sources:
+        tree = ast.parse(text)
+        assert not any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) for n in ast.walk(tree))
+    assert 'subprocess.Popen' in sources[0] and 't2i_v2_eval_pipeline' in sources[0]
+    assert all('run_pipeline' not in text and 'subprocess.Popen' not in text for text in sources[1:])
+    assert '"monitor"' in sources[1] and '"view"' in sources[2]
+    assert 'IFrame' in sources[2] and 'height=4000' in sources[2]
+    assert 'notebook_browser' not in sources[2] and 'srcdoc' not in sources[2]
+    assignments = [node for node in ast.parse(sources[0]).body if isinstance(node, ast.Assign)
+                   and any(isinstance(t, ast.Name) and t.id == 'RUN_PIPELINE' for t in node.targets)]
+    assert len(assignments) == 1 and ast.literal_eval(assignments[0].value) is False
 
 
-@pytest.mark.parametrize('backend', ['diffusers', 'bagel'])
 @pytest.mark.parametrize('with_references', [False, True])
-def test_local_model_receives_original_prompt_and_explicit_parameters(monkeypatch, backend, with_references):
-    """验证本地权重加载及推理接线；不导入真实 torch，不分配 GPU。"""
-    calls = []
+def test_local_model_receives_original_prompt_and_explicit_parameters(monkeypatch, with_references):
+    calls=[]
     class Generator:
-        def __init__(self, device):
-            self.device = device
-        def manual_seed(self, seed):
-            self.seed = seed
-            return self
-    fake_torch = SimpleNamespace(bfloat16='bf16', Generator=Generator,
-                                 manual_seed=lambda seed: None,
-                                 cuda=SimpleNamespace(manual_seed_all=lambda seed: None))
-    monkeypatch.setitem(sys.modules, 'torch', fake_torch)
+        def __init__(self, device): self.device=device
+        def manual_seed(self, seed): self.seed=seed;return self
+    monkeypatch.setitem(sys.modules,'torch',SimpleNamespace(bfloat16='bf16',Generator=Generator))
     class Model:
-        def to(self, device):
-            calls.append(('device', device))
-            return self
+        def to(self, device): calls.append(('device',device));return self
         def __call__(self, **kwargs):
-            calls.append(('infer', kwargs))
-            return SimpleNamespace(images=[Image.new('RGB', (16, 16))])
-        def interleave_inference(self, inputs, **kwargs):
-            calls.append(('infer', dict(inputs=inputs, **kwargs)))
-            return ['模型输出文字', Image.new('RGB', (16, 16))]
-    def from_pretrained(path, **kwargs):
-        calls.append(('load', path, kwargs))
-        return Model()
-    monkeypatch.setitem(sys.modules, 'diffusers', SimpleNamespace(
-        DiffusionPipeline=SimpleNamespace(from_pretrained=from_pretrained)))
-    monkeypatch.setattr('evaluation.bagel.adapter.load_model',
-                        lambda path, offload: (from_pretrained(path), fake_torch))
-    cfg = config(answer_models=[{'backend': backend, 'model': 'local-fixture', 'model_path': '/fixture/weights',
-                               'device': 'cuda:1', 'seed': 7, 'use_references': with_references,
-                               'parameters': {'num_timesteps': 3} if backend == 'bagel' else {'num_inference_steps': 3, 'output_resolution': 1024}}],
-                  judge_model={'model': 'fixture'})['answers'][0]
-    root = resolve_root()
-    actor = GenerateImage(cfg, LanceRecordStore(root, 'records.lance'), LanceBlobStore(root, 'images.lance'), root / 'offload')
-    row = {'task_id': 'q1', 'concept': '概念', 'instruction': '完整题面'}
+            if 'image' in kwargs: kwargs['image']=[im.copy() for im in kwargs['image']]
+            calls.append(('infer',kwargs));return SimpleNamespace(images=[Image.new('RGB',(16,16))])
+    def load(path,**kwargs): calls.append(('load',path,kwargs));return Model()
+    monkeypatch.setitem(sys.modules,'diffusers',SimpleNamespace(DiffusionPipeline=SimpleNamespace(from_pretrained=load)))
+    cfg=config(answer_models=[{'backend':'diffusers','model':'fixture','model_path':'/fixture/weights',
+        'device':'cuda:1','seed':7,'parameters':{'num_inference_steps':3},
+        'answer_mode':'positive_images' if with_references else 'text_only'}])['answers'][0]
+    op=native_actor(cfg)
+    values={'instruction':'完整题面',**({'images':[picture()]} if with_references else {})}
+    op.generate(values)
+    actual=next(c[1] for c in calls if c[0]=='infer')
+    assert actual['prompt'].startswith('完整题面') and actual['generator'].seed==7
+    assert actual['num_inference_steps']==3 and ('device','cuda:1') in calls
     if with_references:
-        blob = actor.blobs.put(picture())
-        row['references_json'] = json.dumps([
-            {'kind': 'text', 'number': 1, 'title': '标题', 'text': '参考知识'},
-            {'kind': 'image', 'number': 2, 'blob_ref': blob.to_dict()}])
-    result = actor.generate(row)
-    assert result['status'] == 'generated' and calls[0][1] == '/fixture/weights'
-    actual = next(call[1] for call in calls if call[0] == 'infer')
-    if backend == 'bagel':
-        prompt, images = actual['inputs'][-1], actual['inputs'][:-1]
-        assert actual['num_timesteps'] == 3
-    else:
-        prompt, images = actual['prompt'], actual.get('image', [])
-        assert actual['num_inference_steps'] == 3 and actual['output_resolution'] == 1024
-        assert actual['generator'].seed == 7 and ('device', 'cuda:1') in calls
-    if with_references:
-        assert '参考知识' in prompt and prompt.endswith('完整题面')
-        assert len(images) == 1 and images[0].getpixel((0, 0)) == (255, 0, 0)
-    else:
-        assert prompt == '完整题面' and images == []
+        assert actual['prompt'].startswith('完整题面\n\n参考图：所附图像') and len(actual['image'])==1
+        assert actual['image'][0].getpixel((0,0))==(255,0,0)
+    else: assert actual['prompt']=='完整题面' and 'image' not in actual
+    op.journal.close()
+
 
 
 def test_judge_writer_failure_preserves_target_and_never_regenerates(monkeypatch):
@@ -305,8 +266,8 @@ def test_judge_writer_failure_preserves_target_and_never_regenerates(monkeypatch
             run_judging(judge_run, target, config(judge_model=cfg['judge']), target_uri=target['uri'])
     assert lance.dataset(target['uri']).version == target['version']
     assert rows(target) == original
-    records = LanceRecordStore(resolve_root(), str(DATASETS / 'records__writer_judge.lance'))
-    assert records.get('state') is None
+    records = RunTables(resolve_root(), str(DATASETS / 'records__writer_judge.lance'))
+    assert records.load() is None
     state = run_judging(judge_run, target, config(judge_model=cfg['judge']), target_uri=target['uri'])
     assert state['counts'] == {'pending_judge': 1}
     assert state['target']['uri'] == target['uri'] and state['target']['version'] > target['version']
@@ -317,7 +278,7 @@ def test_three_models_answer_every_question_and_resume_independently(monkeypatch
     models = ['Qwen-Image-2512', 'BAGEL-7B-MoT', 'openrouter/openai/gpt-image-2']
     generated = []
     def generate(self, instruction, key):
-        generated.append((self.config['model'], instruction))
+        generated.append((self.config['model'], instruction['body']['prompt']))
         buffer = io.BytesIO()
         Image.new('RGB', (16, 16), ['red', 'green', 'blue'][models.index(self.config['model'])]).save(buffer, format='PNG')
         return buffer.getvalue()
@@ -355,7 +316,7 @@ def test_model_subprocess_reads_frozen_run_and_writes_shared_table():
     marker = resolve_root() / 'child_imported.txt'
     (dependency / 'sitecustomize.py').write_text(
         'from pathlib import Path\nPath(' + repr(str(marker)) + ').write_text(\"loaded\")\n')
-    cfg = config(answer_models=[{'backend': 'bagel', 'model': 'BAGEL-7B-MoT',
+    cfg = config(answer_models=[{'backend': 'diffusers', 'model': 'BAGEL-7B-MoT',
                                  'model_path': '/unused', 'python': sys.executable, 'pythonpath': [str(dependency)], 'cuda_visible_devices': ''}],
                  judge_model={'model': 'fixture', 'mode': 'offline'})
     state = run_pipeline(resolve_root() / DATASETS / 'child', {'uri': str(uri), 'version': ds.version}, cfg)
@@ -412,25 +373,25 @@ def test_append_answers_preserves_existing_rows_and_does_not_repeat_on_resume(mo
 def test_reference_inputs_use_frozen_text_and_pixels_without_private_rubrics(monkeypatch):
     """同模型两路分别缓存；图像字节、文字与题面完整交给参考信息路。"""
     root = resolve_root()
-    blob = LanceBlobStore(root, 'reference_images.lance').put(picture())
+    blob = LocalObjectStore(root / 'objects').put(picture())
     refs = [{'kind': 'text', 'number': 1, 'title': '资料标题', 'text': '完整参考知识'},
-            {'kind': 'image', 'number': 2, 'blob_ref': blob.to_dict(), 'support': '外观', 'limitations': '局部'}]
+            {'kind': 'image', 'number': 2, 'object_ref': blob.to_dict(), 'support': '外观', 'limitations': '局部'}]
     src = source([{'task_id': 'q1', 'instruction': '原始题面', 'references_json': json.dumps(refs),
                    'criteria': 'PRIVATE_CRITERIA', 'test_points': 'PRIVATE_POINTS'}])
     received = []
     monkeypatch.setattr(GenerateImage, 'load_model', lambda self: setattr(self, 'model', object()))
     monkeypatch.setattr(GenerateImage, 'aclose', _no_close)
     def local(self, prompt, images=None):
-        received.append((prompt, images))
+        received.append((prompt['body']['prompt'], [Image.open(io.BytesIO(raw)).copy() for raw in images] if images else None))
         return picture()
     monkeypatch.setattr(GenerateImage, 'local', local)
-    cfg = config(answer_models=[{'backend': 'bagel', 'model': 'BAGEL-7B-MoT', 'model_path': '/fixture',
+    cfg = config(answer_models=[{'backend': 'diffusers', 'model': 'BAGEL-7B-MoT', 'model_path': '/fixture',
                                  'use_references': enabled} for enabled in [False, True]])
     result = run_pipeline(root / DATASETS / 'references', src, cfg)
     assert [r['answer_model'] for r in rows(result['target'])] == ['BAGEL-7B-MoT', 'BAGEL-7B-MoT+参考信息']
     assert received[0] == ('原始题面', None)
     prompt, images = received[1]
-    assert all(t in prompt for t in ['完整参考知识', '参考图 1', '局部', '原始题面'])
+    assert all(t in prompt for t in ['完整参考知识', '局部', '原始题面'])
     assert 'PRIVATE' not in prompt and len(images) == 1
     assert images[0].getpixel((0, 0)) == (255, 0, 0)
 
@@ -438,3 +399,145 @@ def test_reference_inputs_use_frozen_text_and_pixels_without_private_rubrics(mon
 async def _no_close(self):
     """模拟模型不使用 torch，不需要释放 GPU。"""
     pass
+
+
+@pytest.mark.parametrize('api', ['images', 'chat', 'openrouter_images'])
+def test_remote_positive_images_keep_prompt_pixels_and_order(monkeypatch, api):
+    cfg=config(answer_models=[{'backend':'modelhub','model':'fixture','api':api,'answer_mode':'positive_images'}])['answers'][0]
+    op=native_actor(cfg); refs=[]
+    for color in ('red','blue'):
+        b=io.BytesIO();Image.new('RGB',(8,4),color).save(b,format='PNG');refs.append(b.getvalue())
+    prompt,images=op.render({'instruction':'原始题面','images':refs})
+    request=op.request(prompt,images)
+    assert request['body'].get('prompt',prompt).startswith('原始题面\n\n参考图：所附图像')
+    assert images==refs
+    if api=='images': assert request['endpoint']=='/images/edits' and len(request['body']['image[]'])==2
+    elif api=='chat': assert len(request['body']['messages'][0]['content'])==3
+    else: assert len(request['body']['input_references'])==2
+    calls=[]
+    def reject(*args): calls.append(1);raise RuntimeError('fixture service rejected')
+    monkeypatch.setattr(GenerateImage,'remote',reject)
+    with pytest.raises(RuntimeError,match='service rejected'):op.generate({'instruction':'原始题面','images':refs})
+    from demiflow.operator_llm.journal import UncertainPromptCall
+    with pytest.raises(UncertainPromptCall):op.generate({'instruction':'原始题面','images':refs})
+    assert len(calls)==1
+    op.journal.close()
+
+
+
+def test_four_answer_arms_preserve_failures_references_and_judge_privacy(monkeypatch):
+    """两个模型×两种方式；缺图只影响有图路，六个成功答案复用图进入独立judge。"""
+    root = resolve_root()
+    objects = LocalObjectStore(root / 'objects')
+    image_ref = objects.put(picture()).to_dict()
+    refs = [{'kind': 'image', 'number': 1, 'object_ref': image_ref}]
+    src = source([
+        {'task_id': 'q1', 'concept': '概念', 'instruction': '原始题面一',
+         'authoring_variant': 'with_positive_images', 'authoring_images_json': json.dumps(refs),
+         'test_points': ['PRIVATE_POINTS'], 'references_json': 'PRIVATE_TEXT'},
+        {'task_id': 'q2', 'concept': '概念', 'instruction': '原始题面二',
+         'authoring_variant': 'with_positive_images', 'authoring_images_json': '[]',
+         'test_points': ['PRIVATE_POINTS'], 'references_json': 'PRIVATE_TEXT'},
+    ])
+    received = []
+    def local(self, prompt, images=None):
+        received.append((self.config['model'], prompt['body']['prompt'], [Image.open(io.BytesIO(raw)).getpixel((0, 0)) for raw in images or []]))
+        return picture()
+    def remote(self, prompt, images):
+        return local(self, prompt, images)
+    monkeypatch.setattr(GenerateImage, 'local', local)
+    monkeypatch.setattr(GenerateImage, 'remote', remote)
+    monkeypatch.setattr(GenerateImage, 'load_model', lambda self: setattr(self, 'model', object()))
+    monkeypatch.setattr(GenerateImage, 'aclose', _no_close)
+    cfg = config(answer_models=[
+        {**model, 'answer_mode': mode}
+        for model in [
+            {'backend': 'diffusers', 'model': 'Qwen-Image-2.1', 'model_path': '/fixture'},
+            {'backend': 'modelhub', 'model': 'malasci/gpt-image-2.5-flare'},
+        ] for mode in ['text_only', 'positive_images']],
+        judge_model={'model': 'malasci/gpt-6-astra-xhigh', 'mode': 'offline'})
+    run = root / DATASETS / 'four_arms'
+    answered = run_pipeline(run, src, cfg)
+    answers = rows(answered['target'])
+    assert len(answers) == 8 and answered['counts'] == {'generated': 6, 'generation_failed': 2}
+    assert not answered['complete'] and len(answered['counts_by_arm']) == 4
+    assert len(received) == 6
+    for name, prompt, pixels in received:
+        assert prompt.startswith(('原始题面一', '原始题面二'))
+        if pixels:
+            assert prompt.startswith('原始题面一\n\n参考图：所附图像') and len(pixels) == 1 and pixels[0][0] > 250
+    for row in answers:
+        if row['answer_mode'] == 'text_only':
+            assert row['status'] == 'generated' and row['reference_image_count'] == 0
+        elif row['task_id'] == 'q1':
+            assert row['reference_image_count'] == 1
+            assert json.loads(row['reference_images_json'])[0]['object_ref'] == image_ref
+        else:
+            assert row['status'] == 'generation_failed' and row['image_json'] is None
+    assert run_pipeline(run, src, cfg) == answered and len(received) == 6
+    pending = run_judging(root / DATASETS / 'four_arms_judge', answered['target'], cfg,
+                          target_uri=str(root / DATASETS / 'four_arms_scores.lance'))
+    judged = rows(pending['target'])
+    assert pending['counts'] == {'pending_judge': 6, 'generation_failed': 2}
+    assert {(r['task_id'], r['answer_model'], r['image_json'], r['reference_images_json']) for r in judged} == {
+        (r['task_id'], r['answer_model'], r['image_json'], r['reference_images_json']) for r in answers}
+    journal = SQLitePromptJournal(**journal_options(**pending['calls']))
+    for row in judged:
+        if row['status'] != 'pending_judge':
+            continue
+        call = json.loads(row['judge_call_json'])
+        assert call['model'] == 'malasci/gpt-6-astra-xhigh'
+        request = json.dumps(journal.read(call['request_ref']['request_id'], 'request'), ensure_ascii=False)
+        assert all(secret not in request for secret in [
+            'PRIVATE_', 'Qwen-Image-2.1', 'gpt-image-2.5-flare', 'positive_images', image_ref['uri']])
+
+
+@pytest.mark.parametrize('problem', ['empty', 'wrong_variant', 'text', 'too_many', 'bad_sha'])
+def test_bad_positive_references_fail_before_model_load(monkeypatch, problem):
+    root = resolve_root()
+    blobs = LocalObjectStore(root / 'objects')
+    ref = {'kind': 'image', 'object_ref': blobs.put(picture()).to_dict()}
+    refs, variant = [ref], 'with_positive_images'
+    if problem == 'empty':
+        refs = []
+    elif problem == 'wrong_variant':
+        variant = 'without_positive_images'
+    elif problem == 'text':
+        refs = [{'kind': 'text', 'text': 'PRIVATE_TEXT'}]
+    elif problem == 'too_many':
+        refs = [ref] * 6
+    else:
+        refs = [{**ref, 'object_ref': {**ref['object_ref'], 'sha256': '0' * 64}}]
+    monkeypatch.setattr(GenerateImage, 'load_model', lambda self: pytest.fail('Must reject before GPU load'))
+    monkeypatch.setattr(GenerateImage, 'local', lambda *args: pytest.fail('No fallback inference'))
+    cfg = config(answer_models=[{'backend': 'diffusers', 'model': 'fixture', 'model_path': '/fixture',
+                                 'answer_mode': 'positive_images'}])['answers'][0]
+    records = RunTables(root, 'records.lance')
+    row = {'task_id': 'q1', 'instruction': '原题', 'authoring_variant': variant,
+           'authoring_images_json': json.dumps(refs)}
+    result = PrepareAnswer(cfg, records)(row)
+    assert result['status'] == 'generation_failed' and result['reason'] and result['image_json'] is None
+    assert records.answer_request(answer_identity(cfg, row)) is None
+
+
+def test_answer_cache_tracks_semantic_changes_and_ignores_unused_references():
+    cfg = config(answer_models=[{'backend': 'diffusers', 'model': 'fixture', 'model_path': '/fixture',
+                                 'answer_mode': 'positive_images'}])['answers'][0]
+    row = {'task_id': 'q1', 'instruction': '原始题面', 'authoring_variant': 'with_positive_images',
+           'authoring_images_json': '["ref1", "ref2"]'}
+    identity = answer_identity(cfg, row)
+    assert identity != answer_identity(cfg, {**row, 'authoring_images_json': '["ref2", "ref1"]'})
+    assert identity != answer_identity(cfg, {**row, 'instruction': '修改后的题面'})
+    assert identity != answer_identity({**cfg, 'seed': 99}, row)
+    assert identity != answer_identity({**cfg, 'parameters': {'num_inference_steps': 2}}, row)
+    text_cfg = {**cfg, 'answer_mode': 'text_only', 'use_references': False}
+    assert identity != answer_identity(text_cfg, row)
+    assert answer_identity(text_cfg, row) == answer_identity(text_cfg, {**row, 'authoring_images_json': 'broken refs'})
+    assert identity == answer_identity(cfg, {**row, 'test_points': 'PRIVATE_CHANGED_POINTS'})
+
+
+def native_actor(cfg):
+    root=resolve_root()
+    return GenerateImage(template=answer_template(cfg),model=cfg,inputs=answer_bindings(cfg),
+        output='generated_image',call_output='call',error_output='error',
+        journal_path=root/'fixture.sqlite',object_store=root/'objects',max_requests=3)

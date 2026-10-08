@@ -1,0 +1,17 @@
+# 本轮独立LiteLLM路由；凭据从现有服务环境继承，不落入配置文件。
+model_list:
+  - model_name: malasci/gpt-6-astra-xhigh
+    litellm_params:
+      model: openai/gpt-6-astra-xhigh
+      api_base: os.environ/MALASCI_API_BASE
+      api_key: os.environ/MALASCI_API_KEY
+  - model_name: malasci/gpt-image-2.5-flare
+    litellm_params:
+      model: openai/gpt-image-2.5-flare
+      api_base: os.environ/MALASCI_API_BASE
+      api_key: os.environ/MALASCI_API_KEY
+litellm_settings:
+  drop_params: false
+  request_timeout: 1800
+router_settings:
+  num_retries: 0

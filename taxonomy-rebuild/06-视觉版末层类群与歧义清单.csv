@@ -1,0 +1,32 @@
+﻿概念ID,原组别,概念原文,视觉版路径,核查结论,名称等级,对应类群或含义,说明,参考依据
+1-008,1,天牛,动物 / 节肢动物 / 甲虫类,明确高阶类群,科,天牛科 Cerambycidae,不是单一物种。,https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=34667&mode=Info
+2-205,2,锹甲,动物 / 节肢动物 / 甲虫类,明确高阶类群,科,锹甲科 Lucanidae,不是单一物种。,https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=41105&mode=info
+3-081,3,叩甲,动物 / 节肢动物 / 甲虫类,明确高阶类群,科,叩甲科 Elateridae,不是单一物种。,https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=30009&mode=Info
+3-098,3,弄蝶,动物 / 节肢动物 / 蝶蛾及其幼虫,明确高阶类群,科,弄蝶科 Hesperiidae,不是单一物种。,https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=40093&mode=Info
+2-216,2,驼蛛,动物 / 节肢动物 / 蛛形动物,明确高阶类群,目,避日目 Solifugae,驼蛛是这类蛛形动物的通名。,https://ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=41356&mode=Info
+2-161,2,立方水母,动物 / 其他无脊椎动物 / 刺胞动物,明确高阶类群,纲,立方水母纲 Cubozoa,不是某一种水母。,https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=6137&mode=Info
+3-131,3,甲壳纲,动物 / 节肢动物 / 甲壳动物,明确高阶类群,高阶类群（原名为纲）,甲壳动物,“甲壳纲”是原标签；现代体系中的等级处理不一，不在此固定为纲。,
+2-135,2,海马,动物 / 鱼类 / 海水鱼类,属级名称,属,海马属 Hippocampus,按名称形式是属名，没有明确种名；不根据某属包含多少现行种来偷换名称等级。,https://www.gbif.org/species/8156547
+3-160,3,肉锥花,植物 / 多肉与肉质植物 / 叶多肉植物,属级名称,属,肉锥花属 Conophytum,按名称形式是属名，没有明确种名；不根据某属包含多少现行种来偷换名称等级。,https://www.gbif.org/species/7329128
+3-038,3,Rhamphorhynchus,动物 / 古生物及其遗存 / 翼龙及其遗存,属级名称,属,喙嘴翼龙属 Rhamphorhynchus,按名称形式是属名，没有明确种名；不根据某属包含多少现行种来偷换名称等级。,https://www.nhm.ac.uk/our-science/services/collections/palaeontology/pterosaurs.html
+3-112,3,板齿犀,动物 / 古生物及其遗存 / 史前哺乳动物,属级名称,属,板齿犀属 Elasmotherium,按名称形式是属名，没有明确种名；不根据某属包含多少现行种来偷换名称等级。,https://www.gbif.org/species/4830618
+3-190,3,钉状龙,动物 / 古生物及其遗存 / 恐龙及其遗存,属级名称,属,钉状龙属 Kentrosaurus,按名称形式是属名，没有明确种名；不根据某属包含多少现行种来偷换名称等级。,https://www.gbif.org/species/4823123
+3-201,3,风神翼龙,动物 / 古生物及其遗存 / 翼龙及其遗存,属级名称,属,风神翼龙属 Quetzalcoatlus,按名称形式是属名，没有明确种名；不根据某属包含多少现行种来偷换名称等级。,https://www.gbif.org/species/4818447
+3-155,3,翼手龙,动物 / 古生物及其遗存 / 翼龙及其遗存,属级名称,属,翼手龙属 Pterodactylus,通常对应此属，也可能被宽泛地使用；两种解释都不足以明确物种。,https://www.gbif.org/species/7236977
+3-128,3,爪兽,动物 / 古生物及其遗存 / 史前哺乳动物,属级名称,属,爪兽属 Chalicotherium,通常对应此属，也可能被宽泛地使用；两种解释都不足以明确物种。,https://www.gbif.org/species/4830306
+3-053,3,Triceratops Mount,动物 / 古生物及其遗存 / 恐龙及其遗存,类群＋标本或遗存,属＋标本,三角龙属 Triceratops,Mount／化石描述标本形式，未说明三角龙属中的物种。,https://www.nhm.ac.uk/discover/dino-directory/triceratops.html
+3-058,3,三角龙化石,动物 / 古生物及其遗存 / 恐龙及其遗存,类群＋标本或遗存,属＋标本,三角龙属 Triceratops,Mount／化石描述标本形式，未说明三角龙属中的物种。,https://www.nhm.ac.uk/discover/dino-directory/triceratops.html
+3-158,3,翼龙骨架,动物 / 古生物及其遗存 / 翼龙及其遗存,类群＋标本或遗存,翼龙类群＋骨架,翼龙类 Pterosauria,骨架是呈现形式，翼龙本身是较大类群。,https://www.nhm.ac.uk/discover/the-truth-about-pterosaurs.html
+2-014,2,Deep-sea Anglerfish,动物 / 鱼类 / 海水鱼类,宽泛通名，未明确到种,多物种类群,深海鮟鱇类,包含多个物种，不宜用该通名代替唯一学名。,https://sanctuaries.noaa.gov/news/2025/sanctuary-symbioses.html
+3-010,3,Diamondback Rattlesnake,动物 / 爬行动物 / 蛇类,宽泛通名，未明确到种,多物种通名,菱背响尾蛇类,未区分东部和西部等具体物种。,https://pubmed.ncbi.nlm.nih.gov/38891681/
+3-040,3,Rockhopper Penguin,动物 / 鸟类 / 企鹅类,宽泛通名，未明确到种,多物种通名,跳岩企鹅类,未区分北方、南方等具体物种。,https://www.bas.ac.uk/news/risks-to-penguin-populations-analysed/
+2-145,2,王莲,植物 / 草本与藤本植物 / 水生与湿地植物,名称有歧义，待确认,待确认,王莲属统称或特定种名,园艺资料常用作 Victoria 属统称；若原定义明确某一种，则可作为物种标签。,https://scbg.cas.cn/hx/201012/t20101227_6734283.html
+2-109,2,弹簧草,植物 / 多肉与肉质植物 / 茎与地下器官肉质植物,名称有歧义，待确认,待确认,园艺通名,弹簧草可能对应不同园艺植物，需原学名或原定义。,
+3-020,3,Indian Turnip,植物 / 草本与藤本植物 / 观花与观叶草本,名称有歧义，待确认,待确认,英文俗名,Indian Turnip 缺少原始学名，不直接判定为科目类群。,
+3-022,3,Lapwing,动物 / 鸟类 / 鸻鹬类,名称有歧义，待确认,待确认,可作种名的英文通名,RSPB 的 Lapwing 指 Vanellus vanellus；前版标为必然多物种过于绝对。,https://www.rspb.org.uk/birds-and-wildlife/lapwing
+3-034,3,Pike,动物 / 鱼类 / 淡水鱼类,名称有歧义，待确认,待确认,可作种名的英文通名,Pike 可作狗鱼类泛称，也常作具体物种简称，需明确原始含义。,
+3-043,3,Shelduck,动物 / 鸟类 / 鸭雁类,名称有歧义，待确认,待确认,可作种名的英文通名,RSPB 的 Shelduck 指 Tadorna tadorna，不应直接算作科目。,https://www.rspb.org.uk/birds-and-wildlife/shelduck/
+3-107,3,斐济鬣蜥,动物 / 爬行动物 / 蜥蜴类,名称有歧义，待确认,待确认,地区性名称,需确认是否特指某种斐济鬣蜥；不能直接判定为正式的科、目或属标签。,
+3-116,3,栉尾鬣蜥,动物 / 爬行动物 / 蜥蜴类,名称有歧义，待确认,待确认,属级通称或种名简称,可能泛指 Ctenosaura 类，也可能是具体物种名的简称。,
+3-135,3,白毒伞,真菌 / 大型真菌 / 伞状真菌,名称有歧义，待确认,待确认,中文俗名,白毒伞须和物种学名对应；不是可以直接认定的科目名称。,
+3-161,3,肉齿菌,真菌 / 大型真菌 / 齿状及珊瑚状真菌,名称有歧义，待确认,待确认,属名简称或种名简称,存在肉齿菌属的用法，也有文献用肉齿菌指具体种，需原定义。,https://www.nmns.edu.tw/collect/catalog/detail/?id=1742414

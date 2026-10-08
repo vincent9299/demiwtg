@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>T2I V2 · 完整题目浏览</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#203047;background:#f4f7fb;font-size:15px;color-scheme:light}*{box-sizing:border-box}body{margin:0}header,main{max-width:1400px;margin:auto;padding:20px 24px}header{padding-bottom:12px}h1{font-size:23px;margin:0 0 8px}h2{font-size:21px;margin:0 0 10px}h3{font-size:17px;margin:20px 0 10px}h4{margin:14px 0 6px}p{line-height:1.65;margin:8px 0}.muted{color:#586980;font-size:13px}.stats,.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{background:#e8eef7;border-radius:6px;padding:5px 9px;font-size:13px}.pass{background:#d9f1e8}.fail,.error{background:#fde7e6}.partial{background:#fff0d0}.inconclusive{background:#ece7fa}.toolbar{position:sticky;top:0;z-index:3;background:#f4f7fbf5;border-block:1px solid #dce3ed;padding:12px 24px;backdrop-filter:blur(10px)}.controls{max-width:1352px;margin:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}label{font-size:13px}input,select,button{font:inherit;border:1px solid #bac7d7;border-radius:6px;padding:7px;background:white;color:inherit}button{cursor:pointer}button:hover{background:#e8effa}button:disabled{opacity:.45;cursor:default}#search{width:230px}#jump{width:75px}#concept{max-width:330px}.card{background:white;border:1px solid #dce3ed;border-radius:10px;padding:22px;margin-bottom:18px}.columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,40%);gap:24px}.text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75}.instruction{padding:15px;background:#f2f6fd;border-left:3px solid #3e6cb1;border-radius:4px}.point{border-top:1px solid #e3e9f1;padding:12px 0}.answer{display:block;width:100%;max-width:640px;height:auto;border-radius:6px;cursor:zoom-in}.references{display:flex;gap:10px;flex-wrap:wrap}.references img{width:140px;height:140px;object-fit:contain;background:#f4f7fb;cursor:zoom-in}details{margin:12px 0}summary{cursor:pointer;color:#315988;padding:6px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.55;background:#f4f7fb;padding:12px;border-radius:6px}a{color:#245fa5}.empty{padding:35px;text-align:center}dialog{border:0;border-radius:10px;max-width:94vw;max-height:94vh;padding:18px}dialog::backdrop{background:#142135a8}dialog img{display:block;max-width:85vw;max-height:75vh;object-fit:contain;margin:10px auto}.footer{display:flex;justify-content:center;gap:16px;padding:15px}@media(max-width:850px){.columns{grid-template-columns:1fr}.toolbar,header,main{padding:12px}.card{padding:15px}#search{width:180px}}
+</style></head><body>
+<header><h1>T2I V2 · 完整题目浏览</h1><p id="summary" class="muted"></p><div id="stats" class="stats"></div>
+<details><summary>名单、原分类与固定来源</summary><div id="scope"></div><pre id="sources"></pre></details></header>
+<section class="toolbar"><div class="controls">
+<input id="search" type="search" placeholder="搜索概念、题面、考点" aria-label="搜索概念、题面、考点">
+<label>原分类 <select id="category"><option value="">全部</option><option value="1">① 常见但容易错</option><option value="2">② 显著视觉特征</option><option value="3">③ 需专业支持</option></select></label>
+<label>结果 <select id="status"><option value="">全部</option><option value="pass">pass</option><option value="partial">partial</option><option value="fail">fail</option><option value="inconclusive">inconclusive</option><option value="technical">技术失败</option><option value="insufficient">出题不足</option><option value="pending">等待中</option></select></label>
+<label>每页 <select id="size"><option>1</option><option>3</option><option>5</option><option>10</option></select> 题</label>
+<button id="prev">上一页</button><label>第 <input id="jump" type="number" min="1" value="1" aria-label="页码"> 页</label><button id="next">下一页</button>
+<span id="count" class="muted" aria-live="polite"></span>
+<select id="concept" aria-label="直接跳转概念"><option value="">直接跳转概念…</option></select><button id="reset">清空筛选</button>
+</div></section>
+<main><div id="cases"></div><div class="footer"><button id="bottom-prev">上一页</button><span id="bottom-count"></span><button id="bottom-next">下一页</button></div><p class="muted">所有题面、考点、判据和已保存评审全文展示。图片为查看缩略图，点击放大；原图地址保留在图片详情中。此页是固定结果快照，浏览操作不调用模型、不修改结果。</p></main>
+<dialog id="image-dialog"><button id="close-image">关闭</button><img id="large-image" alt="放大查看"><p id="image-note" class="muted"></p></dialog>
+<script id="case-data" type="application/json">__CASE_DATA__</script>
+<script>
+(()=>{'use strict';
+const D=JSON.parse(document.getElementById('case-data').textContent),$=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const text=v=>`<div class="text">${esc(v)}</div>`,json=v=>`<pre>${esc(JSON.stringify(v,null,2))}</pre>`;
+const labels={'1':'① 常见但容易错','2':'② 有显著的视觉特征','3':'③ 有视觉特征但需要专业支持才了解'};
+const badge=(s,c='')=>`<span class="badge ${esc(c)}">${esc(s)}</span>`;
+let page=0,filtered=D.cases;
+const codes=c=>c.variants.flatMap(b=>[b.status,b.review.review_status,b.review.review?.verdict]);
+const technical=b=>!['candidate','insufficient','pending'].includes(b.status)||(b.generation.status&&b.generation.status!=='generated')||(b.review.review_status&&b.review.review_status!=='reviewed');
+const media=(key,cls,alt)=>{const m=D.media[key];return !m?'':m.error?text('图片读取失败：'+m.error):`<img class="${cls}" loading="lazy" src="${m.src}" data-image="${esc(key)}" alt="${esc(alt)}">`;};
+function branch(b){const q=b.question,g=b.generation,j=b.review,r=j.review;
+let result=`<h3>${b.variant==='with_positive_images'?'提供正例图':'不提供正例图'}</h3><div class="badges">${badge('出题：'+b.status)}${g.status?badge('生图：'+g.status):''}${j.review_status?badge('评审：'+j.review_status,j.review_status==='reviewed'?'':'error'):''}</div>`;
+if(b.reason)result+=text(b.reason);
+if(q)result+=`<h3>完整题面</h3><div class="instruction text" data-field="instruction">${esc(q.instruction)}</div>`;
+result+='<div class="columns"><section>';
+if(q)result+='<h3>考点、依据与判据</h3>'+q.test_points.map((p,i)=>`<div class="point"><h4>${i+1}. ${esc(p.point)}</h4><p class="muted">依据</p>${text(p.basis)}<p class="muted">可观察判据</p>${text(p.criterion)}</div>`).join('');
+result+='</section><section><h3>Z-Image 作答</h3>';
+result+=b.image?media(b.image,'answer','Z-Image 作答图'):text(g.reason||'没有已提交作答图');
+if(g.task_id)result+=`<details><summary>图片详情与原图地址</summary>${json({task_id:g.task_id,model:g.model,seed:g.seed,width:g.width,height:g.height,object_ref:g.object_ref})}</details>`;
+result+='</section></div><h3>GPT-6 评审</h3>';
+if(j.review_reason)result+=`<p class="badge error">${esc(j.review_reason)}</p>`;
+if(r){result+=`<div class="badges">${badge(r.verdict,r.verdict)}${badge(r.score===-1?'不评分':r.score+' / 10')}${badge('错误类型：'+r.failure_type)}</div><h4>总体理由</h4>${text(r.reason)}<h4>判断依据</h4>${text(r.basis)}`;
+result+=(r.point_results||[]).map(p=>`<div class="point"><h4>考点 ${p.index} · ${badge(p.verdict,p.verdict)}</h4><p class="muted">像素证据</p>${text(p.evidence)}<p class="muted">判断理由</p>${text(p.reason)}</div>`).join('');
+result+=`<details><summary>本轮评审建议分类（独立于原分类）</summary>${json({category:j.case_category,...r.case_annotation})}</details>`;
+}else result+=text(j.review_status?'本题没有有效评审；失败不计作零分或有效 fail。':'本题尚无已提交评审。');
+if(b.raw_review)result+=`<details><summary>失败评审的原始返回全文</summary>${text(b.raw_review)}</details>`;
+result+=`<details><summary>调用记录、错误与固定版本</summary>${json({author_call:b.author_call,author_context:b.author_context,review_call:j.review_call_json,generation_source:j.generation_source,stage_sources:D.meta.stages[b.variant]})}</details>`;
+return result;}
+function card(c){return `<article class="card" data-concept="${esc(c.concept)}"><h2>${c.rank}. ${esc(c.concept)}</h2><div class="badges">${(c.category_codes.length?c.category_codes.map(code=>badge(labels[code])):[badge('原分类未关联')]).join('')}${badge('审核正例 '+c.positive_count+' 张')}</div><p class="muted">${esc(c.taxonomy)}</p><details><summary>原始概念说明与原分类依据</summary>${text(c.definition)}${json(c.categories)}</details>${c.variants.map(branch).join('')}<details><summary>作者正例图（${c.references.length} 张）</summary><div class="references">${c.references.map((key,i)=>media(key,'reference','作者正例 '+(i+1))).join('')}</div></details></article>`;}
+function render(){const size=Number($('size').value),total=Math.max(1,Math.ceil(filtered.length/size));page=Math.max(0,Math.min(page,total-1));$('jump').max=total;$('jump').value=page+1;window.scrollTo(0,0);
+const current=filtered.slice(page*size,(page+1)*size);$('cases').innerHTML=current.length?current.map(card).join(''):'<div class="card empty">没有匹配项；可清空筛选查看全部概念。</div>';
+const label=`${filtered.length} 个概念 · ${page+1} / ${total} 页`;$('count').textContent=label;$('bottom-count').textContent=label;
+for(const id of ['prev','bottom-prev'])$(id).disabled=page===0;
+for(const id of ['next','bottom-next'])$(id).disabled=page===total-1;
+$('concept').value=current.length===1?current[0].concept:'';}
+function filter(){const query=$('search').value.toLocaleLowerCase().trim(),cat=$('category').value,status=$('status').value;
+filtered=D.cases.filter(c=>(!query||(c.concept+' '+c.variants.map(b=>JSON.stringify(b.question||{})).join(' ')).toLocaleLowerCase().includes(query))&&(!cat||c.category_codes.includes(cat))&&(!status||(status==='technical'?c.variants.some(technical):codes(c).includes(status))));page=0;render();}
+function step(n,scroll){page+=n;render();if(scroll)document.querySelector('.toolbar').scrollIntoView({block:'start'});}
+for(const id of ['search','category','status'])$(id).addEventListener(id==='search'?'input':'change',filter);
+$('size').addEventListener('change',()=>{page=0;render();});$('jump').addEventListener('change',()=>{page=(Number($('jump').value)||1)-1;render();});
+for(const id of ['prev','bottom-prev'])$(id).onclick=()=>step(-1,id.startsWith('bottom'));
+for(const id of ['next','bottom-next'])$(id).onclick=()=>step(1,id.startsWith('bottom'));
+$('reset').onclick=()=>{$('search').value='';$('category').value='';$('status').value='';filter();};
+for(const c of D.cases){const o=document.createElement('option');o.value=c.concept;o.textContent=c.rank+'. '+c.concept;$('concept').appendChild(o);}
+$('concept').onchange=()=>{const name=$('concept').value;if(!name)return;$('search').value='';$('category').value='';$('status').value='';filtered=D.cases;$('size').value='1';page=D.cases.findIndex(c=>c.concept===name);render();};
+$('cases').onclick=e=>{const key=e.target.dataset.image;if(!key)return;const m=D.media[key];$('large-image').src=m.src;$('image-note').textContent='查看缩略图；原图：'+m.original_uri;$('image-dialog').showModal();};$('close-image').onclick=()=>$('image-dialog').close();
+$('summary').textContent=`${D.meta.run} · 快照 ${D.meta.refreshed_at} · 阶段 ${D.meta.phase} · 全部技术完成：${D.meta.complete?'是':'否'}`;
+const branches=D.cases.flatMap(c=>c.variants),valid=branches.filter(b=>b.review.review_status==='reviewed');
+$('stats').innerHTML=[badge(D.cases.length+' 个概念'),badge(branches.filter(b=>b.question).length+' 道题'),badge(branches.filter(b=>b.generation.status==='generated').length+' 张作答图'),badge(valid.length+' 个有效评审'),badge(branches.filter(technical).length+' 个技术失败','error'),...Object.entries(D.meta.valid_verdicts).map(([k,v])=>badge(k+' '+v,k))].join('');
+const common=D.cases.filter(c=>c.category_codes.includes('1'));
+$('scope').innerHTML=`<p>第一类已纳入 ${common.length} 个：${esc(common.map(c=>c.concept).join('、'))}</p>`;
+if(D.meta.category1_coverage){const c=D.meta.category1_coverage;$('scope').innerHTML+=`<p>原第一类 ${c.scope_count} 个；概念审核通过 ${c.ready_count} 个；至少一张审核正例 ${c.ready_at_least_one} 个。</p><details><summary>全部原第一类的审核与正例覆盖</summary>${json(c.records)}</details>`;}
+$('sources').textContent=JSON.stringify({cohort:D.meta.cohort,stages:D.meta.stages,original_category_sources:D.meta.category_sources},null,2);
+render();window.caseBrowserReady=true;
+})();
+</script></body></html>

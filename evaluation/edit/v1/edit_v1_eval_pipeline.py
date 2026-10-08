@@ -6,7 +6,7 @@ from demiflow.execution.artifacts import digest
 from demiflow.lance.refs import DatasetRef
 from demiflow.lance.registry import Catalog
 from demiflow.lance.storage import schema_hash
-from preparation.operaters.results import PIPELINE_STAGE_ROWS, to_stage_row, from_stage_row
+from preparation.articles.operators.results import PIPELINE_STAGE_ROWS, to_stage_row, from_stage_row
 from project import historical_input
 import argparse
 import json
@@ -14,9 +14,9 @@ from pathlib import Path
 from functools import partial
 from demiflow import data
 from demiflow.execution.artifacts import run_lock
-from evaluation.edit.v1.operaters.runfiles import graph_digest, EditEvaluationRunFiles, QID_RE
-from evaluation.edit.v1.operaters.answers import BuildEditJobs, GenerateEdit
-from evaluation.edit.v1.operaters.judging import (
+from evaluation.edit.v1.operators.runfiles import graph_digest, EditEvaluationRunFiles, QID_RE
+from evaluation.edit.v1.operators.answers import BuildEditJobs, GenerateEdit
+from evaluation.edit.v1.operators.judging import (
     prompt_config,
     prepare_judge,
     apply_judge,
@@ -62,7 +62,7 @@ def run_pipeline(
         files = EditEvaluationRunFiles(run, config, graph_digest(), questions, responses)
         # 目标与模式随运行冻结，完成的输出在续跑时不重复写入。
         target_uri = str((files.storage_root / target_uri).resolve()) if target_uri else None
-        files.records.put('output', {'uri': target_uri, 'write_mode': write_mode})
+        files.records.save_configuration('output', {'uri': target_uri, 'write_mode': write_mode})
         # prompt pack 沿用 V1 评分协议；异步调用和写表批次分别配置，保存响应便于重放。
         pack, options = prompt_config(run, config)
         # 每道冻结题目一行；题号与题面检查直接写入状态，错误题不进入模型调用。
@@ -98,7 +98,7 @@ def run_pipeline(
             / ('questions' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'questions' + "/" + version)
+        entry = files.records.stage('questions', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -120,7 +120,7 @@ def run_pipeline(
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'questions' + "/" + version, entry)
+            files.records.commit_stage('questions', entry, version, immutable=True)
         files.stages['questions'] = entry
         (files.reused if reused else files.new).append('questions')
         files.previous = {"stage": 'questions', "stage_version": version}
@@ -142,7 +142,7 @@ def run_pipeline(
             / ('answer_jobs' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'answer_jobs' + "/" + version)
+        entry = files.records.stage('answer_jobs', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -164,7 +164,7 @@ def run_pipeline(
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'answer_jobs' + "/" + version, entry)
+            files.records.commit_stage('answer_jobs', entry, version, immutable=True)
         files.stages['answer_jobs'] = entry
         (files.reused if reused else files.new).append('answer_jobs')
         files.previous = {"stage": 'answer_jobs', "stage_version": version}
@@ -184,7 +184,7 @@ def run_pipeline(
                 / ('generated' + '__' + Path(files.relative).name + '__' + version + '.lance')
             )
             uri = str(files.storage_root / relative)
-            entry = files.records.get("stage/" + 'generated' + "/" + version)
+            entry = files.records.stage('generated', version)
             reused = entry is not None
             if not reused:
                 if Path(uri).exists():
@@ -211,7 +211,7 @@ def run_pipeline(
                 )
                 Catalog(files.storage_root).register(ref)
                 entry = {"version": version, "dataset_ref": ref.to_dict()}
-                files.records.put("stage/" + 'generated' + "/" + version, entry)
+                files.records.commit_stage('generated', entry, version, immutable=True)
             files.stages['generated'] = entry
             (files.reused if reused else files.new).append('generated')
             files.previous = {"stage": 'generated', "stage_version": version}
@@ -231,7 +231,7 @@ def run_pipeline(
             / ('answers' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'answers' + "/" + version)
+        entry = files.records.stage('answers', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -253,7 +253,7 @@ def run_pipeline(
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'answers' + "/" + version, entry)
+            files.records.commit_stage('answers', entry, version, immutable=True)
         files.stages['answers'] = entry
         (files.reused if reused else files.new).append('answers')
         files.previous = {"stage": 'answers', "stage_version": version}
@@ -273,7 +273,7 @@ def run_pipeline(
             / ('judge_requests' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'judge_requests' + "/" + version)
+        entry = files.records.stage('judge_requests', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -297,7 +297,7 @@ def run_pipeline(
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'judge_requests' + "/" + version, entry)
+            files.records.commit_stage('judge_requests', entry, version, immutable=True)
         files.stages['judge_requests'] = entry
         (files.reused if reused else files.new).append('judge_requests')
         files.previous = {"stage": 'judge_requests', "stage_version": version}
@@ -319,7 +319,7 @@ def run_pipeline(
         if target_uri:
             relative = str(Path(target_uri).relative_to(files.storage_root))
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'scores' + "/" + version)
+        entry = files.records.stage('scores', version)
         reused = entry is not None
         if not reused:
             if not target_uri and Path(uri).exists():
@@ -356,7 +356,7 @@ def run_pipeline(
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'scores' + "/" + version, entry)
+            files.records.commit_stage('scores', entry, version, immutable=True)
         files.stages['scores'] = entry
         (files.reused if reused else files.new).append('scores')
         files.previous = {"stage": 'scores', "stage_version": version}
@@ -378,7 +378,7 @@ def run_pipeline(
             / ('summary' + '__' + Path(files.relative).name + '__' + version + '.lance')
         )
         uri = str(files.storage_root / relative)
-        entry = files.records.get("stage/" + 'summary' + "/" + version)
+        entry = files.records.stage('summary', version)
         reused = entry is not None
         if not reused:
             if Path(uri).exists():
@@ -400,7 +400,7 @@ def run_pipeline(
             )
             Catalog(files.storage_root).register(ref)
             entry = {"version": version, "dataset_ref": ref.to_dict()}
-            files.records.put("stage/" + 'summary' + "/" + version, entry)
+            files.records.commit_stage('summary', entry, version, immutable=True)
         files.stages['summary'] = entry
         (files.reused if reused else files.new).append('summary')
         files.previous = {"stage": 'summary', "stage_version": version}

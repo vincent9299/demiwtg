@@ -1,3 +1,4 @@
+from benchmark.t2i.v2.operators.run_tables import RunTables
 """Exercise real standard operators and Lance writes with offline responses."""
 import json
 from pathlib import Path
@@ -5,15 +6,17 @@ from pathlib import Path
 import lance
 import pyarrow as pa
 import pytest
-from demiflow.lance.records import LanceRecordStore
-from demiflow.lance.blobs import BlobRef
-from demiflow.operator_llm.lance_journal import submit_response
+from demiflow.operator_llm.call_ref import read_call, journal_options, PromptRecordRef
+from demiflow.operator_llm.sqlite_journal import SQLitePromptJournal
+from demiflow.objects import ObjectRef
+from benchmark.t2i.v2.tests.agent_fixture import submit_design_response as submit_response, single_turn_arguments
 from demiflow import data
 from demiflow.errors import LanceWriteError
-from preparation.tests.publication_fixtures import inputs, article_publication
-from preparation.operaters.article import ARTICLES, article_entity
+from preparation.articles.tests.publication_fixtures import inputs, article_publication
+from preparation.articles.operators.article import ARTICLES, article_entity
 from project import resolve_root
-from benchmark.t2i.v2.t2i_v2_benchmark_pipeline import config, run_pipeline, DATASETS
+from benchmark.t2i.v2.t2i_v2_benchmark_pipeline import run_pipeline, DATASETS
+from benchmark.t2i.v2.tests.agent_fixture import business_config as config
 
 
 def rows(ref):
@@ -22,8 +25,14 @@ def rows(ref):
 
 def candidate():
     return {'instruction': '绘制两个条件判断依次连接的流程图，显示每个判断的两条出边。',
-            'test_points': [{'point': '判断节点的形状', 'basis': '材料 1：菱形表示判断。'},
-                            {'point': '多个判断的连接', 'basis': '题面明确要求。'}]}
+            'test_points': [{'point': '判断节点的形状', 'basis': '材料 1：菱形表示判断。',
+                             'criterion': '两个条件判断均由菱形节点承担；装饰性菱形不能代替判断节点。'},
+                            {'point': '多个判断的连接', 'basis': '题面明确要求。',
+                             'criterion': '判断节点沿流程依次连接，各有两条可区分的出边；孤立节点或缺失分支不满足要求，布局可变化。'}]}
+
+
+
+
 
 
 
@@ -41,7 +50,7 @@ def write_articles(records):
     for row in entities:
         for image in row['illustrations']:
             evidence = json.loads(image['evidence_json'])
-            evidence['bytes']['blob_ref'] = fixture_blob(image['sha256'])
+            evidence['bytes']['object_ref'] = fixture_blob(image['sha256'])
             image['evidence_json'] = json.dumps(evidence)
     data.from_items(entities).write_lance(uri, mode='overwrite', schema=ARTICLES)
     return {'uri': uri, 'version': lance.dataset(uri).version}
@@ -49,7 +58,7 @@ def write_articles(records):
 
 def write_visuals(records):
     """直接构造现役图片表的概念审核字段，不依赖历史发布读取器。"""
-    from preparation.operaters.images import IMAGES
+    from preparation.images.catalog.operators.schema import IMAGES
     uri = str(resolve_root() / 'demiwtg/preparation/datasets/test_images.lance')
     lance.write_dataset(pa.Table.from_pylist(records, schema=IMAGES), uri, mode='overwrite')
     return {'uri': uri, 'version': lance.dataset(uri).version}
@@ -58,14 +67,13 @@ def write_visuals(records):
 def fixture_blob(sha256):
     """测试的 preparation 生产者交付完整引用，消费端无需默认原图路径。"""
     uri = 'demiwtg/collect/datasets/images.lance'
-    return BlobRef(uri, lance.dataset(str(resolve_root() / uri)).version, sha256).to_dict()
+    from collect.assets import AssetReader
+    return AssetReader(resolve_root() / uri, version=lance.dataset(str(resolve_root() / uri)).version).publish(sha256).to_dict()
 
 
 def visual_row(asset, *, concept='流程图', image_id='figure1', published=True, review_status='keep', source=None):
     """一张图的一条概念审核，可控制发布状态、来源及它所支持的内容。"""
-    return {'sha256': asset['sha256'], 'source_refs': [json.dumps({
-                'relative_uri': fixture_blob(asset['sha256'])['relative_uri'],
-                'lance_version': fixture_blob(asset['sha256'])['version']})], 'published_concepts': [concept] if published else [],
+    return {'sha256': asset['sha256'], 'image_uri': fixture_blob(asset['sha256'])['uri'], 'published_concepts': [concept] if published else [],
             'concept_assessments': [{'assessment_id': concept + image_id, 'concept': concept,
                 'image_id': image_id, 'published': published, 'review_status': review_status,
                 'visual_support': {'supports': '独立图片审核的支持范围', 'region': 'whole', 'limitations': 'fixture'},
@@ -96,26 +104,26 @@ def test_reasoning_is_journaled_and_debug_preview_reads_without_model(monkeypatc
     import httpx
     import pandas as pd
     from IPython.display import HTML
-    from demiflow.lance.records import RecordRef
+    from demiflow.operator_llm.call_ref import read_call
 
     reasoning = 'fixture reasoning <debug>：先检查概念。\n再构造单题。'
     cfg = config(run=resolve_root() / DATASETS / 'reasoning', concepts=['流程图'], mode='modelhub')
     posted = []
     body = {'model': cfg['model'], 'choices': [{'finish_reason': finish_reason, 'message': {
         'role': 'assistant', reasoning_field: reasoning,
-        'content': json.dumps({'result': {'question': candidate()}}, ensure_ascii=False),
+        'content': json.dumps({'api_calls': [], 'response': {'result': {'question': candidate()}}}, ensure_ascii=False),
     }}], 'usage': {'prompt_tokens': 12, 'completion_tokens': 20,
                   'completion_tokens_details': {'reasoning_tokens': 9}}}
 
-    async def get(client, url, **kwargs):
-        return httpx.Response(200, request=httpx.Request('GET', url), json={'data': [{'id': cfg['model']}]})
+    def handler(request):
+        if request.method == 'GET':
+            return httpx.Response(200, json={'data': [{'id': cfg['model']}]})
+        posted.append(json.loads(request.content))
+        return httpx.Response(200, json=body)
 
-    async def post(client, url, **kwargs):
-        posted.append(kwargs['json'])
-        return httpx.Response(200, request=httpx.Request('POST', url), json=body)
-
-    monkeypatch.setattr(httpx.AsyncClient, 'get', get)
-    monkeypatch.setattr(httpx.AsyncClient, 'post', post)
+    original_client = httpx.AsyncClient
+    monkeypatch.setattr(httpx, 'AsyncClient', lambda **kwargs:
+                        original_client(transport=httpx.MockTransport(handler), **kwargs))
     state = run_pipeline(cfg)
     design = rows(state['designs'])[0]
     assert design['status'] == status
@@ -127,20 +135,22 @@ def test_reasoning_is_journaled_and_debug_preview_reads_without_model(monkeypatc
     call = json.loads(design['call_json'])
     assert 'reasoning' not in call
     assert all('reasoning' not in attempt for attempt in call.get('attempts', []))
-    saved = RecordRef.from_dict(call['response_ref']).read(resolve_root())
+    saved = read_call(call['response_ref'], resolve_root())
     assert saved['body'] == body  # Includes reasoning even when output was truncated.
     assert saved['elapsed_s'] >= 0
 
-    notebook = json.loads((Path(__file__).parents[1] / 't2i_v2_benchmark_debug.ipynb').read_text())
-    source = ''.join(notebook['cells'][0]['source'])
-    preview = source[source.index('# 4. 只读本次 writer'):]
+    notebook = json.loads((Path(__file__).parents[1] / 'archive/notebook_before_ready200_20261003.ipynb').read_text())
+    preview = ''.join(notebook['cells'][1]['source']).replace(
+        "VIEW_PROJECT = Path('/yzp/zhaozy/yangzepeng/0905/demiwtg')", f'VIEW_PROJECT = Path({str(resolve_root() / "demiwtg")!r})'
+    ).replace("VIEW_RUN_ID = 'dual_keep_codex5_criteria_v3_20260928'", "VIEW_RUN_ID = 'reasoning'")
     assert 'run_pipeline' not in preview
     displays = []
+    monkeypatch.setattr('IPython.display.display', displays.append)
     exec(compile(preview, '<debug-preview>', 'exec'), {
-        'state': state, 'DATA_ROOT': resolve_root(), 'data': data, 'RecordRef': RecordRef,
+        'state': state, 'DATA_ROOT': resolve_root(), 'data': data, 'read_call': read_call,
         'json': json, 'html': html, 'pd': pd, 'HTML': HTML, 'display': displays.append,
     })
-    rendered = '\n'.join(item.data for item in displays)
+    rendered = '\n'.join(item.data for item in displays if isinstance(item, HTML))
     assert html.escape(reasoning) in rendered and finish_reason in rendered
     assert 'reasoning_tokens' in rendered
     assert len(posted) == 1
@@ -155,12 +165,14 @@ def test_offline_roundtrip_reuses_calls_without_freezing_run(inputs):
     assert pending['counts'] == {'pending': 1} and not pending['complete']
     assert rows(pending['candidates']) == []
     original = rows(pending['inputs'])[0]
-    refs = json.loads(original['references_json'])
-    assert [r['number'] for r in refs] == [1, 2]
-    blob = refs[1]['blob_ref']
-    assert BlobRef(**blob).read(resolve_root()) == Path(inputs[4][0]['path']).read_bytes()
+    refs = json.loads(original['evidence_json'])
+    images = json.loads(original['authoring_images_json'])
+    assert [r['number'] for r in refs] == [1] and [r['number'] for r in images] == [1]
+    assert 'references_json' not in original
+    blob = images[0]['object_ref']
+    assert ObjectRef(**blob).read() == Path(inputs[4][0]['path']).read_bytes()
     call = json.loads(rows(pending['designs'])[0]['call_json'])
-    request = LanceRecordStore(**pending['calls']).get(call['request_ref']['key'])
+    request = SQLitePromptJournal(**journal_options(**pending['calls'])).read(call['request_ref']['request_id'], 'request')
     assert '流程图以菱形表示判断' in json.dumps(request, ensure_ascii=False)
     assert 'image_number' in json.dumps(request)
     assert '围绕概念的核心内容选择考点' in json.dumps(request, ensure_ascii=False)
@@ -172,16 +184,19 @@ def test_offline_roundtrip_reuses_calls_without_freezing_run(inputs):
     question = rows(completed['candidates'])[0]
     assert question['status'] == 'unreviewed' and question['task_id'].startswith('t2i_')
     assert question['reasoning'] is None
-    assert question['references_json'] == original['references_json']
+    assert question['evidence_json'] == original['evidence_json']
+    assert question['authoring_images_json'] == original['authoring_images_json']
+    assert 'references_json' not in question
     assert question['test_points'] == answer['test_points']
     assert rows(completed['designs'])[0]['question'] == answer
     assert 'candidates' not in rows(completed['designs'])[0]
     assert 'criteria' not in question
     rerun = run_pipeline({**cfg, 'max_calls': 3})
     assert rerun['complete'] and rows(rerun['candidates']) == rows(completed['candidates'])
-    assert len(LanceRecordStore(**rerun['calls']).keys(prefix='request/')) == 1
-    records = LanceRecordStore(resolve_root(), str(DATASETS / 'records__offline.lance'))
-    assert records.get('manifest') is None and records.get('inputs') is None
+    assert len(SQLitePromptJournal(**journal_options(**rerun['calls'])).request_ids()) == 1
+    records = RunTables(resolve_root(), str(DATASETS / 'records__offline.lance'))
+    assert records.load_manifest() is None
+    assert records.load()['inputs'] == rerun['inputs']
 
 
 
@@ -200,13 +215,22 @@ def test_offline_roundtrip_reuses_calls_without_freezing_run(inputs):
     ({'question': candidate(), 'reason': '又声称不能出题'}, 'invalid_response'),
     ({'candidates': [candidate()]}, 'failed'),
     ({'candidates': [candidate(), candidate()]}, 'failed'),
-    ({'question': dict(candidate(), test_points=[{'point': '主体可辨认', 'basis': '  '}])}, 'invalid_response'),
+    ({'question': dict(candidate(), test_points=[dict(candidate()['test_points'][0], basis='  ')])}, 'invalid_response'),
+    ({'question': dict(candidate(), test_points=[{'point': '判断结构', 'basis': '菱形表示判断。'}])}, 'invalid_response'),
+    *[({'question': dict(candidate(), test_points=[dict(candidate()['test_points'][0], criterion=value)])},
+      'invalid_response') for value in ('', '  \n ', None, [], {'correct': '菱形'})],
 ])
 def test_empty_and_malformed_outputs_are_not_questions(inputs, result, expected):
     run, sources, cfg, pending = start(inputs)
     respond(pending, result)
     state = run_pipeline(cfg)
-    assert state['counts'] == {expected: 1}
+    if expected == 'invalid_response':
+        # Schema-invalid finals exhaust the single-turn agent budget; business
+        # whitespace/semantic errors are rejected by the downstream row check.
+        assert set(state['counts']) <= {'invalid_response', 'failed'}
+        assert sum(state['counts'].values()) == 1
+    else:
+        assert state['counts'] == {expected: 1}
     assert state['complete'] == (expected == 'insufficient')
     assert state['candidate_count'] == 0 and rows(state['candidates']) == []
     assert rows(state['designs'])[0]['reason']
@@ -215,13 +239,13 @@ def test_empty_and_malformed_outputs_are_not_questions(inputs, result, expected)
 def test_context_budget_skips_but_missing_materials_still_call_author(inputs):
     run, sources, cfg, state = start(inputs, max_context_chars=100)
     assert state['counts'] == {'needs_context_budget': 1}
-    assert not LanceRecordStore(**state['calls']).keys()
+    assert not SQLitePromptJournal(**journal_options(**state['calls'])).request_ids()
     missing = run_pipeline(config(run=run.with_name('missing'), concepts=['不存在']))
     assert missing['counts'] == {'pending': 1}
-    assert rows(missing['inputs'])[0]['references_json'] == '[]'
-    calls = LanceRecordStore(**missing['calls'])
-    request = calls.get(next(iter(calls.keys(prefix='request/'))))
-    assert '本概念没有提供参考材料' in json.dumps(request, ensure_ascii=False)
+    assert rows(missing['inputs'])[0]['evidence_json'] == '[]'
+    calls = SQLitePromptJournal(**journal_options(**missing['calls']))
+    request = calls.read(next(iter(calls.request_ids())), 'request')
+    assert '本概念没有提供作答参考材料' in json.dumps(request, ensure_ascii=False)
 
 
 def test_writer_failure_does_not_commit_completion(inputs, monkeypatch):
@@ -236,27 +260,30 @@ def test_writer_failure_does_not_commit_completion(inputs, monkeypatch):
         patch.setattr(lance, 'write_dataset', fail_candidates)
         with pytest.raises(LanceWriteError, match='injected'):
             run_pipeline(cfg)
-    saved = LanceRecordStore(resolve_root(), str(DATASETS / 'records__offline.lance')).get('state')
+    saved = RunTables(resolve_root(), str(DATASETS / 'records__offline.lance')).load()
     assert not saved['complete']
     complete = run_pipeline(cfg)
     assert complete['complete'] and complete['candidate_count'] == 1
-    assert len(LanceRecordStore(**complete['calls']).keys(prefix='request/')) == 1
+    assert len(SQLitePromptJournal(**journal_options(**complete['calls'])).request_ids()) == 1
 
 
 def test_notebook_calls_formal_entry():
     import ast
     book = json.loads((Path(__file__).parents[1] / 't2i_v2_benchmark_debug.ipynb').read_text())
-    assert len(book['cells']) == 1
+    assert len(book['cells']) == 2
     cell = book['cells'][0]
     source = ''.join(cell['source'])
     compile(source, 't2i_v2_benchmark_debug.ipynb', 'exec', flags=ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)
-    assert 'asyncio.to_thread(run_pipeline' in source
-    assert "read_lance(TABLE_URI, version=VERSION)" in source
+    assert 'asyncio.to_thread(pipeline.run_pipeline' in source
+    preview = ''.join(book['cells'][1]['source'])
+    assert "read_lance(**branch['designs']" in preview
+    assert "read_lance(**state['inputs']" in preview
+    assert 'run_pipeline' not in preview
 
 
 def test_notebook_refreshes_cached_readers_config_and_runs_offline(monkeypatch):
     from benchmark.t2i.v2 import t2i_v2_benchmark_pipeline as pipeline
-    from benchmark.t2i.v2.operaters import authoring, images
+    from benchmark.t2i.v2.operators import authoring, images
     from demiflow.operator_llm import client
     from demiflow.data import api as data_api
 
@@ -269,7 +296,7 @@ def test_notebook_refreshes_cached_readers_config_and_runs_offline(monkeypatch):
     monkeypatch.setattr(pipeline, 'config', old_config)
     monkeypatch.setattr(pipeline, 'run_pipeline', stale)
     monkeypatch.setattr(authoring, 'check_response', stale)
-    monkeypatch.setattr(images, 'image_blob_ref', stale)
+    monkeypatch.setattr(images, 'image_object_ref', stale)
     monkeypatch.setattr(client.AsyncOperatorLLMClient, 'decode', stale)
     # 模拟统一 data 入口发布前已启动的内核，连 reader 依赖也仍是旧版本。
     monkeypatch.delattr(data, 'read_lance')
@@ -278,15 +305,28 @@ def test_notebook_refreshes_cached_readers_config_and_runs_offline(monkeypatch):
     monkeypatch.delattr(data_api, '_current_executor')
     book = json.loads((Path(__file__).parents[1] / 't2i_v2_benchmark_debug.ipynb').read_text())
     source = ''.join(book['cells'][0]['source'])
+    # 实验配置在 run 目录；隔离测试使用临时配置，不依赖或执行真实来源。
+    import re
+    run_id = re.search(r"^RUN_ID = '([^']+)'", source, re.MULTILINE).group(1)
+    fixture_config = resolve_root() / 'demiwtg/benchmark/t2i/v2/runs' / run_id / 'config.json'
+    fixture_agent = resolve_root() / 'demiwtg/benchmark/t2i/v2/prompts/agent_codex.yaml'
+    fixture_agent.parent.mkdir(parents=True, exist_ok=True)
+    fixture_agent.write_text((Path(__file__).parents[1] / 'prompts/agent_codex.yaml').read_text())
+    fixture_config.parent.mkdir(parents=True, exist_ok=True)
+    fixture_config.write_text(json.dumps({
+        'run': str(resolve_root() / DATASETS / 'notebook_reload'),
+        'cohort_source': {'uri': 'cohort.lance', 'version': 1},
+    }))
     # 执行真实 notebook 的刷新和配置段，截止模型调用前；不接触正式数据。
-    setup = source[source.index('from importlib import reload'):source.index('# 3. 运行正式 pipeline')]
-    namespace = {'DATA_ROOT': resolve_root()}
+    setup = source[:source.index('if RUN_PIPELINE:')].replace(
+        "PROJECT = Path('/yzp/zhaozy/yangzepeng/0905/demiwtg')", f'PROJECT = Path({str(resolve_root() / "demiwtg")!r})')
+    namespace = {}
     exec(compile(setup, '<notebook-setup>', 'exec'), namespace)
     assert namespace['CONFIG']['run'] == str(namespace['RUN_DIR'])
-    assert namespace['config'] is pipeline.config and pipeline.config is not old_config
-    assert namespace['run_pipeline'] is pipeline.run_pipeline and pipeline.run_pipeline is not stale
+    assert namespace['pipeline'].config is pipeline.config and pipeline.config is not old_config
+    assert namespace['pipeline'].run_pipeline is pipeline.run_pipeline and pipeline.run_pipeline is not stale
     assert pipeline.check_response is authoring.check_response and authoring.check_response is not stale
-    assert pipeline.image_blob_ref is images.image_blob_ref and images.image_blob_ref is not stale
+    assert pipeline.image_object_ref is images.image_object_ref and images.image_object_ref is not stale
     assert client.AsyncOperatorLLMClient.decode is not stale
     assert 'reasoning' in pipeline.DESIGNS.names and 'reasoning' in pipeline.QUESTIONS.names
     assert callable(namespace['data'].read_lance)
@@ -298,11 +338,12 @@ def test_notebook_refreshes_cached_readers_config_and_runs_offline(monkeypatch):
         'article_id': 'fixture', 'concept': '示例', 'review_status': 'reviewed',
         'content': [{'title': '正文', 'content': {'paragraphs': ['独立正文。']}}],
     }], schema=ARTICLES), uri)
-    cfg = namespace['config'](run=resolve_root() / DATASETS / 'notebook_reload',
-        concepts=['示例', '无参考'], article_source={'uri': uri, 'version': 1}, mode='offline')
-    state = namespace['run_pipeline'](cfg)
+    cfg = namespace['pipeline'].config(run=resolve_root() / DATASETS / 'notebook_reload',
+        concepts=['示例', '无参考'], article_source={'uri': uri, 'version': 1},
+        **single_turn_arguments(resolve_root(), mode='offline'))
+    state = namespace['pipeline'].run_pipeline(cfg)
     assert state['counts'] == {'pending': 2}
-    inputs = {row['concept']: json.loads(row['references_json']) for row in rows(state['inputs'])}
+    inputs = {row['concept']: json.loads(row['evidence_json']) for row in rows(state['inputs'])}
     assert inputs['示例'][0]['text'] == '独立正文。'
     assert inputs['无参考'] == []
     assert len(rows(state['designs'])) == 2 and rows(state['candidates']) == []
@@ -358,14 +399,14 @@ def test_each_concept_has_its_own_request_and_missing_concepts_remain(inputs):
     pending = run_pipeline(cfg)
     assert {row['concept'] for row in rows(pending['inputs'])} == set(cfg['concepts'])
     assert pending['counts'] == {'pending': 3}
-    calls = LanceRecordStore(**pending['calls'])
-    assert len(calls.keys(prefix='request/')) == 3
+    calls = SQLitePromptJournal(**journal_options(**pending['calls']))
+    assert len(calls.request_ids()) == 3
 
     for row in rows(pending['designs']):
         if row['status'] != 'pending':
             continue
         call = json.loads(row['call_json'])
-        request = json.dumps(calls.get(call['request_ref']['key']), ensure_ascii=False)
+        request = json.dumps(calls.read(call['request_ref']['request_id'], 'request'), ensure_ascii=False)
         included, excluded = ('SECOND_CONCEPT_ONLY', 'FIRST_CONCEPT_ONLY') if row['concept'] == second['concept'] else ('FIRST_CONCEPT_ONLY', 'SECOND_CONCEPT_ONLY')
         if row['concept'] == '缺失的测试概念':
             assert included not in request and excluded not in request
@@ -378,7 +419,7 @@ def test_each_concept_has_its_own_request_and_missing_concepts_remain(inputs):
     completed = run_pipeline(cfg)
     assert completed['candidate_count'] == 3
     assert completed['counts'] == {'candidate': 3}
-    assert len(calls.keys(prefix='request/')) == 3
+    assert len(calls.request_ids()) == 3
 
 def test_text_and_images_are_independent_and_image_count_is_bounded(inputs):
     articles = write_articles(article_rows(inputs))
@@ -386,10 +427,11 @@ def test_text_and_images_are_independent_and_image_count_is_bounded(inputs):
                              visual_row(inputs[4][0], image_id='figure1')])
     state = run_pipeline(config(run=resolve_root() / DATASETS / 'independent', article_source=articles,
         visual_source=visuals, concepts=['流程图'], max_reference_images=1))
-    refs = json.loads(rows(state['inputs'])[0]['references_json'])
-    assert len(refs) == 2 and [r['kind'] for r in refs] == ['text', 'image']
-    assert refs[1]['blob_ref']['sha256'] == inputs[4][1]['sha256']
-    assert 'sources' not in refs[0] and 'support' not in refs[1]
+    refs = json.loads(rows(state['inputs'])[0]['evidence_json'])
+    images = json.loads(rows(state['inputs'])[0]['authoring_images_json'])
+    assert len(refs) == len(images) == 1 and refs[0]['kind'] == 'text'
+    assert images[0]['object_ref']['sha256'] == inputs[4][1]['sha256']
+    assert 'sources' not in refs[0] and 'support' not in images[0]
 
 
 def test_visual_consumer_filters_only_public_status_and_never_parses_audit(inputs):
@@ -398,8 +440,8 @@ def test_visual_consumer_filters_only_public_status_and_never_parses_audit(input
     visuals = write_visuals([keep, visual_row(inputs[4][1], published=False),
         visual_row(inputs[4][1], review_status='reject'), visual_row(inputs[4][2], concept='其他概念')])
     state = run_pipeline(config(run=resolve_root() / DATASETS / 'visual_only', concepts=['流程图'], visual_source=visuals))
-    refs = json.loads(rows(state['inputs'])[0]['references_json'])
-    assert len(refs) == 1 and refs[0]['blob_ref']['sha256'] == inputs[4][0]['sha256']
+    refs = json.loads(rows(state['inputs'])[0]['authoring_images_json'])
+    assert len(refs) == 1 and refs[0]['object_ref']['sha256'] == inputs[4][0]['sha256']
 
 
 def test_article_and_visual_sources_read_their_configured_versions(inputs):
@@ -412,12 +454,13 @@ def test_article_and_visual_sources_read_their_configured_versions(inputs):
     write_visuals([visual_row(inputs[4][1], image_id='new_image')])
 
     state = run_pipeline(config(run=resolve_root() / DATASETS / 'fixed_sources', article_source=article_source, concepts=['流程图'], visual_source=visual_source))
-    refs = json.loads(rows(state['inputs'])[0]['references_json'])
-    assert len(refs) == 2
+    refs = json.loads(rows(state['inputs'])[0]['evidence_json'])
+    images = json.loads(rows(state['inputs'])[0]['authoring_images_json'])
+    assert len(refs) == len(images) == 1
     assert '流程图以菱形表示判断' in refs[0]['text']
     assert 'NEW_ARTICLE_MUST_NOT_APPEAR' not in refs[0]['text']
-    assert refs[1]['blob_ref']['sha256'] == inputs[4][0]['sha256']
-    assert set(refs[1]) == {'number', 'kind', 'blob_ref'}
+    assert images[0]['object_ref']['sha256'] == inputs[4][0]['sha256']
+    assert set(images[0]) == {'number', 'kind', 'object_ref'}
 
 
 def test_article_consumer_needs_only_public_content_and_status(inputs):
@@ -426,7 +469,7 @@ def test_article_consumer_needs_only_public_content_and_status(inputs):
         'content': [{'title': '正文', 'content': {'paragraphs': ['可独立使用的正文']}}]}]).write_lance(uri)
     state = run_pipeline(config(run=resolve_root() / DATASETS / 'minimal', concepts=['流程图'],
         article_source={'uri': uri, 'version': lance.dataset(uri).version}))
-    refs = json.loads(rows(state['inputs'])[0]['references_json'])
+    refs = json.loads(rows(state['inputs'])[0]['evidence_json'])
     assert refs == [{'number': 1, 'kind': 'text', 'title': '正文', 'text': '可独立使用的正文'}]
 
 
@@ -437,7 +480,7 @@ def test_multiple_articles_are_kept_without_deduplication_or_conflict_checks(inp
     second['knowledge'][0]['content']['paragraphs'][0] = '另一篇文章正文'
     source = write_articles([first, first, second])
     state = run_pipeline(config(run=resolve_root() / DATASETS / 'many_articles', article_source=source, concepts=['流程图']))
-    refs = json.loads(rows(state['inputs'])[0]['references_json'])
+    refs = json.loads(rows(state['inputs'])[0]['evidence_json'])
     assert len(refs) == 3 and refs[0]['text'] == refs[1]['text']
     assert refs[2]['text'] == '另一篇文章正文'
 
@@ -447,7 +490,8 @@ def test_article_illustrations_never_enter_image_budget_or_requests(inputs):
     state = run_pipeline(config(run=resolve_root() / DATASETS / 'text_only', article_source=source,
         concepts=['流程图'], max_reference_images=1))
     assert state['counts'] == {'pending': 1}
-    assert all(r['kind'] == 'text' for r in json.loads(rows(state['inputs'])[0]['references_json']))
+    assert all(r['kind'] == 'text' for r in json.loads(rows(state['inputs'])[0]['evidence_json']))
+    assert rows(state['inputs'])[0]['authoring_images_json'] == '[]'
 
 
 def test_image_decode_failure_raises_before_request(inputs):
@@ -460,8 +504,8 @@ def test_image_decode_failure_raises_before_request(inputs):
     source = write_visuals([visual_row({'sha256': sha})])
     with pytest.raises((LanceWriteError, OSError), match='cannot identify image'):
         run_pipeline(config(run=resolve_root() / DATASETS / 'decode_error', concepts=['流程图'], visual_source=source))
-    calls = LanceRecordStore(resolve_root(), str(DATASETS / 'calls__decode_error.lance'))
-    assert not calls.keys()
+    calls = SQLitePromptJournal(**journal_options(resolve_root(), str(DATASETS / 'calls__decode_error.lance')))
+    assert not calls.request_ids()
 
 
 def test_question_count_is_not_configurable():
@@ -481,34 +525,34 @@ def test_current_source_and_config_replace_previous_run_inputs(inputs):
     changed_source = write_articles([article])
     changed = run_pipeline({**cfg, 'article_source': changed_source})
     assert changed['counts'] == {'pending': 1}
-    assert 'UPDATED_MATERIAL' in rows(changed['inputs'])[0]['references_json']
-    assert len(LanceRecordStore(**changed['calls']).keys(prefix='request/')) == 2
+    assert 'UPDATED_MATERIAL' in rows(changed['inputs'])[0]['evidence_json']
+    assert len(SQLitePromptJournal(**journal_options(**changed['calls'])).request_ids()) == 2
     missing = run_pipeline(config(run=run, article_source=changed_source, concepts=['另一个概念']))
     assert missing['counts'] == {'pending': 1}
     assert rows(missing['inputs'])[0]['concept'] == '另一个概念'
 
 
 def test_preparation_reference_resolves_nondefault_blob_table_and_version(inputs):
-    from demiflow.lance.blobs import LanceBlobStore
-    store = LanceBlobStore(resolve_root(), 'custom/assets.lance')
+    from demiflow.objects import LocalObjectStore
+    store = LocalObjectStore(resolve_root() / 'objects')
     blob = store.put(Path(inputs[4][0]['path']).read_bytes())
     store.put(Path(inputs[4][1]['path']).read_bytes())
     visual = visual_row(inputs[4][0])
-    visual['source_refs'] = [json.dumps({'relative_uri': blob.relative_uri, 'lance_version': blob.version})]
+    visual['image_uri'] = blob.uri
     source = write_visuals([visual])
     import shutil
     shutil.rmtree(resolve_root() / 'demiwtg/collect/datasets/images.lance')
     state = run_pipeline(config(run=resolve_root() / DATASETS / 'custom_source', concepts=['流程图'], visual_source=source))
-    ref = json.loads(rows(state['inputs'])[0]['references_json'])[0]['blob_ref']
+    ref = json.loads(rows(state['inputs'])[0]['authoring_images_json'])[0]['object_ref']
     assert ref == blob.to_dict()
-    assert BlobRef(**ref).read(resolve_root()) == Path(inputs[4][0]['path']).read_bytes()
+    assert ObjectRef(**ref).read() == Path(inputs[4][0]['path']).read_bytes()
 
 
 def test_missing_preparation_reference_does_not_fall_back_to_raw(inputs):
     """缺少交付引用必须暴露问题，不偷偷读取默认 collect 表。"""
     visual = visual_row(inputs[4][0])
-    visual['source_refs'] = []
-    with pytest.raises((ValueError, LanceWriteError), match='lacks blob_ref/source_refs'):
+    visual['image_uri'] = None
+    with pytest.raises((ValueError, LanceWriteError), match='lacks image_uri'):
         run_pipeline(config(run=resolve_root() / DATASETS / 'missing_ref', article_source=None, concepts=['流程图'], visual_source=write_visuals([visual])))
 
 
@@ -530,7 +574,7 @@ def test_config_controls_actual_overlapping_concept_requests(inputs, monkeypatch
     barrier = None
     original = AsyncOperatorLLMRuntime.call_with_trace
 
-    async def synchronized_call(self, prompt, values):
+    async def synchronized_call(self, prompt, values, **kwargs):
         nonlocal active, peak, barrier
         if barrier is None:
             barrier = asyncio.Event()
@@ -541,7 +585,7 @@ def test_config_controls_actual_overlapping_concept_requests(inputs, monkeypatch
             barrier.set()
         try:
             await asyncio.wait_for(barrier.wait(), timeout=2)
-            return await original(self, prompt, values)
+            return await original(self, prompt, values, **kwargs)
         finally:
             active -= 1
 
@@ -553,16 +597,16 @@ def test_config_controls_actual_overlapping_concept_requests(inputs, monkeypatch
     assert peak == concurrency
     assert sorted(entered) == ['概念丙', '概念乙', '概念甲']
     assert state['counts'] == {'pending': 3}
-    assert len(LanceRecordStore(**state['calls']).keys(prefix='request/')) == 3
+    assert len(SQLitePromptJournal(**journal_options(**state['calls'])).request_ids()) == 3
 
 
 def test_selected_pixels_are_read_once_and_budget_failure_reads_none(inputs, monkeypatch):
     reads = []
-    original = BlobRef.read
-    def counted(self, root):
+    original = ObjectRef.read
+    def counted(self):
         reads.append(self.sha256)
-        return original(self, root)
-    monkeypatch.setattr(BlobRef, 'read', counted)
+        return original(self)
+    monkeypatch.setattr(ObjectRef, 'read', counted)
     source = write_visuals([visual_row(inputs[4][0])])
     cfg = config(run=resolve_root() / DATASETS / 'once', visual_source=source, concepts=['流程图'])
     assert run_pipeline(cfg)['counts'] == {'pending': 1}
@@ -570,3 +614,62 @@ def test_selected_pixels_are_read_once_and_budget_failure_reads_none(inputs, mon
     reads.clear()
     state = run_pipeline({**cfg, 'run': str(resolve_root() / DATASETS / 'budget'), 'max_context_chars': 10})
     assert state['counts'] == {'needs_context_budget': 1} and reads == []
+
+
+def test_screening_source_fixed_selection_and_prompt_boundary():
+    """只接固定通过版本；去重后精确选 N 个，原始理由不进入出题请求。"""
+    source_uri = str(resolve_root() / 'fixtures/screening.lance')
+    approved = [{'concept': f'保留{i}', 'taxonomy': ['完整路径 / 一级 / 叶子', '第二路径 / 另一个挂载'],
+                 'status': 'screened', 'decision': 'keep', 'reason': '不得进入出题的粗筛理由'}
+                for i in range(8)]
+    excluded = [{'concept': '暂缓', 'taxonomy': [], 'status': 'screened', 'decision': 'hold', 'reason': ''},
+                {'concept': '失败', 'taxonomy': [], 'status': 'failed', 'decision': None, 'reason': ''}]
+    lance.write_dataset(pa.Table.from_pylist([*approved, approved[0], *excluded]), source_uri)
+    cfg = config(run=resolve_root() / DATASETS / 'from_screening',
+                 screening_source={'uri': source_uri, 'version': 1}, sample_size=5, sample_seed=20260928)
+    state = run_pipeline(cfg)
+    chosen = [row['concept'] for row in rows(state['inputs'])]
+    assert len(chosen) == len(set(chosen)) == 5
+    assert set(chosen) <= {row['concept'] for row in approved}
+    assert state['selection']['eligible_count'] == 8
+    assert set(state['selection']['concepts']) == set(chosen)
+    assert state['counts'] == {'pending': 5} and cfg['max_calls'] == 5
+    journal = SQLitePromptJournal(**journal_options(**state['calls'])).records('request')
+    assert len(journal) == 5
+    assert '不得进入出题的粗筛理由' not in json.dumps(journal, ensure_ascii=False)
+    assert '完整路径 / 一级 / 叶子' in json.dumps(journal, ensure_ascii=False)
+    assert '第二路径 / 另一个挂载' in json.dumps(journal, ensure_ascii=False)
+    assert all(row['taxonomy'] == approved[0]['taxonomy'] for row in rows(state['inputs']))
+    assert all(row['taxonomy'] == approved[0]['taxonomy'] for row in rows(state['designs']))
+    assert all(row['evidence_json'] == '[]' for row in rows(state['inputs']))
+    # 上游产生新版本不能改变已固定的本轮输入；不覆盖或改写上游版本。
+    lance.write_dataset(pa.Table.from_pylist([dict(approved[0], concept='新版概念')]), source_uri, mode='overwrite')
+    resumed = run_pipeline(cfg)
+    assert {row['concept'] for row in rows(resumed['inputs'])} == set(chosen)
+    assert resumed['selection']['concepts'] == state['selection']['concepts']
+    assert lance.dataset(source_uri).version == 2
+    # 换物理行顺序仍选中同一组，不依赖 Lance 扫描顺序。
+    reversed_uri = str(resolve_root() / 'fixtures/screening_reversed.lance')
+    lance.write_dataset(pa.Table.from_pylist(list(reversed([*approved, *excluded]))), reversed_uri)
+    reordered = run_pipeline(config(run=resolve_root() / DATASETS / 'reordered_screening',
+        screening_source={'uri': reversed_uri, 'version': 1}, sample_size=5, sample_seed=20260928))
+    assert {row['concept'] for row in rows(reordered['inputs'])} == set(chosen)
+    assert reordered['selection']['concepts'] == state['selection']['concepts']
+    too_large = config(run=resolve_root() / DATASETS / 'insufficient_pool',
+        screening_source={'uri': source_uri, 'version': 1}, sample_size=9)
+    with pytest.raises(ValueError, match='Only 8'):
+        run_pipeline(too_large)
+    assert not (resolve_root() / DATASETS / 'calls__insufficient_pool.lance').exists()
+    assert not (resolve_root() / DATASETS / 'inputs__insufficient_pool.lance').exists()
+
+
+@pytest.mark.parametrize('kwargs', [
+    {'screening_source': {'uri': 'source.lance', 'version': 1}},
+    {'screening_source': {'uri': 'source.lance', 'version': None}, 'sample_size': 5},
+    {'screening_source': {'uri': 'source.lance', 'version': True}, 'sample_size': 5},
+    {'screening_source': {'uri': 'source.lance', 'version': 1}, 'sample_size': 5, 'concepts': ['不应混用']},
+    {'concepts': ['概念'], 'sample_size': 5},
+])
+def test_screening_selection_requires_explicit_fixed_source_and_size(kwargs):
+    with pytest.raises(ValueError):
+        config(run='/unused', **kwargs)

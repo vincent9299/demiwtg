@@ -1,0 +1,18 @@
+{
+  "replaced_on": "2026-10-03",
+  "removed_sources": [
+    "README.md",
+    "__init__.py",
+    "edit_scene_images_pipeline.py",
+    "edit_scene_images_debug.ipynb",
+    "operaters/run_tables.py",
+    "operaters/sources.py",
+    "operaters/__init__.py",
+    "tests/test_pipeline.py",
+    "tests/__init__.py",
+    "prompts/tasks.yaml"
+  ],
+  "copied_from": "demiwtg/preparation/image_embeddings",
+  "preserved_datasets": "demiwtg/curation/edit_scene_images/datasets",
+  "notes": "Historical reviews and notebook outputs retained; old active Python, prompts and README removed. No inference or dataset rewrite performed."
+}

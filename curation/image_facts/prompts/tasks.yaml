@@ -1,0 +1,426 @@
+schema_version: demiflow_prompt_pack_v2
+prompts:
+  gpt61:
+    version: image-facts-2-complete-output
+    model:
+      name: malasci/gpt-6.1-sol
+      transport: openai_compatible
+      base_url: http://127.0.0.1:4001/v1
+      api_key_env: MODELHUB_API_KEY
+    schema_retries: 0
+    template: |-
+      任务目标：
+      逐图记录图片中可观察的对象、关系、视角、构图、可见性限制、文字、水印和详细描述。这些事实用于检索多对象组合图和分析现有素材覆盖。每张图独立判断。
+
+      主要对象与组合：
+      composition 描述画面中有信息价值的主要对象组合，四选一：单个主要对象、多个同类对象、多个不同类对象、无法确认。墙面、天空、桌面等普通背景不因出现就自动把单体图变为多对象组合；当背景实体实际参与有意义的关系，例如苹果装在篮中、人在骑马，应纳入对象。人像中的头发、雕像的手臂等属于主体部件，不自动计成多个独立主体；可在可见特征和 caption 中详细描述。绘画、棋盘、雕塑、示意图中明确描绘的对象也可记录，说明其载体，避免把图内对象当成现实现场。
+      objects 记录主要且可辨认的对象类型/组，每项给出本图内唯一 object_id、常用名称 name、位置 location、可见特征 visible_features，以及可辨认数量 count；数量无法可靠确定填 null。同类且作用相同的多个对象可以合并一项；位置或关系不同而有必要分别指代时可分开。名称用可确认粒度，例如“苹果”“梨”“篮子”，未知水果写“水果（具体种类不明）”。不从形似外观猜专名、品牌或历史身份。
+      苹果和篮子应分别记录，苹果、梨、篮子应记录三种对象，便于后续按对象集合和关系检索。未提及某种对象仅表示未记录，不构成它一定不存在的证明。
+
+      对象关系：
+      relations 只记录实际可见、有检索价值的关系，subject_id 和 object_id 引用本图 objects 中两个不同对象。type 从位于内部、位于表面、相邻、接触、连接、持握、使用、其他选择，evidence 说明位置或动作证据。
+      “位于内部”方向为被容纳者→容器；“位于表面”为物体→承载面；“持握/使用”为行动者→物品。苹果在篮中可标苹果→篮子→位于内部；苹果与梨仅同时出现不等于彼此接触。持握工具不自动证明正在使用。主体部件之间的连接优先写入特征和 caption，不为凑关系把主体拆成无关对象。没有可靠关系时用空数组。
+
+      构图与视角：
+      framing 四种可判值为局部特写、完整主体为主、场景为主、多面板，另有无法确认。局部特写指主体只有局部构成画面重点；完整主体为主指一个或一组主要对象大体完整、背景次要；场景为主指多个要素的环境或活动整体构成内容；多面板指拼图、多个独立画格。按当前画面组织方式选一项，不按对象个数机械决定。
+      view_tags 标主要主体的可见视角，可多选正面、背面、侧面、俯视、仰视、斜视、内部、剖面；无法判断时仅填无法确认。斜视用于明显的三分之四或斜向视面，而不是所有轻微相机倾斜。多人或多个主体的视角不同时可记录多个有意义的视角，并在 caption 中指明对应对象。缺少稳定正背方向的平面作品、图表或形状不强猜朝向。
+
+      可见性、文字与水印：
+      observability_issues 记录影响辨认对象或关系的模糊、遮挡、裁切、目标过小、反光、其他问题，每项给出 affected_area 和 detail。普通景深、正常主体互相叠放只有确实限制观察时才记录；没有观察到问题填空数组。画面没展示某一面不等于发生裁切。细节不清时描述限制，不把看不清当成不存在。
+      text.presence 与 watermark.presence 均取有、未观察到、无法确认。图中文字包括图案、标识、印刷品、场景文字和后加文字；text.kind 在有文字时区分场景固有文字、后加说明文字、无法区分，未观察到文字时为 null；text.content 只抄确实可读的内容，不能读清的部分在 detail 说明。
+      watermark 指后加的署名、版权、图库商标等覆盖层，不把实物自身商标或棋盘固有文字自动当作水印。填写 location 和 detail，说明是否遮挡主体/细节；覆盖水印上的文字也可同时记入 text。仅靠“照片通常有版权”不能推断水印存在。
+
+      详细描述与输出：
+      caption 用数句话至数段保留主体/部件、数量与位置、视角、可见状态与动作、实际关系、关键背景、文字/水印以及观察限制，详略随图片复杂度调整。它应能支持以后重新分析图片，不只重复几个标签。所有描述以本图像素为证据，未知的身份、动作目的或遮挡内容不补猜。
+      返回 result.annotations，每张输入图恰好一项，image_number 原样对应后附图片编号。不同图片的对象编号和关系互不通用。
+
+      完整输出结构：
+      以下示例仅说明字段形状，所有值由实际图片决定；每个字段都必须存在。无可填的说明用空字符串，未知数量为 null，无关系或观察问题为 []。observability_issues 的每项为 {"type":"上述问题枚举","affected_area":"受影响对象或部位","detail":"具体限制"}；relations 的每项为 {"subject_id":"本图对象ID","object_id":"另一个本图对象ID","type":"上述关系枚举","evidence":"可见依据"}。
+      直接输出 JSON 对象，不加 Markdown 代码块。
+      {
+        "result": {
+          "annotations": [
+            {
+              "image_number": 1,
+              "composition": "单个主要对象",
+              "objects": [
+                {
+                  "object_id": "o1",
+                  "name": "可确认的常用名称",
+                  "location": "画面位置",
+                  "visible_features": "可见形态或状态",
+                  "count": null
+                }
+              ],
+              "relations": [],
+              "framing": "完整主体为主",
+              "view_tags": [
+                "无法确认"
+              ],
+              "observability_issues": [],
+              "text": {
+                "presence": "未观察到",
+                "kind": null,
+                "content": "",
+                "location": "",
+                "detail": ""
+              },
+              "watermark": {
+                "presence": "未观察到",
+                "location": "",
+                "detail": ""
+              },
+              "caption": "依据实际画面填写完整描述。"
+            }
+          ]
+        }
+      }
+
+      本批图片编号：
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema: &id002
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            annotations:
+              type: array
+              items:
+                type: object
+                properties:
+                  image_number:
+                    type: integer
+                    minimum: 1
+                    maximum: 8
+                  composition:
+                    type: string
+                    enum:
+                    - 单个主要对象
+                    - 多个同类对象
+                    - 多个不同类对象
+                    - 无法确认
+                  objects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        object_id: &id001
+                          type: string
+                        name: *id001
+                        location: *id001
+                        visible_features: *id001
+                        count:
+                          type:
+                          - integer
+                          - 'null'
+                          minimum: 1
+                      required:
+                      - object_id
+                      - name
+                      - location
+                      - visible_features
+                      - count
+                      additionalProperties: false
+                    maxItems: 32
+                  relations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        subject_id: *id001
+                        object_id: *id001
+                        type:
+                          type: string
+                          enum:
+                          - 位于内部
+                          - 位于表面
+                          - 相邻
+                          - 接触
+                          - 连接
+                          - 持握
+                          - 使用
+                          - 其他
+                        evidence: *id001
+                      required:
+                      - subject_id
+                      - object_id
+                      - type
+                      - evidence
+                      additionalProperties: false
+                    maxItems: 32
+                  framing:
+                    type: string
+                    enum:
+                    - 局部特写
+                    - 完整主体为主
+                    - 场景为主
+                    - 多面板
+                    - 无法确认
+                  view_tags:
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                      - 正面
+                      - 背面
+                      - 侧面
+                      - 俯视
+                      - 仰视
+                      - 斜视
+                      - 内部
+                      - 剖面
+                      - 无法确认
+                    maxItems: 9
+                    minItems: 1
+                  observability_issues:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - 模糊
+                          - 遮挡
+                          - 裁切
+                          - 目标过小
+                          - 反光
+                          - 其他
+                        affected_area: *id001
+                        detail: *id001
+                      required:
+                      - type
+                      - affected_area
+                      - detail
+                      additionalProperties: false
+                    maxItems: 16
+                  text:
+                    type: object
+                    properties:
+                      presence:
+                        type: string
+                        enum:
+                        - 有
+                        - 未观察到
+                        - 无法确认
+                      kind:
+                        type:
+                        - string
+                        - 'null'
+                        enum:
+                        - 场景固有文字
+                        - 后加说明文字
+                        - 无法区分
+                        - null
+                      content: *id001
+                      location: *id001
+                      detail: *id001
+                    required:
+                    - presence
+                    - kind
+                    - content
+                    - location
+                    - detail
+                    additionalProperties: false
+                  watermark:
+                    type: object
+                    properties:
+                      presence:
+                        type: string
+                        enum:
+                        - 有
+                        - 未观察到
+                        - 无法确认
+                      location: *id001
+                      detail: *id001
+                    required:
+                    - presence
+                    - location
+                    - detail
+                    additionalProperties: false
+                  caption:
+                    type: string
+                    minLength: 1
+                    maxLength: 4000
+                required:
+                - image_number
+                - composition
+                - objects
+                - relations
+                - framing
+                - view_tags
+                - observability_issues
+                - text
+                - watermark
+                - caption
+                additionalProperties: false
+              maxItems: 8
+              minItems: 1
+          required:
+          - annotations
+          additionalProperties: false
+      required:
+      - result
+      additionalProperties: false
+  luna:
+    version: image-facts-2-complete-output
+    model:
+      name: malasci/gpt-6-luna
+      transport: openai_compatible
+      base_url: http://127.0.0.1:4001/v1
+      api_key_env: MODELHUB_API_KEY
+    schema_retries: 0
+    template: |-
+      任务目标：
+      逐图记录图片中可观察的对象、关系、视角、构图、可见性限制、文字、水印和详细描述。这些事实用于检索多对象组合图和分析现有素材覆盖。每张图独立判断。
+
+      主要对象与组合：
+      composition 描述画面中有信息价值的主要对象组合，四选一：单个主要对象、多个同类对象、多个不同类对象、无法确认。墙面、天空、桌面等普通背景不因出现就自动把单体图变为多对象组合；当背景实体实际参与有意义的关系，例如苹果装在篮中、人在骑马，应纳入对象。人像中的头发、雕像的手臂等属于主体部件，不自动计成多个独立主体；可在可见特征和 caption 中详细描述。绘画、棋盘、雕塑、示意图中明确描绘的对象也可记录，说明其载体，避免把图内对象当成现实现场。
+      objects 记录主要且可辨认的对象类型/组，每项给出本图内唯一 object_id、常用名称 name、位置 location、可见特征 visible_features，以及可辨认数量 count；数量无法可靠确定填 null。同类且作用相同的多个对象可以合并一项；位置或关系不同而有必要分别指代时可分开。名称用可确认粒度，例如“苹果”“梨”“篮子”，未知水果写“水果（具体种类不明）”。不从形似外观猜专名、品牌或历史身份。
+      苹果和篮子应分别记录，苹果、梨、篮子应记录三种对象，便于后续按对象集合和关系检索。未提及某种对象仅表示未记录，不构成它一定不存在的证明。
+
+      对象关系：
+      relations 只记录实际可见、有检索价值的关系，subject_id 和 object_id 引用本图 objects 中两个不同对象。type 从位于内部、位于表面、相邻、接触、连接、持握、使用、其他选择，evidence 说明位置或动作证据。
+      “位于内部”方向为被容纳者→容器；“位于表面”为物体→承载面；“持握/使用”为行动者→物品。苹果在篮中可标苹果→篮子→位于内部；苹果与梨仅同时出现不等于彼此接触。持握工具不自动证明正在使用。主体部件之间的连接优先写入特征和 caption，不为凑关系把主体拆成无关对象。没有可靠关系时用空数组。
+
+      构图与视角：
+      framing 四种可判值为局部特写、完整主体为主、场景为主、多面板，另有无法确认。局部特写指主体只有局部构成画面重点；完整主体为主指一个或一组主要对象大体完整、背景次要；场景为主指多个要素的环境或活动整体构成内容；多面板指拼图、多个独立画格。按当前画面组织方式选一项，不按对象个数机械决定。
+      view_tags 标主要主体的可见视角，可多选正面、背面、侧面、俯视、仰视、斜视、内部、剖面；无法判断时仅填无法确认。斜视用于明显的三分之四或斜向视面，而不是所有轻微相机倾斜。多人或多个主体的视角不同时可记录多个有意义的视角，并在 caption 中指明对应对象。缺少稳定正背方向的平面作品、图表或形状不强猜朝向。
+
+      可见性、文字与水印：
+      observability_issues 记录影响辨认对象或关系的模糊、遮挡、裁切、目标过小、反光、其他问题，每项给出 affected_area 和 detail。普通景深、正常主体互相叠放只有确实限制观察时才记录；没有观察到问题填空数组。画面没展示某一面不等于发生裁切。细节不清时描述限制，不把看不清当成不存在。
+      text.presence 与 watermark.presence 均取有、未观察到、无法确认。图中文字包括图案、标识、印刷品、场景文字和后加文字；text.kind 在有文字时区分场景固有文字、后加说明文字、无法区分，未观察到文字时为 null；text.content 只抄确实可读的内容，不能读清的部分在 detail 说明。
+      watermark 指后加的署名、版权、图库商标等覆盖层，不把实物自身商标或棋盘固有文字自动当作水印。填写 location 和 detail，说明是否遮挡主体/细节；覆盖水印上的文字也可同时记入 text。仅靠“照片通常有版权”不能推断水印存在。
+
+      详细描述与输出：
+      caption 用数句话至数段保留主体/部件、数量与位置、视角、可见状态与动作、实际关系、关键背景、文字/水印以及观察限制，详略随图片复杂度调整。它应能支持以后重新分析图片，不只重复几个标签。所有描述以本图像素为证据，未知的身份、动作目的或遮挡内容不补猜。
+      返回 result.annotations，每张输入图恰好一项，image_number 原样对应后附图片编号。不同图片的对象编号和关系互不通用。
+
+      完整输出结构：
+      以下示例仅说明字段形状，所有值由实际图片决定；每个字段都必须存在。无可填的说明用空字符串，未知数量为 null，无关系或观察问题为 []。observability_issues 的每项为 {"type":"上述问题枚举","affected_area":"受影响对象或部位","detail":"具体限制"}；relations 的每项为 {"subject_id":"本图对象ID","object_id":"另一个本图对象ID","type":"上述关系枚举","evidence":"可见依据"}。
+      直接输出 JSON 对象，不加 Markdown 代码块。
+      {
+        "result": {
+          "annotations": [
+            {
+              "image_number": 1,
+              "composition": "单个主要对象",
+              "objects": [
+                {
+                  "object_id": "o1",
+                  "name": "可确认的常用名称",
+                  "location": "画面位置",
+                  "visible_features": "可见形态或状态",
+                  "count": null
+                }
+              ],
+              "relations": [],
+              "framing": "完整主体为主",
+              "view_tags": [
+                "无法确认"
+              ],
+              "observability_issues": [],
+              "text": {
+                "presence": "未观察到",
+                "kind": null,
+                "content": "",
+                "location": "",
+                "detail": ""
+              },
+              "watermark": {
+                "presence": "未观察到",
+                "location": "",
+                "detail": ""
+              },
+              "caption": "依据实际画面填写完整描述。"
+            }
+          ]
+        }
+      }
+
+      本批图片编号：
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema: *id002
+  qwen4b:
+    version: image-facts-2-complete-output
+    model:
+      name: qwen3.5-4b
+      transport: openai_compatible
+      base_url: http://127.0.0.1:8024/v1
+      api_key_env: IMAGE_FACTS_LOCAL_KEY
+    schema_retries: 0
+    template: |-
+      任务目标：
+      逐图记录图片中可观察的对象、关系、视角、构图、可见性限制、文字、水印和详细描述。这些事实用于检索多对象组合图和分析现有素材覆盖。每张图独立判断。
+
+      主要对象与组合：
+      composition 描述画面中有信息价值的主要对象组合，四选一：单个主要对象、多个同类对象、多个不同类对象、无法确认。墙面、天空、桌面等普通背景不因出现就自动把单体图变为多对象组合；当背景实体实际参与有意义的关系，例如苹果装在篮中、人在骑马，应纳入对象。人像中的头发、雕像的手臂等属于主体部件，不自动计成多个独立主体；可在可见特征和 caption 中详细描述。绘画、棋盘、雕塑、示意图中明确描绘的对象也可记录，说明其载体，避免把图内对象当成现实现场。
+      objects 记录主要且可辨认的对象类型/组，每项给出本图内唯一 object_id、常用名称 name、位置 location、可见特征 visible_features，以及可辨认数量 count；数量无法可靠确定填 null。同类且作用相同的多个对象可以合并一项；位置或关系不同而有必要分别指代时可分开。名称用可确认粒度，例如“苹果”“梨”“篮子”，未知水果写“水果（具体种类不明）”。不从形似外观猜专名、品牌或历史身份。
+      苹果和篮子应分别记录，苹果、梨、篮子应记录三种对象，便于后续按对象集合和关系检索。未提及某种对象仅表示未记录，不构成它一定不存在的证明。
+
+      对象关系：
+      relations 只记录实际可见、有检索价值的关系，subject_id 和 object_id 引用本图 objects 中两个不同对象。type 从位于内部、位于表面、相邻、接触、连接、持握、使用、其他选择，evidence 说明位置或动作证据。
+      “位于内部”方向为被容纳者→容器；“位于表面”为物体→承载面；“持握/使用”为行动者→物品。苹果在篮中可标苹果→篮子→位于内部；苹果与梨仅同时出现不等于彼此接触。持握工具不自动证明正在使用。主体部件之间的连接优先写入特征和 caption，不为凑关系把主体拆成无关对象。没有可靠关系时用空数组。
+
+      构图与视角：
+      framing 四种可判值为局部特写、完整主体为主、场景为主、多面板，另有无法确认。局部特写指主体只有局部构成画面重点；完整主体为主指一个或一组主要对象大体完整、背景次要；场景为主指多个要素的环境或活动整体构成内容；多面板指拼图、多个独立画格。按当前画面组织方式选一项，不按对象个数机械决定。
+      view_tags 标主要主体的可见视角，可多选正面、背面、侧面、俯视、仰视、斜视、内部、剖面；无法判断时仅填无法确认。斜视用于明显的三分之四或斜向视面，而不是所有轻微相机倾斜。多人或多个主体的视角不同时可记录多个有意义的视角，并在 caption 中指明对应对象。缺少稳定正背方向的平面作品、图表或形状不强猜朝向。
+
+      可见性、文字与水印：
+      observability_issues 记录影响辨认对象或关系的模糊、遮挡、裁切、目标过小、反光、其他问题，每项给出 affected_area 和 detail。普通景深、正常主体互相叠放只有确实限制观察时才记录；没有观察到问题填空数组。画面没展示某一面不等于发生裁切。细节不清时描述限制，不把看不清当成不存在。
+      text.presence 与 watermark.presence 均取有、未观察到、无法确认。图中文字包括图案、标识、印刷品、场景文字和后加文字；text.kind 在有文字时区分场景固有文字、后加说明文字、无法区分，未观察到文字时为 null；text.content 只抄确实可读的内容，不能读清的部分在 detail 说明。
+      watermark 指后加的署名、版权、图库商标等覆盖层，不把实物自身商标或棋盘固有文字自动当作水印。填写 location 和 detail，说明是否遮挡主体/细节；覆盖水印上的文字也可同时记入 text。仅靠“照片通常有版权”不能推断水印存在。
+
+      详细描述与输出：
+      caption 用数句话至数段保留主体/部件、数量与位置、视角、可见状态与动作、实际关系、关键背景、文字/水印以及观察限制，详略随图片复杂度调整。它应能支持以后重新分析图片，不只重复几个标签。所有描述以本图像素为证据，未知的身份、动作目的或遮挡内容不补猜。
+      返回 result.annotations，每张输入图恰好一项，image_number 原样对应后附图片编号。不同图片的对象编号和关系互不通用。
+
+      完整输出结构：
+      以下示例仅说明字段形状，所有值由实际图片决定；每个字段都必须存在。无可填的说明用空字符串，未知数量为 null，无关系或观察问题为 []。observability_issues 的每项为 {"type":"上述问题枚举","affected_area":"受影响对象或部位","detail":"具体限制"}；relations 的每项为 {"subject_id":"本图对象ID","object_id":"另一个本图对象ID","type":"上述关系枚举","evidence":"可见依据"}。
+      直接输出 JSON 对象，不加 Markdown 代码块。
+      {
+        "result": {
+          "annotations": [
+            {
+              "image_number": 1,
+              "composition": "单个主要对象",
+              "objects": [
+                {
+                  "object_id": "o1",
+                  "name": "可确认的常用名称",
+                  "location": "画面位置",
+                  "visible_features": "可见形态或状态",
+                  "count": null
+                }
+              ],
+              "relations": [],
+              "framing": "完整主体为主",
+              "view_tags": [
+                "无法确认"
+              ],
+              "observability_issues": [],
+              "text": {
+                "presence": "未观察到",
+                "kind": null,
+                "content": "",
+                "location": "",
+                "detail": ""
+              },
+              "watermark": {
+                "presence": "未观察到",
+                "location": "",
+                "detail": ""
+              },
+              "caption": "依据实际画面填写完整描述。"
+            }
+          ]
+        }
+      }
+
+      本批图片编号：
+      {{ payload | json }}
+      {{ images | numbered_image }}
+    response_schema: *id002

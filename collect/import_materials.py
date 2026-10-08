@@ -34,7 +34,7 @@ def ingest(records,kind,root):
                     ext=(image.format or '').lower()
             else:ext=r.get('ext') or 'unknown'
             rows.append({'sha256':identity,'data':raw,'ext':ext,'byte_size':len(raw) if raw is not None else 0,
-                'storage_mode':'lance_blob','concepts':source['concepts'],'sources':[source],
+                'storage_mode':'object_uri','concepts':source['concepts'],'sources':[source],
                 'availability':'available' if raw is not None else 'metadata_only','resolution':resolution})
         else:
             identity=r.get('source_identity') or r['url'];text=r.get('text');digest=sha(text) if text is not None else None

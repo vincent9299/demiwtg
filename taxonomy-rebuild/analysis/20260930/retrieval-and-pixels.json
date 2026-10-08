@@ -1,0 +1,148 @@
+{
+  "source_version": 16,
+  "rename": {
+    "old": "Axe木棒",
+    "proposed": "Axe 木制棒球棒",
+    "old_candidates": 10,
+    "new_name_direct": 0,
+    "with_original_name_relation": 10,
+    "uri_available_candidates": 9,
+    "preserved": true
+  },
+  "merge": {
+    "assumption": "仅检验两来源取并集的机制；未正式合并概念",
+    "source_names": [
+      "月饼",
+      "中秋月饼"
+    ],
+    "counts": [
+      10,
+      16
+    ],
+    "overlap": 1,
+    "union": 25,
+    "preserved": true
+  },
+  "pixels": [
+    {
+      "sha256": "4b9f9694bc72584f4ca57e943270385ec6325936990d309a9bfdf9a0a6e6d7aa",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        512,
+        512
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/4b/4b9f9694bc72584f4ca57e943270385ec6325936990d309a9bfdf9a0a6e6d7aa"
+    },
+    {
+      "sha256": "a9774fe50ec7c3b29c6460dabd15976e0f8081c6adafc9437e01d9f7b0ad0cb0",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        234,
+        321
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/a9/a9774fe50ec7c3b29c6460dabd15976e0f8081c6adafc9437e01d9f7b0ad0cb0"
+    },
+    {
+      "sha256": "03a1e04873eb1a1610220b3f37bcdbeb247be4f804dc320b410ee21e0609a81c",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        630,
+        1047
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/03/03a1e04873eb1a1610220b3f37bcdbeb247be4f804dc320b410ee21e0609a81c"
+    },
+    {
+      "sha256": "0969d83cdfabbff19c564d8e1f1c44ac1651ce8a35afcade1580bd25f273231b",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        900,
+        578
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/09/0969d83cdfabbff19c564d8e1f1c44ac1651ce8a35afcade1580bd25f273231b"
+    },
+    {
+      "sha256": "2a6dd7f468611eeb5935ee8729935cc21c875124fc748fc72f8d69109120a922",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        500,
+        860
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/2a/2a6dd7f468611eeb5935ee8729935cc21c875124fc748fc72f8d69109120a922"
+    },
+    {
+      "sha256": "6c5269017fe8fa2d3fd0ff4cd2643fa7d9782d159fd38f57d7c5b9504e007bb1",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        1033,
+        773
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/6c/6c5269017fe8fa2d3fd0ff4cd2643fa7d9782d159fd38f57d7c5b9504e007bb1"
+    },
+    {
+      "sha256": "2d1e346c6fb428a3d9028a1a6c1eaa343b149fec2893f04db2f596198ae78403",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        880,
+        660
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/2d/2d1e346c6fb428a3d9028a1a6c1eaa343b149fec2893f04db2f596198ae78403"
+    },
+    {
+      "sha256": "2f1a7fd46e6d11ce64b62d81e79ea29633d841a03d61c3276ab78b9f734953d9",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        851,
+        851
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/2f/2f1a7fd46e6d11ce64b62d81e79ea29633d841a03d61c3276ab78b9f734953d9"
+    },
+    {
+      "sha256": "092b96992dff99300ce0b94aa2df33858e8e6697d565b1d82a1e1350d89ff22f",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        958,
+        1278
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/09/092b96992dff99300ce0b94aa2df33858e8e6697d565b1d82a1e1350d89ff22f"
+    },
+    {
+      "sha256": "0fa9851e156db71f661ebe2dbc276603793c9b5ff71d43e538855dd658b02e98",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        270,
+        202
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/0f/0fa9851e156db71f661ebe2dbc276603793c9b5ff71d43e538855dd658b02e98"
+    },
+    {
+      "sha256": "08ee8d8ec2d039609a87f0f69dbe201398c64d1214adfc1de07817349c13b1ba",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        1024,
+        683
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/08/08ee8d8ec2d039609a87f0f69dbe201398c64d1214adfc1de07817349c13b1ba"
+    },
+    {
+      "sha256": "1550ed0196489872db5177a4c51da0731d11e88e76f36c4048191d6c11d02fdf",
+      "sha_matches": true,
+      "decode_ok": true,
+      "size": [
+        2229,
+        4711
+      ],
+      "path": "/yzp/zhaozy/yangzepeng/0905/objects/15/1550ed0196489872db5177a4c51da0731d11e88e76f36c4048191d6c11d02fdf"
+    }
+  ]
+}

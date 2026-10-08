@@ -47,7 +47,7 @@ import requests
 BENCH_ROOT = Path(__file__).resolve().parents[5]   # repository root
 sys.path.insert(0, str(BENCH_ROOT))
 
-from benchmark.t2i.v1.operaters.facets import FACET_KEYS                 # noqa: E402  facet 词表权威源
+from benchmark.t2i.v1.operators.facets import FACET_KEYS                 # noqa: E402  facet 词表权威源
 
 SUB_DIR = Path(__file__).resolve().parents[2]             # t2i/
 EVAL_DIR = SUB_DIR / "data"
@@ -596,7 +596,7 @@ def audit(questions: list) -> list:
             warns.append(f"facet_tags 数量 {len(tags)} 不在 3~5")
         # v4: 配比（Alignment ≤2 + Quality ≤1 + Aesthetics ≤2）
         # FACETS 已导入但 audit 函数内未直接导入，用规则独立判定
-        from benchmark.t2i.v1.operaters.facets import FACETS  # noqa: PLC0415  内联 import 避免循环
+        from benchmark.t2i.v1.operators.facets import FACETS  # noqa: PLC0415  内联 import 避免循环
         pillar_of = {k: p for k, _, p, _ in FACETS}
         n_align = sum(1 for t in tags if pillar_of.get(t) == "Alignment")
         n_qual = sum(1 for t in tags if pillar_of.get(t) == "Quality")

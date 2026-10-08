@@ -46,10 +46,10 @@ def relocate_remaining_controls(workspace, plan):
             table = workspace / mapping[str(relative.with_name('calls.lance'))]
             target = control_directory(table) / 'reservation.lock'
         elif path.name == '.lock' and parts[:2] == ('runs', 'pipeline'):
-            owner = {'t2i': 'curation/t2i', 'edit': 'curation/edit'}[parts[2]]
+            owner = {'t2i': 'curation/t2i_training_samples', 'edit': 'curation/edit_training_pairs'}[parts[2]]
             target = workspace / 'demiwtg' / owner / 'datasets/_demiflow' / parts[3] / '.lock'
         elif path.name == 'write.lock' and '_demiflow' in parts:
-            owner = {'t2i': 'curation/t2i', 'edit': 'curation/edit'}[parts[2]]
+            owner = {'t2i': 'curation/t2i_training_samples', 'edit': 'curation/edit_training_pairs'}[parts[2]]
             target = (workspace / 'demiwtg' / owner / 'datasets/_demiflow' /
                       ('uncommitted_materials__' + parts[3] + '__' + path.parent.name) / path.name)
         else:

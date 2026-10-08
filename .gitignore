@@ -145,6 +145,7 @@ tools/environment/retired_files/
 
 # Top-level material/evaluation pipelines and versioned benchmark pipelines.
 /preparation/runs/
+/preparation/images/annotation/runs/
 /preparation/runtime/
 /evaluation/runs/
 /evaluation/archive/
@@ -167,12 +168,12 @@ tools/environment/retired_files/
 /evaluation/archive/*/*
 !/evaluation/archive/*/README.md
 !/evaluation/archive/*/review.ipynb
-!/curation/edit/reviews/
-/curation/edit/reviews/*
-!/curation/edit/reviews/public_pair_probe_20260922/
-/curation/edit/reviews/public_pair_probe_20260922/*
-!/curation/edit/reviews/public_pair_probe_20260922/README.md
-!/curation/edit/reviews/public_pair_probe_20260922/review.ipynb
+!/curation/edit_training_pairs/reviews/
+/curation/edit_training_pairs/reviews/*
+!/curation/edit_training_pairs/reviews/public_pair_probe_20260922/
+/curation/edit_training_pairs/reviews/public_pair_probe_20260922/*
+!/curation/edit_training_pairs/reviews/public_pair_probe_20260922/README.md
+!/curation/edit_training_pairs/reviews/public_pair_probe_20260922/review.ipynb
 
 # Pipeline-owned Lance tables and their coordination files
 **/datasets/
@@ -201,3 +202,38 @@ tools/environment/retired_files/
 /collect/p31/*.tsv
 # 凭据（TMDB token 等）
 .tmdb_token
+
+# ---- 2026-10-08 盘点：数据/运行产物不入库，大文件走 123 网盘备份 ----
+/collect/download/
+/collect/cos_ledger_20260926/
+/collect/wiki_documents/
+/collect/qid_identity/
+/preparation/concept_image_backfill/
+/preparation/concept_positive_images/
+/preparation/concepts/
+/preparation/document_embeddings/
+/preparation/documents/
+/preparation/image_embeddings/
+/preparation/images/
+/preparation/qid_concepts/
+/preparation/qid_images/
+/preparation/qid_review/
+/preparation/taxonomy/
+/curation/concept_image_tasks/
+/curation/edit_scene_images/
+/curation/t2i_positive_pairs/
+/benchmark/t2i/coarse_screening/
+/benchmark/t2i/fine_screening/
+/evaluation/t2i/v2/runs/
+/evaluation/t2i/case_annotation/
+/subset/
+.demiforge/tasks/
+*.lance
+*.arrow
+*.txn
+*.manifest
+*.lock
+*.sqlite
+*.db
+*.db-wal
+*.db-shm

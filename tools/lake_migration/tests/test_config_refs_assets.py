@@ -9,7 +9,6 @@ from project import (
 )
 from demiflow.lance.refs import DatasetRef
 import demiflow.lance.refs as platform_refs
-import demiflow.lance.assets as platform_assets
 
 
 def make_ref(**overrides):
@@ -58,14 +57,6 @@ def test_refs_reexport_is_platform_implementation():
     assert DatasetRef is platform_refs.DatasetRef
 
 
-def test_assets_errors_reexport_are_platform_implementation():
-    from collect.assets import AssetError, AssetReader, AssetResolution
-
-    assert AssetError is platform_assets.AssetError
-    assert AssetResolution is platform_assets.AssetResolution
-    assert issubclass(AssetReader, platform_assets.BlobAssetReader)
-
-
 # ------------------------------------------------------------- 适配绑定
 
 def write_blob(blobs_root, payload: bytes, ext: str = "jpg") -> str:
@@ -83,12 +74,3 @@ def test_reader_binds_lake_even_before_the_first_table(tmp_path):
     assert reader.datasets_root == tmp_path
     sha = write_blob(tmp_path/'blobs', b'old-file')
     with pytest.raises(AssetMissing): reader.read_bytes(sha, 'jpg')
-
-
-def test_default_reader_binds_project_root(monkeypatch, tmp_path):
-    from collect.assets import default_reader, AssetMissing
-    monkeypatch.setenv(DATASETS_ROOT_ENV, str(tmp_path))
-    reader = default_reader()
-    assert reader.datasets_root == tmp_path
-    sha = write_blob(tmp_path/'blobs', b'old-file')
-    with pytest.raises(AssetMissing): reader.read_bytes(sha,'jpg')

@@ -1,0 +1,74 @@
+[
+  {
+    "ids": ["2-099"],
+    "claim": "妇好三联甗既是青铜文物，也具有蒸煮炊具功能；支持两版采用不同主入口。",
+    "source": "中国国家博物馆：“妇好”青铜三联甗",
+    "url": "https://www.chnmuseum.cn/zp/zpml/kgfjp/202107/t20210728_250870.shtml"
+  },
+  {
+    "ids": ["2-048"],
+    "claim": "悉尼港大桥采用钢拱结构。",
+    "source": "新南威尔士州政府：Sydney Harbour Bridge",
+    "url": "https://www.nsw.gov.au/visiting-and-exploring-nsw/locations-and-attractions/sydney-harbour-bridge"
+  },
+  {
+    "ids": ["2-054"],
+    "claim": "青马大桥属于悬索桥。",
+    "source": "香港路政署：Tsing Ma Bridge",
+    "url": "https://www.hyd.gov.hk/en/information_corner/hyd_factsheets/doc/e_Tsing_Ma_Bridge.pdf"
+  },
+  {
+    "ids": ["2-011"],
+    "claim": "朝天门大桥采用钢拱结构。",
+    "source": "重庆市地方志办公室：“桥都”之朝天门大桥",
+    "url": "https://dfz.cq.gov.cn/zqlswh/rwby_417819/202311/t20231102_12510286.html"
+  },
+  {
+    "ids": ["2-139"],
+    "claim": "档案图注描述现滑铁卢桥采用悬臂钢筋混凝土箱梁；由于名录另有拱式描述，此归属保留核对标记。",
+    "source": "Historic England：Waterloo Bridge 档案照片",
+    "url": "https://historicengland.org.uk/images-books/photos/item/AA001219"
+  },
+  {
+    "ids": ["2-139"],
+    "claim": "名录条目采用多拱式结构表述，与档案图注措辞不同。",
+    "source": "Historic England：Waterloo Bridge 名录",
+    "url": "https://historicengland.org.uk/listing/the-list/list-entry/1275000"
+  },
+  {
+    "ids": ["1-003"],
+    "claim": "Crassula ovata 是种级名称。",
+    "source": "Kew Plants of the World Online",
+    "url": "https://powo.science.kew.org/taxon/273350-1"
+  },
+  {
+    "ids": ["3-029"],
+    "claim": "Narcissus tazetta 是种级名称。",
+    "source": "Kew Plants of the World Online",
+    "url": "https://powo.science.kew.org/taxon/66240-1"
+  },
+  {
+    "ids": ["3-160"],
+    "claim": "Conophytum 是属级类群，包含多个物种。",
+    "source": "Kew Plants of the World Online",
+    "url": "https://powo.science.kew.org/taxon/urn%3Alsid%3Aipni.org%3Anames%3A16140-1"
+  },
+  {
+    "ids": ["1-008"],
+    "claim": "天牛科 Cerambycidae 是科级类群。",
+    "source": "NCBI Taxonomy",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=34667&mode=Info"
+  },
+  {
+    "ids": ["3-081"],
+    "claim": "叩甲科 Elateridae 是科级类群。",
+    "source": "NCBI Taxonomy",
+    "url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=30009&mode=Info"
+  },
+  {
+    "ids": ["3-015"],
+    "claim": "Fritillaria imperialis 'Rubra' 是带有栽培品种名的概念。",
+    "source": "Royal Horticultural Society",
+    "url": "https://www.rhs.org.uk/plants/95211/fritillaria-imperialis-rubra/details"
+  }
+]

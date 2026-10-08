@@ -1,0 +1,197 @@
+{
+  "run": "bagel_imagerag_20261007",
+  "source": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/latest_reanswer_questions__review91_20261006.lance",
+    "version": 1
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/answers__bagel_imagerag_20261007.lance",
+  "answers": [
+    {
+      "answer_mode": "imagerag",
+      "api": "images_json",
+      "api_key_env": "MODELHUB_API_KEY",
+      "backend": "modelhub",
+      "base_url": "http://127.0.0.1:8006/v1",
+      "concurrency": 4,
+      "device": "cuda:0",
+      "enabled": true,
+      "max_reference_images": 3,
+      "model": "BAGEL-7B-MoT",
+      "parameters": {
+        "num_inference_steps": 50,
+        "response_format": "b64_json",
+        "seed": 42,
+        "size": "1024x1024"
+      },
+      "queue_depth": 4,
+      "revision": "bagel-interleave-50steps-1024-17e541567e0cbbaf",
+      "seed": 42,
+      "shared_service": {
+        "configuration": {
+          "base_url": "http://127.0.0.1:8006/v1",
+          "command": [
+            "/yzp/zhaozy/yangzepeng/0905/env-bagel/bin/python",
+            "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+            "--backend",
+            "bagel",
+            "--model-path",
+            "/yzp/zhaozy/yangzepeng/0905/models/BAGEL-7B-MoT",
+            "--served-model-name",
+            "BAGEL-7B-MoT",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8006",
+            "--steps",
+            "50",
+            "--offload-dir",
+            "/yzp/zhaozy/yangzepeng/0905/_demiflow/evaluation_t2i_v2/bagel_imagerag_20261007/offload_shared"
+          ],
+          "env": {
+            "HF_HUB_OFFLINE": "1",
+            "PYTHONPATH": "/yzp/zhaozy/yangzepeng/0905/demiwtg",
+            "TRANSFORMERS_OFFLINE": "1"
+          },
+          "expected_model": "BAGEL-7B-MoT",
+          "gpus": [
+            0
+          ],
+          "log_path": "_demiflow/evaluation_t2i_v2/bagel_imagerag_20261007/image_service.log",
+          "root": "/yzp/zhaozy/yangzepeng/0905",
+          "shutdown_timeout_s": 30,
+          "startup_timeout_s": 900
+        },
+        "name": "t2i_eval_bagel_imagerag_20261007",
+        "request_concurrency": 16,
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "stop_when_idle": true
+      },
+      "timeout_s": 1800,
+      "imagerag": {
+        "prompt_protocol": "upstream_16c9502",
+        "caption_sources": [
+          {
+            "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_v3_image_hints.lance",
+            "version": 1
+          },
+          {
+            "uri": "demiwtg/preparation/images/dense_caption/datasets/captions__reviewed_dense_caption_qwen38_retry_failed_20261006_r01.lance",
+            "version": 1
+          }
+        ],
+        "initial_answers": {
+          "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__bagel_ab_prompt1_c8_20261004__arm00.lance",
+          "version": 299
+        },
+        "pool": {
+          "uri": "demiwtg/preparation/image_embeddings/datasets/image_embeddings__a170b8529adc30d8.lance",
+          "version": 1
+        },
+        "encoder": {
+          "name": "tencent/WeMM-Embedding-9B",
+          "revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482",
+          "dimensions": 4096,
+          "base_url": "http://127.0.0.1:8002/v1",
+          "input_format": "chat",
+          "normalize": true,
+          "api_key_env": "",
+          "request_options": {
+            "add_generation_prompt": false,
+            "mm_processor_kwargs": {
+              "max_pixels": 1048576,
+              "min_pixels": 65536
+            }
+          },
+          "encoding_parameters": {
+            "backend_version": "0.28.0",
+            "dimension": 4096,
+            "dtype": "bfloat16",
+            "implementation": "wemm-vllm-pooling-v1",
+            "model_id": "tencent/WeMM-Embedding-9B",
+            "model_revision": "00c52839de57a6d4fd5b78cf5522ccf0ac8ea482",
+            "normalization": "l2_float32",
+            "packages": {
+              "Pillow": "12.3.0",
+              "torch": "2.13.0",
+              "transformers": "5.16.1"
+            },
+            "pixels": {
+              "color": "RGB",
+              "frame": "first",
+              "max": 1048576,
+              "min": 65536,
+              "orientation": "exif_transpose",
+              "transport": "original_if_compatible"
+            },
+            "request": "native_user_content_batched_chat",
+            "template_sha256": "7c3df2aab83ab9096428ec27b6b99ad87c4790418b830d119957634f28c677ba"
+          },
+          "image_transport": "original_if_compatible"
+        },
+        "query_service": {
+          "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+          "cuda_bin": "/usr/local/cuda/bin",
+          "gpus": [
+            0
+          ],
+          "data_parallel_size": 1,
+          "tensor_parallel_size": 1,
+          "gpu_memory_utilization": 0.5,
+          "max_model_len": 8192,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 16384,
+          "api_server_count": 1,
+          "enforce_eager": true,
+          "enable_logging_iteration_details": false,
+          "startup_timeout_s": 600,
+          "shutdown_timeout_s": 30,
+          "readiness_timeout_s": 2,
+          "poll_interval_s": 1,
+          "startup_log_interval_s": 15,
+          "limit_mm_per_prompt": null,
+          "mm_processor_cache_gb": 0,
+          "enable_prefix_caching": false,
+          "language_model_only": false,
+          "omp_num_threads": null,
+          "model_path": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B",
+          "runner": "pooling",
+          "dtype": "bfloat16",
+          "chat_template": "/yzp/zhaozy/yangzepeng/0905/models/WeMM-Embedding-9B/embedding_chat_template.jinja"
+        },
+        "embedding_execution": {
+          "batch_size": 8,
+          "concurrency": 1,
+          "queue_depth": 8,
+          "options": {
+            "io_workers": 1,
+            "prepare_workers": 1,
+            "response_workers": 1
+          }
+        },
+        "max_context_chars": 30000,
+        "vlm": {
+          "model": "gpt-6.1-sol",
+          "base_url": "http://127.0.0.1:4001/v1",
+          "api_key_env": "MODELHUB_API_KEY",
+          "concurrency": 4,
+          "timeout_s": 600,
+          "max_output_tokens": 4096
+        },
+        "additional_initial_answers": [
+          {
+            "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answer_results__bagel_reanswer_review91_c8_20261006__arm00.lance",
+            "version": 91
+          }
+        ],
+        "max_queries": 32,
+        "max_initial_bytes": 8388608
+      }
+    }
+  ],
+  "parallel_answers": true,
+  "stream_judging": false,
+  "arm_concurrency": 1,
+  "max_questions": 299,
+  "max_consecutive_failures": 3,
+  "stage": "answers"
+}

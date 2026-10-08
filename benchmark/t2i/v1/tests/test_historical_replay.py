@@ -13,8 +13,8 @@ from project import historical_evidence, default_root, evidence_key
 def evidence():
     return historical_evidence(default_root())
 
-from preparation.operaters import runfiles as storage
-from preparation.operaters.runfiles import saved_stage
+from preparation.articles.operators import runfiles as storage
+from preparation.articles.operators.runfiles import saved_stage
 
 REPO = Path(__file__).resolve().parents[4]
 SAMPLES = REPO / "benchmark/t2i/v1/bench200/provenance/samples_v60_uniform_r11.jsonl"
@@ -45,10 +45,10 @@ def test_replay_two_historical_authoring_calls_end_to_end(lake):
                             encoding="utf-8")
 
     from benchmark.t2i.v1.t2i_v1_benchmark_pipeline import config, run_pipeline
-    from benchmark.t2i.v1.operaters.prompting import extract_json_object
-    from preparation.operaters.runfiles import read_record
+    from benchmark.t2i.v1.operators.prompting import extract_json_object
+    from preparation.articles.operators.runfiles import read_record
     from project import resolve_root
-    from demiflow.operator_llm.lance_journal import submit_response
+    from demiflow.operator_llm.sqlite_offline import submit_response
 
     run = lake / "benchmark/t2i/v1/datasets/replay"
     cfg = config("offline", ["xiaoyao/gpt-5.6-sol"], author_model="gpt-5.6-sol",

@@ -1,6 +1,5 @@
 """Raw image/document entities owned by collection."""
 import pyarrow as pa
-import lance
 
 IMAGES_URI = 'demiwtg/collect/datasets/images.lance'
 DOCUMENTS_URI = 'demiwtg/collect/datasets/documents.lance'
@@ -30,7 +29,7 @@ IMAGE_METADATA = pa.schema([
 IMAGES = pa.schema([pa.field('sha256', pa.string(), nullable=False),
     pa.field('ext', pa.string(), nullable=False),
     pa.field('byte_size', pa.int64(), nullable=False),
-    pa.field('storage_mode', pa.string(), nullable=False), lance.blob_field('data'),
+    pa.field('storage_mode', pa.string(), nullable=False), ('image_uri', pa.string()),
     *IMAGE_METADATA])
 SECTION = pa.struct([('title', pa.string()), ('text', pa.large_string()),
                      ('attributes_json', pa.large_string())])

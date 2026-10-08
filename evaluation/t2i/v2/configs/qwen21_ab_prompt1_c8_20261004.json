@@ -1,0 +1,146 @@
+{
+  "run": "qwen21_ab_prompt1_c8_20261004",
+  "source": {
+    "uri": "demiwtg/benchmark/t2i/v2/datasets/candidates__ready_positive300_common85_codex_v16_probe_20261004.lance",
+    "version": 300
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/scores_ab__qwen21_ab_prompt1_c8_20261004.lance",
+  "answers": [
+    {
+      "backend": "modelhub",
+      "model": "Qwen-Image-2.1",
+      "model_path": "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+      "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+      "device": "cuda:0",
+      "seed": 42,
+      "parameters": {
+        "num_inference_steps": 40,
+        "output_resolution": 1024,
+        "size": "1024x1024",
+        "seed": 42,
+        "response_format": "b64_json"
+      },
+      "answer_mode": "text_only",
+      "cuda_visible_devices": "1",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8,
+      "api": "images_json",
+      "base_url": "http://127.0.0.1:8005/v1",
+      "revision": "qwen21-local-json-multi-40steps-1024-20261004",
+      "timeout_s": 900,
+      "shared_service": {
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "name": "t2i_eval_qwen21_gpu1_c8_20261004",
+        "request_concurrency": 16,
+        "stop_when_idle": true,
+        "configuration": {
+          "root": "/yzp/zhaozy/yangzepeng/0905",
+          "base_url": "http://127.0.0.1:8005/v1",
+          "gpus": [
+            1
+          ],
+          "command": [
+            "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+            "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+            "--backend",
+            "qwen-image-2.1",
+            "--model-path",
+            "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+            "--served-model-name",
+            "Qwen-Image-2.1",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8005",
+            "--steps",
+            "40"
+          ],
+          "env": {
+            "PYTHONPATH": "/tmp/edit_qwen21_dependencies:/tmp/edit_diffusers_official/src",
+            "HF_HUB_OFFLINE": "1"
+          },
+          "expected_model": "Qwen-Image-2.1",
+          "startup_timeout_s": 600,
+          "shutdown_timeout_s": 30,
+          "log_path": "_demiflow/evaluation_t2i_v2/qwen21_ab_prompt1_c8_20261004/qwen_service.log"
+        }
+      }
+    },
+    {
+      "backend": "modelhub",
+      "model": "Qwen-Image-2.1",
+      "model_path": "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+      "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+      "device": "cuda:0",
+      "seed": 42,
+      "parameters": {
+        "num_inference_steps": 40,
+        "output_resolution": 1024,
+        "size": "1024x1024",
+        "seed": 42,
+        "response_format": "b64_json"
+      },
+      "answer_mode": "positive_images",
+      "cuda_visible_devices": "1",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8,
+      "api": "images_json",
+      "base_url": "http://127.0.0.1:8005/v1",
+      "revision": "qwen21-local-json-multi-40steps-1024-20261004",
+      "timeout_s": 900,
+      "shared_service": {
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "name": "t2i_eval_qwen21_gpu1_c8_20261004",
+        "request_concurrency": 16,
+        "stop_when_idle": true,
+        "configuration": {
+          "root": "/yzp/zhaozy/yangzepeng/0905",
+          "base_url": "http://127.0.0.1:8005/v1",
+          "gpus": [
+            1
+          ],
+          "command": [
+            "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+            "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+            "--backend",
+            "qwen-image-2.1",
+            "--model-path",
+            "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+            "--served-model-name",
+            "Qwen-Image-2.1",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8005",
+            "--steps",
+            "40"
+          ],
+          "env": {
+            "PYTHONPATH": "/tmp/edit_qwen21_dependencies:/tmp/edit_diffusers_official/src",
+            "HF_HUB_OFFLINE": "1"
+          },
+          "expected_model": "Qwen-Image-2.1",
+          "startup_timeout_s": 600,
+          "shutdown_timeout_s": 30,
+          "log_path": "_demiflow/evaluation_t2i_v2/qwen21_ab_prompt1_c8_20261004/qwen_service.log"
+        }
+      }
+    }
+  ],
+  "judge": {
+    "model": "malasci/gpt-6-astra",
+    "base_url": "http://127.0.0.1:4001/v1",
+    "api_key_env": "MODELHUB_API_KEY",
+    "timeout_s": 900,
+    "max_output_tokens": 32768,
+    "concurrency": 8,
+    "max_context_chars": 60000,
+    "reasoning_effort": "xhigh"
+  },
+  "stream_judging": true,
+  "arm_concurrency": 2,
+  "max_questions": 300,
+  "max_consecutive_failures": 3
+}

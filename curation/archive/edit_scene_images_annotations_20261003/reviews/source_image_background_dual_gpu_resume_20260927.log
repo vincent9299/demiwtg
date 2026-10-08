@@ -1,0 +1,9 @@
+[NbConvertApp] Converting notebook /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/source_image_debug.ipynb to notebook
+/opt/conda/lib/python3.11/site-packages/nbformat/__init__.py:93: MissingIDFieldWarning: Code cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.
+  validate(nb)
+[IPKernelApp] WARNING | Kernel is running over TCP without encryption. All communication (including code and outputs) is sent in plain text and is susceptible to eavesdropping. Use IPC transport or launch with kernel manager-provisioned CurveZMQ keys to enable transport encryption.
+[2026-09-27T14:32:22Z WARN  lance::dataset::write::insert] No existing dataset at /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/image_checks__scene_pool_category_l3_v1.lance, it will be created
+[2026-09-27T14:37:57Z WARN  lance::dataset::write::insert] No existing dataset at /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/image_inputs__scene_pool_category_l3_v1.lance, it will be created
+[2026-09-27T14:47:27Z WARN  lance::dataset::write::insert] No existing dataset at /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/image_results__scene_pool_category_l3_v1.lance, it will be created
+[2026-09-27T14:47:28Z WARN  lance::dataset::write::insert] No existing dataset at /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/pool__scene_pool_category_l3_v1.lance, it will be created
+[NbConvertApp] Writing 2399848 bytes to /yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/reviews/source_image_background_dual_gpu_resume_20260927.ipynb

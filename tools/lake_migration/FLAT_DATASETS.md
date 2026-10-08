@@ -1,21 +1,33 @@
-# 按 pipeline 平铺的 Lance 数据
+# 按生产职责组织数据
 
-业务表直接存放所属 pipeline 或模块的 `datasets/`（用户已更正拼写）。没有运行、阶段、case 或 history 数据子目录。运行名仅作为表名后缀；同名表再加题目编号或指纹，避免覆盖。
+**2026-10-02 当前约定：** 公共材料也归其生产模块的 datasets，registry 归 `_demiflow/registry/`，不再独立保留工作区顶层公共 datasets。共用 P1–P4 和概念正例图归 preparation；任务素材和训练数据归 curation。实际迁移、概念底库改名、文档库迁移及顶层 datasets 退役状态见 [职责说明](../../docs/asset_ownership_20261002.md)。迁移入口为 `curation_ownership.py` 与 `dataset_ownership.py`，不重写冻结行和版本。
 
-| 所属模块 | 物理位置（相对共同工作区） |
-| --- | --- |
-| 原始材料与采集历史 | demiwtg/collect/datasets/ |
-| 文章、视觉审核和历史文章运行 | demiwtg/preparation/datasets/ |
-| T2I 构题、审核和训练条目 | demiwtg/curation/t2i/datasets/ |
-| Edit 构题、图对、审核、训练条目与公开图对探索 | demiwtg/curation/edit/datasets/ |
-| 混合赛道历史训练试验 | demiwtg/curation/datasets/ |
-| T2I V1 固定基准证据、源图及模型输出 | demiwtg/benchmark/t2i/v1/datasets/ |
-| 基准构建各版本的新运行 | demiwtg/benchmark/{t2i,edit}/{v1,v2}/datasets/ |
-| 综合评测 | demiwtg/evaluation/datasets/ |
-| 分赛道 V1 评测 | demiwtg/evaluation/{t2i,edit}/v1/datasets/ |
-| 现役主数据、全局登记、仍被引用的公共证据 | datasets/ |
+## 2026-09 历史布局与迁移记录
 
-常用表：`demiwtg/collect/datasets/{images,documents}.lance`，`demiwtg/preparation/datasets/{images,articles}.lance`。共享表包括 `datasets/master_concepts.lance`、`taxonomy_nodes.lance`、`taxonomy_edges.lance`、`concept_taxonomy.lance`、`registry_datasets.lance`、`registry_releases.lance`。
+下文保留当时的记录，其中根 datasets、Blob 与旧模块名不代表当前布局；勿据此恢复已退役内容。
+
+当前布局按数据职责分层，表直接平铺在对应 `datasets/`，不建立运行、阶段、case 或 history 数据子目录。路径相对共同工作区。
+
+| 层 | 物理位置 | 内容 |
+| --- | --- | --- |
+| 原始采集层 | `demiwtg/collect/datasets/` | 原始 images/documents、四张 qid 表及采集事实 |
+| 公共样本层 | `datasets/` | preparation 的样本目标表、概念/分类主数据和跨 pipeline 公共材料 |
+| Pipeline 应用层 | `demiwtg/<pipeline>/datasets/` | 必要中间结果、模型调用、原图候选池、构题、训练及评测结果 |
+
+采集写原始层 → preparation 从固定采集版本清洗、补尺寸、按需标注并更新公共样本列 → 下游从显式公共 URI/version 读取材料并写应用结果。图片字节沿交付 source_refs/BlobRef 读取，不在消费者另选原始表。公共目录的位置不表示样本已审核通过。
+
+具体表与应用位置：
+
+- 原始：`demiwtg/collect/datasets/{images,documents,qid_images_v2,qid_edges,qid_concepts_fat,qid_concept_xref}.lance`。
+- 公共：`datasets/{images,articles,master_concepts,taxonomy_nodes,taxonomy_edges}.lance`。概念挂载已合并进 master_concepts；全局登记及保留的公共证据仍在公共层，是配套设施，不是第四层。
+- preparation 的现役公共目标为 images/articles。起初一并迁移的 `datasets/knowledge_base__bench200_production_20260920_v8.lance`、`datasets/metadata__test__configured_answering.lance` 已按用户后续要求删除；不再恢复，公共层不新增每运行一份的样本目标表。
+- 应用：`demiwtg/benchmark/{t2i,edit}/{v1,v2}/datasets/`、`demiwtg/benchmark/edit/source_images/datasets/`、`demiwtg/curation/{t2i,edit}/datasets/`、`demiwtg/evaluation/{t2i,edit}/<pipeline>/datasets/`。preparation 的流程若需暂存中间结果，仍使用本模块 datasets。
+
+2026-09-27 历史迁移入口：[three_layer_storage.py](three_layer_storage.py)。首批移动四张 qid 和 articles/images；第二批迁走 preparation 剩余两张目标表，用户随后要求删除这两张表。迁移回执分别在共同根 `_demiflow/three_layer_storage_20260927/` 和 `_demiflow/three_layer_storage_20260927_remaining_preparation/`；删除回执在 `_demiflow/preparation_legacy_targets_cleanup_20260927/`，记录移除的历史登记与位置映射。历史迁移计划不代表当前保留范围，不应重跑补充批或恢复已退役表。迁移时逐表保留写锁并整目录移动，核对文件 inode/大小/mtime、每个版本的行数/schema 和实际解码样本，再更新精确位置映射。
+
+2026-09-27 按用户要求合并概念挂载：`master_concepts.lance@3` 新增 `taxonomy_metadata`，完整保存原关系表的排序和来源，原 taxonomy 及其他字段保持；主表@1/@2 继续可读。`concept_taxonomy.lance` 已删除，旧四表发布、关系登记和两个位置映射已退役，新默认采集发布为 `master_data_merged_20260927`。入口 [merge_concept_taxonomy.py](merge_concept_taxonomy.py)，回执在共同根 `_demiflow/concept_taxonomy_merge_20260927/`。旧迁移清单中该表仅是历史记录，不得据此重建。
+
+本次不执行全量图片补齐或任何模型标注。运行入口已采用公共样本新路径；`preparation/images/catalog/image_catalog_debug.ipynb` 仍由用户手工运行。
 
 `project.resolve_root()` 默认返回共同工作区（包含 demiwtg/ 和 datasets/ 的父目录）。`DEMIWTG_DATASETS_ROOT` 若设置，也应指向这种布局的共同根；测试使用隔离根。消费者直接使用完整实际表路径和固定版本调用标准 `read_lance` 或 `lance.dataset`。
 

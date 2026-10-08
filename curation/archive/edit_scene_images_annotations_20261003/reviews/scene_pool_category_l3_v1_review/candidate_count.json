@@ -1,0 +1,7 @@
+{
+  "source": "/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/edit/source_images/datasets/image_checks__scene_pool_category_l3_v1.lance",
+  "version": 1,
+  "max_images_per_concept": 4,
+  "candidates_before_global_limit": 123603,
+  "elapsed_s": 11.661777999252081
+}

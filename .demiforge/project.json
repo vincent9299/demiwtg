@@ -1,0 +1,237 @@
+{
+  "pipelines": {
+    "qid_review": {
+      "entry": "qid_review_pipeline.py",
+      "path": "preparation/qid_review",
+      "verify": [
+        {
+          "argv": [
+            "{project}/../env/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "preparation/qid_review/tests",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "--basetemp",
+            "{scratch}/pytest"
+          ],
+          "env": {
+            "DEMIWTG_DATASETS_ROOT": "{scratch}/data",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONPATH": "{project}:{project}/../demiflow"
+          },
+          "id": "qid-review-fixtures",
+          "timeout": 600
+        }
+      ]
+    },
+    "subset": {
+      "entry": "subset_pipeline.py",
+      "path": "subset",
+      "verify": [
+        {
+          "argv": [
+            "{project}/../env/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "subset/tests/test_image_record_contract.py",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "--basetemp",
+            "{scratch}/pytest"
+          ],
+          "env": {
+            "DEMIWTG_DATASETS_ROOT": "{scratch}/data",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONPATH": "{project}:{project}/../demiflow"
+          },
+          "id": "image-record-contract",
+          "timeout": 30
+        }
+      ]
+    },
+    "t2i-evaluation-v2": {
+      "path": "evaluation/t2i/v2",
+      "entry": "t2i_v2_eval_pipeline.py",
+      "verify": [
+        {
+          "id": "notebook-d7-fixtures",
+          "argv": [
+            "{project}/../env/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "evaluation/t2i/v2/tests/test_notebook.py",
+            "evaluation/t2i/v2/tests/test_d7.py",
+            "evaluation/t2i/v2/tests/test_d_evaluation.py",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "--basetemp",
+            "{scratch}/pytest"
+          ],
+          "env": {
+            "DEMIWTG_DATASETS_ROOT": "{scratch}/data",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONPATH": "{project}:{project}/../demiflow"
+          },
+          "timeout": 600
+        },
+        {
+          "id": "imagerag-original-fixtures",
+          "argv": [
+            "{project}/../env/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "evaluation/t2i/v2/tests/test_imagerag_original.py",
+            "evaluation/t2i/v2/tests/test_imagerag_messages.py",
+            "evaluation/t2i/v2/tests/test_request_inputs.py",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "--basetemp",
+            "{scratch}/rag-pytest"
+          ],
+          "env": {
+            "DEMIWTG_DATASETS_ROOT": "{scratch}/data",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONPATH": "{project}:{project}/../demiflow"
+          },
+          "timeout": 600
+        }
+      ]
+    },
+    "concept_image_tasks": {
+      "path": "curation/concept_image_tasks",
+      "entry": "concept_image_tasks_pipeline.py",
+      "verify": [
+        {
+          "id": "concept-image-notebook-fixtures",
+          "argv": [
+            "{project}/../env/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "curation/concept_image_tasks/tests/test_query_progress.py",
+            "curation/concept_image_tasks/tests/test_search_schedule.py",
+            "curation/concept_image_tasks/tests/test_checkpoints.py",
+            "curation/concept_image_tasks/tests/test_case_viewer.py",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "--basetemp",
+            "{scratch}/pytest"
+          ],
+          "env": {
+            "DEMIWTG_DATASETS_ROOT": "{scratch}/data",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONPATH": "{project}:{project}/../demiflow"
+          },
+          "timeout": 600
+        }
+      ]
+    },
+    "t2i_positive_pairs": {
+      "path": "curation/t2i_positive_pairs",
+      "entry": "t2i_positive_pairs_pipeline.py",
+      "verify": [
+        {
+          "id": "t2i-positive-fixtures",
+          "argv": [
+            "{project}/../env/bin/python",
+            "-B",
+            "-m",
+            "pytest",
+            "curation/t2i_positive_pairs/tests",
+            "-q",
+            "-p",
+            "no:cacheprovider",
+            "--basetemp",
+            "{scratch}/pytest"
+          ],
+          "env": {
+            "DEMIWTG_DATASETS_ROOT": "{scratch}/data",
+            "OMP_NUM_THREADS": "2",
+            "OPENBLAS_NUM_THREADS": "2",
+            "PYTHONPATH": "{project}:{project}/../demiflow"
+          },
+          "timeout": 600
+        }
+      ]
+    }
+  },
+  "readonly": [
+    "../demiflow/demiflow",
+    "../demiflow/tests",
+    "../demiflow/AGENTS.md",
+    "../demiflow/README.md",
+    "../demiflow/docs/datafusion.md",
+    "../demiflow/pyproject.toml"
+  ],
+  "schema": "demiforge-project-v1",
+  "sources": {
+    "pilot-existing-tests": {
+      "path": "subset/tests/test_image_uris.py"
+    },
+    "pilot-operator": {
+      "path": "subset/operators/images.py"
+    },
+    "pipeline-spec": {
+      "path": "PIPELINE_SPEC.md"
+    },
+    "qid-concept-contract": {
+      "path": "preparation/qid_concepts/README.md",
+      "lines": [
+        7,
+        96
+      ]
+    },
+    "qid-review-materials": {
+      "path": "preparation/qid_review/operators/materials.py"
+    },
+    "qid-identity-contract": {
+      "path": "collect/qid_identity/README.md"
+    },
+    "project-rules": {
+      "lines": [
+        1,
+        40
+      ],
+      "path": "AGENTS.md"
+    },
+    "concept-image-tasks-contract": {
+      "path": "curation/concept_image_tasks/README.md",
+      "lines": [
+        511,
+        519
+      ]
+    },
+    "concept-image-tasks-notebook": {
+      "path": "curation/concept_image_tasks/concept_image_tasks_debug.ipynb"
+    }
+  },
+  "standard": "1.0.0-candidate.3",
+  "tool_root": "../Demiurge",
+  "watch": [
+    "preparation/qid_review",
+    "preparation/qid_concepts/operators/schema.py",
+    "collect/qid_identity/operators/entities.py",
+    "subset",
+    "project.py",
+    "preparation/articles/tests/test_pipeline_layout.py",
+    "evaluation/t2i/v2",
+    "PIPELINE_SPEC.md",
+    "curation/concept_image_tasks",
+    "curation/t2i_positive_pairs"
+  ]
+}

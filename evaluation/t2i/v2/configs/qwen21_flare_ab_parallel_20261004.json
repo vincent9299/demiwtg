@@ -1,0 +1,91 @@
+{
+  "run": "qwen21_flare_ab_parallel_20261004",
+  "source": {
+    "uri": "demiwtg/benchmark/t2i/v2/datasets/candidates__ready_positive300_common85_codex_v16_probe_20261004.lance",
+    "version": 300
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/scores_ab__qwen21_flare_ab_parallel_20261004.lance",
+  "answers": [
+    {
+      "backend": "diffusers",
+      "model": "Qwen-Image-2.1",
+      "model_path": "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+      "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+      "pythonpath": [
+        "/tmp/edit_qwen21_dependencies",
+        "/tmp/edit_diffusers_official/src"
+      ],
+      "device": "cuda:0",
+      "seed": 42,
+      "parameters": {
+        "num_inference_steps": 40,
+        "output_resolution": 1024,
+        "height": 1024,
+        "width": 1024
+      },
+      "answer_mode": "text_only",
+      "cuda_visible_devices": "0",
+      "max_reference_images": 5
+    },
+    {
+      "backend": "diffusers",
+      "model": "Qwen-Image-2.1",
+      "model_path": "/yzp/zhaozy/yangzepeng/0905/models/Qwen-Image-2.1",
+      "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+      "pythonpath": [
+        "/tmp/edit_qwen21_dependencies",
+        "/tmp/edit_diffusers_official/src"
+      ],
+      "device": "cuda:0",
+      "seed": 42,
+      "parameters": {
+        "num_inference_steps": 40,
+        "output_resolution": 1024,
+        "height": 1024,
+        "width": 1024
+      },
+      "answer_mode": "positive_images",
+      "cuda_visible_devices": "1",
+      "max_reference_images": 5
+    },
+    {
+      "backend": "modelhub",
+      "model": "malasci/gpt-image-2.5-flare",
+      "api": "images",
+      "base_url": "http://127.0.0.1:4002/v1",
+      "api_key_env": "MODELHUB_API_KEY",
+      "timeout_s": 1800,
+      "parameters": {
+        "size": "1024x1024"
+      },
+      "answer_mode": "text_only",
+      "max_reference_images": 5
+    },
+    {
+      "backend": "modelhub",
+      "model": "malasci/gpt-image-2.5-flare",
+      "api": "images",
+      "base_url": "http://127.0.0.1:4002/v1",
+      "api_key_env": "MODELHUB_API_KEY",
+      "timeout_s": 1800,
+      "parameters": {
+        "size": "1024x1024"
+      },
+      "answer_mode": "positive_images",
+      "max_reference_images": 5
+    }
+  ],
+  "judge": {
+    "model": "malasci/gpt-6-astra-xhigh",
+    "base_url": "http://127.0.0.1:4002/v1",
+    "api_key_env": "MODELHUB_API_KEY",
+    "timeout_s": 900,
+    "max_output_tokens": 32768,
+    "concurrency": 1,
+    "max_context_chars": 60000
+  },
+  "stream_judging": true,
+  "arm_concurrency": 4,
+  "max_questions": 300,
+  "max_consecutive_failures": 3
+}

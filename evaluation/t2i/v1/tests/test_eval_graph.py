@@ -8,8 +8,8 @@ from project import historical_evidence, default_root, evidence_key
 def evidence():
     return historical_evidence(default_root())
 
-from preparation.operaters import runfiles as storage
-from preparation.operaters.runfiles import saved_stage, run_manifest
+from preparation.articles.operators import runfiles as storage
+from preparation.articles.operators.runfiles import saved_stage, run_manifest
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def test_offline_graph_imports_answers_and_pends_judge(lake):
     requests = saved_stage(run, "judge_requests")
     active = next(r for r in requests if r["status"] == "generated")
     assert active["prompt_images"] and active["prompt_images"][0].startswith("data:image/jpeg;base64,")
-    from preparation.operaters.runfiles import read_record
+    from preparation.articles.operators.runfiles import read_record
     assert "prompt_instructions" not in active
     messages = read_record(active['judge_binding']['request_ref'])['messages']
     text = '\n'.join(p.get('text', '') for m in messages if m['role'] == 'user' for p in m['content'])
@@ -64,10 +64,10 @@ def test_offline_graph_imports_answers_and_pends_judge(lake):
 
 
 def test_binding_judge_response_scores_three_lines(lake):
-    from demiflow.operator_llm.lance_journal import submit_response
-    from preparation.operaters.runfiles import read_record
+    from demiflow.operator_llm.sqlite_offline import submit_response
+    from preparation.articles.operators.runfiles import read_record
     from project import resolve_root
-    from evaluation.t2i.v1.operaters.judging import V60_DIMS
+    from evaluation.t2i.v1.operators.judging import V60_DIMS
     run, _, cfg = build(lake, lake[2])
     active = next(r for r in saved_stage(run, "judge_requests") if r["status"] == "generated")
     native = read_record(active["judge_binding"]["request_ref"])["native_offline"]
@@ -93,7 +93,7 @@ def test_binding_judge_response_scores_three_lines(lake):
 
 def test_online_mode_required_for_gateway_and_jobs_pending_offline(lake):
     from evaluation.t2i.v1.t2i_v1_eval_pipeline import config, run_pipeline
-    from evaluation.t2i.v1.operaters.answers import BuildAnswerJobs
+    from evaluation.t2i.v1.operators.answers import BuildAnswerJobs
     cfg = config("offline", ["openrouter/google/gemini-3.1-flash-image"])
     run = lake[0] / "evaluation/t2i/v1/datasets/jobs"
     run_pipeline(run, lake[1], cfg, through="answers")
@@ -106,7 +106,7 @@ def test_online_mode_required_for_gateway_and_jobs_pending_offline(lake):
 
 def test_finalize_matches_historical_scores():
     """Re-finalize historical judge responses with the port and compare line scores."""
-    from evaluation.t2i.v1.operaters.judging import finalize_v60, validate_v60
+    from evaluation.t2i.v1.operators.judging import finalize_v60, validate_v60
     from evaluation.t2i.v1.tests.fixtures.eval_score import finalize_v60 as old_finalize
     scores_dir = storage.ROOT / "benchmark/t2i/v1/bench200/scores"
     files = [name for name in evidence().paths(evidence_key(scores_dir)+"/scores_v60_V2_") if name.endswith(".jsonl")]

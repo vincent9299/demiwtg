@@ -1,0 +1,100 @@
+{
+  "run": "pilot10_64_three_models_v2_20261004",
+  "source": {
+    "uri": "demiwtg/curation/t2i_positive_pairs/datasets/inputs_v4__pilot10_target1024_20261004.lance",
+    "version": 3
+  },
+  "models": [
+    "gpt61",
+    "luna",
+    "qwen4b"
+  ],
+  "reference_model": "gpt61",
+  "prompt_config": "/yzp/zhaozy/yangzepeng/0905/demiwtg/curation/image_facts/prompts/tasks.yaml",
+  "batch_sizes": {
+    "gpt61": 8,
+    "luna": 8,
+    "qwen4b": 1
+  },
+  "concurrency": {
+    "gpt61": 2,
+    "luna": 2,
+    "qwen4b": 8
+  },
+  "prompt_options": {
+    "gpt61": {
+      "stream": true,
+      "timeout_s": 900,
+      "gateway": "litellm",
+      "request_options": {
+        "max_completion_tokens": 32768,
+        "reasoning_effort": "xhigh"
+      }
+    },
+    "luna": {
+      "stream": true,
+      "timeout_s": 900,
+      "gateway": "litellm",
+      "request_options": {
+        "max_completion_tokens": 32768,
+        "reasoning_effort": "xhigh"
+      }
+    },
+    "qwen4b": {
+      "stream": true,
+      "timeout_s": 300,
+      "request_options": {
+        "max_tokens": 8192,
+        "temperature": 0,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      }
+    }
+  },
+  "local_service": {
+    "python": "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+    "cuda_bin": "/usr/local/cuda/bin",
+    "gpus": [
+      0
+    ],
+    "data_parallel_size": 1,
+    "tensor_parallel_size": 1,
+    "gpu_memory_utilization": 0.5,
+    "max_model_len": 16384,
+    "max_num_seqs": 8,
+    "max_num_batched_tokens": 16384,
+    "api_server_count": 1,
+    "enforce_eager": true,
+    "enable_logging_iteration_details": false,
+    "startup_timeout_s": 600,
+    "shutdown_timeout_s": 30,
+    "readiness_timeout_s": 2,
+    "poll_interval_s": 1,
+    "startup_log_interval_s": 15,
+    "limit_mm_per_prompt": {
+      "image": 1
+    },
+    "runner": null,
+    "chat_template": null,
+    "dtype": null,
+    "trust_remote_code": false,
+    "mm_processor_cache_gb": null,
+    "enable_prefix_caching": null,
+    "language_model_only": false,
+    "model_path": "models/Qwen3.5-4B"
+  },
+  "max_images": 64,
+  "max_source_rows": 10,
+  "max_edge": 1024,
+  "jpeg_quality": 85,
+  "max_image_bytes": 33554432,
+  "max_image_pixels": 64000000,
+  "max_encoded_batch_bytes": 16777216,
+  "max_requests": {
+    "gpt61": 8,
+    "luna": 8,
+    "qwen4b": 64
+  },
+  "write_mode": "overwrite"
+}

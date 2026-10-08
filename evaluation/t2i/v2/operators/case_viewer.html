@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>T2I 多路评测</title><style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#203047;background:#f4f7fb;font-size:15px;color-scheme:light}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}header,main{max-width:1400px;margin:auto;padding:20px 24px}header{padding-bottom:12px}h1{font-size:23px;margin:0 0 8px}h2{font-size:21px;margin:0 0 10px}h3{font-size:17px;margin:20px 0 10px}h4{margin:14px 0 6px}p{line-height:1.65;margin:8px 0}.muted{color:#586980;font-size:13px}.stats,.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{background:#e8eef7;border-radius:6px;padding:5px 9px;font-size:13px}.pass{background:#d9f1e8}.fail,.error{background:#fde7e6}.partial{background:#fff0d0}.inconclusive{background:#ece7fa}.toolbar{position:sticky;top:0;z-index:3;background:#f4f7fbf5;border-block:1px solid #dce3ed;padding:12px 24px;backdrop-filter:blur(10px)}.controls{max-width:1352px;margin:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}label{font-size:13px}input,select,button{font:inherit;border:1px solid #bac7d7;border-radius:6px;padding:7px;background:white;color:inherit}button{cursor:pointer}button:hover{background:#e8effa}button:disabled{opacity:.45;cursor:default}#search{width:230px}#jump{width:75px}#concept{max-width:330px}.card{background:white;border:1px solid #dce3ed;border-radius:10px;padding:22px;margin-bottom:18px}.columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,40%);gap:24px}.text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75}.instruction{padding:15px;background:#f2f6fd;border-left:3px solid #3e6cb1;border-radius:4px}.point{border-top:1px solid #e3e9f1;padding:12px 0}.answer{display:block;width:100%;max-width:640px;height:auto;border-radius:6px;cursor:zoom-in}.references{display:flex;gap:10px;flex-wrap:wrap}.references img{width:140px;height:140px;object-fit:contain;background:#f4f7fb;cursor:zoom-in}details{margin:12px 0}summary{cursor:pointer;color:#315988;padding:6px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.55;background:#f4f7fb;padding:12px;border-radius:6px}a{color:#245fa5}.empty{padding:35px;text-align:center}dialog{border:0;border-radius:10px;max-width:94vw;max-height:94vh;padding:18px}dialog::backdrop{background:#142135a8}dialog img{display:block;max-width:85vw;max-height:75vh;object-fit:contain;margin:10px auto}.footer{display:flex;justify-content:center;gap:16px;padding:15px}@media(max-width:850px){.columns{grid-template-columns:1fr}.toolbar,header,main{padding:12px}.card{padding:15px}#search{width:180px}}
+
+.actual-prompt{font-size:14px;line-height:1.8;max-height:none}.actual-references img{width:240px;height:240px}.actual-references figure{margin:4px}.actual-references figcaption{font-size:12px;color:#586980}.model-input{border:1px solid #dce3ed;padding:12px;border-radius:6px}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border:1px solid #dce3ed;padding:7px;text-align:left}.arm{border-top:2px solid #dce3ed;margin-top:22px}.score{font-size:22px;font-weight:650}.error-text{color:#a12621}
+.score-list-controls{margin:12px 0}.score-list-scroll{overflow-x:auto}.score-list-table{min-width:1150px}.score-list-table td{vertical-align:top}.score-list-table th:first-child{min-width:155px}.score-pair{white-space:nowrap;font-variant-numeric:tabular-nums}.score-delta{display:block;font-size:12px;margin-top:5px}.score-up{color:#117349}.score-down{color:#b32f32}.score-selected{background:#edf3ff}.case-score-link{text-align:left;border:0;background:transparent;padding:2px;color:#245fa5}
+.media-item{max-width:100%;margin:4px 0}.media-item>button{display:block;font-size:12px;margin-top:5px}#image-note{overflow-wrap:anywhere;user-select:text}.copy-controls{margin:6px auto}#copy-status{overflow-wrap:anywhere}
+</style></head>
+<body><header><h1>T2I 多路评测 · A/B 判分</h1><p id="summary"></p><section id="overview"><div id="progress"></div><p><button id="open-details">查看逐题明细 →</button></p></section><details><summary>当前运行、错误日志与固定版本</summary><pre id="metadata"></pre></details></header>
+<section class="toolbar" id="detail-toolbar"><div class="controls"><button id="back-summary" hidden>← 返回汇总</button></div><div class="controls"><input id="search" type="search" placeholder="搜索概念、题面、考点"><label>作答路 <select id="arm"><option value="">全部作答路</option></select></label><label>结果 <select id="status"><option value="">全部</option><option value="scored">A/B 已判分</option><option value="generated">已有作答图</option><option value="pending">等待中</option><option value="technical">技术失败</option><option value="pass">B pass</option><option value="partial">B partial</option><option value="fail">B fail</option><option value="inconclusive">B inconclusive</option></select></label><label>每页 <select id="size"><option>1</option><option>3</option><option>5</option></select> 题</label><button id="prev">上一页</button><input id="jump" type="number" min="1" value="1" aria-label="页码"><button id="next">下一页</button><span id="count"></span><select id="concept"><option value="">跳转题目…</option></select><button id="reset">清空筛选</button></div></section>
+<div class="controls copy-controls"><button id="copy-selection">复制选中文字</button><span id="copy-status" class="muted" role="status" aria-live="polite">支持 Ctrl+C / ⌘C；图片路径可用图片下方按钮复制。</span></div>
+<main id="detail-body" hidden><div id="cases"></div><div class="footer"><button id="bottom-prev">上一页</button><span id="bottom-count"></span><button id="bottom-next">下一页</button></div><p class="muted">所有题面、考点和评分理由保留全文。翻页不运行代码；重新运行notebook查看格可刷新最新结果。图片为缩略图，点击放大，原图URI保留。技术失败和未评分不作0分。</p></main>
+<dialog id="image-dialog"><button id="close-image">关闭</button> <button id="copy-image-path">复制原图路径</button><span id="image-copy-status" role="status"></span><img id="large-image"><p id="image-note"></p></dialog>
+<script id="case-data" type="application/json">__CASE_DATA__</script><script>
+(async()=>{'use strict';const $=id=>document.getElementById(id);let D=JSON.parse($('case-data').textContent);
+if(D.encoding==='gzip-base64'){const raw=Uint8Array.from(atob(D.payload),c=>c.charCodeAt(0));D=JSON.parse(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).text());}
+
+const primaryJudge=String(D.meta.judge||'').toLowerCase().startsWith('codex')?'Codex':'Malasci';
+// 从共享表恢复逐字相同的真实输入；仅复用存储，不重新渲染模型模板。
+const unpack=v=>{if(v&&Number.isInteger(v.text_index)){v.text=D.prompt_texts[v.text_index];delete v.text_index;}};
+for(const c of D.cases)for(const a of c.arms)for(const name of ['input','a_input','b_input','d_input','codex_input','core_input','rag_decision_input','rag_concepts_input','rag_captions_input']){const v=a[name];if(!v)continue;unpack(v);for(const m of v.messages||[])for(const p of m.parts)unpack(p);}
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const text=v=>`<div class="text">${esc(v)}</div>`,json=v=>`<pre>${esc(JSON.stringify(v,null,2))}</pre>`,score=v=>v==null?'—':Number(v).toFixed(2),badge=s=>`<span class="badge">${esc(s)}</span>`;
+let page=0,filtered=D.cases;
+const showDetails=()=>{$('overview').hidden=true;$('detail-toolbar').hidden=false;$('back-summary').hidden=false;$('detail-body').hidden=false;render();window.scrollTo(0,0);};
+$('open-details').onclick=showDetails;
+$('back-summary').onclick=()=>{$('overview').hidden=false;$('back-summary').hidden=true;$('detail-body').hidden=true;window.scrollTo(0,0);};
+const visible=c=>c.arms.filter(a=>$('arm').value===''||a.index===Number($('arm').value));
+const technical=a=>a.scoring_scheme==='D'?['failed','invalid_response','partially_reviewed','invalid_image','answer_missing','answer_mismatch','needs_context_budget','core_failed','core_invalid_response'].includes(a.d_status):a.status==='generation_failed'||[a.a_status,a.b_status].some(s=>s&&!['ready','pending','scored','reviewed','generation_failed'].includes(s));
+const matches=(a,s)=>a.scoring_scheme==='D'?(!s||s==='technical'&&technical(a)||s==='scored'&&a.d_status==='reviewed'||s==='generated'&&!!a.image||s==='pending'&&(!a.d_status||a.d_status==='pending')||a.d_verdict===s||s==='inconclusive'&&a.d_status==='core_inconclusive'):!s||s==='technical'&&technical(a)||s==='scored'&&a.a_status==='scored'&&a.b_status==='reviewed'||s==='generated'&&!!a.image||s==='pending'&&(!a.status||!a.a_status||a.a_status==='ready'||a.b_status==='ready'||a.a_status==='pending'||a.b_status==='pending')||a.b_verdict===s;
+function localImagePath(uri){
+ if(typeof uri!=='string')return '';
+ try{const u=new URL(uri);if(u.protocol==='file:'&&(!u.hostname||u.hostname==='localhost'))return decodeURIComponent(u.pathname);}catch(e){}
+ return uri;
+}
+function imageFileLink(uri, label='打开原图'){
+ const path=localImagePath(uri);
+ if(!path.startsWith('/')||path.startsWith('//'))return '';
+ const href=path.split('/').map(encodeURIComponent).join('/');
+ return `<a class="original-image-link" data-open-image href="${esc(href)}" title="${esc(path)}">${esc(label)}</a>`;
+}
+// Let the notebook host open the original using its current local/remote workspace.
+// The standalone HTML retains an ordinary file link; embedded clicks stay in the notebook.
+document.addEventListener('click',e=>{
+ const link=e.target.closest('a[data-open-image]');
+ if(!link||parent===window)return;
+ e.preventDefault();parent.postMessage({type:'t2i-open-image-v1',href:link.getAttribute('href')},'*');
+});
+const media=(key,cls)=>{const m=D.media[key];return !m?'':`<div class="media-item">${m.error?text(m.error):`<img loading="lazy" class="${cls}" src="${m.src}" data-image="${esc(key)}">`}${m.uri?`${imageFileLink(m.uri)} <button type="button" data-copy-image="${esc(key)}">复制原图路径</button>`:''}</div>`;};
+function selectedText(){const el=document.activeElement;if(el?.matches('input:not([type=password]),textarea')&&typeof el.selectionStart==='number')return el.value.slice(el.selectionStart,el.selectionEnd);return window.getSelection()?.toString()||'';}
+function publishSelection(){if(parent!==window)parent.postMessage({type:'t2i-selection-v1',text:selectedText()},'*');}
+for(const name of ['selectionchange','focusin','keyup'])document.addEventListener(name,publishSelection);
+window.addEventListener('message',e=>{if(e.source===parent&&e.data?.type==='t2i-selection-request-v1')publishSelection();});
+function copyText(value){
+ const status=$('image-dialog').open?$('image-copy-status'):$('copy-status');
+ if(!value){status.textContent='请先选中要复制的文字。';return false;}
+ const focused=document.activeElement,selection=window.getSelection(),ranges=[];
+ for(let i=0;i<(selection?.rangeCount||0);i++)ranges.push(selection.getRangeAt(i).cloneRange());
+ const inputRange=focused&&typeof focused.selectionStart==='number'?[focused.selectionStart,focused.selectionEnd,focused.selectionDirection]:null;
+ const area=document.createElement('textarea');area.value=value;area.style.cssText='position:fixed;left:-10000px;top:0';
+ ($('image-dialog').open?$('image-dialog'):document.body).append(area);
+ let copied=false;try{area.focus({preventScroll:true});area.select();copied=document.execCommand('copy');}catch(e){}
+ finally{area.remove();focused?.focus({preventScroll:true});selection?.removeAllRanges();for(const range of ranges)selection?.addRange(range);if(inputRange)focused.setSelectionRange(...inputRange);}
+ status.textContent=copied?`已复制 ${value.length} 个字符。`:'自动复制未成功，请使用页面上方的复制备用文本框。';
+ // Send after restored selection events so the fallback retains the requested path.
+ setTimeout(()=>{if(parent!==window)parent.postMessage({type:'t2i-copy-result-v1',text:value,copied},'*');},0);
+ return copied;
+}
+$('copy-selection').addEventListener('pointerdown',e=>e.preventDefault());
+$('copy-selection').onclick=()=>copyText(selectedText());
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==='c'&&selectedText()&&copyText(selectedText())){e.preventDefault();e.stopImmediatePropagation();}},true);
+
+function inputView(v, title, opened=false){if(!v)return '';let h=`<details class="model-input" ${opened?'open':''}><summary>${esc(title)}</summary>`;if(!v.available)return h+text(v.note||'无请求记录')+'</details>';
+h+=`<p class="muted">${esc(v.template||'')}${v.note?' · '+esc(v.note):''}</p>`;
+if(v.text!=null)h+=`<pre class="actual-prompt" data-field="actual-prompt">${esc(v.text)}</pre>`;
+if(v.images){h+=`<h4>实际输入的参考图（${v.images.length}张）</h4><div class="references actual-references">`+(v.images.length?v.images.map((k,i)=>`<figure>${media(k,'reference')}<figcaption>输入参考图 ${i+1}</figcaption></figure>`).join(''):text('未传入参考图'))+'</div>';}
+for(const m of v.messages||[]){h+=`<h4>${esc(m.role)}</h4>`;for(const p of m.parts)h+=p.image?media(p.image,'reference'):`<pre class="actual-prompt">${esc(p.text)}</pre>`;}
+h+=`<details><summary>请求参数及原始记录位置</summary>${json({parameters:v.parameters,source:v.source,image_refs:v.image_refs})}</details></details>`;return h;}
+function ragView(a){if(!a.rag)return '';const r=a.rag;let h=`<details class="rag-trace"><summary>ImageRAG诊断、检索与初图 · ${esc(r.status)}</summary>${text(r.reason||'')}`;
+if(a.initial_image)h+=`<h4>无图初始作答</h4>${media(a.initial_image,'answer')}`;
+if(r.status==='keep_initial')h+=text('VLM判断初图已符合题面；最终沿用初图，未追加生图请求。');
+if(r.fallback_prompt)h+=text('未识别出缺失概念，按原版回退为原题检索；不是图库dense caption。');
+for(const [step,title] of [['decision','是否符合题面'],['concepts','缺失概念'],['captions','检索caption']]){h+=`<h4>${title}</h4>${json(r.stages?.[step]?.result)}`+inputView(a['rag_'+step+'_input'],title+' · 实际完整输入');}
+if(r.references?.length)h+=`<h4>caption与命中图片</h4>${r.references.map(v=>`<div class="point"><b>参考图 ${esc(v.number)}</b><h5>缺失概念检索描述</h5>${text(v.caption)}<h5>图库图片caption · ${esc(v.image_caption_status||'未关联')}</h5>${text(v.image_caption||v.image_caption_error||'暂无caption')}<p>cosine距离：${esc(v.distance)}</p>${json(v.object_ref)}${imageFileLink(v.object_ref?.uri)}</div>`).join('')}`;
+return h+`<details><summary>完整溯源：固定图库、查询调用与命中记录</summary>${json(r)}</details></details>`;}
+function d7Arm(a){
+const r=a.d_result, m=a.d_metrics_result||{}, requirements=a.core_requirements?.requirements||[];
+const compare=!!a.codex, cr=a.codex?.result, cm=a.codex?.metrics||{};
+const byId=Object.fromEntries((r?.requirement_scores||[]).map(v=>[v.id,v]));
+const cb=Object.fromEntries((cr?.requirement_scores||[]).map(v=>[v.id,v]));
+const groups=[['task_correctness_core','核心正确性',v=>v.dimension==='task_correctness'&&v.is_core],['task_correctness_noncore','非核心正确性',v=>v.dimension==='task_correctness'&&!v.is_core],['general_instruction_following','通用题面遵循',v=>v.dimension==='general_instruction_following']];
+const labels=[['overall','综合分'],['task_correctness','任务正确性'],['task_correctness_core','核心正确性'],['task_correctness_noncore','非核心正确性'],['general_instruction_following','通用题面遵循'],['quality','质量'],['aesthetics','美感']];
+const metric=(metrics,key)=>metrics[key+'_status']==='not_applicable'?'N/A':score(metrics[key+'_score']);
+const pending=a.codex?.status==='not_requested'?'尚未补评':a.codex?.reason||'待评';
+const rating=(v,reason)=>v==null?text(reason||'待评'):`<b>${esc(v.score??v.issue??v)}</b>${text(v.reason||reason||'')}`;
+let h=`<section class="arm"><h3>${esc(a.label)}</h3>${badge(primaryJudge+' D7：'+(a.d_status==='not_requested'?'未提交评分':a.d_status||'待评'))}${compare?badge('Codex D7：'+(a.codex.status||'待评')):''}${badge('生图：'+(a.status||'待完成'))}${ragView(a)}${inputView(a.input,'实际答题输入 · 完整 prompt 与传入参考图',true)}<div class="columns"><section><h4>已有作答图</h4>${a.image?media(a.image,'answer'):text('无作答图')}</section><section><h4>D · 五组评分${compare?' · 同图判官对比':''}</h4><table class="judge-scores"><thead><tr><th>维度</th><th>${primaryJudge}</th>${compare?'<th>Codex</th><th>Codex − Malasci</th>':''}</tr></thead><tbody>`;
+for(const [key,label] of labels){const x=m[key+'_score'],y=cm[key+'_score'];h+=`<tr><th>${label}</th><td>${metric(m,key)}</td>${compare?`<td>${metric(cm,key)}</td><td>${x==null||y==null?'—':score(y-x)}</td>`:''}</tr>`;}
+h+=`</tbody></table>${text(a.d_reason||'')}${compare?text(a.codex.reason||''):''}</section></div>`;
+for(const [key,label,select] of groups){
+const entries=requirements.filter(select);
+h+=`<h4>${label} · ${compare?primaryJudge+' ':''}${metric(m,key)}${compare?' / Codex '+metric(cm,key):''}</h4>`;
+if(!entries.length){h+=text('固定清单无本组方向：N/A');continue;}
+h+=`<table class="requirement-comparison"><thead><tr><th>固定检查方向与判据</th><th>${primaryJudge} · 分值与理由</th>${compare?'<th>Codex · 分值与理由</th>':''}</tr></thead><tbody>`;
+for(const item of entries){h+=`<tr data-requirement="${esc(item.id)}"><td><b>${esc(item.id)}</b>${text(item.requirement)}${text('判据：'+item.criterion)}${text('依据：'+item.basis)}${item.applicability?text('适用条件：'+item.applicability):''}</td><td>${rating(byId[item.id])}</td>${compare?`<td>${rating(cb[item.id],pending)}</td>`:''}</tr>`;}
+h+='</tbody></table>';}
+for(const [dim,label] of [['quality','质量'],['aesthetics','美感']]){h+=`<details><summary>${label} · 全部细项及理由${compare?' · Malasci / Codex':''}</summary><table><thead><tr><th>细项</th><th>${primaryJudge} · 分值与理由</th>${compare?'<th>Codex · 分值与理由</th>':''}</tr></thead><tbody>`;for(const key of new Set([...Object.keys(r?.[dim]||{}),...Object.keys(cr?.[dim]||{})]))h+=`<tr><td>${esc(key)}</td><td>${r?.[dim]?.[key]===null?text('N/A'):rating(r?.[dim]?.[key],r?.[dim+'_reasons']?.[key])}</td>${compare?`<td>${cr?.[dim]?.[key]===null?text('N/A'):rating(cr?.[dim]?.[key],cr?.[dim+'_reasons']?.[key]||pending)}</td>`:''}</tr>`;h+='</tbody></table></details>';}
+h+=`<details><summary>分组换算、适用状态及实际权重</summary><h4>${primaryJudge}</h4>${json(m)}${compare?'<h4>Codex</h4>'+json(cm):''}</details><details><summary>判官原始完整响应</summary><h4>${primaryJudge}</h4>${json(r)}${compare?'<h4>Codex</h4>'+json(cr):''}</details><details><summary>Review 固定检查方向与题目版本（两路共用）</summary>${json(a.core_requirements)}</details>`;
+return h+inputView(a.d_input,primaryJudge+' D 判分 · 实际完整输入与作答图')+inputView(a.codex_input,'Codex D 判分 · 实际完整输入与作答图')+'</section>';
+}
+function dArm(a){
+if(D.meta.prompt_version==='t2i-v2-d-judge-7-review')return d7Arm(a);
+const four=D.meta.prompt_version==='t2i-v2-d-judge-6-review';
+let h=`<section class="arm"><h3>${esc(a.label)}</h3><div class="badges">${badge('D：'+(a.d_status==='not_requested'?'未提交评分':a.d_status||'待评'))}${a.d_single_pass?'':badge('要求准备：'+(a.core_status||'待准备'))}${badge('任务结论：'+(a.d_verdict||'—'))}</div>${badge('生图：'+(a.status||'待完成'))}${ragView(a)}${inputView(a.input,'实际答题输入 · 完整 prompt 与传入参考图',true)}<div class="columns"><section><h4>已有作答图</h4>${a.image?media(a.image,'answer'):text('无作答图')}</section><section><h4>D · ${four?'四':'三'}个维度独立评分</h4><p class="score">任务正确性 ${score(a.d_task_score)}</p><p>质量 ${score(a.d_quality_score)} · 美感 ${score(a.d_aesthetics_score)} / 100</p>${four?`<p>其他题面遵循 ${score(a.d_other_score)} · ${esc(a.d_other_status||'待评')}</p><p>综合分 ${score(a.d_overall_score)} · 权重 70/10/10/10</p>`:''}${text(a.d_reason||a.core_reason||'')}`;
+const r=a.d_result;
+if(r){
+  if(four){
+    for(const [dim,label] of [['task_correctness','任务正确性：原考点及必要补充'],['other_instruction_following','其他题面遵循']]){
+      h+=`<h4>${label}</h4>`;
+      const checks=r[dim]?.checks||[], order=a.d_metrics_result?.requirement_order?.[dim]||checks.map((_,i)=>i+1);
+      for(const issue of a.d_metrics_result?.validation_errors?.[dim]||[])h+=text('该维度暂未计分：'+issue);
+      for(const [i,sourceIndex] of order.entries()){const item=checks[sourceIndex-1];h+=`<div class="point"><b>要求 ${i+1} · ${esc(item.verdict)}${item.is_core?' · 核心门槛':''}</b>${text(item.requirement)}${text('题面引用：'+item.instruction_quote)}${text('来源：'+(item.source_point_indices.length?'原考点 '+item.source_point_indices.join('、'):'题面补充'))}${item.applicability?text('适用条件：'+item.applicability):''}${text(item.reason)}</div>`;}
+      if(!r[dim]?.checks?.length)h+=text('没有适用的检查项');
+      for(const issue of r[dim]?.issues||[])h+=text('评审问题：'+issue);
+    }
+  }else{
+    h+=`<h4>任务判断与证据</h4>${text(r.task_correctness.reason)}<h4>依据</h4>${text(r.task_correctness.basis)}`;
+    for(const [group,label] of [['point_results','原有考点'],['additional_requirements','补充要求']])for(const item of r.task_correctness[group]||[])h+=`<div class="point"><b>${label} ${esc(item.index)} · ${esc(item.verdict)}</b>${item.requirement?text(item.requirement):''}${item.instruction_quote?text('题面引用：'+item.instruction_quote):''}${text(item.evidence)}${text(item.reason)}</div>`;
+    h+=`<h4>题面覆盖说明</h4>${text(r.task_correctness.coverage_reason)}`;
+  }
+  for(const [dim,label] of [['quality','质量'],['aesthetics','美感']]){
+    h+=`<details><summary>${label} · 全部细项及理由</summary>`;
+    for(const issue of a.d_metrics_result?.validation_errors?.[dim]||[])h+=text('该维度暂未计分：'+issue);
+    for(const [key,value] of Object.entries(r[dim]||{}))h+=`<div class="point"><b>${esc(key)} · ${esc(value)}</b>${text(r[dim+'_reasons'][key])}</div>`;
+    h+='</details>';
+  }
+}
+h+=`<details><summary>通过率、核心项计数与分数换算</summary>${json(a.d_metrics_result)}</details><details><summary>D 判官原始完整响应（保留返回顺序）</summary>${json(r)}</details></section></div><details><summary>${a.d_single_pass?'本次评审的要求与计分记录':'评图前固定的要求清单与归属依据（两路共用）'}</summary>${json(a.core_requirements)}${a.d_single_pass?'':json(a.core_plan)}</details>`;
+return h+(a.d_single_pass?'':inputView(a.core_input,'要求准备 · 实际完整输入（无图）'))+inputView(a.d_input,'D 判分 · 实际完整输入与作答图')+'</section>';
+}
+function arm(a){if(a.scoring_scheme==='D')return dArm(a);let h=`<section class="arm"><h3>${esc(a.label)}</h3><div class="badges">${badge('生图：'+(a.status||'pending'))}${badge('A：'+(a.a_status||'pending'))}${badge('B：'+(a.b_status||'pending'))}${badge('实际参考图 '+(a.input?.available?a.input.images.length:'无请求记录'))}</div>${ragView(a)}${inputView(a.input,'实际答题输入 · 完整 prompt 与传入参考图',true)}<div class="columns"><section><h4>作答图</h4>${a.image?media(a.image,'answer'):text('尚无作答图')}<p class="error-text">${esc(a.reason||'')}</p><details><summary>原图与生成耗时</summary>${json({image:a.image_json?JSON.parse(a.image_json):null,generation_seconds:a.generation_seconds})}</details></section><section><h4>A · 通用评分</h4><p class="score">${score(a.a_score)} / 100</p><p>对齐 ${score(a.alignment_score)} · 质量 ${score(a.quality_score)} · 美感 ${score(a.aesthetics_score)}</p>${text(a.a_reason||'')}`;
+if(a.a_result){h+='<details><summary>A 全部22项分值和理由</summary>';for(const dim of ['alignment','quality','aesthetics']){h+=`<h4>${esc(dim)}</h4>`;for(const [key,value] of Object.entries(a.a_result[dim]||{}))h+=`<div class="point"><b>${esc(key)} · ${esc(value)}</b>${text(a.a_result[dim+'_reasons']?.[key]||'')}</div>`;}h+='</details>';}
+h+=`<h4>B · 出题考点评分</h4><p class="score">${score(a.b_score)} / 100</p><p>${esc(a.b_verdict||'')} · 原始分 ${a.b_raw_score==null?'—':esc(a.b_raw_score)}</p>${text(a.b_reason||'')}`;
+if(a.b_result){const r=a.b_result;h+=`<h4>总体理由</h4>${text(r.reason)}<h4>依据</h4>${text(r.basis)}`;for(const p of r.point_results||[])h+=`<div class="point"><b>考点 ${esc(p.index)} · ${esc(p.verdict)}</b><p class="muted">像素证据</p>${text(p.evidence)}<p class="muted">判断理由</p>${text(p.reason)}</div>`;h+=`<details><summary>B原始完整结果及分类辅助判断</summary>${json(r)}</details>`;}
+return h+'</section></div>'+inputView(a.a_input,'A 判分 · 实际完整输入')+inputView(a.b_input,'B 判分 · 实际完整输入')+'</section>';}
+function card(c){return `<article class="card" data-concept="${esc(c.concept)}"><h2>${c.rank}. ${esc(c.concept)}</h2><p class="muted">${esc((c.taxonomy||[]).join(' / '))}</p><h3>完整题面</h3><div class="instruction text" data-field="instruction">${esc(c.instruction)}</div><details><summary>全部考点、依据和判据（${c.test_points.length}项）</summary>${c.test_points.map((p,i)=>`<div class="point"><b>${i+1}. ${esc(p.point)}</b><p class="muted">依据</p>${text(p.basis)}<p class="muted">判据</p>${text(p.criterion)}</div>`).join('')}</details>${visible(c).filter(a=>matches(a,$('status').value)).map(arm).join('')}<details><summary>全部正例参考图（${c.references.length}张）</summary><div class="references">${c.references.map(k=>media(k,'reference')).join('')}</div></details></article>`;}
+function render(){const size=Number($('size').value),total=Math.max(1,Math.ceil(filtered.length/size));page=Math.max(0,Math.min(page,total-1));$('jump').value=page+1;$('jump').max=total;$('cases').innerHTML=filtered.slice(page*size,(page+1)*size).map(card).join('')||'<p class="empty">没有匹配的题目</p>';const label=`${filtered.length} 题 · ${page+1} / ${total} 页`;$('count').textContent=label;$('bottom-count').textContent=label;for(const id of ['prev','bottom-prev'])$(id).disabled=page===0;for(const id of ['next','bottom-next'])$(id).disabled=page===total-1;window.scrollTo(0,0);}
+function filter(){const q=$('search').value.toLocaleLowerCase();filtered=D.cases.filter(c=>(c.concept+c.instruction+JSON.stringify(c.test_points)).toLocaleLowerCase().includes(q)&&visible(c).some(a=>matches(a,$('status').value)));page=0;render();}
+for(const id of ['search','arm','status'])$(id).addEventListener(id==='search'?'input':'change',()=>{filter();showDetails();});
+for(const id of ['prev','bottom-prev'])$(id).onclick=()=>{page--;showDetails();};for(const id of ['next','bottom-next'])$(id).onclick=()=>{page++;showDetails();};
+$('size').onchange=()=>{page=0;render();};$('jump').onchange=()=>{page=Number($('jump').value)-1;render();};$('reset').onclick=()=>{$('search').value='';$('arm').value='';$('status').value='';filter();};
+for(const c of D.cases){const o=document.createElement('option');o.value=c.task_id;o.textContent=c.rank+'. '+c.concept;$('concept').appendChild(o);}
+$('concept').onchange=()=>{const target=$('concept').value;$('search').value='';$('arm').value='';$('status').value='';filtered=D.cases;page=Math.floor(filtered.findIndex(c=>c.task_id===target)/Number($('size').value));showDetails();};
+for(const a of D.meta.arms){const o=document.createElement('option');o.value=a.index;o.textContent=a.label;$('arm').appendChild(o);}
+if(D.meta.scoring_scheme==='D'){
+document.querySelector('h1').textContent='T2I 多路评测 · D '+(D.meta.prompt_version==='t2i-v2-d-judge-7-review'?'五组':D.meta.prompt_version==='t2i-v2-d-judge-6-review'?'四维':'三维')+'评分'+(D.meta.prompt_version?' · '+D.meta.prompt_version:'');
+for(const o of $('status').options){if(o.value==='scored')o.textContent='D 已判分';else if(['pass','partial','fail','inconclusive'].includes(o.value))o.textContent='D '+o.value;}
+}
+$('summary').textContent=`${D.meta.run} · ${D.meta.questions}题 / ${D.meta.expected}条答案 · 后台${D.meta.active?'运行中':'未运行'} · ${D.meta.phase} · 判分 ${D.meta.judge}${D.meta.reasoning_effort ? " + " + D.meta.reasoning_effort : ""} · 快照 ${D.meta.updated_at}`;
+const dSeven=D.meta.prompt_version==='t2i-v2-d-judge-7-review';
+const dFour=D.meta.prompt_version==='t2i-v2-d-judge-6-review';
+const dLabels={...(dSeven?{task_correctness_core:'核心正确性',task_correctness_noncore:'非核心正确性',general_instruction_following:'通用题面遵循',overall:'综合分'}:{}),task_correctness:'任务正确性',quality:'质量',aesthetics:'美感',...(dFour?{other_instruction_following:'其他题面遵循',overall:'综合分'}:{})};
+if(D.meta.scoring_scheme==='D'){$('progress').innerHTML=(D.meta.complete?'':'<p class="error-text">评测尚不完整。下列均分只覆盖有效结果；技术失败不计为0分。配对表只比较两路同题均有效的样本。</p>')+'<p>'+ (dSeven?'每项0/1/2映射为0/60/100，各组平均；核心任一0使核心组为0。权重60/10/10/10/10，仅N/A组移出分母；评审异常保留空分。':dFour?'正确性仅计算本维度要求；核心通过且至少2/3通过得60，全通过得100。其他遵循按通过率计分。综合权重70/10/10/10，仅明确不适用时归一化。':'固定核心要求全部通过，且总体通过率至少2/3才得1；全部通过得2。历史三维结果不按新版重算。') +'</p><table><thead><tr><th>作答路</th><th>记录 / 范围</th>'+Object.values(dLabels).map(v=>`<th>${esc(v)} · 均分（有效数/应有）</th>`).join('')+'<th>状态与任务结论</th></tr></thead><tbody>'+D.meta.arms.map(a=>`<tr><td>${esc(a.label)}${D.meta.complete?' · 已完成':a.paused?' · 已暂停':''}</td><td>${a.recorded} / ${a.expected}</td>${Object.keys(dLabels).map(k=>`<td>${score(a.dimensions[k]?.mean)}（${a.dimensions[k]?.valid||0}/${a.expected}）</td>`).join('')}<td>${esc(JSON.stringify(a.states))}<br>${esc(JSON.stringify(a.verdicts))}${dFour?'<br>其他遵循：'+esc(JSON.stringify(a.other_statuses||{})):''}</td></tr>`).join('')+'</tbody></table><details><summary>同题且两路均有有效分的配对比较</summary>'+json(D.meta.paired_dimensions)+'</details>';}else $('progress').innerHTML='<table><thead><tr><th>作答路</th><th>生图成功 / 失败 / 待完成</th><th>A有效数 / 均分</th><th>B有效数 / 均分</th><th>A状态</th><th>B状态及结论</th></tr></thead><tbody>'+D.meta.arms.map(a=>`<tr><td>${esc(a.label)}${a.paused?'<br><span class="badge">已暂停</span>':''}</td><td>${a.generation.generated||0} / ${a.generation.generation_failed||0} / ${a.expected-Object.values(a.generation).reduce((x,y)=>x+y,0)}</td><td>${a.a_valid} / ${score(a.a_mean)}</td><td>${a.b_valid} / ${score(a.b_mean)}</td><td>${esc(JSON.stringify(a.a))}</td><td>${esc(JSON.stringify(a.b))}<br>${esc(JSON.stringify(a.b_verdicts))}</td></tr>`).join('')+'</tbody></table>';
+if(D.meta.performance){
+const performance=D.meta.performance,groups=performance.groups,modeNames={text_only:'无图',positive_images:'正例图',imagerag:'按缺点 RAG'};
+const table=$('progress').querySelector(':scope > table');
+if(table){
+table.querySelector('thead tr').insertAdjacentHTML('beforeend','<th>生图调用均值 · 秒<br>含启动/排队（若发生）</th><th>已记录作答调用 · 秒/题<br>含等待；RAG含初图</th><th>D7原调用均值 · 秒<br>计时数 / 调用数</th>');
+for(const [index,row] of [...table.querySelectorAll('tbody tr')].entries()){
+const arm=D.meta.arms[index],g=groups.find(g=>g.generation_model===arm.generation_model&&g.answer_mode===arm.answer_mode);
+const metric=s=>s?`${score(s.mean_s)}<br><span class="muted">${s.timed_calls}/${s.calls}${s.skipped_questions?'；跳过 '+s.skipped_questions+' 题':''}</span>`:'未记录';
+row.insertAdjacentHTML('beforeend',`<td data-timing="generation">${metric(g?.stages.generation)}</td><td data-timing="answer-subtotal">${score(g?.recorded_answer_model_call_s_per_question)}${g?.missing_answer_model_timing_calls?'<br><span class="muted">缺 '+g.missing_answer_model_timing_calls+' 次计时</span>':''}</td><td data-timing="judge">${metric(g?.stages.judge)}${g?.judge_reused_initial?'<br><span class="muted">同图复用 '+g.judge_reused_initial+' 题</span>':''}</td>`);
+}
+const scroll=document.createElement('div');scroll.className='score-list-scroll';table.before(scroll);scroll.append(table);
+}
+let h='<section id="performance-summary"><h3>时间性能 · 推理环节与调用耗时</h3>';
+if(performance.denoising){
+const d=performance.denoising;
+h+='<section id="denoising-summary"><h4>生图去噪循环 · 已排除启动与请求排队</h4><p class="muted">'+esc(d.basis)+' '+esc(d.cohort_note)+'</p><div class="score-list-scroll"><table><thead><tr><th>模型 · 模式</th><th>历史日志批次</th><th>配置步数</th><th>日志样本数</th><th>均值 · 秒</th><th>P50</th><th>P95</th></tr></thead><tbody>';
+for(const [i,g] of d.groups.entries())h+=`<tr data-denoise-index="${i}"><td>${esc(g.generation_model)} · ${modeNames[g.answer_mode]}</td><td>${Object.keys(g.runs).map(esc).join('<br>')}</td><td>${g.configured_steps.join(' / ')}</td><td>${g.samples}${g.ambiguous_modes?'（模式无法区分）':''}${g.error?'（日志不可读）':''}</td><td>${score(g.mean_s)}</td><td>${score(g.p50_s)}</td><td>${score(g.p95_s)}</td></tr>`;
+h+='</tbody></table></div></section>';
+}
+if(performance.net_inference)h+='<p id="net-inference-limits" class="muted">'+Object.entries(performance.net_inference).filter(([k,v])=>typeof v==='string').map(([k,v])=>esc(v)).join(' ')+'</p>';
+h+='<h4>各阶段调用墙钟 · 保留历史原始口径</h4><p class="muted">'+esc(performance.basis)+' '+esc(performance.aggregation)+' '+esc(performance.comparison_note)+'</p><details id="performance-stages"><summary>展开两个模型 × 三种模式的各阶段调用耗时（秒）</summary><div class="score-list-scroll"><table><thead><tr><th>模型 · 模式</th><th>阶段</th><th>计时数 / 调用数（单位）</th><th>未执行题数</th><th>均值</th><th>P50</th><th>P95</th><th>已记录累计秒</th></tr></thead><tbody>';
+for(const g of groups)for(const [key,s] of Object.entries(g.stages))h+=`<tr data-timing-model="${esc(g.generation_model)}" data-timing-mode="${esc(g.answer_mode)}" data-timing-stage="${esc(key)}"><td>${esc(g.generation_model)} · ${modeNames[g.answer_mode]}</td><td>${esc(s.label)}${s.models?.length?'<br><span class="muted">'+esc(s.models.join(" / "))+'</span>':''}</td><td>${s.timed_calls}/${s.calls}（${esc(s.unit)}）${s.missing_calls?'；缺失 '+s.missing_calls:''}</td><td>${s.skipped_questions}</td><td>${score(s.mean_s)}</td><td>${score(s.p50_s)}</td><td>${score(s.p95_s)}</td><td>${score(s.sum_s)}</td></tr>`;
+$('progress').insertAdjacentHTML('beforeend',h+'</tbody></table></div><p class="muted">P50/P95仅基于有效计时样本，采用线性插值。向量检索未保存独立时长，显示空值；调用秒数之和不能当作并发批次的历时。</p><details><summary>实际生成参数（历史调用）</summary>'+json(groups.map(g=>({model:g.generation_model,mode:g.answer_mode,parameters:g.generation_parameters})))+'</details></details></section>');
+}
+if(D.meta.codex_comparison){
+const c=D.meta.codex_comparison;
+let h='<section id="codex-comparison"><h3>同一作答 · Malasci / Codex 对比</h3><p>'+esc(c.label)+'。按维度只比较双方均有有效分的同题结果；空分及 N/A 不补零。</p><table><thead><tr><th>作答路</th><th>Codex 完成 / 范围</th><th>判官</th>'+Object.values(dLabels).map(v=>`<th>${esc(v)} · 均分（配对数）</th>`).join('')+'</tr></thead><tbody>';
+for(const a of c.arms)for(const [key,label] of [['malasci_mean','Malasci'],['codex_mean','Codex'],['delta','Codex − Malasci']])h+=`<tr><td>${esc(a.generation_model||'')} · ${a.answer_mode==='text_only'?'无参考图':'正例参考图'}</td><td>${a.reviewed} / ${a.expected}</td><th>${label}</th>${Object.keys(dLabels).map(k=>`<td>${score(a.dimensions[k]?.[key])}（${a.dimensions[k]?.paired_count||0}）</td>`).join('')}</tr>`;
+$('progress').insertAdjacentHTML('beforeend',h+'</tbody></table></section>');
+}
+if(dSeven){
+const dimensions={overall:'综合分',task_correctness_core:'核心正确性',task_correctness_noncore:'非核心正确性',general_instruction_following:'通用题面遵循',quality:'质量',aesthetics:'美感',task_correctness:'任务正确性'};
+const signed=v=>v==null?'—':(v>0?'+':'')+score(v);
+const deltaClass=v=>v>0?'score-up':v<0?'score-down':'muted';
+const value=(a,judge,key)=>{
+  const status=judge==='codex'?a?.codex?.status:a?.d_status;
+  const metrics=(judge==='codex'?a?.codex?.metrics:a?.d_metrics_result)||{};
+  if(metrics[key+'_status']==='not_applicable')return {number:null,label:'N/A'};
+  const n=metrics[key+'_score'];
+  return status==='reviewed'&&typeof n==='number'&&Number.isFinite(n)?{number:n,label:score(n)}:{number:null,label:status==='reviewed'?'—':'未评分'};
+};
+const modeLabels={text_only:'无图',positive_images:'正例图',imagerag:'按缺点 RAG'};
+const modes=['text_only','positive_images','imagerag'];
+const comparisons={positive_text:['text_only','positive_images','正例图 − 无图'],rag_positive:['positive_images','imagerag','RAG − 正例图'],rag_text:['text_only','imagerag','RAG − 无图']};
+const modelName=a=>a.generation_model||a.answer_model?.replace(/\+(?:正例参考图|ImageRAG)$/, '');
+const hasRag=D.cases.some(c=>c.arms.some(a=>a.answer_mode==='imagerag'));
+const pair=(c,judge,key)=>{
+  const model=$('case-score-model').value, values=Object.fromEntries(modes.map(mode=>[mode,value(c.arms.find(a=>a.answer_mode===mode&&modelName(a)===model),judge,key)]));
+  const deltas=Object.fromEntries(Object.entries(comparisons).map(([name,[a,b]])=>{const raw=values[a].number!=null&&values[b].number!=null?values[b].number-values[a].number:null;return [name,raw!=null&&Math.abs(raw)<1e-9?0:raw];}));
+  const which=$('case-score-comparison').value,[a,b]=comparisons[which];
+  return {left:values[a],right:values[b],delta:deltas[which],values,deltas};
+};
+$('progress').insertAdjacentHTML('beforeend',`<section id="case-score-list"><h3>每题得分列表 · 无图 → 正例图${hasRag?' → 按缺点 RAG':''}</h3>
+<p class="muted">同题、同生成模型比较；各维度保留三路分数与差值。RAG 从该模型无图作答诊断缺点，可能保留初图；此时复用同一 D7 评分。N/A、未评分不作0分。点击题目查看作答图和完整理由。</p>
+<div class="controls score-list-controls"><label>生成模型 <select id="case-score-model">${[...new Set(D.cases.flatMap(c=>c.arms.map(modelName)))].filter(Boolean).map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join('')}</select></label><label>判官 <select id="case-score-judge"><option value="malasci">${primaryJudge}</option>${D.meta.codex_comparison?'<option value="codex">Codex</option>':''}</select></label>
+<label>比较变化 <select id="case-score-comparison">${Object.entries(comparisons).filter(([k])=>hasRag||k==='positive_text').map(([k,v])=>`<option value="${k}" ${hasRag&&k==='rag_positive'?'selected':''}>${v[2]}</option>`).join('')}</select></label>
+<label>比较维度 <select id="case-score-dimension">${Object.entries(dimensions).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+<label>筛选 <select id="case-score-filter"><option value="all">全部题目</option><option value="higher">分数升高</option><option value="lower">分数降低</option><option value="equal">分数相同</option><option value="unpaired">无法配对</option></select></label>
+<label>排序 <select id="case-score-sort"><option value="desc">差值从高到低</option><option value="asc">差值从低到高</option><option value="rank">原题顺序</option></select></label>
+<label>搜索 <input id="case-score-search" type="search" placeholder="题号或概念"></label></div>
+<p id="case-score-summary" aria-live="polite"></p><p id="case-score-triple"></p><p id="case-score-count" class="muted"></p><div class="score-list-scroll"><table id="case-score-table" class="score-list-table"></table></div></section>`);
+function renderScoreList(){
+  const judge=$('case-score-judge').value,key=$('case-score-dimension').value,selected=$('case-score-filter').value,sort=$('case-score-sort').value,q=$('case-score-search').value.trim().toLocaleLowerCase(),which=$('case-score-comparison').value,[leftMode,rightMode,comparisonLabel]=comparisons[which];
+  const rows=D.cases.map(c=>({c,...pair(c,judge,key)})),valid=rows.filter(r=>r.delta!=null);
+  const higher=valid.filter(r=>r.delta>0).length,lower=valid.filter(r=>r.delta<0).length,equal=valid.length-higher-lower;
+  const mean=side=>valid.length?valid.reduce((s,r)=>s+r[side].number,0)/valid.length:null;
+  const diff=valid.length?valid.reduce((s,r)=>s+r.delta,0)/valid.length:null;
+  $('case-score-summary').innerHTML=`<b>${esc($('case-score-model').value)} · ${judge==='codex'?'Codex':primaryJudge} · ${dimensions[key]}</b> · 全量同题配对 ${valid.length}/${rows.length}：${modeLabels[leftMode]} ${score(mean('left'))} → ${modeLabels[rightMode]} ${score(mean('right'))}，均分差 <b class="${deltaClass(diff)}">${signed(diff)}</b>。升高 ${higher} 题，降低 ${lower} 题，相同 ${equal} 题，无法配对 ${rows.length-valid.length} 题。`;
+  const triple=rows.filter(r=>modes.every(m=>r.values[m].number!=null)),means=modes.map(m=>triple.length?triple.reduce((s,r)=>s+r.values[m].number,0)/triple.length:null);
+  $('case-score-triple').textContent=hasRag?`三路均有效的共同题集 ${triple.length}/${rows.length}：无图 ${score(means[0])} → 正例图 ${score(means[1])} → 按缺点 RAG ${score(means[2])}。三路差值：${triple.length?`${signed(means[1]-means[0])} / ${signed(means[2]-means[1])}；RAG 相对无图 ${signed(means[2]-means[0])}`:'—'}。`:'';
+  const listed=rows.filter(r=>(!q||(r.c.rank+' '+r.c.concept).toLocaleLowerCase().includes(q))&&(selected==='all'||selected==='higher'&&r.delta>0||selected==='lower'&&r.delta<0||selected==='equal'&&r.delta===0||selected==='unpaired'&&r.delta==null));
+  listed.sort((a,b)=>sort==='rank'?a.c.rank-b.c.rank:a.delta==null?(b.delta==null?a.c.rank-b.c.rank:1):b.delta==null?-1:(sort==='asc'?a.delta-b.delta:b.delta-a.delta)||a.c.rank-b.c.rank);
+  $('case-score-count').textContent=`当前列表 ${listed.length} / ${rows.length} 题；筛选、排序按「${dimensions[key]} · ${comparisonLabel}」，以上均分始终使用全量有效配对。`;
+  $('case-score-table').innerHTML='<thead><tr><th scope="col">题目 · 查看图与理由</th>'+Object.entries(dimensions).map(([k,label])=>`<th scope="col" class="${k===key?'score-selected':''}">${label}<br><span class="muted">无图 → 正例图${hasRag?' → RAG':''}</span></th>`).join('')+'</tr></thead><tbody>'+listed.map(({c})=>`<tr data-task-id="${esc(c.task_id)}"><th scope="row"><button class="case-score-link" data-case-score-task="${esc(c.task_id)}">${c.rank}. ${esc(c.concept)}</button></th>${Object.keys(dimensions).map(k=>{const p=pair(c,judge,k);return `<td data-dimension="${k}" class="${k===key?'score-selected':''}"><span class="score-pair">${modes.filter(m=>hasRag||m!=='imagerag').map(m=>p.values[m].label).join(' → ')}</span>${Object.entries(comparisons).filter(([d])=>hasRag||d==='positive_text').map(([d,v])=>`<span class="score-delta ${deltaClass(p.deltas[d])}">${v[2]}：${p.deltas[d]==null?'无法配对':signed(p.deltas[d])}</span>`).join('')}</td>`;}).join('')}</tr>`).join('')+'</tbody>';
+  if(!listed.length)$('case-score-table').insertAdjacentHTML('beforeend','<tfoot><tr><td colspan="8" class="empty">没有匹配的题目</td></tr></tfoot>');
+}
+for(const id of ['case-score-model','case-score-judge','case-score-comparison','case-score-dimension','case-score-filter','case-score-sort','case-score-search'])$(id).addEventListener(id==='case-score-search'?'input':'change',renderScoreList);
+$('case-score-table').onclick=e=>{const button=e.target.closest('[data-case-score-task]');if(!button)return;$('size').value='1';$('concept').value=button.dataset.caseScoreTask;$('concept').dispatchEvent(new Event('change'));};
+renderScoreList();
+}
+$('metadata').textContent=JSON.stringify(D.meta,null,2);
+if(D.meta.scoring_scheme==='D'){
+const comparison=$('progress').querySelector('details');comparison.open=true;
+const modeLabels={text_only:'无图',positive_images:'正例图',imagerag:'按缺点 RAG'};
+if(D.meta.comparisons_by_model){comparison.innerHTML='<summary>各生成模型 · 同题配对与三路共同有效题集</summary>'+Object.entries(D.meta.comparisons_by_model).map(([model,group])=>'<h3>'+esc(model)+'</h3>'+Object.values(group.pairs).map(pair=>'<h4>'+modeLabels[pair.left]+' → '+modeLabels[pair.right]+'</h4><table><thead><tr><th>维度</th><th>配对题数</th><th>'+modeLabels[pair.left]+'</th><th>'+modeLabels[pair.right]+'</th><th>差值</th></tr></thead><tbody>'+Object.entries(dLabels).map(([k,label])=>{const v=pair.dimensions[k]||{};return `<tr><td>${label}</td><td>${v.paired_count||0}</td><td>${score(v.arm0_mean)}</td><td>${score(v.arm1_mean)}</td><td>${score(v.arm1_minus_arm0)}</td></tr>`;}).join('')+'</tbody></table>').join('')+(Object.keys(group.pairs).length>1?'<h4>三路均有效 · 相同分母</h4><table><thead><tr><th>维度</th><th>共同有效题数</th><th>无图 → 正例图 → 按缺点 RAG</th></tr></thead><tbody>'+Object.entries(dLabels).map(([k,label])=>{const v=group.three_modes[k]||{};return `<tr><td>${label}</td><td>${v.valid||0}</td><td>${['text_only','positive_images','imagerag'].map(m=>score(v.means?.[m])).join(' → ')}</td></tr>`;}).join('')+'</tbody></table>':'')).join('');}
+else comparison.innerHTML='<summary>同题且两路均有有效分的配对比较</summary>'+json(D.meta.paired_by_model||D.meta.paired_dimensions);
+
+}
+$('cases').onclick=e=>{const button=e.target.closest('[data-copy-image]');if(button){copyText(localImagePath(D.media[button.dataset.copyImage].uri));return;}const key=e.target.dataset.image;if(!key)return;const m=D.media[key];$('large-image').src=m.src;$('image-note').innerHTML=imageFileLink(m.uri,localImagePath(m.uri))||esc(m.uri);$('copy-image-path').dataset.uri=m.uri;$('image-copy-status').textContent='';$('image-dialog').showModal();};
+$('copy-image-path').onclick=()=>copyText(localImagePath($('copy-image-path').dataset.uri));
+$('close-image').onclick=()=>$('image-dialog').close();render();
+})().catch(error=>{document.getElementById('summary').textContent='离线查看加载失败：'+error.message;console.error(error);});</script></body></html>

@@ -79,7 +79,7 @@ KNOWLEDGE_WEIGHT = 0.7                   # 知识线 : 通用线 = 0.7 : 0.3（v
 # ---------------------------------------------------------------------------
 REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO))
-from benchmark.t2i.v1.operaters.facets import FACETS, FACET_KEYS
+from benchmark.t2i.v1.operators.facets import FACETS, FACET_KEYS
 
 
 # ---------------------------------------------------------------------------

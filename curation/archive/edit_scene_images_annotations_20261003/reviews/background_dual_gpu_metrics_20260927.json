@@ -1,0 +1,70 @@
+[
+  {
+    "time": "2026-09-27T13:41:52.960310+00:00",
+    "metrics": {
+      "0": {
+        "num_requests_running": 1.0,
+        "generation_tokens_total": 1328.0,
+        "request_success_total": 22.0
+      },
+      "1": {
+        "num_requests_running": 0.0,
+        "generation_tokens_total": 1267.0,
+        "request_success_total": 24.0
+      }
+    },
+    "gpus": "0, 100 %, 28183 MiB\n1, 100 %, 27985 MiB",
+    "progress": "[Edit 原图][scene_pool_category_l3_v1][+210.3s] 分类进度：处理 5450/7917，响应复用=5441；状态={'screened': 5450}；决定={'reject': 1599, 'keep': 2232, 'hold': 1619}；耗时=189.1s，处理速度=1729.3 行/分钟（含复用）；最近=植物 / 草本植物 / 加拿大血根草 → hold"
+  },
+  {
+    "time": "2026-09-27T13:42:03.013987+00:00",
+    "metrics": {
+      "0": {
+        "num_requests_running": 2.0,
+        "generation_tokens_total": 3494.0,
+        "request_success_total": 59.0
+      },
+      "1": {
+        "num_requests_running": 1.0,
+        "generation_tokens_total": 3540.0,
+        "request_success_total": 61.0
+      }
+    },
+    "gpus": "0, 99 %, 28183 MiB\n1, 100 %, 27985 MiB",
+    "progress": "[Edit 原图][scene_pool_category_l3_v1][+216.6s] 分类进度：处理 5500/7917，响应复用=5441；状态={'screened': 5500}；决定={'reject': 1602, 'keep': 2252, 'hold': 1646}；耗时=195.4s，处理速度=1688.9 行/分钟（含复用）；最近=植物 / 草本植物 / 姜 → keep"
+  },
+  {
+    "time": "2026-09-27T13:42:13.153699+00:00",
+    "metrics": {
+      "0": {
+        "num_requests_running": 1.0,
+        "generation_tokens_total": 6185.0,
+        "request_success_total": 102.0
+      },
+      "1": {
+        "num_requests_running": 1.0,
+        "generation_tokens_total": 6050.0,
+        "request_success_total": 103.0
+      }
+    },
+    "gpus": "0, 0 %, 28183 MiB\n1, 100 %, 27985 MiB",
+    "progress": "[Edit 原图][scene_pool_category_l3_v1][+229.0s] 分类进度：处理 5600/7917，响应复用=5441；状态={'screened': 5600}；决定={'reject': 1610, 'keep': 2304, 'hold': 1686}；耗时=207.8s，处理速度=1617.3 行/分钟（含复用）；最近=植物 / 草本植物 / 粉蝶花 → keep"
+  },
+  {
+    "time": "2026-09-27T13:42:23.282970+00:00",
+    "metrics": {
+      "0": {
+        "num_requests_running": 0.0,
+        "generation_tokens_total": 8896.0,
+        "request_success_total": 143.0
+      },
+      "1": {
+        "num_requests_running": 0.0,
+        "generation_tokens_total": 8753.0,
+        "request_success_total": 144.0
+      }
+    },
+    "gpus": "0, 99 %, 28183 MiB\n1, 0 %, 27985 MiB",
+    "progress": "[Edit 原图][scene_pool_category_l3_v1][+241.3s] 分类进度：处理 5700/7917，响应复用=5441；状态={'screened': 5700}；决定={'reject': 1613, 'keep': 2375, 'hold': 1712}；耗时=220.1s，处理速度=1553.9 行/分钟（含复用）；最近=植物 / 观赏植物 / 花叶槭 → keep"
+  }
+]

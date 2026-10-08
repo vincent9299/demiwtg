@@ -1,0 +1,16 @@
+{
+  "active_edition": "visual-combined-v1",
+  "tree": "08-最终版视觉分类树.json",
+  "view": "08-最终版视觉分类树.md",
+  "concepts": "combined-decisions.json",
+  "audit_view": "10-需确认与物种粒度.md",
+  "quality_report": "09-合并与质量检查.md",
+  "sources": [
+    "inputs/original-table.txt",
+    "inputs/batch2-original-table.txt"
+  ],
+  "manifest": "combined-manifest.json",
+  "rebuild_command": "../../env/bin/python build.py --combined",
+  "status": "fixed_batches_reviewed_proposal_replay",
+  "decision": "用户选择视觉版并要求合并两批；旧交付保留。存在明确未决项，不作为全量科学定种或生产主库发布。"
+}

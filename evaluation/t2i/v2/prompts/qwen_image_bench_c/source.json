@@ -1,0 +1,74 @@
+{
+  "scheme": "C",
+  "status": "upstream_snapshot_only_not_wired_or_run",
+  "repository": "https://github.com/QwenLM/Qwen-Image-Bench",
+  "commit": "8ab1fb47df2fba7b0cb046770a87f6323b98ecfc",
+  "commit_date": "2026-06-18T10:00:04Z",
+  "retrieved_at": "2026-10-05T07:25:21.289395+08:00",
+  "paper": "https://arxiv.org/html/2605.28091v1#A1.SS3",
+  "paper_section": "Appendix A.3 / A.3.1 / A.3.2",
+  "license": "Apache-2.0",
+  "copy_policy": "Upstream checklists.py and LICENSE copied byte-for-byte; no translation, shortening, or rubric changes.",
+  "files": [
+    {
+      "path": "checklists.py",
+      "source_url": "https://raw.githubusercontent.com/QwenLM/Qwen-Image-Bench/8ab1fb47df2fba7b0cb046770a87f6323b98ecfc/checklists.py",
+      "browse_url": "https://github.com/QwenLM/Qwen-Image-Bench/blob/8ab1fb47df2fba7b0cb046770a87f6323b98ecfc/checklists.py",
+      "bytes": 10579,
+      "sha256": "0b2608752afb8adfd2ee38a7cd09ea6b11fd87365c94111eb70d10d60fd2eab3"
+    },
+    {
+      "path": "LICENSE",
+      "source_url": "https://raw.githubusercontent.com/QwenLM/Qwen-Image-Bench/8ab1fb47df2fba7b0cb046770a87f6323b98ecfc/LICENSE",
+      "browse_url": "https://github.com/QwenLM/Qwen-Image-Bench/blob/8ab1fb47df2fba7b0cb046770a87f6323b98ecfc/LICENSE",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    }
+  ],
+  "prompt_constants": {
+    "QUALITY_CHECKLIST": {
+      "start_line": 3,
+      "end_line": 11,
+      "chars": 771,
+      "sha256": "8a6d823d018c436ca27b699107b51a9e6f13a77cef6c0c550b61668a302d2854"
+    },
+    "AESTHETICS_CHECKLIST": {
+      "start_line": 14,
+      "end_line": 25,
+      "chars": 1072,
+      "sha256": "17842a0465c43e1dbeefde4751f2820db6f5bfc32118cd26b26c888aebc09560"
+    },
+    "ALIGNMENT_CHECKLIST": {
+      "start_line": 27,
+      "end_line": 47,
+      "chars": 2083,
+      "sha256": "f7c12833f8b09e05d6175799ef0136453c8f44950bb5f70c3b321c793c42be82"
+    },
+    "REAL_WORLD_FIDELITY_CHECKLIST": {
+      "start_line": 49,
+      "end_line": 59,
+      "chars": 1242,
+      "sha256": "4d9cf534b6b8d9fa71d8cbf5694cedcc48fa8c75b57049bb33ab55bf039a898a"
+    },
+    "CREATIVE_GENERATION_CHECKLIST": {
+      "start_line": 62,
+      "end_line": 87,
+      "chars": 3332,
+      "sha256": "632992f5e337d6bb331de57fe9e885ca4b178d94098852a8db7754d599572f61"
+    },
+    "SYSTEM_PROMPT": {
+      "start_line": 98,
+      "end_line": 102,
+      "chars": 209,
+      "sha256": "654a1e24488b20c4e891c71fafe1bf5ad073332886d75745bd7b393edaec345b"
+    },
+    "USER_PROMPT_TEMPLATE": {
+      "start_line": 104,
+      "end_line": 130,
+      "chars": 654,
+      "sha256": "21c74f02756c974e9af2bf2bd652b01383110e2d2f227bfb46277eb8c02f2618"
+    }
+  },
+  "execution_note": "Read-only upstream prompt evidence, not a demiflow executable prompt pack. Before C scoring is enabled, preserve original wording while adapting variables/image binding to the standard YAML prompt pack and map_prompt_async; no business import or direct execution of upstream Python.",
+  "upstream_assembly_reference": "https://github.com/QwenLM/Qwen-Image-Bench/blob/8ab1fb47df2fba7b0cb046770a87f6323b98ecfc/judge.py#L121-L147"
+}

@@ -75,7 +75,7 @@ def pack_card(row):
 
 def prepare():
     # 一行一张已发布图片，展开其 keep 概念关系，再按概念聚合。
-    images = (data.read_lance(str(ROOT / 'demiwtg/preparation/datasets/images.lance'), version=5,
+    images = (data.read_lance(str(ROOT / 'datasets/images.lance'), version=5,
                              columns=['sha256', 'concept_assessments'],
                              filter='array_length(published_concepts) > 0')
               .flat_map(image_cards)
@@ -84,7 +84,7 @@ def prepare():
                   'image_samples': ((acc['image_samples'] if acc else []) + [row['image']])[:3],
               }))
     # 一行一篇 reviewed 文章；本次只取少量节选用于廉价概念级筛选。
-    articles = (data.read_lance(str(ROOT / 'demiwtg/preparation/datasets/articles.lance'), version=4,
+    articles = (data.read_lance(str(ROOT / 'datasets/articles.lance'), version=4,
                                columns=['concept', 'article_id', 'content'],
                                filter="review_status = 'reviewed'")
                 .map(article_card)

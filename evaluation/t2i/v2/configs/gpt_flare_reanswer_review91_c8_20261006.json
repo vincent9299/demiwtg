@@ -1,0 +1,49 @@
+{
+  "run": "gpt_flare_reanswer_review91_c8_20261006",
+  "source": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/reanswer_questions__review91_20261006.lance",
+    "version": 1
+  },
+  "target": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answers__gpt_flare_reanswer_review91_c8_20261006.lance",
+  "answers": [
+    {
+      "backend": "modelhub",
+      "model": "openrouter/openai/gpt-image-2.5-flare",
+      "provider_model": "openai/gpt-image-2.5-flare",
+      "api": "openrouter_images",
+      "base_url": "http://127.0.0.1:4002/openrouter",
+      "api_key_env": "MODELHUB_API_KEY",
+      "parameters": {
+        "aspect_ratio": "1:1",
+        "quality": "auto"
+      },
+      "timeout_s": 900,
+      "answer_mode": "text_only",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8
+    },
+    {
+      "backend": "modelhub",
+      "model": "openrouter/openai/gpt-image-2.5-flare",
+      "provider_model": "openai/gpt-image-2.5-flare",
+      "api": "openrouter_images",
+      "base_url": "http://127.0.0.1:4002/openrouter",
+      "api_key_env": "MODELHUB_API_KEY",
+      "parameters": {
+        "aspect_ratio": "1:1",
+        "quality": "auto"
+      },
+      "timeout_s": 900,
+      "answer_mode": "positive_images",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8
+    }
+  ],
+  "parallel_answers": true,
+  "stream_judging": false,
+  "arm_concurrency": 2,
+  "max_questions": 91,
+  "max_consecutive_failures": 3
+}

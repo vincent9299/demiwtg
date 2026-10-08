@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from demiflow.lance.registry import ReleaseRegistry
 from demiflow.lance.refs import DatasetRef
-from preparation.operaters.images import identity, assessment, write_curation
+from preparation.images.catalog.operators.records import identity, assessment, write_curation
 
 
 def publish_visual_records(root, records, release_id, *, source_ref, source_file=None, run_id=None, binding=None, previous=None):

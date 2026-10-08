@@ -1,0 +1,130 @@
+{
+  "run": "bagel_ab_prompt1_c8_20261004",
+  "source": {
+    "uri": "demiwtg/benchmark/t2i/v2/datasets/candidates__ready_positive300_common85_codex_v16_probe_20261004.lance",
+    "version": 300
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/scores_ab__bagel_ab_prompt1_c8_20261004.lance",
+  "answers": [
+    {
+      "backend": "modelhub",
+      "model": "BAGEL-7B-MoT",
+      "seed": 42,
+      "parameters": {
+        "num_inference_steps": 50,
+        "size": "1024x1024",
+        "seed": 42,
+        "response_format": "b64_json"
+      },
+      "answer_mode": "text_only",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8,
+      "api": "images_json",
+      "base_url": "http://127.0.0.1:8006/v1",
+      "revision": "bagel-interleave-50steps-1024-17e541567e0cbbaf",
+      "timeout_s": 1800,
+      "service": {
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "base_url": "http://127.0.0.1:8006/v1",
+        "gpus": [
+          0
+        ],
+        "command": [
+          "/yzp/zhaozy/yangzepeng/0905/env-bagel/bin/python",
+          "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+          "--backend",
+          "bagel",
+          "--model-path",
+          "/yzp/zhaozy/yangzepeng/0905/models/BAGEL-7B-MoT",
+          "--served-model-name",
+          "BAGEL-7B-MoT",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "8006",
+          "--steps",
+          "50",
+          "--offload-dir",
+          "/yzp/zhaozy/yangzepeng/0905/_demiflow/evaluation_t2i_v2/bagel_ab_prompt1_c8_20261004/offload_arm00"
+        ],
+        "env": {
+          "PYTHONPATH": "/yzp/zhaozy/yangzepeng/0905/demiwtg",
+          "HF_HUB_OFFLINE": "1",
+          "TRANSFORMERS_OFFLINE": "1"
+        },
+        "expected_model": "BAGEL-7B-MoT",
+        "startup_timeout_s": 900,
+        "shutdown_timeout_s": 30,
+        "log_path": "_demiflow/evaluation_t2i_v2/bagel_ab_prompt1_c8_20261004/bagel_arm00_service.log"
+      }
+    },
+    {
+      "backend": "modelhub",
+      "model": "BAGEL-7B-MoT",
+      "seed": 42,
+      "parameters": {
+        "num_inference_steps": 50,
+        "size": "1024x1024",
+        "seed": 42,
+        "response_format": "b64_json"
+      },
+      "answer_mode": "positive_images",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8,
+      "api": "images_json",
+      "base_url": "http://127.0.0.1:8007/v1",
+      "revision": "bagel-interleave-50steps-1024-17e541567e0cbbaf",
+      "timeout_s": 1800,
+      "service": {
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "base_url": "http://127.0.0.1:8007/v1",
+        "gpus": [
+          1
+        ],
+        "command": [
+          "/yzp/zhaozy/yangzepeng/0905/env-bagel/bin/python",
+          "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+          "--backend",
+          "bagel",
+          "--model-path",
+          "/yzp/zhaozy/yangzepeng/0905/models/BAGEL-7B-MoT",
+          "--served-model-name",
+          "BAGEL-7B-MoT",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "8007",
+          "--steps",
+          "50",
+          "--offload-dir",
+          "/yzp/zhaozy/yangzepeng/0905/_demiflow/evaluation_t2i_v2/bagel_ab_prompt1_c8_20261004/offload_arm01"
+        ],
+        "env": {
+          "PYTHONPATH": "/yzp/zhaozy/yangzepeng/0905/demiwtg",
+          "HF_HUB_OFFLINE": "1",
+          "TRANSFORMERS_OFFLINE": "1"
+        },
+        "expected_model": "BAGEL-7B-MoT",
+        "startup_timeout_s": 900,
+        "shutdown_timeout_s": 30,
+        "log_path": "_demiflow/evaluation_t2i_v2/bagel_ab_prompt1_c8_20261004/bagel_arm01_service.log"
+      }
+    }
+  ],
+  "judge": {
+    "model": "malasci/gpt-6-astra",
+    "base_url": "http://127.0.0.1:4001/v1",
+    "api_key_env": "MODELHUB_API_KEY",
+    "timeout_s": 900,
+    "max_output_tokens": 32768,
+    "concurrency": 8,
+    "max_context_chars": 60000,
+    "reasoning_effort": "xhigh"
+  },
+  "stream_judging": true,
+  "arm_concurrency": 2,
+  "max_questions": 300,
+  "max_consecutive_failures": 3
+}

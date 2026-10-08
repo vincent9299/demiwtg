@@ -1,0 +1,39 @@
+{
+  "run": "qwen21_d6_paired30_20261005",
+  "source": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/d_questions__qwen21_d4_paired30_20261005.lance",
+    "version": 1
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/scores_d__qwen21_d6_paired30_20261005.lance",
+  "judge": {
+    "model": "malasci/gpt-6-astra",
+    "base_url": "http://127.0.0.1:4001/v1",
+    "api_key_env": "MODELHUB_API_KEY",
+    "timeout_s": 900,
+    "max_output_tokens": 32768,
+    "concurrency": 8,
+    "max_context_chars": 60000,
+    "reasoning_effort": "xhigh"
+  },
+  "d_evaluation": {
+    "question_limit": 30,
+    "answers": [
+      {
+        "model": "Qwen-Image-2.1",
+        "answer_mode": "text_only",
+        "source": {
+          "uri": "demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_ab_prompt1_c8_20261004__arm00.lance",
+          "version": 299
+        }
+      },
+      {
+        "model": "Qwen-Image-2.1+正例参考图",
+        "answer_mode": "positive_images",
+        "source": {
+          "uri": "demiwtg/evaluation/t2i/v2/datasets/answer_results__qwen21_ab_prompt1_c8_20261004__arm01.lance",
+          "version": 299
+        }
+      }
+    ]
+  }
+}

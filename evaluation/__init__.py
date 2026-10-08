@@ -1,1 +1,1 @@
-"""V4 frozen, paired image-generation ablations."""
+"""模型评测分类入口；实现归各独立 pipeline。"""

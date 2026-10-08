@@ -1,0 +1,79 @@
+{
+  "run": "zimage_ab_text_c8_20261004",
+  "source": {
+    "uri": "demiwtg/benchmark/t2i/v2/datasets/candidates__ready_positive300_common85_codex_v16_probe_20261004.lance",
+    "version": 300
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/scores_ab__zimage_ab_text_c8_20261004.lance",
+  "answers": [
+    {
+      "backend": "modelhub",
+      "model": "Z-Image-Turbo",
+      "api": "images",
+      "base_url": "http://127.0.0.1:8003/v1",
+      "api_key_env": "MODELHUB_API_KEY",
+      "revision": "zimage-turbo-local-8steps-guidance1-maxseq512-20261004",
+      "parameters": {
+        "size": "1024x1024",
+        "num_inference_steps": 8,
+        "seed": 42,
+        "response_format": "b64_json"
+      },
+      "seed": 42,
+      "timeout_s": 900,
+      "answer_mode": "text_only",
+      "cuda_visible_devices": "0",
+      "concurrency": 8,
+      "queue_depth": 8,
+      "service": {
+        "command": [
+          "/yzp/zhaozy/yangzepeng/0905/env/bin/python",
+          "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+          "--backend",
+          "z-image",
+          "--model-path",
+          "/yzp/zhaozy/yangzepeng/0905/models/Z-Image-Turbo",
+          "--served-model-name",
+          "Z-Image-Turbo",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "8003",
+          "--steps",
+          "8",
+          "--guidance",
+          "1.0",
+          "--max-seq-len",
+          "512"
+        ],
+        "base_url": "http://127.0.0.1:8003/v1",
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "gpus": [
+          0
+        ],
+        "env": {
+          "PYTHONPATH": "",
+          "HF_HUB_OFFLINE": "1"
+        },
+        "expected_model": "Z-Image-Turbo",
+        "startup_timeout_s": 600,
+        "shutdown_timeout_s": 30,
+        "log_path": "_demiflow/evaluation_t2i_v2/zimage_ab_text_c8_20261004/zimage_service.log"
+      }
+    }
+  ],
+  "judge": {
+    "model": "malasci/gpt-6-astra",
+    "base_url": "http://127.0.0.1:4001/v1",
+    "api_key_env": "MODELHUB_API_KEY",
+    "timeout_s": 900,
+    "max_output_tokens": 32768,
+    "concurrency": 8,
+    "max_context_chars": 60000,
+    "reasoning_effort": "xhigh"
+  },
+  "stream_judging": true,
+  "arm_concurrency": 1,
+  "max_questions": 300,
+  "max_consecutive_failures": 3
+}

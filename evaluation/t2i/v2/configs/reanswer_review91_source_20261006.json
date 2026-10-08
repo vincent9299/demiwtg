@@ -1,0 +1,28 @@
+{
+  "run": "reanswer_review91_source_20261006",
+  "source": {
+    "uri": "demiwtg/benchmark/t2i/v2/datasets/candidates__ready_positive300_common85_codex_v16_probe_20261004.lance",
+    "version": 300
+  },
+  "target": "demiwtg/evaluation/t2i/v2/datasets/reanswer_questions__review91_20261006.lance",
+  "review_sources": [
+    {
+      "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i/v2/datasets/question_reviews__ready_positive299_question_review_v4_callbacks_20261005.lance",
+      "version": 251
+    },
+    {
+      "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i/v2/datasets/question_reviews__ready_positive123_question_review_v4_recovery_20261006.lance",
+      "version": 124
+    },
+    {
+      "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i/v2/datasets/question_reviews__ready_positive2_reauthor_v17_review_20261006__question_review.lance",
+      "version": 2
+    }
+  ],
+  "cohort_source": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/benchmark/t2i/v2/datasets/cohort__ready_positive300_common100_priority_20261004.lance",
+    "version": 4
+  },
+  "expected_ready": 299,
+  "expected_changed": 91
+}

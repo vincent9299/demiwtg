@@ -12,7 +12,7 @@ def downloaded_image(row, data, *, system):
         resolution = dict(width=width, height=height, stored_width=width, stored_height=height,
             megapixels=width*height/1e6, aspect_ratio=width/height,
             orientation_basis='decoded_pixels', measurement_source='collection_decoder')
-    return dict(sha256=sha(data), ext=row['ext'], byte_size=len(data), storage_mode='lance_blob',
+    return dict(sha256=sha(data), ext=row['ext'], byte_size=len(data), storage_mode='object_uri',
         data=data, concepts=sorted(set(names)), sources=[source], availability='available', resolution=resolution)
 
 

@@ -1,0 +1,112 @@
+[
+  {
+    "usageKey": 8156547,
+    "scientificName": "Hippocampus Rafinesque, 1810",
+    "canonicalName": "Hippocampus",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "matchType": "EXACT",
+    "confidence": 94,
+    "query": "Hippocampus",
+    "url": "https://api.gbif.org/v1/species/match?name=Hippocampus"
+  },
+  {
+    "usageKey": 7329128,
+    "scientificName": "Conophytum N.E.Br.",
+    "canonicalName": "Conophytum",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "matchType": "EXACT",
+    "confidence": 94,
+    "query": "Conophytum",
+    "url": "https://api.gbif.org/v1/species/match?name=Conophytum"
+  },
+  {
+    "usageKey": null,
+    "scientificName": null,
+    "canonicalName": null,
+    "rank": null,
+    "status": null,
+    "matchType": "NONE",
+    "confidence": 100,
+    "query": "Rhamphorhynchus",
+    "url": "https://api.gbif.org/v1/species/match?name=Rhamphorhynchus"
+  },
+  {
+    "usageKey": 4830618,
+    "scientificName": "Elasmotherium Fischer, 1808",
+    "canonicalName": "Elasmotherium",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "matchType": "EXACT",
+    "confidence": 94,
+    "query": "Elasmotherium",
+    "url": "https://api.gbif.org/v1/species/match?name=Elasmotherium"
+  },
+  {
+    "usageKey": 4823123,
+    "scientificName": "Kentrosaurus Hennig, 1915",
+    "canonicalName": "Kentrosaurus",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "matchType": "EXACT",
+    "confidence": 94,
+    "query": "Kentrosaurus",
+    "url": "https://api.gbif.org/v1/species/match?name=Kentrosaurus"
+  },
+  {
+    "usageKey": 4818447,
+    "scientificName": "Quetzalcoatlus Lawson, 1975",
+    "canonicalName": "Quetzalcoatlus",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "matchType": "EXACT",
+    "confidence": 94,
+    "query": "Quetzalcoatlus",
+    "url": "https://api.gbif.org/v1/species/match?name=Quetzalcoatlus"
+  },
+  {
+    "usageKey": 7236977,
+    "scientificName": "Pterodactylus Rafinesque, 1815",
+    "canonicalName": "Pterodactylus",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "matchType": "EXACT",
+    "confidence": 94,
+    "query": "Pterodactylus",
+    "url": "https://api.gbif.org/v1/species/match?name=Pterodactylus"
+  },
+  {
+    "usageKey": 4830306,
+    "scientificName": "Chalicotherium Kaup, 1833",
+    "canonicalName": "Chalicotherium",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "matchType": "EXACT",
+    "confidence": 94,
+    "query": "Chalicotherium",
+    "url": "https://api.gbif.org/v1/species/match?name=Chalicotherium"
+  },
+  {
+    "usageKey": 4823146,
+    "scientificName": "Triceratops Marsh, 1889",
+    "canonicalName": "Triceratops",
+    "rank": "GENUS",
+    "status": "ACCEPTED",
+    "matchType": "EXACT",
+    "confidence": 94,
+    "query": "Triceratops",
+    "url": "https://api.gbif.org/v1/species/match?name=Triceratops"
+  },
+  {
+    "usageKey": null,
+    "scientificName": null,
+    "canonicalName": null,
+    "rank": null,
+    "status": null,
+    "matchType": "NONE",
+    "confidence": 100,
+    "query": "Pterosauria",
+    "url": "https://api.gbif.org/v1/species/match?name=Pterosauria"
+  }
+]

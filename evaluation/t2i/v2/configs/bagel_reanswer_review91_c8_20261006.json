@@ -1,0 +1,135 @@
+{
+  "run": "bagel_reanswer_review91_c8_20261006",
+  "source": {
+    "uri": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/reanswer_questions__review91_20261006.lance",
+    "version": 1
+  },
+  "target": "/yzp/zhaozy/yangzepeng/0905/demiwtg/evaluation/t2i/v2/datasets/answers__bagel_reanswer_review91_c8_20261006.lance",
+  "answers": [
+    {
+      "backend": "modelhub",
+      "model": "BAGEL-7B-MoT",
+      "seed": 42,
+      "parameters": {
+        "num_inference_steps": 50,
+        "size": "1024x1024",
+        "seed": 42,
+        "response_format": "b64_json"
+      },
+      "answer_mode": "text_only",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8,
+      "api": "images_json",
+      "base_url": "http://127.0.0.1:8006/v1",
+      "revision": "bagel-interleave-50steps-1024-17e541567e0cbbaf",
+      "timeout_s": 1800,
+      "api_key_env": "MODELHUB_API_KEY",
+      "shared_service": {
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "name": "t2i_eval_bagel_gpu0_reanswer_20261006",
+        "configuration": {
+          "root": "/yzp/zhaozy/yangzepeng/0905",
+          "base_url": "http://127.0.0.1:8006/v1",
+          "gpus": [
+            0
+          ],
+          "command": [
+            "/yzp/zhaozy/yangzepeng/0905/env-bagel/bin/python",
+            "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+            "--backend",
+            "bagel",
+            "--model-path",
+            "/yzp/zhaozy/yangzepeng/0905/models/BAGEL-7B-MoT",
+            "--served-model-name",
+            "BAGEL-7B-MoT",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8006",
+            "--steps",
+            "50",
+            "--offload-dir",
+            "/yzp/zhaozy/yangzepeng/0905/_demiflow/evaluation_t2i_v2/bagel_reanswer_review91_c8_20261006/offload_shared"
+          ],
+          "env": {
+            "PYTHONPATH": "/yzp/zhaozy/yangzepeng/0905/demiwtg",
+            "HF_HUB_OFFLINE": "1",
+            "TRANSFORMERS_OFFLINE": "1"
+          },
+          "expected_model": "BAGEL-7B-MoT",
+          "startup_timeout_s": 900,
+          "shutdown_timeout_s": 30,
+          "log_path": "_demiflow/evaluation_t2i_v2/bagel_reanswer_review91_c8_20261006/bagel_service.log"
+        },
+        "request_concurrency": 16,
+        "stop_when_idle": true
+      }
+    },
+    {
+      "backend": "modelhub",
+      "model": "BAGEL-7B-MoT",
+      "seed": 42,
+      "parameters": {
+        "num_inference_steps": 50,
+        "size": "1024x1024",
+        "seed": 42,
+        "response_format": "b64_json"
+      },
+      "answer_mode": "positive_images",
+      "max_reference_images": 5,
+      "concurrency": 8,
+      "queue_depth": 8,
+      "api": "images_json",
+      "base_url": "http://127.0.0.1:8006/v1",
+      "revision": "bagel-interleave-50steps-1024-17e541567e0cbbaf",
+      "timeout_s": 1800,
+      "api_key_env": "MODELHUB_API_KEY",
+      "shared_service": {
+        "root": "/yzp/zhaozy/yangzepeng/0905",
+        "name": "t2i_eval_bagel_gpu0_reanswer_20261006",
+        "configuration": {
+          "root": "/yzp/zhaozy/yangzepeng/0905",
+          "base_url": "http://127.0.0.1:8006/v1",
+          "gpus": [
+            0
+          ],
+          "command": [
+            "/yzp/zhaozy/yangzepeng/0905/env-bagel/bin/python",
+            "/yzp/zhaozy/yangzepeng/0905/models/serve_z_image.py",
+            "--backend",
+            "bagel",
+            "--model-path",
+            "/yzp/zhaozy/yangzepeng/0905/models/BAGEL-7B-MoT",
+            "--served-model-name",
+            "BAGEL-7B-MoT",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8006",
+            "--steps",
+            "50",
+            "--offload-dir",
+            "/yzp/zhaozy/yangzepeng/0905/_demiflow/evaluation_t2i_v2/bagel_reanswer_review91_c8_20261006/offload_shared"
+          ],
+          "env": {
+            "PYTHONPATH": "/yzp/zhaozy/yangzepeng/0905/demiwtg",
+            "HF_HUB_OFFLINE": "1",
+            "TRANSFORMERS_OFFLINE": "1"
+          },
+          "expected_model": "BAGEL-7B-MoT",
+          "startup_timeout_s": 900,
+          "shutdown_timeout_s": 30,
+          "log_path": "_demiflow/evaluation_t2i_v2/bagel_reanswer_review91_c8_20261006/bagel_service.log"
+        },
+        "request_concurrency": 16,
+        "stop_when_idle": true
+      }
+    }
+  ],
+  "parallel_answers": true,
+  "stream_judging": false,
+  "arm_concurrency": 2,
+  "max_questions": 91,
+  "max_consecutive_failures": 3
+}

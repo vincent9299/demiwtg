@@ -1,0 +1,639 @@
+[
+  {
+    "query_name": "Cerambycidae",
+    "requested_rank": "FAMILY",
+    "url": "https://api.gbif.org/v2/species/match?scientificName=Cerambycidae&taxonRank=FAMILY&checklistKey=7ddf754f-d193-4cc9-b351-99906754a03b",
+    "retrieved_at": "2026-09-30T06:48:59.802220+00:00",
+    "response_sha256": "d860ac937102d037073563bbd09722e232d6925629ef849bd9ea68a7c4174a0b",
+    "response": {
+      "usage": {
+        "key": "BJ5MR",
+        "name": "Cerambycidae Latreille, 1802",
+        "canonicalName": "Cerambycidae",
+        "authorship": "Latreille, 1802",
+        "rank": "FAMILY",
+        "code": "ZOOLOGICAL",
+        "status": "ACCEPTED",
+        "type": "SCIENTIFIC",
+        "formattedName": "<i>Cerambycidae</i> Latreille, 1802"
+      },
+      "classification": [
+        {
+          "key": "CS5HF",
+          "name": "Eukaryota",
+          "rank": "DOMAIN"
+        },
+        {
+          "key": "N",
+          "name": "Animalia",
+          "rank": "KINGDOM"
+        },
+        {
+          "key": "RT",
+          "name": "Arthropoda",
+          "rank": "PHYLUM"
+        },
+        {
+          "key": "L2655",
+          "name": "Hexapoda",
+          "rank": "SUBPHYLUM"
+        },
+        {
+          "key": "H6",
+          "name": "Insecta",
+          "rank": "CLASS"
+        },
+        {
+          "key": "C2L",
+          "name": "Coleoptera",
+          "rank": "ORDER"
+        },
+        {
+          "key": "DDHNW",
+          "name": "Polyphaga",
+          "rank": "SUBORDER"
+        },
+        {
+          "key": "KZYT4",
+          "name": "Cucujiformia",
+          "rank": "SERIES_ZOOLOGY"
+        },
+        {
+          "key": "KV5BH",
+          "name": "Chrysomeloidea",
+          "rank": "SUPERFAMILY"
+        },
+        {
+          "key": "BJ5MR",
+          "name": "Cerambycidae",
+          "rank": "FAMILY"
+        }
+      ],
+      "diagnostics": {
+        "matchType": "EXACT",
+        "confidence": 95,
+        "timeTaken": 10,
+        "timings": {
+          "nameNRank": 0,
+          "sciNameMatch": 10,
+          "nameParse": 0,
+          "luceneMatch": 10
+        }
+      },
+      "synonym": false
+    },
+    "response_body": "{\"usage\":{\"key\":\"BJ5MR\",\"name\":\"Cerambycidae Latreille, 1802\",\"canonicalName\":\"Cerambycidae\",\"authorship\":\"Latreille, 1802\",\"rank\":\"FAMILY\",\"code\":\"ZOOLOGICAL\",\"status\":\"ACCEPTED\",\"type\":\"SCIENTIFIC\",\"formattedName\":\"<i>Cerambycidae</i> Latreille, 1802\"},\"classification\":[{\"key\":\"CS5HF\",\"name\":\"Eukaryota\",\"rank\":\"DOMAIN\"},{\"key\":\"N\",\"name\":\"Animalia\",\"rank\":\"KINGDOM\"},{\"key\":\"RT\",\"name\":\"Arthropoda\",\"rank\":\"PHYLUM\"},{\"key\":\"L2655\",\"name\":\"Hexapoda\",\"rank\":\"SUBPHYLUM\"},{\"key\":\"H6\",\"name\":\"Insecta\",\"rank\":\"CLASS\"},{\"key\":\"C2L\",\"name\":\"Coleoptera\",\"rank\":\"ORDER\"},{\"key\":\"DDHNW\",\"name\":\"Polyphaga\",\"rank\":\"SUBORDER\"},{\"key\":\"KZYT4\",\"name\":\"Cucujiformia\",\"rank\":\"SERIES_ZOOLOGY\"},{\"key\":\"KV5BH\",\"name\":\"Chrysomeloidea\",\"rank\":\"SUPERFAMILY\"},{\"key\":\"BJ5MR\",\"name\":\"Cerambycidae\",\"rank\":\"FAMILY\"}],\"diagnostics\":{\"matchType\":\"EXACT\",\"confidence\":95,\"timeTaken\":10,\"timings\":{\"nameNRank\":0,\"sciNameMatch\":10,\"nameParse\":0,\"luceneMatch\":10}},\"synonym\":false}"
+  },
+  {
+    "query_name": "Alcedo atthis",
+    "requested_rank": "SPECIES",
+    "url": "https://api.gbif.org/v2/species/match?scientificName=Alcedo+atthis&taxonRank=SPECIES&checklistKey=7ddf754f-d193-4cc9-b351-99906754a03b",
+    "retrieved_at": "2026-09-30T06:49:01.435499+00:00",
+    "response_sha256": "15ef397bdfbe004ded7b97c02bf37af855b5db494df9a358668ecf1debf74460",
+    "response": {
+      "usage": {
+        "key": "667V7",
+        "name": "Alcedo atthis (Linnaeus, 1758)",
+        "canonicalName": "Alcedo atthis",
+        "authorship": "(Linnaeus, 1758)",
+        "rank": "SPECIES",
+        "code": "ZOOLOGICAL",
+        "status": "ACCEPTED",
+        "genericName": "Alcedo",
+        "specificEpithet": "atthis",
+        "type": "SCIENTIFIC",
+        "formattedName": "<i>Alcedo</i> <i>atthis</i> (Linnaeus, 1758)"
+      },
+      "classification": [
+        {
+          "key": "CS5HF",
+          "name": "Eukaryota",
+          "rank": "DOMAIN"
+        },
+        {
+          "key": "N",
+          "name": "Animalia",
+          "rank": "KINGDOM"
+        },
+        {
+          "key": "CH2",
+          "name": "Chordata",
+          "rank": "PHYLUM"
+        },
+        {
+          "key": "8V4V3",
+          "name": "Vertebrata",
+          "rank": "SUBPHYLUM"
+        },
+        {
+          "key": "8V4V5",
+          "name": "Gnathostomata",
+          "rank": "INFRAPHYLUM"
+        },
+        {
+          "key": "8VVWB",
+          "name": "Osteichthyes",
+          "rank": "PARVPHYLUM"
+        },
+        {
+          "key": "9CK8W",
+          "name": "Tetrapoda",
+          "rank": "MEGACLASS"
+        },
+        {
+          "key": "V2",
+          "name": "Aves",
+          "rank": "CLASS"
+        },
+        {
+          "key": "ZL",
+          "name": "Coraciiformes",
+          "rank": "ORDER"
+        },
+        {
+          "key": "66F",
+          "name": "Alcedinidae",
+          "rank": "FAMILY"
+        },
+        {
+          "key": "J4C",
+          "name": "Alcedininae",
+          "rank": "SUBFAMILY"
+        },
+        {
+          "key": "RKP",
+          "name": "Alcedo",
+          "rank": "GENUS"
+        },
+        {
+          "key": "667V7",
+          "name": "Alcedo atthis",
+          "rank": "SPECIES"
+        }
+      ],
+      "diagnostics": {
+        "matchType": "EXACT",
+        "confidence": 99,
+        "timeTaken": 2,
+        "timings": {
+          "nameNRank": 0,
+          "sciNameMatch": 3,
+          "nameParse": 1,
+          "luceneMatch": 2
+        }
+      },
+      "additionalStatus": [
+        {
+          "clbDatasetKey": "53131",
+          "datasetAlias": "IUCN",
+          "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+          "status": "LEAST_CONCERN",
+          "statusCode": "LC",
+          "sourceId": "22683027"
+        }
+      ],
+      "synonym": false
+    },
+    "response_body": "{\"usage\":{\"key\":\"667V7\",\"name\":\"Alcedo atthis (Linnaeus, 1758)\",\"canonicalName\":\"Alcedo atthis\",\"authorship\":\"(Linnaeus, 1758)\",\"rank\":\"SPECIES\",\"code\":\"ZOOLOGICAL\",\"status\":\"ACCEPTED\",\"genericName\":\"Alcedo\",\"specificEpithet\":\"atthis\",\"type\":\"SCIENTIFIC\",\"formattedName\":\"<i>Alcedo</i> <i>atthis</i> (Linnaeus, 1758)\"},\"classification\":[{\"key\":\"CS5HF\",\"name\":\"Eukaryota\",\"rank\":\"DOMAIN\"},{\"key\":\"N\",\"name\":\"Animalia\",\"rank\":\"KINGDOM\"},{\"key\":\"CH2\",\"name\":\"Chordata\",\"rank\":\"PHYLUM\"},{\"key\":\"8V4V3\",\"name\":\"Vertebrata\",\"rank\":\"SUBPHYLUM\"},{\"key\":\"8V4V5\",\"name\":\"Gnathostomata\",\"rank\":\"INFRAPHYLUM\"},{\"key\":\"8VVWB\",\"name\":\"Osteichthyes\",\"rank\":\"PARVPHYLUM\"},{\"key\":\"9CK8W\",\"name\":\"Tetrapoda\",\"rank\":\"MEGACLASS\"},{\"key\":\"V2\",\"name\":\"Aves\",\"rank\":\"CLASS\"},{\"key\":\"ZL\",\"name\":\"Coraciiformes\",\"rank\":\"ORDER\"},{\"key\":\"66F\",\"name\":\"Alcedinidae\",\"rank\":\"FAMILY\"},{\"key\":\"J4C\",\"name\":\"Alcedininae\",\"rank\":\"SUBFAMILY\"},{\"key\":\"RKP\",\"name\":\"Alcedo\",\"rank\":\"GENUS\"},{\"key\":\"667V7\",\"name\":\"Alcedo atthis\",\"rank\":\"SPECIES\"}],\"diagnostics\":{\"matchType\":\"EXACT\",\"confidence\":99,\"timeTaken\":2,\"timings\":{\"nameNRank\":0,\"sciNameMatch\":3,\"nameParse\":1,\"luceneMatch\":2}},\"additionalStatus\":[{\"clbDatasetKey\":\"53131\",\"datasetAlias\":\"IUCN\",\"datasetKey\":\"19491596-35ae-4a91-9a98-85cf505f1bd3\",\"status\":\"LEAST_CONCERN\",\"statusCode\":\"LC\",\"sourceId\":\"22683027\"}],\"synonym\":false}"
+  },
+  {
+    "query_name": "Cerdocyon thous",
+    "requested_rank": "SPECIES",
+    "url": "https://api.gbif.org/v2/species/match?scientificName=Cerdocyon+thous&taxonRank=SPECIES&checklistKey=7ddf754f-d193-4cc9-b351-99906754a03b",
+    "retrieved_at": "2026-09-30T06:49:02.410240+00:00",
+    "response_sha256": "ed79a84dc6668e3b8e04d291dd3524c4367d2b92d5bb2af1bf91e50c816d4a1d",
+    "response": {
+      "usage": {
+        "key": "SWGW",
+        "name": "Cerdocyon thous (Linnaeus, 1766)",
+        "canonicalName": "Cerdocyon thous",
+        "authorship": "(Linnaeus, 1766)",
+        "rank": "SPECIES",
+        "code": "ZOOLOGICAL",
+        "status": "ACCEPTED",
+        "genericName": "Cerdocyon",
+        "specificEpithet": "thous",
+        "type": "SCIENTIFIC",
+        "formattedName": "<i>Cerdocyon</i> <i>thous</i> (Linnaeus, 1766)"
+      },
+      "classification": [
+        {
+          "key": "CS5HF",
+          "name": "Eukaryota",
+          "rank": "DOMAIN"
+        },
+        {
+          "key": "N",
+          "name": "Animalia",
+          "rank": "KINGDOM"
+        },
+        {
+          "key": "CH2",
+          "name": "Chordata",
+          "rank": "PHYLUM"
+        },
+        {
+          "key": "8V4V3",
+          "name": "Vertebrata",
+          "rank": "SUBPHYLUM"
+        },
+        {
+          "key": "8V4V5",
+          "name": "Gnathostomata",
+          "rank": "INFRAPHYLUM"
+        },
+        {
+          "key": "8VVWB",
+          "name": "Osteichthyes",
+          "rank": "PARVPHYLUM"
+        },
+        {
+          "key": "9CK8W",
+          "name": "Tetrapoda",
+          "rank": "MEGACLASS"
+        },
+        {
+          "key": "6224G",
+          "name": "Mammalia",
+          "rank": "CLASS"
+        },
+        {
+          "key": "6226C",
+          "name": "Theria",
+          "rank": "SUBCLASS"
+        },
+        {
+          "key": "LG",
+          "name": "Eutheria",
+          "rank": "INFRACLASS"
+        },
+        {
+          "key": "VS",
+          "name": "Carnivora",
+          "rank": "ORDER"
+        },
+        {
+          "key": "4CT",
+          "name": "Caniformia",
+          "rank": "SUBORDER"
+        },
+        {
+          "key": "C3K84",
+          "name": "Canidae",
+          "rank": "FAMILY"
+        },
+        {
+          "key": "62JXJ",
+          "name": "Cerdocyon",
+          "rank": "GENUS"
+        },
+        {
+          "key": "SWGW",
+          "name": "Cerdocyon thous",
+          "rank": "SPECIES"
+        }
+      ],
+      "diagnostics": {
+        "matchType": "EXACT",
+        "confidence": 99,
+        "timeTaken": 3,
+        "timings": {
+          "nameNRank": 0,
+          "sciNameMatch": 4,
+          "nameParse": 0,
+          "luceneMatch": 4
+        }
+      },
+      "additionalStatus": [
+        {
+          "clbDatasetKey": "53131",
+          "datasetAlias": "IUCN",
+          "datasetKey": "19491596-35ae-4a91-9a98-85cf505f1bd3",
+          "status": "LEAST_CONCERN",
+          "statusCode": "LC",
+          "sourceId": "4248"
+        }
+      ],
+      "synonym": false
+    },
+    "response_body": "{\"usage\":{\"key\":\"SWGW\",\"name\":\"Cerdocyon thous (Linnaeus, 1766)\",\"canonicalName\":\"Cerdocyon thous\",\"authorship\":\"(Linnaeus, 1766)\",\"rank\":\"SPECIES\",\"code\":\"ZOOLOGICAL\",\"status\":\"ACCEPTED\",\"genericName\":\"Cerdocyon\",\"specificEpithet\":\"thous\",\"type\":\"SCIENTIFIC\",\"formattedName\":\"<i>Cerdocyon</i> <i>thous</i> (Linnaeus, 1766)\"},\"classification\":[{\"key\":\"CS5HF\",\"name\":\"Eukaryota\",\"rank\":\"DOMAIN\"},{\"key\":\"N\",\"name\":\"Animalia\",\"rank\":\"KINGDOM\"},{\"key\":\"CH2\",\"name\":\"Chordata\",\"rank\":\"PHYLUM\"},{\"key\":\"8V4V3\",\"name\":\"Vertebrata\",\"rank\":\"SUBPHYLUM\"},{\"key\":\"8V4V5\",\"name\":\"Gnathostomata\",\"rank\":\"INFRAPHYLUM\"},{\"key\":\"8VVWB\",\"name\":\"Osteichthyes\",\"rank\":\"PARVPHYLUM\"},{\"key\":\"9CK8W\",\"name\":\"Tetrapoda\",\"rank\":\"MEGACLASS\"},{\"key\":\"6224G\",\"name\":\"Mammalia\",\"rank\":\"CLASS\"},{\"key\":\"6226C\",\"name\":\"Theria\",\"rank\":\"SUBCLASS\"},{\"key\":\"LG\",\"name\":\"Eutheria\",\"rank\":\"INFRACLASS\"},{\"key\":\"VS\",\"name\":\"Carnivora\",\"rank\":\"ORDER\"},{\"key\":\"4CT\",\"name\":\"Caniformia\",\"rank\":\"SUBORDER\"},{\"key\":\"C3K84\",\"name\":\"Canidae\",\"rank\":\"FAMILY\"},{\"key\":\"62JXJ\",\"name\":\"Cerdocyon\",\"rank\":\"GENUS\"},{\"key\":\"SWGW\",\"name\":\"Cerdocyon thous\",\"rank\":\"SPECIES\"}],\"diagnostics\":{\"matchType\":\"EXACT\",\"confidence\":99,\"timeTaken\":3,\"timings\":{\"nameNRank\":0,\"sciNameMatch\":4,\"nameParse\":0,\"luceneMatch\":4}},\"additionalStatus\":[{\"clbDatasetKey\":\"53131\",\"datasetAlias\":\"IUCN\",\"datasetKey\":\"19491596-35ae-4a91-9a98-85cf505f1bd3\",\"status\":\"LEAST_CONCERN\",\"statusCode\":\"LC\",\"sourceId\":\"4248\"}],\"synonym\":false}"
+  },
+  {
+    "query_name": "Padda oryzivora",
+    "requested_rank": "SPECIES",
+    "url": "https://api.gbif.org/v2/species/match?scientificName=Padda+oryzivora&taxonRank=SPECIES&checklistKey=7ddf754f-d193-4cc9-b351-99906754a03b",
+    "retrieved_at": "2026-09-30T06:49:03.390179+00:00",
+    "response_sha256": "ff1afd3d312e22ad6f45f3e523b0b1c4a238b5546a6007d0bc88aae7e6b725a0",
+    "response": {
+      "usage": {
+        "key": "4BWFW",
+        "name": "Padda oryzivora (Linnaeus, 1758)",
+        "canonicalName": "Padda oryzivora",
+        "authorship": "(Linnaeus, 1758)",
+        "rank": "SPECIES",
+        "code": "ZOOLOGICAL",
+        "status": "SYNONYM",
+        "genericName": "Padda",
+        "specificEpithet": "oryzivora",
+        "type": "SCIENTIFIC",
+        "formattedName": "<i>Padda</i> <i>oryzivora</i> (Linnaeus, 1758)"
+      },
+      "acceptedUsage": {
+        "key": "3VYFC",
+        "name": "Lonchura oryzivora (Linnaeus, 1758)",
+        "canonicalName": "Lonchura oryzivora",
+        "authorship": "(Linnaeus, 1758)",
+        "rank": "SPECIES",
+        "code": "ZOOLOGICAL",
+        "genericName": "Lonchura",
+        "specificEpithet": "oryzivora",
+        "type": "SCIENTIFIC",
+        "formattedName": "<i>Lonchura</i> <i>oryzivora</i> (Linnaeus, 1758)"
+      },
+      "classification": [
+        {
+          "key": "CS5HF",
+          "name": "Eukaryota",
+          "rank": "DOMAIN"
+        },
+        {
+          "key": "N",
+          "name": "Animalia",
+          "rank": "KINGDOM"
+        },
+        {
+          "key": "CH2",
+          "name": "Chordata",
+          "rank": "PHYLUM"
+        },
+        {
+          "key": "8V4V3",
+          "name": "Vertebrata",
+          "rank": "SUBPHYLUM"
+        },
+        {
+          "key": "8V4V5",
+          "name": "Gnathostomata",
+          "rank": "INFRAPHYLUM"
+        },
+        {
+          "key": "8VVWB",
+          "name": "Osteichthyes",
+          "rank": "PARVPHYLUM"
+        },
+        {
+          "key": "9CK8W",
+          "name": "Tetrapoda",
+          "rank": "MEGACLASS"
+        },
+        {
+          "key": "V2",
+          "name": "Aves",
+          "rank": "CLASS"
+        },
+        {
+          "key": "3RL",
+          "name": "Passeriformes",
+          "rank": "ORDER"
+        },
+        {
+          "key": "623Q5",
+          "name": "Estrildidae",
+          "rank": "FAMILY"
+        },
+        {
+          "key": "5GBZ",
+          "name": "Lonchura",
+          "rank": "GENUS"
+        },
+        {
+          "key": "3VYFC",
+          "name": "Lonchura oryzivora",
+          "rank": "SPECIES"
+        }
+      ],
+      "diagnostics": {
+        "matchType": "EXACT",
+        "confidence": 98,
+        "timeTaken": 8,
+        "timings": {
+          "nameNRank": 0,
+          "sciNameMatch": 8,
+          "nameParse": 0,
+          "luceneMatch": 8
+        }
+      },
+      "synonym": true
+    },
+    "response_body": "{\"usage\":{\"key\":\"4BWFW\",\"name\":\"Padda oryzivora (Linnaeus, 1758)\",\"canonicalName\":\"Padda oryzivora\",\"authorship\":\"(Linnaeus, 1758)\",\"rank\":\"SPECIES\",\"code\":\"ZOOLOGICAL\",\"status\":\"SYNONYM\",\"genericName\":\"Padda\",\"specificEpithet\":\"oryzivora\",\"type\":\"SCIENTIFIC\",\"formattedName\":\"<i>Padda</i> <i>oryzivora</i> (Linnaeus, 1758)\"},\"acceptedUsage\":{\"key\":\"3VYFC\",\"name\":\"Lonchura oryzivora (Linnaeus, 1758)\",\"canonicalName\":\"Lonchura oryzivora\",\"authorship\":\"(Linnaeus, 1758)\",\"rank\":\"SPECIES\",\"code\":\"ZOOLOGICAL\",\"genericName\":\"Lonchura\",\"specificEpithet\":\"oryzivora\",\"type\":\"SCIENTIFIC\",\"formattedName\":\"<i>Lonchura</i> <i>oryzivora</i> (Linnaeus, 1758)\"},\"classification\":[{\"key\":\"CS5HF\",\"name\":\"Eukaryota\",\"rank\":\"DOMAIN\"},{\"key\":\"N\",\"name\":\"Animalia\",\"rank\":\"KINGDOM\"},{\"key\":\"CH2\",\"name\":\"Chordata\",\"rank\":\"PHYLUM\"},{\"key\":\"8V4V3\",\"name\":\"Vertebrata\",\"rank\":\"SUBPHYLUM\"},{\"key\":\"8V4V5\",\"name\":\"Gnathostomata\",\"rank\":\"INFRAPHYLUM\"},{\"key\":\"8VVWB\",\"name\":\"Osteichthyes\",\"rank\":\"PARVPHYLUM\"},{\"key\":\"9CK8W\",\"name\":\"Tetrapoda\",\"rank\":\"MEGACLASS\"},{\"key\":\"V2\",\"name\":\"Aves\",\"rank\":\"CLASS\"},{\"key\":\"3RL\",\"name\":\"Passeriformes\",\"rank\":\"ORDER\"},{\"key\":\"623Q5\",\"name\":\"Estrildidae\",\"rank\":\"FAMILY\"},{\"key\":\"5GBZ\",\"name\":\"Lonchura\",\"rank\":\"GENUS\"},{\"key\":\"3VYFC\",\"name\":\"Lonchura oryzivora\",\"rank\":\"SPECIES\"}],\"diagnostics\":{\"matchType\":\"EXACT\",\"confidence\":98,\"timeTaken\":8,\"timings\":{\"nameNRank\":0,\"sciNameMatch\":8,\"nameParse\":0,\"luceneMatch\":8}},\"synonym\":true}"
+  },
+  {
+    "query_name": "Mentha",
+    "requested_rank": "GENUS",
+    "url": "https://api.gbif.org/v2/species/match?scientificName=Mentha&taxonRank=GENUS&checklistKey=7ddf754f-d193-4cc9-b351-99906754a03b",
+    "retrieved_at": "2026-09-30T06:49:04.374737+00:00",
+    "response_sha256": "a46c9d93acb650efa8015605fe4030d18aa2dcbb4109333f3839c0ef78f8fee3",
+    "response": {
+      "usage": {
+        "key": "8VZ9G",
+        "name": "Mentha L.",
+        "canonicalName": "Mentha",
+        "authorship": "L.",
+        "rank": "GENUS",
+        "code": "BOTANICAL",
+        "status": "ACCEPTED",
+        "type": "SCIENTIFIC",
+        "formattedName": "<i>Mentha</i> L."
+      },
+      "classification": [
+        {
+          "key": "CS5HF",
+          "name": "Eukaryota",
+          "rank": "DOMAIN"
+        },
+        {
+          "key": "P",
+          "name": "Plantae",
+          "rank": "KINGDOM"
+        },
+        {
+          "key": "CMQ8S",
+          "name": "Pteridobiotina",
+          "rank": "SUBKINGDOM"
+        },
+        {
+          "key": "TP",
+          "name": "Tracheophyta",
+          "rank": "PHYLUM"
+        },
+        {
+          "key": "MG",
+          "name": "Magnoliopsida",
+          "rank": "CLASS"
+        },
+        {
+          "key": "3F4",
+          "name": "Lamiales",
+          "rank": "ORDER"
+        },
+        {
+          "key": "PR82T",
+          "name": "Lamiaceae",
+          "rank": "FAMILY"
+        },
+        {
+          "key": "V5KN5",
+          "name": "Nepetoideae",
+          "rank": "SUBFAMILY"
+        },
+        {
+          "key": "V5L69",
+          "name": "Mentheae",
+          "rank": "TRIBE"
+        },
+        {
+          "key": "V5NB5",
+          "name": "Menthinae",
+          "rank": "SUBTRIBE"
+        },
+        {
+          "key": "8VZ9G",
+          "name": "Mentha",
+          "rank": "GENUS"
+        }
+      ],
+      "diagnostics": {
+        "matchType": "EXACT",
+        "confidence": 96,
+        "timeTaken": 35,
+        "timings": {
+          "nameNRank": 0,
+          "sciNameMatch": 35,
+          "nameParse": 0,
+          "luceneMatch": 35
+        }
+      },
+      "synonym": false,
+      "left": 1188073,
+      "right": 1188175
+    },
+    "response_body": "{\"usage\":{\"key\":\"8VZ9G\",\"name\":\"Mentha L.\",\"canonicalName\":\"Mentha\",\"authorship\":\"L.\",\"rank\":\"GENUS\",\"code\":\"BOTANICAL\",\"status\":\"ACCEPTED\",\"type\":\"SCIENTIFIC\",\"formattedName\":\"<i>Mentha</i> L.\"},\"classification\":[{\"key\":\"CS5HF\",\"name\":\"Eukaryota\",\"rank\":\"DOMAIN\"},{\"key\":\"P\",\"name\":\"Plantae\",\"rank\":\"KINGDOM\"},{\"key\":\"CMQ8S\",\"name\":\"Pteridobiotina\",\"rank\":\"SUBKINGDOM\"},{\"key\":\"TP\",\"name\":\"Tracheophyta\",\"rank\":\"PHYLUM\"},{\"key\":\"MG\",\"name\":\"Magnoliopsida\",\"rank\":\"CLASS\"},{\"key\":\"3F4\",\"name\":\"Lamiales\",\"rank\":\"ORDER\"},{\"key\":\"PR82T\",\"name\":\"Lamiaceae\",\"rank\":\"FAMILY\"},{\"key\":\"V5KN5\",\"name\":\"Nepetoideae\",\"rank\":\"SUBFAMILY\"},{\"key\":\"V5L69\",\"name\":\"Mentheae\",\"rank\":\"TRIBE\"},{\"key\":\"V5NB5\",\"name\":\"Menthinae\",\"rank\":\"SUBTRIBE\"},{\"key\":\"8VZ9G\",\"name\":\"Mentha\",\"rank\":\"GENUS\"}],\"diagnostics\":{\"matchType\":\"EXACT\",\"confidence\":96,\"timeTaken\":35,\"timings\":{\"nameNRank\":0,\"sciNameMatch\":35,\"nameParse\":0,\"luceneMatch\":35}},\"synonym\":false,\"left\":1188073,\"right\":1188175}"
+  },
+  {
+    "query_name": "Mentha canadensis",
+    "requested_rank": "SPECIES",
+    "url": "https://api.gbif.org/v2/species/match?scientificName=Mentha+canadensis&taxonRank=SPECIES&checklistKey=7ddf754f-d193-4cc9-b351-99906754a03b",
+    "retrieved_at": "2026-09-30T06:49:05.373659+00:00",
+    "response_sha256": "6fdc5ff380a633d126f4ae4329e2a2e805891609c59299e7a927436c717bd702",
+    "response": {
+      "usage": {
+        "key": "3ZRPK",
+        "name": "Mentha canadensis L.",
+        "canonicalName": "Mentha canadensis",
+        "authorship": "L.",
+        "rank": "SPECIES",
+        "code": "BOTANICAL",
+        "status": "SYNONYM",
+        "genericName": "Mentha",
+        "specificEpithet": "canadensis",
+        "type": "SCIENTIFIC",
+        "formattedName": "<i>Mentha</i> <i>canadensis</i> L."
+      },
+      "acceptedUsage": {
+        "key": "7KBV5",
+        "name": "Mentha arvensis subsp. canadensis (L.) H.Hara",
+        "canonicalName": "Mentha arvensis canadensis",
+        "authorship": "(L.) H.Hara",
+        "rank": "SUBSPECIES",
+        "code": "BOTANICAL",
+        "genericName": "Mentha",
+        "specificEpithet": "arvensis",
+        "infraspecificEpithet": "canadensis",
+        "type": "SCIENTIFIC",
+        "formattedName": "<i>Mentha</i> <i>arvensis</i> subsp. <i>canadensis</i> (L.) H.Hara"
+      },
+      "classification": [
+        {
+          "key": "CS5HF",
+          "name": "Eukaryota",
+          "rank": "DOMAIN"
+        },
+        {
+          "key": "P",
+          "name": "Plantae",
+          "rank": "KINGDOM"
+        },
+        {
+          "key": "CMQ8S",
+          "name": "Pteridobiotina",
+          "rank": "SUBKINGDOM"
+        },
+        {
+          "key": "TP",
+          "name": "Tracheophyta",
+          "rank": "PHYLUM"
+        },
+        {
+          "key": "MG",
+          "name": "Magnoliopsida",
+          "rank": "CLASS"
+        },
+        {
+          "key": "3F4",
+          "name": "Lamiales",
+          "rank": "ORDER"
+        },
+        {
+          "key": "PR82T",
+          "name": "Lamiaceae",
+          "rank": "FAMILY"
+        },
+        {
+          "key": "V5KN5",
+          "name": "Nepetoideae",
+          "rank": "SUBFAMILY"
+        },
+        {
+          "key": "V5L69",
+          "name": "Mentheae",
+          "rank": "TRIBE"
+        },
+        {
+          "key": "V5NB5",
+          "name": "Menthinae",
+          "rank": "SUBTRIBE"
+        },
+        {
+          "key": "8VZ9G",
+          "name": "Mentha",
+          "rank": "GENUS"
+        },
+        {
+          "key": "3ZRM7",
+          "name": "Mentha arvensis",
+          "rank": "SPECIES"
+        },
+        {
+          "key": "7KBV5",
+          "name": "Mentha arvensis canadensis",
+          "rank": "SUBSPECIES"
+        }
+      ],
+      "diagnostics": {
+        "matchType": "EXACT",
+        "confidence": 98,
+        "timeTaken": 9,
+        "timings": {
+          "nameNRank": 0,
+          "sciNameMatch": 10,
+          "nameParse": 1,
+          "luceneMatch": 9
+        }
+      },
+      "synonym": true,
+      "left": 1188137,
+      "right": 1188140
+    },
+    "response_body": "{\"usage\":{\"key\":\"3ZRPK\",\"name\":\"Mentha canadensis L.\",\"canonicalName\":\"Mentha canadensis\",\"authorship\":\"L.\",\"rank\":\"SPECIES\",\"code\":\"BOTANICAL\",\"status\":\"SYNONYM\",\"genericName\":\"Mentha\",\"specificEpithet\":\"canadensis\",\"type\":\"SCIENTIFIC\",\"formattedName\":\"<i>Mentha</i> <i>canadensis</i> L.\"},\"acceptedUsage\":{\"key\":\"7KBV5\",\"name\":\"Mentha arvensis subsp. canadensis (L.) H.Hara\",\"canonicalName\":\"Mentha arvensis canadensis\",\"authorship\":\"(L.) H.Hara\",\"rank\":\"SUBSPECIES\",\"code\":\"BOTANICAL\",\"genericName\":\"Mentha\",\"specificEpithet\":\"arvensis\",\"infraspecificEpithet\":\"canadensis\",\"type\":\"SCIENTIFIC\",\"formattedName\":\"<i>Mentha</i> <i>arvensis</i> subsp. <i>canadensis</i> (L.) H.Hara\"},\"classification\":[{\"key\":\"CS5HF\",\"name\":\"Eukaryota\",\"rank\":\"DOMAIN\"},{\"key\":\"P\",\"name\":\"Plantae\",\"rank\":\"KINGDOM\"},{\"key\":\"CMQ8S\",\"name\":\"Pteridobiotina\",\"rank\":\"SUBKINGDOM\"},{\"key\":\"TP\",\"name\":\"Tracheophyta\",\"rank\":\"PHYLUM\"},{\"key\":\"MG\",\"name\":\"Magnoliopsida\",\"rank\":\"CLASS\"},{\"key\":\"3F4\",\"name\":\"Lamiales\",\"rank\":\"ORDER\"},{\"key\":\"PR82T\",\"name\":\"Lamiaceae\",\"rank\":\"FAMILY\"},{\"key\":\"V5KN5\",\"name\":\"Nepetoideae\",\"rank\":\"SUBFAMILY\"},{\"key\":\"V5L69\",\"name\":\"Mentheae\",\"rank\":\"TRIBE\"},{\"key\":\"V5NB5\",\"name\":\"Menthinae\",\"rank\":\"SUBTRIBE\"},{\"key\":\"8VZ9G\",\"name\":\"Mentha\",\"rank\":\"GENUS\"},{\"key\":\"3ZRM7\",\"name\":\"Mentha arvensis\",\"rank\":\"SPECIES\"},{\"key\":\"7KBV5\",\"name\":\"Mentha arvensis canadensis\",\"rank\":\"SUBSPECIES\"}],\"diagnostics\":{\"matchType\":\"EXACT\",\"confidence\":98,\"timeTaken\":9,\"timings\":{\"nameNRank\":0,\"sciNameMatch\":10,\"nameParse\":1,\"luceneMatch\":9}},\"synonym\":true,\"left\":1188137,\"right\":1188140}"
+  }
+]

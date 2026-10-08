@@ -1,0 +1,34 @@
+schema_version: demiflow_image_templates_v1
+prompts:
+  text_only:
+    version: t2i-answer-text-1
+    template: '{{ instruction }}'
+  positive_images:
+    version: t2i-answer-positive-3
+    template: |-
+      {{ instruction }}
+
+      参考图：所附图像用于帮助你识别题目涉及的概念，并参考其中相关主体的外观、形态和结构。请结合这些视觉信息，按照上方指令生成图像；场景、动作、对象关系、构图和风格以指令为准，无需照搬参考图中与题意无关的背景或其他元素。
+      {{ images | image }}
+  legacy_references:
+    version: t2i-answer-materials-1
+    template: |-
+      参考信息：
+      {{ materials | json }}
+
+      题目：
+      {{ instruction }}{{ images | image }}
+  imagerag:
+    version: t2i-answer-imagerag-1
+    template: |-
+      According to these examples, generate the following instruction. The reference images are supplied in the same order as their captions.
+
+      Reference captions:
+      {{ captions | json }}
+
+      Instruction:
+      {{ instruction }}
+      {{ images | image }}
+  imagerag_original:
+    version: t2i-answer-imagerag-original-16c9502-1
+    template: 'According to these images of {{ examples }}, generate {{ instruction }}{{ images | image }}'

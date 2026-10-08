@@ -1,0 +1,9 @@
+{
+  "command": ["env/bin/python", "models/serve_z_image.py", "--model-path", "models/Z-Image-Turbo", "--served-model-name", "Z-Image-Turbo", "--port", "8003", "--steps", "8", "--guidance", "1.0"],
+  "base_url": "http://127.0.0.1:8003/v1",
+  "gpus": [0],
+  "ready_path": "/health",
+  "expected_model": "Z-Image-Turbo",
+  "startup_timeout_s": 600,
+  "shutdown_timeout_s": 30
+}
